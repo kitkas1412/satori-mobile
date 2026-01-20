@@ -38,8 +38,8 @@ export function StreakCard() {
           {getCurrentDateString()}
         </Text>
         <View className="flex-row items-center gap-1">
-          <Flame size={20} color="#F97316" />
-          <Text className="text-[#F97316] text-base font-bold font-heading">
+          <Flame size={20} color="#f97316" />
+          <Text className="text-orange-500 text-base font-bold font-heading">
             4
           </Text>
         </View>
@@ -53,7 +53,7 @@ export function StreakCard() {
                 day.active ? "bg-primary-default" : "bg-[rgba(123,146,239,0.2)]"
               }`}
             >
-              {day.active && <Check className="w-5 h-5" color={"#FFFFFF"} />}
+              {day.active && <Check className="w-5 h-5" color="#ffffff" />}
             </View>
             <Text
               className={`text-xs font-bold ${
