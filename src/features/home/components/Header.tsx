@@ -2,7 +2,7 @@ import { Image } from "expo-image";
 import { Bell } from "lucide-react-native";
 import { Text, View } from "react-native";
 
-export function HomeHeader() {
+export function Header() {
   return (
     <View className="flex-row items-center justify-between px-4 pt-16 pb-4">
       <View className="flex-row items-center gap-2">
