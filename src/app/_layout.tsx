@@ -22,7 +22,7 @@ export default function RootLayout() {
 
   return (
     <QueryProvider>
-      <GluestackUIProvider mode="dark">
+      <GluestackUIProvider mode="light">
         <ThemeProvider
           value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
         >
@@ -31,6 +31,10 @@ export default function RootLayout() {
             <Stack.Screen
               name="modal"
               options={{ presentation: "modal", title: "Modal" }}
+            />
+            <Stack.Screen
+              name="(auth)/email"
+              options={{ headerShown: false }}
             />
           </Stack>
           <StatusBar style="auto" />
