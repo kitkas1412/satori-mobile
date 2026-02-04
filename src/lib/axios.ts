@@ -5,7 +5,7 @@ import axios, {
 } from "axios";
 
 // Cấu hình base URL - có thể thay đổi theo môi trường
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL || "https://api.example.com";
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
 // Tạo axios instance
 const axiosInstance = axios.create({

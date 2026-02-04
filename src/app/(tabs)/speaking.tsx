@@ -51,7 +51,7 @@ export default function SpeakingScreen() {
             title="Luyện hội thoại"
             description="Chữa lành tâm hồn bằng một bài hội thoại"
             imageSource={require("../../../assets/images/chat-bubble-dynamic-color.png")}
-            onPress={() => router.push("/(screen)/conversation-practice")}
+            onPress={() => router.push("/conversation-practice")}
           />
         </View>
       </ScrollView>
