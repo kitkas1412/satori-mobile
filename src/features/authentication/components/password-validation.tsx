@@ -25,8 +25,8 @@ const validationRules: ValidationRule[] = [
     isValid: (password) => /[a-z]/.test(password),
   },
   {
-    label: "Ít nhất một chữ số",
-    isValid: (password) => /[0-9]/.test(password),
+    label: "Ký tự đặc biệt (!@#$,...)",
+    isValid: (password) => /[!@#$%^&*(),.?":{}|<>]/.test(password),
   },
 ];
 

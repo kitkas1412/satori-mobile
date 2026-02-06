@@ -7,10 +7,22 @@ interface PasswordInputProps {
   onChangeText: (text: string) => void;
   error?: boolean;
   label?: string;
+  editable?: boolean;
+  placeholder?: string;
 }
 
 export const PasswordInput = forwardRef<TextInput, PasswordInputProps>(
-  ({ value, onChangeText, error = false, label = "Nhập mật khẩu" }, ref) => {
+  (
+    {
+      value,
+      onChangeText,
+      error = false,
+      label = "Nhập mật khẩu",
+      editable = true,
+      placeholder = "Nhập mật khẩu của bạn",
+    },
+    ref,
+  ) => {
     const [showPassword, setShowPassword] = useState(false);
 
     return (
@@ -35,12 +47,13 @@ export const PasswordInput = forwardRef<TextInput, PasswordInputProps>(
             ref={ref}
             value={value}
             onChangeText={onChangeText}
-            placeholder="Nhập mật khẩu của bạn"
+            placeholder={placeholder}
             placeholderTextColor="rgba(0,0,0,0.6)"
             className="flex-1 font-body text-[16px] text-typography-black"
             secureTextEntry={!showPassword}
             autoCapitalize="none"
             autoCorrect={false}
+            editable={editable}
           />
           <TouchableOpacity
             onPress={() => setShowPassword(!showPassword)}

@@ -1,8 +1,11 @@
 import { BackButton } from "@/features/authentication/components";
+import { useForgotPassword } from "@/features/authentication/hooks";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   ScrollView,
   Text,
@@ -14,10 +17,30 @@ import {
 export function ForgotPasswordScreen() {
   const router = useRouter();
   const [email, setEmail] = useState("");
+  const { mutate: forgotPassword, isPending } = useForgotPassword();
 
   const handleSubmit = () => {
-    // TODO: Implement forgot password logic
-    console.log("Forgot password for:", email);
+    if (!email) return;
+
+    forgotPassword(
+      { email },
+      {
+        onSuccess: (data) => {
+          // Navigate to OTP screen with email parameter
+          router.push({
+            pathname: "/(auth)/reset-password-otp",
+            params: { email },
+          });
+        },
+        onError: (error: any) => {
+          const errorMessage =
+            error?.response?.data?.message ||
+            error?.message ||
+            "Có lỗi xảy ra khi gửi email khôi phục mật khẩu";
+          Alert.alert("Lỗi", errorMessage);
+        },
+      },
+    );
   };
 
   return (
@@ -62,6 +85,7 @@ export function ForgotPasswordScreen() {
               autoCapitalize="none"
               autoCorrect={false}
               autoFocus={true}
+              editable={!isPending}
             />
           </TouchableOpacity>
         </View>
@@ -71,16 +95,20 @@ export function ForgotPasswordScreen() {
         <View className="px-4 pb-8">
           <TouchableOpacity
             onPress={handleSubmit}
-            disabled={!email}
-            className={`rounded-[14px] items-center justify-center px-[14px] py-[16.5px] ${
-              !email ? "bg-gray-300" : "bg-primary-default"
+            disabled={!email || isPending}
+            className={`rounded-[14px] items-center justify-center px-[14px] py-[16.5px] flex-row ${
+              !email || isPending ? "bg-gray-300" : "bg-primary-default"
             }`}
             accessibilityRole="button"
             accessibilityLabel="Tiếp tục"
           >
-            <Text className="font-heading text-[18px] text-[#F3F4F6]">
-              Tiếp tục
-            </Text>
+            {isPending ? (
+              <ActivityIndicator color="#F3F4F6" />
+            ) : (
+              <Text className="font-heading text-[18px] text-[#F3F4F6]">
+                Tiếp tục
+              </Text>
+            )}
           </TouchableOpacity>
         </View>
       </ScrollView>

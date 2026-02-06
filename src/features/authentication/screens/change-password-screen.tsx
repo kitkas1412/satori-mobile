@@ -61,7 +61,7 @@ export function ChangePasswordScreen() {
     newPassword.length >= 8 &&
     /[A-Z]/.test(newPassword) &&
     /[a-z]/.test(newPassword) &&
-    /[0-9]/.test(newPassword) &&
+    /[!@#$%^&*(),.?":{}|<>]/.test(newPassword) &&
     newPassword === confirmPassword;
 
   const passwordsMatch =

@@ -57,3 +57,55 @@ export interface ChangePasswordResponse {
   message: string;
   data: null;
 }
+
+export interface ForgotPasswordParams {
+  email: string;
+}
+
+export interface ForgotPasswordResponse {
+  success: boolean;
+  code: string;
+  message: string;
+  timestamp: string;
+}
+
+export interface VerifyOTPParams {
+  email: string;
+  otp: string;
+}
+
+export interface VerifyOTPResponse {
+  success: boolean;
+  code: string;
+  message: string;
+  data: {
+    resetToken: string;
+    expiresInSeconds: number;
+    email: string;
+  };
+  timestamp: string;
+}
+
+export interface ResendOTPParams {
+  email: string;
+}
+
+export interface ResendOTPResponse {
+  success: boolean;
+  code: string;
+  message: string;
+  timestamp: string;
+}
+
+export interface ResetPasswordParams {
+  resetToken: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+export interface ResetPasswordResponse {
+  success: boolean;
+  code: string;
+  message: string;
+  timestamp: string;
+}

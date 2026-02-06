@@ -56,10 +56,6 @@ function RootLayoutNav() {
         options={{ headerShown: false, gestureEnabled: false }}
       />
       <Stack.Screen
-        name="modal"
-        options={{ presentation: "modal", title: "Modal" }}
-      />
-      <Stack.Screen
         name="(auth)/welcome"
         options={{ headerShown: false, gestureEnabled: false }}
       />
@@ -69,6 +65,10 @@ function RootLayoutNav() {
       />
       <Stack.Screen
         name="(auth)/forgot-password"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="(auth)/reset-password-otp"
         options={{ headerShown: false, gestureEnabled: false }}
       />
       <Stack.Screen
