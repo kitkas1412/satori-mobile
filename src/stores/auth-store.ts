@@ -63,12 +63,17 @@ export const useAuthStore = create<AuthState>()(
 
       setHydrated: () => set({ isHydrated: true }),
 
-      login: (user, token) =>
+      login: (user, token) => {
+        console.log("Auth Store - Saving login:", {
+          userId: user.id,
+          tokenPreview: token.substring(0, 20) + "...",
+        });
         set({
           user,
           token,
           isAuthenticated: true,
-        }),
+        });
+      },
 
       logout: () =>
         set({

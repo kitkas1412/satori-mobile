@@ -1,5 +1,4 @@
 import { api } from "@/lib/axios";
-import type { ApiResponse } from "@/types/api";
 import type {
   ChangePasswordParams,
   ChangePasswordResponse,
@@ -8,9 +7,9 @@ import type {
 export async function changePasswordApi(
   params: ChangePasswordParams,
 ): Promise<ChangePasswordResponse> {
-  const response = await api.post<ApiResponse<ChangePasswordResponse>>(
+  const response = await api.post<ChangePasswordResponse>(
     "/auth/change-password",
     params,
   );
-  return response.data.data;
+  return response.data;
 }

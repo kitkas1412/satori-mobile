@@ -1,3 +1,4 @@
+import { useAuthStore } from "@/stores/auth-store";
 import axios, {
   AxiosError,
   AxiosResponse,
@@ -16,13 +17,43 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // TODO: Lấy token từ storage (AsyncStorage, SecureStore, etc.)
-    // const token = await getStoredToken();
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
+    // Lấy token từ auth store
+    const token = useAuthStore.getState().token;
 
-    console.log("Request:", config.method?.toUpperCase(), config.url);
+    // Các endpoint không cần token
+    const publicEndpoints = [
+      "/auth/login",
+      "/auth/register",
+      "/auth/forgot-password",
+    ];
+    const isPublicEndpoint = publicEndpoints.some((endpoint) =>
+      config.url?.includes(endpoint),
+    );
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+      console.log(
+        "Request:",
+        config.method?.toUpperCase(),
+        config.url,
+        "- Token attached",
+      );
+    } else if (!isPublicEndpoint) {
+      console.log(
+        "Request:",
+        config.method?.toUpperCase(),
+        config.url,
+        "- No token found",
+      );
+    } else {
+      console.log(
+        "Request:",
+        config.method?.toUpperCase(),
+        config.url,
+        "- Public endpoint",
+      );
+    }
+
     return config;
   },
   (error: AxiosError) => {
@@ -44,8 +75,7 @@ axiosInstance.interceptors.response.use(
       switch (status) {
         case 401:
           console.error("Unauthorized - Token hết hạn hoặc không hợp lệ");
-          // TODO: Xử lý logout hoặc refresh token
-          // await handleLogout();
+          useAuthStore.getState().logout();
           break;
         case 403:
           console.error("Forbidden - Không có quyền truy cập");
