@@ -9,7 +9,3 @@ export async function loginApi(params: LoginParams): Promise<LoginResponse> {
   );
   return response.data.data;
 }
-
-export async function logoutApi(): Promise<void> {
-  await api.post("/auth/logout");
-}

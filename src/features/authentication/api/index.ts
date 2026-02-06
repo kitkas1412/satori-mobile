@@ -5,4 +5,5 @@ export type {
   LoginResponse,
 } from "./auth.types";
 export { changePasswordApi } from "./change-password";
-export { loginApi, logoutApi } from "./login";
+export { loginApi } from "./login";
+export { logoutApi } from "./logout";

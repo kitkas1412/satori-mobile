@@ -10,6 +10,13 @@ export interface LoginResponse {
   token: string;
 }
 
+export interface LogoutResponse {
+  success: boolean;
+  code: string;
+  message: string;
+  timestamp: string;
+}
+
 export interface ChangePasswordParams {
   currentPassword: string;
   newPassword: string;
