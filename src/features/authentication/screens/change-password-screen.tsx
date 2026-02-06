@@ -1,19 +1,19 @@
 import {
   BackButton,
   PasswordInput,
-} from "@/features/authentication/components";
-import { PasswordValidation } from "@/features/authentication/components/password-validation";
+  PasswordValidation,
+  PrimaryButton,
+} from "@/components/ui";
 import { useChangePassword } from "@/features/authentication/hooks";
+import { getPasswordValidationStatus } from "@/features/authentication/utils/password-validation";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   ScrollView,
   Switch,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 
@@ -102,7 +102,9 @@ export function ChangePasswordScreen() {
           />
 
           <View className="mt-4 mb-4">
-            <PasswordValidation password={newPassword} />
+            <PasswordValidation
+              rules={getPasswordValidationStatus(newPassword)}
+            />
           </View>
 
           <PasswordInput
@@ -139,23 +141,12 @@ export function ChangePasswordScreen() {
         <View className="flex-1" />
 
         <View className="px-4 mb-5">
-          <TouchableOpacity
+          <PrimaryButton
+            text="Đổi mật khẩu"
             onPress={handleSubmit}
             disabled={!isFormValid || isPending}
-            className={`rounded-[8px] items-center justify-center px-[14px] py-[16.5px] ${
-              isFormValid && !isPending ? "bg-primary-default" : "bg-gray-300"
-            }`}
-            accessibilityRole="button"
-            accessibilityLabel="Đổi mật khẩu"
-          >
-            {isPending ? (
-              <ActivityIndicator color="#F3F4F6" />
-            ) : (
-              <Text className="font-heading text-[18px] text-[#F3F4F6]">
-                Đổi mật khẩu
-              </Text>
-            )}
-          </TouchableOpacity>
+            loading={isPending}
+          />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

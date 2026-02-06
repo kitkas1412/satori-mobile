@@ -1,12 +1,12 @@
 import {
   BackButton,
   EmailInput,
-  ForgotPasswordLink,
-  LoginButton,
-  LoginHeader,
-  LoginLoadingOverlay,
+  LoadingOverlay,
   PasswordInput,
-} from "@/features/authentication/components";
+  PrimaryButton,
+  SectionHeader,
+} from "@/components/ui";
+import { ForgotPasswordLink } from "@/features/authentication/components";
 import { useLoginForm } from "@/features/authentication/hooks";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -44,10 +44,13 @@ export function LoginScreen() {
           <View className="flex-col px-4 pt-16 pb-4">
             <BackButton onPress={() => router.back()} />
 
-            <LoginHeader
-              title="Nhập địa chỉ email của bạn"
-              subtitle="Hãy sử dụng địa chỉ email đã được xác nhận với trung tâm"
-            />
+            <View className="mt-8">
+              <SectionHeader
+                title="Nhập địa chỉ email của bạn"
+                subtitle="Hãy sử dụng địa chỉ email đã được xác nhận với trung tâm"
+                alignment="left"
+              />
+            </View>
 
             <EmailInput
               ref={emailInputRef}
@@ -76,15 +79,17 @@ export function LoginScreen() {
           <View className="flex-1" />
 
           <View className="px-4 mb-5">
-            <LoginButton
+            <PrimaryButton
+              text="Đăng nhập"
               onPress={handleSubmit}
               disabled={isLoading || !isFormValid}
+              loading={isLoading}
             />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
 
-      <LoginLoadingOverlay visible={isLoading} />
+      <LoadingOverlay visible={isLoading} />
     </>
   );
 }

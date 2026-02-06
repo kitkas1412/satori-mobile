@@ -11,7 +11,6 @@ export const BackButton: React.FC<BackButtonProps> = ({ onPress }) => {
     <TouchableOpacity
       className="w-6 h-6 items-center justify-center"
       accessibilityRole="button"
-      accessibilityLabel="Quay lại"
       onPress={onPress}
       hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
     >

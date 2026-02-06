@@ -1,10 +1,13 @@
-import { BackButton } from "@/features/authentication/components";
-import { OTPInput } from "@/features/authentication/components/otp-input";
+import {
+  BackButton,
+  OTPInput,
+  PrimaryButton,
+  SectionHeader,
+} from "@/components/ui";
 import { useResendOTP, useVerifyOTP } from "@/features/authentication/hooks";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -96,9 +99,9 @@ export function ResetPasswordOTPScreen({
           <BackButton onPress={() => router.back()} />
 
           {/* Title */}
-          <Text className="font-heading text-[17px] leading-[22px] text-black mt-14 text-center">
-            Thay đổi mật khẩu
-          </Text>
+          <View className="mt-14">
+            <SectionHeader title="Thay đổi mật khẩu" alignment="center" />
+          </View>
 
           {/* Description */}
           <Text className="font-body text-[12px] text-black mt-7">
@@ -144,22 +147,12 @@ export function ResetPasswordOTPScreen({
 
       {/* Continue Button - Fixed at bottom */}
       <View className="px-4 pb-4">
-        <TouchableOpacity
-          className={`rounded-lg px-[14px] py-[16.5px] items-center flex-row justify-center ${
-            isButtonDisabled ? "bg-gray-400" : "bg-[#7B92EF]"
-          }`}
+        <PrimaryButton
+          text="Tiếp tục"
           onPress={handleContinue}
           disabled={isButtonDisabled}
-          activeOpacity={0.8}
-        >
-          {isPending ? (
-            <ActivityIndicator color="#F3F4F6" />
-          ) : (
-            <Text className="font-heading text-[18px] text-[#F3F4F6]">
-              Tiếp tục
-            </Text>
-          )}
-        </TouchableOpacity>
+          loading={isPending}
+        />
       </View>
     </KeyboardAvoidingView>
   );

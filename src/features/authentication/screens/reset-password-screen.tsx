@@ -1,19 +1,18 @@
 import {
   BackButton,
   PasswordInput,
-} from "@/features/authentication/components";
-import { PasswordValidation } from "@/features/authentication/components/password-validation";
+  PasswordValidation,
+  PrimaryButton,
+} from "@/components/ui";
 import { useResetPassword } from "@/features/authentication/hooks";
+import { getPasswordValidationStatus } from "@/features/authentication/utils/password-validation";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 
@@ -99,7 +98,9 @@ export function ResetPasswordScreen() {
 
           {/* Password Validation */}
           <View className="mt-3">
-            <PasswordValidation password={newPassword} />
+            <PasswordValidation
+              rules={getPasswordValidationStatus(newPassword)}
+            />
           </View>
 
           {/* Confirm Password Input */}
@@ -116,22 +117,12 @@ export function ResetPasswordScreen() {
 
       {/* Continue Button - Fixed at bottom */}
       <View className="px-4 pb-4">
-        <TouchableOpacity
-          className={`rounded-lg px-[14px] py-[16.5px] items-center flex-row justify-center ${
-            isFormValid && !isPending ? "bg-[#7B92EF]" : "bg-gray-400"
-          }`}
+        <PrimaryButton
+          text="Tiếp tục"
           onPress={handleSubmit}
           disabled={!isFormValid || isPending}
-          activeOpacity={0.8}
-        >
-          {isPending ? (
-            <ActivityIndicator color="#F3F4F6" />
-          ) : (
-            <Text className="font-heading text-[18px] text-[#F3F4F6]">
-              Tiếp tục
-            </Text>
-          )}
-        </TouchableOpacity>
+          loading={isPending}
+        />
       </View>
     </KeyboardAvoidingView>
   );

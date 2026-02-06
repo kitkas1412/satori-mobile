@@ -1,0 +1,31 @@
+import { Check, X } from "lucide-react-native";
+import React from "react";
+import { Text, View } from "react-native";
+
+interface ValidationRule {
+  label: string;
+  isValid: boolean;
+}
+
+interface PasswordValidationProps {
+  rules: ValidationRule[];
+}
+
+export const PasswordValidation: React.FC<PasswordValidationProps> = ({
+  rules,
+}) => {
+  return (
+    <View className="flex-col gap-3">
+      {rules.map((rule, index) => (
+        <View key={index} className="flex-row items-start gap-2">
+          {rule.isValid ? (
+            <Check size={16} color="#10B981" />
+          ) : (
+            <X size={16} color="#EF4444" />
+          )}
+          <Text className="font-body text-[12px] text-black">{rule.label}</Text>
+        </View>
+      ))}
+    </View>
+  );
+};

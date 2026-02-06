@@ -40,7 +40,7 @@ export default function ProfileScreen() {
       {user && (
         <View className="px-6 py-4 bg-white mx-4 rounded-2xl mb-4">
           <Text className="text-text-default text-lg font-semibold mb-1">
-            {user.name || user.email}
+            {user.fullName || "Người dùng"}
           </Text>
           <Text className="text-text-muted text-sm">{user.email}</Text>
         </View>
