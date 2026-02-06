@@ -2,18 +2,21 @@
 
 Thư mục này chứa các custom hooks sử dụng TanStack Query để fetch và mutate data.
 
+**Note:** Authentication hooks đã được chuyển sang `@/features/authentication/hooks`
+
 ## Cấu trúc
 
 ```
 hooks/api/
-├── use-auth.ts      # Authentication hooks
 ├── use-users.ts     # User CRUD hooks
 └── index.ts         # Export tất cả hooks
 ```
 
 ## Hooks có sẵn
 
-### Authentication Hooks
+### Authentication Hooks (DEPRECATED)
+
+**Đã chuyển sang:** `@/features/authentication/hooks`
 
 #### `useLogin()`
 

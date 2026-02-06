@@ -1,10 +1,12 @@
 import { useAuthStore } from "@/stores/auth-store";
+import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { LogOut } from "lucide-react-native";
+import { KeyRound, LogOut } from "lucide-react-native";
 import { Alert, Pressable, Text, View } from "react-native";
 
 export default function ProfileScreen() {
   const { logout, user } = useAuthStore();
+  const router = useRouter();
 
   const handleLogout = () => {
     Alert.alert(
@@ -44,7 +46,17 @@ export default function ProfileScreen() {
         </View>
       )}
 
-      <View className="px-6 mt-4">
+      <View className="px-6 mt-4 gap-3">
+        <Pressable
+          onPress={() => router.push("/change-password")}
+          className="flex-row items-center justify-center bg-primary-default py-4 px-6 rounded-xl active:opacity-80"
+        >
+          <KeyRound size={20} color="white" />
+          <Text className="text-white text-base font-semibold ml-2">
+            Thay đổi mật khẩu
+          </Text>
+        </Pressable>
+
         <Pressable
           onPress={handleLogout}
           className="flex-row items-center justify-center bg-red-500 py-4 px-6 rounded-xl active:opacity-80"

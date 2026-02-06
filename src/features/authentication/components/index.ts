@@ -5,3 +5,4 @@ export { LoginButton } from "./login-button";
 export { LoginHeader } from "./login-header";
 export { LoginLoadingOverlay } from "./login-loading-overlay";
 export { PasswordInput } from "./password-input";
+export { PasswordValidation } from "./password-validation";

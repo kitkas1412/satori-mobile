@@ -1,3 +1,2 @@
-// Export tất cả API hooks
-export * from "./use-auth";
+// Authentication hooks moved to @/features/authentication/hooks
 export * from "./use-users";
