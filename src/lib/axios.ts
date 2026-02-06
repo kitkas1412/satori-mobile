@@ -6,7 +6,6 @@ import axios, {
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
-// Tạo axios instance
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
   timeout: 30000, // 30 seconds
@@ -15,7 +14,6 @@ const axiosInstance = axios.create({
   },
 });
 
-// Request interceptor - thêm token vào header
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // TODO: Lấy token từ storage (AsyncStorage, SecureStore, etc.)
@@ -41,7 +39,6 @@ axiosInstance.interceptors.response.use(
   },
   async (error: AxiosError) => {
     if (error.response) {
-      // Server đã response nhưng có lỗi status code
       const status = error.response.status;
 
       switch (status) {
