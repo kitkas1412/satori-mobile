@@ -72,10 +72,6 @@ export const OTPInput: React.FC<OTPInputProps> = ({
     }
   };
 
-  const handleBoxPress = () => {
-    hiddenInputRef.current?.focus();
-  };
-
   const handleFocus = () => {
     setIsFocused(true);
   };

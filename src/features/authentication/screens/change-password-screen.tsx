@@ -84,8 +84,6 @@ export function ChangePasswordScreen() {
     newPassword === confirmPassword &&
     newPassword !== currentPassword;
 
-  const passwordsMatch =
-    confirmPassword.length > 0 && newPassword === confirmPassword;
   const passwordsDontMatch =
     confirmPassword.length > 0 && newPassword !== confirmPassword;
   const newPasswordSameAsOld =
