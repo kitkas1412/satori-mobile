@@ -59,7 +59,7 @@ export const BaseInput = forwardRef<TextInput, BaseInputProps>(
     return (
       <>
         {label && (
-          <Text className="mt-6 font-heading text-lg text-black"></Text>
+          <Text className="mt-6 font-heading text-lg text-black">{label}</Text>
         )}
 
         <TouchableOpacity

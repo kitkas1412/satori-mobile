@@ -12,7 +12,7 @@ export const BackButton: React.FC<BackButtonProps> = ({ onPress }) => {
       className="w-6 h-6 items-center justify-center"
       accessibilityRole="button"
       onPress={onPress}
-      hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+      hitSlop={{ top: 30, bottom: 30, left: 30, right: 30 }}
     >
       <ArrowLeft size={24} color="rgba(0,0,0,0.6)" />
     </TouchableOpacity>
