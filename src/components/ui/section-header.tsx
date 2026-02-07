@@ -23,12 +23,12 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
 
     switch (size) {
       case "sm":
-        return `${base} text-[14px] leading-[18px] ${alignClass}`;
+        return `${base} text-sm ${alignClass}`;
       case "lg":
-        return `${base} text-[20px] leading-[26px] ${alignClass}`;
+        return `${base} text-xl ${alignClass}`;
       case "md":
       default:
-        return `${base} text-[17px] leading-[22px] ${alignClass}`;
+        return `${base} text-lg ${alignClass}`;
     }
   };
 
@@ -38,9 +38,9 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
 
     switch (size) {
       case "sm":
-        return `${base} text-[10px] ${alignClass}`;
+        return `${base} text-sm ${alignClass}`;
       case "lg":
-        return `${base} text-[14px] ${alignClass}`;
+        return `${base} text-sm ${alignClass}`;
       case "md":
       default:
         return `${base} text-xs ${alignClass}`;

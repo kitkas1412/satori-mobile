@@ -21,7 +21,7 @@ export const TextLink: React.FC<TextLinkProps> = ({
       case "secondary":
         return "text-gray-600";
       case "danger":
-        return "text-red-500";
+        return "text-error-500";
       case "primary":
       default:
         return "text-primary-dark";
@@ -31,12 +31,12 @@ export const TextLink: React.FC<TextLinkProps> = ({
   const getSizeClass = () => {
     switch (size) {
       case "sm":
-        return "text-[10px]";
+        return "text-tiny-xs";
       case "lg":
-        return "text-[14px]";
+        return "text-sm";
       case "md":
       default:
-        return "text-[12px]";
+        return "text-xs";
     }
   };
 

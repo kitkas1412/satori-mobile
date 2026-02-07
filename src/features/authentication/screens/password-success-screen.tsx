@@ -22,11 +22,11 @@ export function PasswordSuccessScreen() {
           />
         </View>
 
-        <Text className="font-heading text-[24px] text-black text-center font-bold mb-6">
+        <Text className="font-heading text-2xl text-black text-center font-bold mb-6">
           Thay đổi mật khẩu thành công!
         </Text>
 
-        <Text className="font-body text-[14px] text-black text-center w-[312px]">
+        <Text className="font-body text-sm text-black text-center w-[312px]">
           Mật khẩu của bạn đã được thay đổi thành công. Vui lòng đăng nhập lại
           với mật khẩu mới.
         </Text>

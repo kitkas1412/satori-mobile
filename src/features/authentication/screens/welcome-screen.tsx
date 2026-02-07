@@ -36,7 +36,7 @@ export function WelcomeScreen() {
       <View className="items-center mt-[54px]">
         <TouchableOpacity
           onPress={handleContinue}
-          className="bg-[#5a72d6] rounded-full w-[100px] h-[100px] items-center justify-center"
+          className="bg-primary-default rounded-full w-[100px] h-[100px] items-center justify-center"
         >
           <ArrowRight size={44} color="white" strokeWidth={2} />
         </TouchableOpacity>

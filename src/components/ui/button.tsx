@@ -29,7 +29,7 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
 
     switch (variant) {
       case "danger":
-        return "bg-red-500";
+        return "bg-error-500";
       case "secondary":
         return "bg-gray-500";
       case "primary":
@@ -51,9 +51,7 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
       ) : (
         <View className="flex-row items-center gap-2">
           {icon}
-          <Text className="font-heading text-[18px] text-[#F3F4F6]">
-            {text}
-          </Text>
+          <Text className="font-heading text-lg text-[#F3F4F6]">{text}</Text>
         </View>
       )}
     </TouchableOpacity>

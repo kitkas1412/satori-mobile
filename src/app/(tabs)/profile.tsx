@@ -59,7 +59,7 @@ export default function ProfileScreen() {
 
         <Pressable
           onPress={handleLogout}
-          className="flex-row items-center justify-center bg-red-500 py-4 px-6 rounded-xl active:opacity-80"
+          className="flex-row items-center justify-center bg-error-default py-4 px-6 rounded-xl active:opacity-80"
         >
           <LogOut size={20} color="white" />
           <Text className="text-white text-base font-semibold ml-2">

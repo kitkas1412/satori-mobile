@@ -23,7 +23,7 @@ export const PasswordValidation: React.FC<PasswordValidationProps> = ({
           ) : (
             <X size={16} color="#EF4444" />
           )}
-          <Text className="font-body text-[12px] text-black">{rule.label}</Text>
+          <Text className="font-body text-xs text-black">{rule.label}</Text>
         </View>
       ))}
     </View>

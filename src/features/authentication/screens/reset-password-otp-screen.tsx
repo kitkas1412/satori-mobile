@@ -102,17 +102,17 @@ export function ResetPasswordOTPScreen() {
             <SectionHeader title="Thay đổi mật khẩu" />
           </View>
 
-          <Text className="font-body text-[12px] text-black mt-7">
+          <Text className="font-body text-xs text-black mt-7">
             Một email chứa OTP đặt lại mật khẩu đã được gửi đến địa chỉ email
             của bạn:
           </Text>
 
-          <Text className="font-heading text-[12px] text-[#F3AB1B] mt-3">
+          <Text className="font-heading text-xs text-[#F3AB1B] mt-3">
             {email}
           </Text>
 
           <View className="mt-9">
-            <Text className="font-heading text-[17px] leading-[22px] text-black mb-3">
+            <Text className="font-heading text-lg text-black mb-3">
               Nhập mã OTP
             </Text>
 
@@ -125,12 +125,12 @@ export function ResetPasswordOTPScreen() {
             />
 
             <View className="flex-row items-center justify-center mt-3">
-              <Text className="font-body text-[12px] text-[#6B7280]">
+              <Text className="font-body text-xs text-[#6B7280]">
                 Không nhận được mã?{" "}
               </Text>
               <TouchableOpacity onPress={handleResendOTP} disabled={!canResend}>
                 <Text
-                  className={`font-body text-[12px] ${canResend ? "text-[#7B92EF]" : "text-[#9CA3AF]"}`}
+                  className={`font-body text-xs ${canResend ? "text-[#7B92EF]" : "text-[#9CA3AF]"}`}
                 >
                   {isResendPending
                     ? "Đang gửi..."

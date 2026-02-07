@@ -59,15 +59,13 @@ export const BaseInput = forwardRef<TextInput, BaseInputProps>(
     return (
       <>
         {label && (
-          <Text className="mt-6 font-heading text-[17px] leading-[22px] text-black">
-            {label}
-          </Text>
+          <Text className="mt-6 font-heading text-lg text-black"></Text>
         )}
 
         <TouchableOpacity
           activeOpacity={1}
           onPress={() => (ref as any)?.current?.focus()}
-          className={`${label ? "mt-2" : "mt-5"} rounded-[8px] border ${hasError ? "border-red-500" : "border-[rgba(0,0,0,0.38)]"} px-[14px] py-[16.5px] flex-row items-center gap-[16px] bg-white ${containerClassName}`}
+          className={`${label ? "mt-2" : "mt-5"} rounded-[8px] border ${hasError ? "border-error-default" : "border-[rgba(0,0,0,0.38)]"} px-[14px] py-[16.5px] flex-row items-center gap-[16px] bg-white ${containerClassName}`}
           hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
         >
           {leftIcon && <View className="flex-shrink-0">{leftIcon}</View>}
@@ -79,7 +77,7 @@ export const BaseInput = forwardRef<TextInput, BaseInputProps>(
             onBlur={onBlur}
             placeholder={placeholder}
             placeholderTextColor="rgba(0,0,0,0.6)"
-            className={`flex-1 font-body text-[16px] text-typography-black ${inputClassName}`}
+            className={`flex-1 font-body text-base text-typography-black ${inputClassName}`}
             secureTextEntry={secureTextEntry}
             keyboardType={keyboardType}
             autoCapitalize={autoCapitalize}
@@ -96,7 +94,7 @@ export const BaseInput = forwardRef<TextInput, BaseInputProps>(
         </TouchableOpacity>
 
         {errorMessage && (
-          <Text className="mt-1 ml-1 font-body text-[12px] text-error-default">
+          <Text className="mt-1 ml-1 font-body text-xs text-error-default">
             {errorMessage}
           </Text>
         )}

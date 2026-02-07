@@ -25,7 +25,7 @@ export function Header() {
         <View className="w-9 h-9 bg-secondary-default rounded-full items-center justify-center">
           <Bell className="w-6 h-6" />
         </View>
-        <View className="absolute top-1.5 right-0 w-1.5 h-1.5 bg-red-500 rounded-full" />
+        <View className="absolute top-1.5 right-0 w-1.5 h-1.5 bg-error-500 rounded-full" />
       </View>
     </View>
   );

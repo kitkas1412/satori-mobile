@@ -122,7 +122,7 @@ export function ChangePasswordScreen() {
           />
 
           {currentPasswordError && (
-            <Text className="font-body text-[12px] text-red-500 mt-2">
+            <Text className="font-body text-xs text-error-default mt-2">
               {currentPasswordError}
             </Text>
           )}
@@ -132,16 +132,15 @@ export function ChangePasswordScreen() {
             value={newPassword}
             onChangeText={setNewPassword}
             label="Mật khẩu mới"
+            error={
+              newPasswordSameAsOld
+                ? "Mật khẩu mới phải khác mật khẩu hiện tại"
+                : undefined
+            }
             editable={!isPending}
             onSubmitEditing={() => confirmPasswordRef.current?.focus()}
             returnKeyType="next"
           />
-
-          {newPasswordSameAsOld && (
-            <Text className="font-body text-[12px] text-red-500 mt-2">
-              Mật khẩu mới phải khác mật khẩu hiện tại
-            </Text>
-          )}
 
           <View className="mt-4 mb-4">
             <PasswordValidation
