@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { TextInput, View } from "react-native";
 
 interface OTPInputProps {
@@ -6,6 +6,7 @@ interface OTPInputProps {
   onComplete?: (otp: string) => void;
   value?: string;
   onChangeText?: (otp: string) => void;
+  autoFocus?: boolean;
 }
 
 export const OTPInput: React.FC<OTPInputProps> = ({
@@ -13,11 +14,18 @@ export const OTPInput: React.FC<OTPInputProps> = ({
   onComplete,
   value = "",
   onChangeText,
+  autoFocus = false,
 }) => {
   const [otp, setOtp] = useState<string[]>(
     value.split("").concat(Array(length - value.length).fill("")),
   );
   const inputRefs = useRef<(TextInput | null)[]>([]);
+
+  useEffect(() => {
+    if (autoFocus) {
+      inputRefs.current[0]?.focus();
+    }
+  }, [autoFocus]);
 
   const handleChange = (text: string, index: number) => {
     // Only allow numbers

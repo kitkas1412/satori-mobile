@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Keyboard, TextInput } from "react-native";
+import { validateEmail } from "../utils";
 import { useLogin } from "./use-login";
 
 export function useLoginForm() {
@@ -16,11 +17,6 @@ export function useLoginForm() {
       Keyboard.dismiss();
     }
   }, [loginMutation.isPending]);
-
-  const validateEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
 
   const handleEmailChange = (text: string) => {
     setEmail(text);

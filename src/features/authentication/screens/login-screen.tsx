@@ -1,16 +1,16 @@
-import {
-  BackButton,
-  EmailInput,
-  LoadingOverlay,
-  PasswordInput,
-  PrimaryButton,
-  SectionHeader,
-} from "@/components/ui";
-import { ForgotPasswordLink } from "@/features/authentication/components";
+import { LoadingOverlay, PrimaryButton } from "@/components/ui";
 import { useLoginForm } from "@/features/authentication/hooks";
 import { useRouter } from "expo-router";
 import React from "react";
-import { KeyboardAvoidingView, ScrollView, View } from "react-native";
+import { KeyboardAvoidingView, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  BackButton,
+  EmailInput,
+  ForgotPasswordLink,
+  PasswordInput,
+  SectionHeader,
+} from "../components";
 
 export function LoginScreen() {
   const router = useRouter();
@@ -36,12 +36,8 @@ export function LoginScreen() {
         className="flex-1 bg-background-default"
         keyboardVerticalOffset={0}
       >
-        <ScrollView
-          className="flex-1"
-          contentContainerStyle={{ flexGrow: 1 }}
-          keyboardShouldPersistTaps="always"
-        >
-          <View className="flex-col px-4 pt-16 pb-4">
+        <SafeAreaView className="flex-1">
+          <View className="flex-col px-4">
             <BackButton onPress={() => router.back()} />
 
             <View className="mt-8">
@@ -60,6 +56,8 @@ export function LoginScreen() {
               error={loginError || emailError}
               hasLoginError={!!loginError}
               autoFocus={true}
+              onSubmitEditing={() => passwordInputRef.current?.focus()}
+              returnKeyType="next"
             />
 
             <PasswordInput
@@ -67,6 +65,8 @@ export function LoginScreen() {
               value={password}
               onChangeText={handlePasswordChange}
               error={!!loginError}
+              onSubmitEditing={handleSubmit}
+              returnKeyType="done"
             />
 
             <ForgotPasswordLink
@@ -78,7 +78,7 @@ export function LoginScreen() {
 
           <View className="flex-1" />
 
-          <View className="px-4 mb-5">
+          <View className="px-4">
             <PrimaryButton
               text="Đăng nhập"
               onPress={handleSubmit}
@@ -86,7 +86,7 @@ export function LoginScreen() {
               loading={isLoading}
             />
           </View>
-        </ScrollView>
+        </SafeAreaView>
       </KeyboardAvoidingView>
 
       <LoadingOverlay visible={isLoading} />

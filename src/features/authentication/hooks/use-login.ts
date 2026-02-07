@@ -9,10 +9,7 @@ export function useLogin() {
     mutationFn: loginApi,
     onSuccess: (response) => {
       login(response.data.user, response.data.accessToken);
-      console.log(
-        "Login successful - Token saved:",
-        response.data.accessToken.substring(0, 20) + "...",
-      );
+      console.log("Login successful - Token saved:");
     },
   });
 }

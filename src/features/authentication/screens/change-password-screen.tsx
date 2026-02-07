@@ -1,29 +1,28 @@
-import {
-  BackButton,
-  PasswordInput,
-  PasswordValidation,
-  PrimaryButton,
-} from "@/components/ui";
+import { PrimaryButton } from "@/components/ui";
 import { useChangePassword } from "@/features/authentication/hooks";
 import { getPasswordValidationStatus } from "@/features/authentication/utils/password-validation";
+import { useAuthStore } from "@/stores/auth-store";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
   ScrollView,
-  Switch,
   Text,
+  TextInput,
   View,
 } from "react-native";
+import { BackButton, PasswordInput, PasswordValidation } from "../components";
 
 export function ChangePasswordScreen() {
   const router = useRouter();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [logoutOtherDevices, setLogoutOtherDevices] = useState(true);
+  const newPasswordRef = useRef<TextInput>(null);
+  const confirmPasswordRef = useRef<TextInput>(null);
 
+  const { logout } = useAuthStore();
   const { mutate: changePassword, isPending } = useChangePassword();
 
   const handleSubmit = () => {
@@ -34,14 +33,16 @@ export function ChangePasswordScreen() {
         currentPassword,
         newPassword,
         confirmPassword,
-        logoutOtherDevices,
       },
       {
         onSuccess: (data) => {
           Alert.alert("Thành công", data.message || "Đổi mật khẩu thành công", [
             {
               text: "OK",
-              onPress: () => router.back(),
+              onPress: () => {
+                logout();
+                router.replace("/(auth)/login");
+              },
             },
           ]);
         },
@@ -83,22 +84,24 @@ export function ChangePasswordScreen() {
         <View className="flex-col px-4 pt-16 pb-4">
           <BackButton onPress={() => router.back()} />
 
-          <Text className="font-heading text-[24px] text-black mb-6">
-            Đổi mật khẩu
-          </Text>
-
           <PasswordInput
             value={currentPassword}
             onChangeText={setCurrentPassword}
             label="Mật khẩu hiện tại"
             editable={!isPending}
+            autoFocus={true}
+            onSubmitEditing={() => newPasswordRef.current?.focus()}
+            returnKeyType="next"
           />
 
           <PasswordInput
+            ref={newPasswordRef}
             value={newPassword}
             onChangeText={setNewPassword}
             label="Mật khẩu mới"
             editable={!isPending}
+            onSubmitEditing={() => confirmPasswordRef.current?.focus()}
+            returnKeyType="next"
           />
 
           <View className="mt-4 mb-4">
@@ -108,10 +111,13 @@ export function ChangePasswordScreen() {
           </View>
 
           <PasswordInput
+            ref={confirmPasswordRef}
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             label="Xác nhận mật khẩu mới"
             editable={!isPending}
+            onSubmitEditing={handleSubmit}
+            returnKeyType="done"
           />
 
           {passwordsDontMatch && (
@@ -125,17 +131,6 @@ export function ChangePasswordScreen() {
               Mật khẩu khớp
             </Text>
           )}
-
-          <View className="flex-row items-center justify-between mt-6 py-3">
-            <Text className="font-body text-[14px] text-black flex-1">
-              Đăng xuất các thiết bị khác
-            </Text>
-            <Switch
-              value={logoutOtherDevices}
-              onValueChange={setLogoutOtherDevices}
-              disabled={isPending}
-            />
-          </View>
         </View>
 
         <View className="flex-1" />

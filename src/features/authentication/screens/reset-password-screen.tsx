@@ -1,26 +1,24 @@
-import {
-  BackButton,
-  PasswordInput,
-  PasswordValidation,
-  PrimaryButton,
-} from "@/components/ui";
+import { PrimaryButton } from "@/components/ui";
 import { useResetPassword } from "@/features/authentication/hooks";
 import { getPasswordValidationStatus } from "@/features/authentication/utils/password-validation";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
+  TextInput,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { BackButton, PasswordInput, PasswordValidation } from "../components";
 
 export function ResetPasswordScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ resetToken?: string }>();
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const confirmPasswordRef = useRef<TextInput>(null);
 
   const { mutate: resetPassword, isPending } = useResetPassword();
 
@@ -78,12 +76,8 @@ export function ResetPasswordScreen() {
       className="flex-1 bg-[#F6F7F9]"
       keyboardVerticalOffset={0}
     >
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{ flexGrow: 1 }}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View className="flex-col px-4 pt-16 pb-4">
+      <SafeAreaView className="flex-1">
+        <View className="flex-col px-4 ">
           {/* Back Button */}
           <BackButton onPress={() => router.back()} />
 
@@ -94,6 +88,9 @@ export function ResetPasswordScreen() {
             label="Mật khẩu mới"
             placeholder="Nhập mật khẩu mới"
             editable={!isPending}
+            autoFocus={true}
+            onSubmitEditing={() => confirmPasswordRef.current?.focus()}
+            returnKeyType="next"
           />
 
           {/* Password Validation */}
@@ -105,15 +102,18 @@ export function ResetPasswordScreen() {
 
           {/* Confirm Password Input */}
           <PasswordInput
+            ref={confirmPasswordRef}
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             label="Xác nhận mật khẩu mới"
             placeholder="Nhập lại mật khẩu mới"
             error={passwordsDontMatch}
             editable={!isPending}
+            onSubmitEditing={handleSubmit}
+            returnKeyType="done"
           />
         </View>
-      </ScrollView>
+      </SafeAreaView>
 
       {/* Continue Button - Fixed at bottom */}
       <View className="px-4 pb-4">

@@ -1,9 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
-import type { ResendOTPParams, ResendOTPResponse } from "../api";
-import { resendOTPApi } from "../api";
+import type { ForgotPasswordParams, ForgotPasswordResponse } from "../api";
+import { forgotPasswordApi } from "../api";
 
 export const useResendOTP = () => {
-  return useMutation<ResendOTPResponse, Error, ResendOTPParams>({
-    mutationFn: resendOTPApi,
+  return useMutation<ForgotPasswordResponse, Error, ForgotPasswordParams>({
+    mutationFn: forgotPasswordApi,
   });
 };

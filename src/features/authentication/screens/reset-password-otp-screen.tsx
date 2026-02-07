@@ -1,30 +1,22 @@
-import {
-  BackButton,
-  OTPInput,
-  PrimaryButton,
-  SectionHeader,
-} from "@/components/ui";
+import { PrimaryButton } from "@/components/ui";
 import { useResendOTP, useVerifyOTP } from "@/features/authentication/hooks";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { BackButton, OTPInput, SectionHeader } from "../components";
 
-interface ResetPasswordOTPScreenProps {
-  email?: string;
-}
-
-export function ResetPasswordOTPScreen({
-  email = "email@example.com",
-}: ResetPasswordOTPScreenProps) {
+export function ResetPasswordOTPScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ email?: string }>();
+  const email = params.email || "email@example.com";
   const [otp, setOtp] = useState("");
   const { mutate: verifyOTP, isPending } = useVerifyOTP();
   const { mutate: resendOTP, isPending: isResendPending } = useResendOTP();
@@ -89,32 +81,23 @@ export function ResetPasswordOTPScreen({
       className="flex-1 bg-[#F6F7F9]"
       keyboardVerticalOffset={0}
     >
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{ flexGrow: 1 }}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View className="flex-col px-4 pt-16 pb-4">
-          {/* Back Button */}
+      <SafeAreaView className="flex-1">
+        <View className="flex-col px-4">
           <BackButton onPress={() => router.back()} />
 
-          {/* Title */}
-          <View className="mt-14">
-            <SectionHeader title="Thay đổi mật khẩu" alignment="center" />
+          <View className="mt-8">
+            <SectionHeader title="Thay đổi mật khẩu" />
           </View>
 
-          {/* Description */}
           <Text className="font-body text-[12px] text-black mt-7">
             Một email chứa OTP đặt lại mật khẩu đã được gửi đến địa chỉ email
             của bạn:
           </Text>
 
-          {/* Email Display */}
           <Text className="font-heading text-[12px] text-[#F3AB1B] mt-3">
             {email}
           </Text>
 
-          {/* OTP Input Section */}
           <View className="mt-9">
             <Text className="font-heading text-[17px] leading-[22px] text-black mb-3">
               Nhập mã OTP
@@ -125,9 +108,9 @@ export function ResetPasswordOTPScreen({
               value={otp}
               onChangeText={setOtp}
               onComplete={handleOTPComplete}
+              autoFocus={true}
             />
 
-            {/* Resend Link */}
             <View className="flex-row items-center justify-center mt-3">
               <Text className="font-body text-[12px] text-[#6B7280]">
                 Không nhận được mã?{" "}
@@ -143,9 +126,8 @@ export function ResetPasswordOTPScreen({
             </View>
           </View>
         </View>
-      </ScrollView>
+      </SafeAreaView>
 
-      {/* Continue Button - Fixed at bottom */}
       <View className="px-4 pb-4">
         <PrimaryButton
           text="Tiếp tục"
