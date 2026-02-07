@@ -76,6 +76,10 @@ function RootLayoutNav() {
         options={{ headerShown: false, gestureEnabled: false }}
       />
       <Stack.Screen
+        name="(auth)/reset-password-success"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
         name="change-password"
         options={{ headerShown: false, gestureEnabled: false }}
       />

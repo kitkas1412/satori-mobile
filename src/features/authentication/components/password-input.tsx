@@ -10,7 +10,7 @@ import {
 interface PasswordInputProps {
   value: string;
   onChangeText: (text: string) => void;
-  error?: boolean;
+  error?: boolean | string;
   label?: string;
   editable?: boolean;
   placeholder?: string;

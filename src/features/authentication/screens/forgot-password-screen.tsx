@@ -1,4 +1,5 @@
 import { PrimaryButton } from "@/components/ui";
+import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { useForgotPassword } from "@/features/authentication/hooks";
 import { validateEmail } from "@/features/authentication/utils";
 import { useRouter } from "expo-router";
@@ -93,6 +94,8 @@ export function ForgotPasswordScreen() {
           />
         </View>
       </SafeAreaView>
+
+      <LoadingOverlay visible={isPending} />
     </KeyboardAvoidingView>
   );
 }

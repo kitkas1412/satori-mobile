@@ -1,4 +1,5 @@
 import { PrimaryButton } from "@/components/ui";
+import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { useChangePassword } from "@/features/authentication/hooks";
 import { getPasswordValidationStatus } from "@/features/authentication/utils/password-validation";
 import { useAuthStore } from "@/stores/auth-store";
@@ -19,6 +20,7 @@ export function ChangePasswordScreen() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [currentPasswordError, setCurrentPasswordError] = useState("");
   const newPasswordRef = useRef<TextInput>(null);
   const confirmPasswordRef = useRef<TextInput>(null);
 
@@ -35,23 +37,38 @@ export function ChangePasswordScreen() {
         confirmPassword,
       },
       {
-        onSuccess: (data) => {
-          Alert.alert("Thành công", data.message || "Đổi mật khẩu thành công", [
-            {
-              text: "OK",
-              onPress: () => {
-                logout();
-                router.replace("/(auth)/login");
+        onSuccess: () => {
+          Alert.alert(
+            "Thành công",
+            "Vui lòng đăng nhập lại với mật khẩu mới.",
+            [
+              {
+                text: "OK",
+                onPress: () => {
+                  logout();
+                  router.replace("/(auth)/login");
+                },
               },
-            },
-          ]);
+            ],
+          );
         },
         onError: (error: any) => {
           const errorMessage =
             error?.response?.data?.message ||
             error?.message ||
             "Có lỗi xảy ra khi đổi mật khẩu";
-          Alert.alert("Lỗi", errorMessage);
+
+          // Kiểm tra nếu lỗi là do mật khẩu hiện tại sai
+          if (
+            errorMessage.toLowerCase().includes("mật khẩu hiện tại") ||
+            errorMessage.toLowerCase().includes("incorrect password") ||
+            errorMessage.toLowerCase().includes("wrong password") ||
+            errorMessage.toLowerCase().includes("current password")
+          ) {
+            setCurrentPasswordError(errorMessage);
+          } else {
+            Alert.alert("Lỗi", errorMessage);
+          }
         },
       },
     );
@@ -62,13 +79,19 @@ export function ChangePasswordScreen() {
     newPassword.length >= 8 &&
     /[A-Z]/.test(newPassword) &&
     /[a-z]/.test(newPassword) &&
+    /[0-9]/.test(newPassword) &&
     /[!@#$%^&*(),.?":{}|<>]/.test(newPassword) &&
-    newPassword === confirmPassword;
+    newPassword === confirmPassword &&
+    newPassword !== currentPassword;
 
   const passwordsMatch =
     confirmPassword.length > 0 && newPassword === confirmPassword;
   const passwordsDontMatch =
     confirmPassword.length > 0 && newPassword !== confirmPassword;
+  const newPasswordSameAsOld =
+    newPassword.length > 0 &&
+    currentPassword.length > 0 &&
+    newPassword === currentPassword;
 
   return (
     <KeyboardAvoidingView
@@ -86,13 +109,25 @@ export function ChangePasswordScreen() {
 
           <PasswordInput
             value={currentPassword}
-            onChangeText={setCurrentPassword}
+            onChangeText={(text) => {
+              setCurrentPassword(text);
+              if (currentPasswordError) {
+                setCurrentPasswordError("");
+              }
+            }}
             label="Mật khẩu hiện tại"
+            error={!!currentPasswordError}
             editable={!isPending}
             autoFocus={true}
             onSubmitEditing={() => newPasswordRef.current?.focus()}
             returnKeyType="next"
           />
+
+          {currentPasswordError && (
+            <Text className="font-body text-[12px] text-red-500 mt-2">
+              {currentPasswordError}
+            </Text>
+          )}
 
           <PasswordInput
             ref={newPasswordRef}
@@ -103,6 +138,12 @@ export function ChangePasswordScreen() {
             onSubmitEditing={() => confirmPasswordRef.current?.focus()}
             returnKeyType="next"
           />
+
+          {newPasswordSameAsOld && (
+            <Text className="font-body text-[12px] text-red-500 mt-2">
+              Mật khẩu mới phải khác mật khẩu hiện tại
+            </Text>
+          )}
 
           <View className="mt-4 mb-4">
             <PasswordValidation
@@ -115,22 +156,11 @@ export function ChangePasswordScreen() {
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             label="Xác nhận mật khẩu mới"
+            error={passwordsDontMatch ? "Mật khẩu mới không khớp" : undefined}
             editable={!isPending}
             onSubmitEditing={handleSubmit}
             returnKeyType="done"
           />
-
-          {passwordsDontMatch && (
-            <Text className="font-body text-[12px] text-red-500 mt-2">
-              Mật khẩu không khớp
-            </Text>
-          )}
-
-          {passwordsMatch && (
-            <Text className="font-body text-[12px] text-green-500 mt-2">
-              Mật khẩu khớp
-            </Text>
-          )}
         </View>
 
         <View className="flex-1" />
@@ -144,6 +174,8 @@ export function ChangePasswordScreen() {
           />
         </View>
       </ScrollView>
+
+      <LoadingOverlay visible={isPending} />
     </KeyboardAvoidingView>
   );
 }

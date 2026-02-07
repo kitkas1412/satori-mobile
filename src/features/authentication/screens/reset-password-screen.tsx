@@ -1,4 +1,5 @@
 import { PrimaryButton } from "@/components/ui";
+import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { useResetPassword } from "@/features/authentication/hooks";
 import { getPasswordValidationStatus } from "@/features/authentication/utils/password-validation";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -37,17 +38,8 @@ export function ResetPasswordScreen() {
         confirmPassword,
       },
       {
-        onSuccess: (data) => {
-          Alert.alert(
-            "Thành công",
-            data.message || "Đặt lại mật khẩu thành công",
-            [
-              {
-                text: "OK",
-                onPress: () => router.replace("/(auth)/login"),
-              },
-            ],
-          );
+        onSuccess: () => {
+          router.replace("/(auth)/reset-password-success");
         },
         onError: (error: any) => {
           const errorMessage =
@@ -64,6 +56,7 @@ export function ResetPasswordScreen() {
     newPassword.length >= 8 &&
     /[A-Z]/.test(newPassword) &&
     /[a-z]/.test(newPassword) &&
+    /[0-9]/.test(newPassword) &&
     /[!@#$%^&*(),.?":{}|<>]/.test(newPassword) &&
     newPassword === confirmPassword;
 
@@ -107,7 +100,7 @@ export function ResetPasswordScreen() {
             onChangeText={setConfirmPassword}
             label="Xác nhận mật khẩu mới"
             placeholder="Nhập lại mật khẩu mới"
-            error={passwordsDontMatch}
+            error={passwordsDontMatch ? "Mật khẩu mới không khớp" : undefined}
             editable={!isPending}
             onSubmitEditing={handleSubmit}
             returnKeyType="done"
@@ -124,6 +117,8 @@ export function ResetPasswordScreen() {
           loading={isPending}
         />
       </View>
+
+      <LoadingOverlay visible={isPending} />
     </KeyboardAvoidingView>
   );
 }
