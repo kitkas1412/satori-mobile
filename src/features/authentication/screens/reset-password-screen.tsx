@@ -100,7 +100,7 @@ export function ResetPasswordScreen() {
             onChangeText={setConfirmPassword}
             label="Xác nhận mật khẩu mới"
             placeholder="Nhập lại mật khẩu mới"
-            error={passwordsDontMatch ? "Mật khẩu mới không khớp" : undefined}
+            error={passwordsDontMatch ? "Mật khẩu không trùng khớp" : undefined}
             editable={!isPending}
             onSubmitEditing={handleSubmit}
             returnKeyType="done"

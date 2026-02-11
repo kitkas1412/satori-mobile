@@ -6,7 +6,7 @@ export interface EmailValidationRule {
 export const emailValidationRules: EmailValidationRule[] = [
   {
     label: "Định dạng email hợp lệ",
-    isValid: (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
+    isValid: (email) => /^[^\s@]+@[^\s@]+$/.test(email),
   },
   {
     label: "Không chứa khoảng trắng",
@@ -16,11 +16,10 @@ export const emailValidationRules: EmailValidationRule[] = [
     label: "Có tên miền hợp lệ",
     isValid: (email) => {
       const domainPart = email.split("@")[1];
-      return domainPart
-        ? /^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?\.[a-zA-Z]{2,}$/.test(
-            domainPart,
-          )
-        : false;
+      if (!domainPart) return false;
+      return /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*$/.test(
+        domainPart,
+      );
     },
   },
 ];

@@ -153,7 +153,7 @@ export function ChangePasswordScreen() {
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             label="Xác nhận mật khẩu mới"
-            error={passwordsDontMatch ? "Mật khẩu mới không khớp" : undefined}
+            error={passwordsDontMatch ? "Mật khẩu không trùng khớp" : undefined}
             editable={!isPending}
             onSubmitEditing={handleSubmit}
             returnKeyType="done"
@@ -164,7 +164,7 @@ export function ChangePasswordScreen() {
 
         <View className="px-4 mb-5">
           <PrimaryButton
-            text="Đổi mật khẩu"
+            text="Xác nhận"
             onPress={handleSubmit}
             disabled={!isFormValid || isPending}
             loading={isPending}
