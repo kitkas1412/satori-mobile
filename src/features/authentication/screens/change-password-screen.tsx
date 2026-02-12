@@ -35,6 +35,7 @@ export function ChangePasswordScreen() {
         currentPassword,
         newPassword,
         confirmPassword,
+        logoutOtherDevices: true,
       },
       {
         onSuccess: () => {

@@ -32,13 +32,15 @@ const secureStorage: StateStorage = {
 interface AuthState {
   user: User | null;
   token: string | null;
+  refreshToken: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   isHydrated: boolean;
 
   setUser: (user: User | null) => void;
   setToken: (token: string | null) => void;
-  login: (user: User, token: string) => void;
+  setRefreshToken: (refreshToken: string | null) => void;
+  login: (user: User, token: string, refreshToken: string) => void;
   logout: () => void;
   updateUser: (updates: Partial<User>) => void;
   setHydrated: () => void;
@@ -49,6 +51,7 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       user: null,
       token: null,
+      refreshToken: null,
       isAuthenticated: false,
       isLoading: false,
       isHydrated: false,
@@ -61,16 +64,20 @@ export const useAuthStore = create<AuthState>()(
 
       setToken: (token) => set({ token }),
 
+      setRefreshToken: (refreshToken) => set({ refreshToken }),
+
       setHydrated: () => set({ isHydrated: true }),
 
-      login: (user, token) => {
+      login: (user, token, refreshToken) => {
         console.log("Auth Store - Saving login:", {
           userId: user.id,
           tokenPreview: token.substring(0, 20) + "...",
+          hasRefreshToken: !!refreshToken,
         });
         set({
           user,
           token,
+          refreshToken,
           isAuthenticated: true,
         });
       },
@@ -79,6 +86,7 @@ export const useAuthStore = create<AuthState>()(
         set({
           user: null,
           token: null,
+          refreshToken: null,
           isAuthenticated: false,
         }),
 
@@ -97,6 +105,7 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         user: state.user,
         token: state.token,
+        refreshToken: state.refreshToken,
         isAuthenticated: state.isAuthenticated,
       }),
       onRehydrateStorage: () => (state) => {

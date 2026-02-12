@@ -74,8 +74,12 @@ axiosInstance.interceptors.response.use(
 
       switch (status) {
         case 401:
-          console.error("Unauthorized - Token hết hạn hoặc không hợp lệ");
-          useAuthStore.getState().logout();
+          console.error(
+            "Unauthorized - Token expired or invalid, forcing logout",
+          );
+
+          const { logout } = useAuthStore.getState();
+          logout();
           break;
         case 403:
           console.error("Forbidden - Không có quyền truy cập");

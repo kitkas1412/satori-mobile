@@ -1,3 +1,4 @@
+import { useLogout } from "@/features/authentication/hooks";
 import { useAuthStore } from "@/stores/auth-store";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -5,23 +6,24 @@ import { KeyRound, LogOut } from "lucide-react-native";
 import { Alert, Pressable, Text, View } from "react-native";
 
 export default function ProfileScreen() {
-  const { logout, user } = useAuthStore();
+  const { user } = useAuthStore();
   const router = useRouter();
+  const { mutate: logoutUser, isPending } = useLogout();
 
   const handleLogout = () => {
     Alert.alert(
       "Đăng xuất",
-      "Bạn muốn đăng xuất?",
+      "Bạn có chắc chắn muốn đăng xuất?",
       [
         {
-          text: "Huỷ",
+          text: "Hủy",
           style: "cancel",
         },
         {
-          text: "Đồng ý",
+          text: "Đăng xuất",
           style: "destructive",
           onPress: () => {
-            logout();
+            logoutUser();
           },
         },
       ],
@@ -59,11 +61,13 @@ export default function ProfileScreen() {
 
         <Pressable
           onPress={handleLogout}
+          disabled={isPending}
           className="flex-row items-center justify-center bg-error-default py-4 px-6 rounded-xl active:opacity-80"
+          style={{ opacity: isPending ? 0.5 : 1 }}
         >
           <LogOut size={20} color="white" />
           <Text className="text-white text-base font-semibold ml-2">
-            Đăng xuất
+            {isPending ? "Đang đăng xuất..." : "Đăng xuất"}
           </Text>
         </Pressable>
       </View>

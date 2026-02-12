@@ -8,8 +8,12 @@ export function useLogin() {
   return useMutation({
     mutationFn: loginApi,
     onSuccess: (response) => {
-      login(response.data.user, response.data.accessToken);
-      console.log("Login successful - Token saved:");
+      login(
+        response.data.user,
+        response.data.accessToken,
+        response.data.refreshToken,
+      );
+      console.log("Login successful - Tokens saved:");
     },
   });
 }

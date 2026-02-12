@@ -22,6 +22,10 @@ export const emailValidationRules: EmailValidationRule[] = [
       );
     },
   },
+  {
+    label: "Không quá 255 ký tự",
+    isValid: (email) => email.length <= 255,
+  },
 ];
 
 /**
