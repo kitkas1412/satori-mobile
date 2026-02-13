@@ -12,12 +12,10 @@ export default function SpeakingScreen() {
 
       {/* Header */}
       <View className="flex-row items-center justify-between px-4 pt-16 pb-4">
-        <Text className="font-heading text-[20px] text-text-muted">
-          Luyện nói
-        </Text>
+        <Text className="font-heading text-xl text-text-muted">Luyện nói</Text>
         <Pressable className="w-9 h-9 bg-secondary-default rounded-full items-center justify-center active:opacity-80">
           <Bell size={20} className="text-typography-white" />
-          <View className="absolute top-0 right-0 w-[7px] h-[7px] bg-red-500 rounded-full border border-white" />
+          <View className="absolute top-0 right-0 w-[7px] h-[7px] bg-error-500 rounded-full border border-white" />
         </Pressable>
       </View>
 
@@ -32,10 +30,10 @@ export default function SpeakingScreen() {
         {/* Practice Section */}
         <View className="mt-6 gap-2.5">
           <View className="gap-1 mb-2">
-            <Text className="font-heading text-[20px] text-text-muted">
+            <Text className="font-heading text-xl text-text-muted">
               Chọn bài học của bạn
             </Text>
-            <Text className="font-body text-[12px] text-text-muted">
+            <Text className="font-body text-xs text-text-muted">
               Học nhanh đi ngủ, kiến thức đã đủ
             </Text>
           </View>
@@ -51,7 +49,7 @@ export default function SpeakingScreen() {
             title="Luyện hội thoại"
             description="Chữa lành tâm hồn bằng một bài hội thoại"
             imageSource={require("../../../assets/images/chat-bubble-dynamic-color.png")}
-            onPress={() => router.push("/(screen)/conversation-practice")}
+            onPress={() => router.push("/conversation-practice")}
           />
         </View>
       </ScrollView>

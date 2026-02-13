@@ -22,12 +22,10 @@ export interface PaginatedResponse<T> {
   };
 }
 
-// Example: User type
 export interface User {
   id: string;
   email: string;
-  name: string;
-  avatar?: string;
-  createdAt: string;
-  updatedAt: string;
+  fullName: string;
+  avatarUrl: string | null;
+  role: string;
 }

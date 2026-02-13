@@ -8,7 +8,7 @@ export function ReadyBanner() {
         <View className="flex-row items-center gap-2 mb-1">
           <Sparkles size={14} className="text-primary-800" />
         </View>
-        <Text className="font-heading text-[24px] text-primary-800 leading-6">
+        <Text className="font-heading text-2xl text-primary-800 leading-6">
           Bạn Đã Sẵn Sàng Chưa
         </Text>
       </View>

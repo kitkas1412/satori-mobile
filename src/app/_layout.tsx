@@ -12,7 +12,7 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
-import { Stack } from "expo-router";
+import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
@@ -22,6 +22,7 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 
 import { QueryProvider } from "@/components/providers/query-provider";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
+import { useAuthStore } from "@/stores/auth-store";
 import "../../global.css";
 
 // Keep splash screen visible while fonts load
@@ -30,6 +31,65 @@ SplashScreen.preventAutoHideAsync();
 export const unstable_settings = {
   anchor: "(tabs)",
 };
+
+function RootLayoutNav() {
+  const router = useRouter();
+  const segments = useSegments();
+  const { isAuthenticated, isHydrated } = useAuthStore();
+
+  useEffect(() => {
+    if (!isHydrated) return;
+
+    const inAuthGroup = segments[0] === "(auth)";
+
+    if (!isAuthenticated && !inAuthGroup) {
+      router.replace("/(auth)/welcome");
+    } else if (isAuthenticated && inAuthGroup) {
+      router.replace("/(tabs)");
+    }
+  }, [isAuthenticated, isHydrated, segments]);
+
+  return (
+    <Stack>
+      <Stack.Screen
+        name="(tabs)"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="(auth)/welcome"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="(auth)/login"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="(auth)/forgot-password"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="(auth)/reset-password-otp"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="(auth)/reset-password"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="(auth)/reset-password-success"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="change-password"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="conversation-practice"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+    </Stack>
+  );
+}
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -57,21 +117,7 @@ export default function RootLayout() {
         <ThemeProvider
           value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
         >
-          <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen
-              name="modal"
-              options={{ presentation: "modal", title: "Modal" }}
-            />
-            <Stack.Screen
-              name="(auth)/email"
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="(screen)/conversation-practice"
-              options={{ headerShown: false }}
-            />
-          </Stack>
+          <RootLayoutNav />
           <StatusBar style="auto" />
         </ThemeProvider>
       </GluestackUIProvider>

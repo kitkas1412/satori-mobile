@@ -19,7 +19,7 @@ export function QuickPractice() {
             <Text className="text-text-muted text-lg font-bold mb-1 font-heading">
               Ôn tập từ vựng
             </Text>
-            <Text className="text-text-muted text-[10px] font-body">
+            <Text className="text-text-muted text-tiny-xs font-body">
               Các câu hỏi trắc nghiệm theo bài học
             </Text>
           </View>
