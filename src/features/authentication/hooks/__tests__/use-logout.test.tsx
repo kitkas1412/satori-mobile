@@ -1,29 +1,29 @@
-import React from 'react';
-import { renderHook, act, waitFor } from '@testing-library/react-native';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useLogout } from '@/features/authentication/hooks/use-logout';
-import { useAuthStore } from '@/stores/auth-store';
+import { useLogout } from "@/features/authentication/hooks/use-logout";
+import { useAuthStore } from "@/stores/auth-store";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { act, renderHook, waitFor } from "@testing-library/react-native";
+import React from "react";
 
-jest.mock('@/features/authentication/api', () => ({
+import { logoutApi } from "@/features/authentication/api";
+
+jest.mock("@/features/authentication/api", () => ({
   logoutApi: jest.fn(),
 }));
-
-import { logoutApi } from '@/features/authentication/api';
 
 const mockLogoutApi = logoutApi as jest.MockedFunction<typeof logoutApi>;
 
 const mockUser = {
-  id: '1',
-  email: 'test@example.com',
-  fullName: 'Test User',
+  id: "1",
+  email: "learner1@test.satori.com",
+  fullName: "Nguyen Van A",
   avatarUrl: null,
-  role: 'student',
+  role: "LEARNER",
 };
 
 const logoutSuccess = {
   success: true,
-  code: 'SUCCESS',
-  message: 'Logged out',
+  code: "SUCCESS",
+  message: "Logged out",
   timestamp: new Date().toISOString(),
 };
 
@@ -41,10 +41,12 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-describe('useLogout', () => {
-  it('skips the API call when no token is in the store', async () => {
+describe("useLogout", () => {
+  it("skips the API call when no token is in the store", async () => {
     // Store starts with token: null from getInitialState()
-    const { result } = renderHook(() => useLogout(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useLogout(), {
+      wrapper: createWrapper(),
+    });
 
     await act(async () => {
       result.current.mutate();
@@ -56,16 +58,18 @@ describe('useLogout', () => {
     expect(useAuthStore.getState().isAuthenticated).toBe(false);
   });
 
-  it('calls logoutApi and clears store on API success', async () => {
+  it("calls logoutApi and clears store on API success", async () => {
     useAuthStore.setState({
-      token: 'valid-token',
+      token: "valid-token",
       user: mockUser,
       isAuthenticated: true,
-      refreshToken: 'rt',
+      refreshToken: "rt",
     });
     mockLogoutApi.mockResolvedValueOnce(logoutSuccess);
 
-    const { result } = renderHook(() => useLogout(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useLogout(), {
+      wrapper: createWrapper(),
+    });
 
     await act(async () => {
       result.current.mutate();
@@ -80,14 +84,16 @@ describe('useLogout', () => {
     expect(user).toBeNull();
   });
 
-  it('swallows a 401 error and still clears store via onSuccess', async () => {
-    useAuthStore.setState({ token: 'expired-token', isAuthenticated: true });
-    const error401 = Object.assign(new Error('Unauthorized'), {
+  it("swallows a 401 error and still clears store via onSuccess", async () => {
+    useAuthStore.setState({ token: "expired-token", isAuthenticated: true });
+    const error401 = Object.assign(new Error("Unauthorized"), {
       response: { status: 401 },
     });
     mockLogoutApi.mockRejectedValueOnce(error401);
 
-    const { result } = renderHook(() => useLogout(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useLogout(), {
+      wrapper: createWrapper(),
+    });
 
     await act(async () => {
       result.current.mutate();
@@ -100,12 +106,14 @@ describe('useLogout', () => {
     expect(useAuthStore.getState().token).toBeNull();
   });
 
-  it('clears store on non-401 API error (local-first guarantee)', async () => {
-    useAuthStore.setState({ token: 'valid-token', isAuthenticated: true });
-    const networkError = new Error('Network Error'); // no response.status
+  it("clears store on non-401 API error (local-first guarantee)", async () => {
+    useAuthStore.setState({ token: "valid-token", isAuthenticated: true });
+    const networkError = new Error("Network Error"); // no response.status
     mockLogoutApi.mockRejectedValueOnce(networkError);
 
-    const { result } = renderHook(() => useLogout(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useLogout(), {
+      wrapper: createWrapper(),
+    });
 
     await act(async () => {
       result.current.mutate();
