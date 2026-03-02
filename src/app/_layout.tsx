@@ -83,10 +83,6 @@ function RootLayoutNav() {
         name="change-password"
         options={{ headerShown: false, gestureEnabled: false }}
       />
-      <Stack.Screen
-        name="conversation-practice"
-        options={{ headerShown: false, gestureEnabled: false }}
-      />
     </Stack>
   );
 }

@@ -1,10 +1,10 @@
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { ArrowLeft } from "lucide-react-native";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AiBanner, LessonSection } from "@/features/practice/components";
+import { useAuthStore } from "@/stores";
 
 // Mock data - replace with real data from API
 const lessonsData = [
@@ -74,51 +74,44 @@ const lessonsData = [
   },
 ];
 
-export default function ConversationPracticeScreen() {
+export function SpeakingScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const user = useAuthStore((state) => state.user);
 
   return (
     <View className="flex-1 bg-background-default">
       <StatusBar style="dark" hidden={true} />
 
-      {/* Header */}
-      <View
-        className="px-4 flex-row items-center gap-2 h-12"
-        style={{ paddingTop: insets.top }}
-      >
-        <Pressable
-          className="w-6 h-12 justify-center"
-          onPress={() => router.back()}
+      {user?.status === "INACTIVE" ? (
+        <View className="flex-1 items-center justify-center px-4">
+          <Text className="text-text-muted text-base text-center">
+            Tính năng đang tạm khoá. Vui lòng thử lại sau
+          </Text>
+        </View>
+      ) : (
+        <ScrollView
+          className="flex-1"
+          contentContainerClassName="px-4 pt-2 pb-8 gap-4"
         >
-          <ArrowLeft size={24} color="#475569" strokeWidth={2} />
-        </Pressable>
-        <Text className="text-text-muted text-xl font-bold font-heading">
-          Luyện hội thoại
-        </Text>
-      </View>
+          {/* AI Banner */}
+          <AiBanner />
 
-      <ScrollView
-        className="flex-1"
-        contentContainerClassName="px-4 pt-2 pb-8 gap-4"
-      >
-        {/* AI Banner */}
-        <AiBanner />
-
-        {/* Lesson Sections */}
-        {lessonsData.map((section) => (
-          <LessonSection
-            key={section.id}
-            lessonNumber={section.lessonNumber}
-            lessonTitle={section.lessonTitle}
-            lessonDescription={section.lessonDescription}
-            completedCount={section.completedCount}
-            totalCount={section.totalCount}
-            lessons={section.lessons}
-            badgeColor={section.badgeColor}
-          />
-        ))}
-      </ScrollView>
+          {/* Lesson Sections */}
+          {lessonsData.map((section) => (
+            <LessonSection
+              key={section.id}
+              lessonNumber={section.lessonNumber}
+              lessonTitle={section.lessonTitle}
+              lessonDescription={section.lessonDescription}
+              completedCount={section.completedCount}
+              totalCount={section.totalCount}
+              lessons={section.lessons}
+              badgeColor={section.badgeColor}
+            />
+          ))}
+        </ScrollView>
+      )}
     </View>
   );
 }
