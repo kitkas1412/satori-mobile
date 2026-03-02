@@ -8,6 +8,11 @@ export function useLogin() {
   return useMutation({
     mutationFn: loginApi,
     onSuccess: (response) => {
+      if (response.data.user.role !== "LEARNER") {
+        throw new Error(
+          "Tài khoản của bạn không có quyền truy cập ứng dụng này.",
+        );
+      }
       login(
         response.data.user,
         response.data.accessToken,

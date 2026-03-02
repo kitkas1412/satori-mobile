@@ -51,6 +51,7 @@ export function useLoginForm() {
       console.error("Login error:", error);
       const errorMessage =
         error?.response?.data?.message ||
+        error?.message ||
         "Đăng nhập thất bại. Vui lòng thử lại.";
       setLoginError(errorMessage);
     }
