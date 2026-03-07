@@ -20,18 +20,18 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          default: "#7b92ef",
-          light: "#9cb0f7",
-          dark: "#5a72d6",
+          default: "#7B92EF",
+          light: "#9CB0F7",
+          dark: "#4A67D6",
           foreground: "#FFFFFF",
         },
         secondary: {
-          default: "#f3ab1b",
-          light: "#fcd376",
-          foreground: "#090a0c",
+          default: "#F3AB1B",
+          light: "#FCD376",
+          foreground: "#090A0C",
         },
         tertiary: {
-          default: "#b185db",
+          default: "#7440B6",
           light: "#d4b3e9",
           dark: "#8e6ab0",
           foreground: "#FFFFFF",
@@ -68,7 +68,7 @@ module.exports = {
         text: {
           main: "#090a0c",
           muted: "#475569",
-          inverse: "#FFFFFF",
+          inverse: "#F3F4F6",
         },
         indicator: {
           primary: "rgb(var(--color-indicator-primary)/<alpha-value>)",

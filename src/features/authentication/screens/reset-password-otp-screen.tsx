@@ -1,10 +1,9 @@
 import { PrimaryButton } from "@/components/ui";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
-import { useResendOTP, useVerifyOTP } from "@/features/authentication/hooks";
+import { useResetPasswordOTPForm } from "@/features/authentication/hooks";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Text,
@@ -18,75 +17,26 @@ export function ResetPasswordOTPScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ email?: string }>();
   const email = params.email || "email@example.com";
-  const [otp, setOtp] = useState("");
-  const [countdown, setCountdown] = useState(0);
-  const { mutate: verifyOTP, isPending } = useVerifyOTP();
-  const { mutate: resendOTP, isPending: isResendPending } = useResendOTP();
 
-  useEffect(() => {
-    if (countdown > 0) {
-      const timer = setTimeout(() => {
-        setCountdown(countdown - 1);
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [countdown]);
-
-  const handleOTPComplete = (completedOTP: string) => {
-    console.log("OTP completed:", completedOTP);
-  };
-
-  const handleResendOTP = () => {
-    resendOTP(
-      { email },
-      {
-        onSuccess: (data) => {
-          setCountdown(60);
-          Alert.alert(
-            "Đã gửi lại mã",
-            data.message || "Một mã OTP mới đã được gửi đến email của bạn",
-          );
-        },
-        onError: (error: any) => {
-          const errorMessage =
-            error?.response?.data?.message ||
-            error?.message ||
-            "Có lỗi xảy ra khi gửi lại OTP";
-          Alert.alert("Lỗi", errorMessage);
-        },
-      },
-    );
-  };
-
-  const handleContinue = () => {
-    if (otp.length === 6) {
-      verifyOTP(
-        { email, otp },
-        {
-          onSuccess: (data) => {
-            // Navigate to reset password screen with reset token
-            router.push({
-              pathname: "/(auth)/reset-password",
-              params: {
-                email,
-                resetToken: data.data.resetToken,
-              },
-            });
-          },
-          onError: (error: any) => {
-            const errorMessage =
-              error?.response?.data?.message ||
-              error?.message ||
-              "Có lỗi xảy ra khi xác thực OTP";
-            Alert.alert("Lỗi", errorMessage);
-          },
-        },
-      );
-    }
-  };
-
-  const isButtonDisabled = otp.length !== 6 || isPending;
-  const canResend = countdown === 0 && !isResendPending;
+  const {
+    otp,
+    countdown,
+    verifyError,
+    resendMessage,
+    resendError,
+    isButtonDisabled,
+    canResend,
+    isPending,
+    isResendPending,
+    handleOTPChange,
+    handleResendOTP,
+    handleContinue,
+  } = useResetPasswordOTPForm(email, (resetToken) =>
+    router.push({
+      pathname: "/(auth)/reset-password",
+      params: { email, resetToken },
+    }),
+  );
 
   return (
     <KeyboardAvoidingView
@@ -119,10 +69,27 @@ export function ResetPasswordOTPScreen() {
             <OTPInput
               length={6}
               value={otp}
-              onChangeText={setOtp}
-              onComplete={handleOTPComplete}
+              onChangeText={handleOTPChange}
               autoFocus={true}
             />
+
+            {verifyError ? (
+              <Text className="font-body text-xs text-error-default mt-2">
+                {verifyError}
+              </Text>
+            ) : null}
+
+            {resendMessage ? (
+              <Text className="font-body text-xs text-success-default mt-2">
+                {resendMessage}
+              </Text>
+            ) : null}
+
+            {resendError ? (
+              <Text className="font-body text-xs text-error-default mt-2">
+                {resendError}
+              </Text>
+            ) : null}
 
             <View className="flex-row items-center justify-center mt-3">
               <Text className="font-body text-xs text-[#6B7280]">

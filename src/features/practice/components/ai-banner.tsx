@@ -12,7 +12,6 @@ export function AiBanner({ onPress }: AiBannerProps) {
         onPress={onPress}
         className="h-[132px] rounded-3xl overflow-hidden"
       >
-        {/* Gradient background as placeholder */}
         <LinearGradient
           colors={["#A7D8FF", "#FFD6E8"]}
           start={{ x: 0, y: 0 }}
