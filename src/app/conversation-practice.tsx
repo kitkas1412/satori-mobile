@@ -1,13 +1,13 @@
 import { ConversationPracticeScreen } from "@/features/speaking/screens/conversation-practice-screen";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 
 export default function ConversationPractice() {
-  const router = useRouter();
+  const { topicId, title } = useLocalSearchParams<{ topicId: string; title: string }>();
 
   return (
     <ConversationPracticeScreen
-      onClose={() => router.back()}
-      onEndSession={() => router.back()}
+      topicId={topicId ?? ""}
+      title={title ?? ""}
     />
   );
 }

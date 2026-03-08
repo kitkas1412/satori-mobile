@@ -87,6 +87,10 @@ function RootLayoutNav() {
         name="conversation-practice"
         options={{ headerShown: false, gestureEnabled: false }}
       />
+      <Stack.Screen
+        name="conversation-feedback"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
     </Stack>
   );
 }

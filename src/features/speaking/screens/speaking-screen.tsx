@@ -1,6 +1,7 @@
 import { Bell } from "lucide-react-native";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
 
@@ -19,6 +20,7 @@ function TopicSection({
   section: LessonSectionItem;
   defaultExpanded: boolean;
 }) {
+  const router = useRouter();
   const { data: topics } = useTopicsByTheme(section.id);
 
   const difficultyLabel = (score: number) => {
@@ -38,6 +40,15 @@ function TopicSection({
       status: "active" as const,
     })) ?? [];
 
+  function handleLessonPress(id: string) {
+    const topic = topics?.find((t) => t.id === id);
+    if (!topic) return;
+    router.push({
+      pathname: "/conversation-practice",
+      params: { topicId: topic.id, title: topic.title },
+    });
+  }
+
   return (
     <LessonSection
       lessonNumber={section.orderIndex}
@@ -47,6 +58,7 @@ function TopicSection({
       totalCount={section.topicCount}
       lessons={lessons}
       defaultExpanded={defaultExpanded}
+      onLessonPress={handleLessonPress}
     />
   );
 }

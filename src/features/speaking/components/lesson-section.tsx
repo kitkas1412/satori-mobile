@@ -19,6 +19,7 @@ interface LessonSectionProps {
     status: "completed" | "active" | "locked";
   }[];
   defaultExpanded?: boolean;
+  onLessonPress?: (id: string) => void;
 }
 
 export function LessonSection({
@@ -29,6 +30,7 @@ export function LessonSection({
   totalCount,
   lessons,
   defaultExpanded = true,
+  onLessonPress,
 }: LessonSectionProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const colorScheme = useColorScheme();
@@ -93,6 +95,7 @@ export function LessonSection({
               subtitle={lesson.subtitle}
               type={lesson.type}
               status={lesson.status}
+              onPress={() => onLessonPress?.(lesson.id)}
             />
           ))}
         </View>
