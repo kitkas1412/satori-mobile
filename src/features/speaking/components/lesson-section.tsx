@@ -2,6 +2,8 @@ import { ChevronDown, ChevronRight } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { LessonCard } from "./lesson-card";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { Colors } from "@/constants/theme";
 
 interface LessonSectionProps {
   lessonNumber: number;
@@ -16,7 +18,6 @@ interface LessonSectionProps {
     type: "pronunciation" | "stress" | "conversation";
     status: "completed" | "active" | "locked";
   }[];
-  badgeColor: string;
   defaultExpanded?: boolean;
 }
 
@@ -27,10 +28,11 @@ export function LessonSection({
   completedCount,
   totalCount,
   lessons,
-  badgeColor,
   defaultExpanded = true,
 }: LessonSectionProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
 
   return (
     <View className="gap-2">
@@ -43,27 +45,39 @@ export function LessonSection({
           <View className="flex-row gap-1 items-center">
             <View
               className="px-2 py-[2px] rounded-[3px]"
-              style={{ backgroundColor: badgeColor }}
+              style={{ backgroundColor: theme.primary }}
             >
-              <Text className="text-text-inverse text-xs font-body">
+              <Text
+                className="text-xs font-body"
+                style={{ color: theme.textInverse }}
+              >
                 Bài {lessonNumber}
               </Text>
             </View>
-            <Text className="text-text-muted text-xs font-body">
+            <Text
+              className="text-xs font-body"
+              style={{ color: theme.textMuted }}
+            >
               {completedCount}/{totalCount} BÀI HỌC
             </Text>
           </View>
           {isExpanded ? (
-            <ChevronDown size={24} color="#475569" />
+            <ChevronDown size={24} color="hsl(215, 19%, 35%)" />
           ) : (
-            <ChevronRight size={24} color="#475569" />
+            <ChevronRight size={24} color="hsl(215, 19%, 35%)" />
           )}
         </View>
         <View>
-          <Text className="text-text-main text-xl font-bold font-heading">
+          <Text
+            className="text-xl font-bold font-heading"
+            style={{ color: theme.textDefault }}
+          >
             {lessonTitle}
           </Text>
-          <Text className="text-text-muted text-sm font-body">
+          <Text
+            className="text-sm font-body"
+            style={{ color: theme.textMuted }}
+          >
             {lessonDescription}
           </Text>
         </View>
@@ -79,7 +93,6 @@ export function LessonSection({
               subtitle={lesson.subtitle}
               type={lesson.type}
               status={lesson.status}
-              accentColor={badgeColor}
             />
           ))}
         </View>

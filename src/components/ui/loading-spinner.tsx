@@ -48,8 +48,8 @@ export function LoadingSpinner({ size = 80 }: LoadingSpinnerProps) {
             borderRadius: outerSize * 0.59375,
             borderWidth,
             borderColor: "transparent",
-            borderTopColor: "#7b92ef",
-            borderRightColor: "#7b92ef",
+            borderTopColor: "hsl(228, 78%, 71%)",
+            borderRightColor: "hsl(228, 78%, 71%)",
           },
           animatedStyle,
         ]}

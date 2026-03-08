@@ -41,7 +41,7 @@ export function ResetPasswordOTPScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      className="flex-1 bg-[#F6F7F9]"
+      className="flex-1 bg-[hsl(220,20%,97%)]"
       keyboardVerticalOffset={0}
     >
       <SafeAreaView className="flex-1">
@@ -57,7 +57,7 @@ export function ResetPasswordOTPScreen() {
             của bạn:
           </Text>
 
-          <Text className="font-heading text-xs text-[#F3AB1B] mt-3">
+          <Text className="font-heading text-xs text-[hsl(40,90%,53%)] mt-3">
             {email}
           </Text>
 
@@ -92,12 +92,12 @@ export function ResetPasswordOTPScreen() {
             ) : null}
 
             <View className="flex-row items-center justify-center mt-3">
-              <Text className="font-body text-xs text-[#6B7280]">
+              <Text className="font-body text-xs text-[hsl(220,9%,46%)]">
                 Không nhận được mã?{" "}
               </Text>
               <TouchableOpacity onPress={handleResendOTP} disabled={!canResend}>
                 <Text
-                  className={`font-body text-xs ${canResend ? "text-[#7B92EF]" : "text-[#9CA3AF]"}`}
+                  className={`font-body text-xs ${canResend ? "text-[hsl(228,78%,71%)]" : "text-[hsl(218,11%,65%)]"}`}
                 >
                   {isResendPending
                     ? "Đang gửi..."

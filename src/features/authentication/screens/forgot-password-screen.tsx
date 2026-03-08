@@ -29,7 +29,7 @@ export function ForgotPasswordScreen() {
   return (
     <KeyboardAvoidingView
       behavior="padding"
-      className="flex-1 bg-[#F6F7F9]"
+      className="flex-1 bg-[hsl(220,20%,97%)]"
       keyboardVerticalOffset={0}
     >
       <SafeAreaView className="flex-1">

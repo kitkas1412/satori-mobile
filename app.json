@@ -39,6 +39,12 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Satori Nihongo cần quyền truy cập microphone để bạn có thể hội thoại tiếng Nhật với AI."
+        }
       ]
     ],
     "experiments": {

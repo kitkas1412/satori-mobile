@@ -19,9 +19,9 @@ export const PasswordValidation: React.FC<PasswordValidationProps> = ({
       {rules.map((rule, index) => (
         <View key={index} className="flex-row items-start gap-2">
           {rule.isValid ? (
-            <Check size={16} color="#10B981" />
+            <Check size={16} color="hsl(160, 84%, 39%)" />
           ) : (
-            <X size={16} color="#EF4444" />
+            <X size={16} color="hsl(0, 84%, 60%)" />
           )}
           <Text className="font-body text-xs text-black">{rule.label}</Text>
         </View>

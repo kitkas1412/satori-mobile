@@ -1,5 +1,7 @@
-import { CircleCheck, MessageSquareMore, Mic } from "lucide-react-native";
+import { MessageSquareMore } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { Colors } from "@/constants/theme";
 
 type LessonStatus = "completed" | "active" | "locked";
 type LessonType = "pronunciation" | "stress" | "conversation";
@@ -9,7 +11,6 @@ interface LessonCardProps {
   subtitle: string;
   type: LessonType;
   status: LessonStatus;
-  accentColor?: string;
   onPress?: () => void;
 }
 
@@ -18,46 +19,31 @@ export function LessonCard({
   subtitle,
   type,
   status,
-  accentColor = "#7b92ef", // primary-default
   onPress,
 }: LessonCardProps) {
-  const getIcon = () => {
-    switch (type) {
-      case "pronunciation":
-        return CircleCheck;
-      case "stress":
-        return Mic;
-      case "conversation":
-        return MessageSquareMore;
-    }
-  };
-
-  const Icon = getIcon();
-
-  // Completed lessons always use green checkmark
-  const iconColor = status === "completed" ? "#10B981" : accentColor;
-
-  const borderClass =
-    status === "active"
-      ? "border-[#7b92ef]"
-      : status === "locked"
-        ? "border-border"
-        : "border-transparent";
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
 
   return (
     <Pressable
       onPress={onPress}
-      className={`bg-background-surface rounded-[14px] border ${borderClass} p-4 pt-6 pb-4 flex-row gap-4 h-[97px]`}
+      className="rounded-[14px] border p-4 pt-6 pb-4 flex-row gap-4 h-[97px]"
+      style={{ backgroundColor: theme.background, borderColor: theme.border }}
       disabled={status === "locked"}
     >
       <View className="w-6 h-6">
-        <Icon size={24} color={iconColor} strokeWidth={2} />
+        <MessageSquareMore size={24} color={theme.primary} strokeWidth={2} />
       </View>
       <View className="flex-1 gap-[5px]">
-        <Text className="text-text-muted text-lg font-bold font-heading">
+        <Text
+          className="text-lg font-bold font-heading"
+          style={{ color: theme.textDefault }}
+        >
           {title}
         </Text>
-        <Text className="text-text-muted text-xs font-body">{subtitle}</Text>
+        <Text className="text-xs font-body" style={{ color: theme.textMuted }}>
+          {subtitle}
+        </Text>
       </View>
     </Pressable>
   );

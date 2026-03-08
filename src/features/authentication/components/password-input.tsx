@@ -48,7 +48,7 @@ export const PasswordInput = forwardRef<TextInput, PasswordInputProps>(
           <MaterialIcons
             name="lock-outline"
             size={24}
-            color={error ? "#ef4444" : "rgba(0,0,0,0.6)"}
+            color={error ? "hsl(0, 84%, 60%)" : "hsla(0, 0%, 0%, 0.6)"}
           />
         }
         rightAccessory={
@@ -59,7 +59,7 @@ export const PasswordInput = forwardRef<TextInput, PasswordInputProps>(
             <MaterialIcons
               name={showPassword ? "visibility" : "visibility-off"}
               size={24}
-              color="rgba(0,0,0,0.6)"
+              color="hsla(0, 0%, 0%, 0.6)"
             />
           </TouchableOpacity>
         }
