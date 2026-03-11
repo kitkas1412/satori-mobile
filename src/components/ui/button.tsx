@@ -6,7 +6,7 @@ interface PrimaryButtonProps {
   onPress: () => void;
   disabled?: boolean;
   loading?: boolean;
-  variant?: "primary" | "danger" | "secondary";
+  variant?: "primary" | "danger" | "secondary" | "dark";
   icon?: React.ReactNode;
   fullWidth?: boolean;
   accessibilityLabel?: string;
@@ -32,6 +32,8 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
         return "bg-error-500";
       case "secondary":
         return "bg-gray-500";
+      case "dark":
+        return "bg-primary-dark";
       case "primary":
       default:
         return "bg-primary-default";

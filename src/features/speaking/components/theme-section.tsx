@@ -17,6 +17,7 @@ interface ThemeSectionProps {
     subtitle: string;
     type: "pronunciation" | "stress" | "conversation";
     status: "completed" | "active" | "locked";
+    practiced?: boolean;
   }[];
   defaultExpanded?: boolean;
   onLessonPress?: (id: string) => void;
@@ -36,6 +37,8 @@ export function ThemeSection({
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
+  const accentColor = lessonNumber % 2 === 0 ? theme.purple : theme.primary;
+
   return (
     <View className="gap-2">
       {/* Header */}
@@ -47,7 +50,7 @@ export function ThemeSection({
           <View className="flex-row gap-1 items-center">
             <View
               className="px-2 py-[2px] rounded-[3px]"
-              style={{ backgroundColor: theme.primary }}
+              style={{ backgroundColor: accentColor }}
             >
               <Text
                 className="text-xs font-body"
@@ -87,17 +90,38 @@ export function ThemeSection({
 
       {/* Lesson Cards */}
       {isExpanded && (
-        <View className="gap-2">
-          {lessons.map((lesson) => (
-            <TopicCard
-              key={lesson.id}
-              title={lesson.title}
-              subtitle={lesson.subtitle}
-              type={lesson.type}
-              status={lesson.status}
-              onPress={() => onLessonPress?.(lesson.id)}
-            />
-          ))}
+        <View>
+          {lessons.map((lesson, index) => {
+            const firstUnpracticedIndex = lessons.findIndex(
+              (l) => !l.practiced,
+            );
+            const isFirstUnpracticed = index === firstUnpracticedIndex;
+            return (
+              <View key={lesson.id}>
+                {index > 0 &&
+                  !isFirstUnpracticed &&
+                  index !== firstUnpracticedIndex + 1 && (
+                    <View
+                      style={{
+                        marginHorizontal: 16,
+                        height: 1,
+                        backgroundColor: theme.border,
+                      }}
+                    />
+                  )}
+                <TopicCard
+                  title={lesson.title}
+                  subtitle={lesson.subtitle}
+                  type={lesson.type}
+                  status={lesson.status}
+                  practiced={lesson.practiced}
+                  showBorder={isFirstUnpracticed}
+                  accentColor={accentColor}
+                  onPress={() => onLessonPress?.(lesson.id)}
+                />
+              </View>
+            );
+          })}
         </View>
       )}
     </View>

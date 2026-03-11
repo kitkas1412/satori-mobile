@@ -1,4 +1,4 @@
-import { MessageSquareMore } from "lucide-react-native";
+import { CircleCheck, MessageSquareMore } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
@@ -11,6 +11,9 @@ interface TopicCardProps {
   subtitle: string;
   type: LessonType;
   status: LessonStatus;
+  practiced?: boolean;
+  showBorder?: boolean;
+  accentColor?: string;
   onPress?: () => void;
 }
 
@@ -19,20 +22,35 @@ export function TopicCard({
   subtitle,
   type,
   status,
+  practiced,
+  showBorder,
+  accentColor,
   onPress,
 }: TopicCardProps) {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
+  const iconColor = accentColor ?? theme.primary;
 
   return (
     <Pressable
       onPress={onPress}
-      className="rounded-[14px] border p-4 pt-6 pb-4 flex-row gap-4 h-[97px]"
-      style={{ backgroundColor: theme.background, borderColor: theme.border }}
+      className="p-4 pt-6 pb-4 flex-row gap-4 h-[97px]"
+      style={{
+        backgroundColor: theme.background,
+        ...(showBorder && {
+          borderWidth: 2,
+          borderColor: theme.border,
+          borderRadius: 8,
+        }),
+      }}
       disabled={status === "locked"}
     >
       <View className="w-6 h-6">
-        <MessageSquareMore size={24} color={theme.primary} strokeWidth={2} />
+        {practiced ? (
+          <CircleCheck size={24} color={theme.success} strokeWidth={2} />
+        ) : (
+          <MessageSquareMore size={24} color={iconColor} strokeWidth={2} />
+        )}
       </View>
       <View className="flex-1 gap-[5px]">
         <Text

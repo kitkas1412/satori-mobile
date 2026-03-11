@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
+import { ScreenHeader } from "@/components/ui";
 
 import {
   ConversationBanner,
@@ -41,6 +42,7 @@ function TopicSection({
         ? ("conversation" as const)
         : ("pronunciation" as const),
       status: "active" as const,
+      practiced: topic.practiced,
     })) ?? [];
 
   function handleLessonPress(id: string) {
@@ -76,29 +78,24 @@ export function SpeakingScreen() {
   return (
     <View className="flex-1" style={{ backgroundColor: theme.background }}>
       {/* Header */}
-      <View
-        className="flex-row items-center justify-between px-4 pb-4"
-        style={{ paddingTop: insets.top + 16 }}
-      >
-        <Text
-          className="text-xl font-heading"
-          style={{ color: theme.textDefault }}
-        >
-          Luyện nói
-        </Text>
-        <View className="relative">
-          <View
-            className="w-9 h-9 rounded-full items-center justify-center"
-            style={{ backgroundColor: theme.secondary }}
-          >
-            <Bell size={20} fill={theme.white} color={theme.white} />
+      <ScreenHeader
+        title="Luyện nói"
+        paddingTop={insets.top + 16}
+        rightAction={
+          <View className="relative">
+            <View
+              className="w-9 h-9 rounded-full items-center justify-center"
+              style={{ backgroundColor: theme.secondary }}
+            >
+              <Bell size={20} fill={theme.white} color={theme.white} />
+            </View>
+            <View
+              className="absolute top-0 right-0 w-[7px] h-[7px] rounded-full"
+              style={{ backgroundColor: theme.error }}
+            />
           </View>
-          <View
-            className="absolute top-0 right-0 w-[7px] h-[7px] rounded-full"
-            style={{ backgroundColor: theme.error }}
-          />
-        </View>
-      </View>
+        }
+      />
 
       {user?.status === "INACTIVE" ? (
         <View className="flex-1 items-center justify-center px-4">

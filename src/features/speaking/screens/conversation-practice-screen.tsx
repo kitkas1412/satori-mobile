@@ -1,9 +1,8 @@
-import { AlignJustify, Languages, Mic, X } from "lucide-react-native";
-import React, { useEffect, useRef, useState } from "react";
+import { AlignJustify, X } from "lucide-react-native";
+import React, { useEffect, useRef } from "react";
 import {
   ActivityIndicator,
   Alert,
-  Pressable,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -13,107 +12,19 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { PrimaryButton, ScreenHeader } from "@/components/ui";
+import {
+  FeedbackBubble,
+  MessageBubble,
+  MicButton,
+  TypingIndicator,
+} from "@/features/speaking/components";
 import { useConversationSession, useRecorder } from "@/features/speaking/hooks";
 import { useConversationStore } from "@/stores";
-import type { FeedbackResultResponse, Messages } from "@/features/speaking/api";
 
 interface ConversationPracticeScreenProps {
   topicId: string;
   title: string;
-}
-
-function MessageBubble({ message }: { message: Messages }) {
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
-  const [showTranslation, setShowTranslation] = useState(false);
-
-  if (message.role === "ASSISTANT") {
-    return (
-      <View className="self-start max-w-[85%]">
-        <TouchableOpacity
-          activeOpacity={0.85}
-          onPress={() => setShowTranslation((v) => !v)}
-        >
-          <View
-            className="bg-white px-4 py-4 gap-2"
-            style={{
-              borderTopLeftRadius: 14,
-              borderTopRightRadius: 14,
-              borderBottomRightRadius: 14,
-            }}
-          >
-            <Text className="font-body text-base text-text-main">
-              {message.content}
-            </Text>
-            {showTranslation && message.translation ? (
-              <Text
-                className="font-body text-sm"
-                style={{ color: theme.textMuted }}
-              >
-                {message.translation}
-              </Text>
-            ) : null}
-            <View className="self-end">
-              <Languages size={12} color={theme.textMuted} />
-            </View>
-          </View>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
-  return (
-    <View className="self-end max-w-[85%]">
-      <View
-        className="bg-primary-default px-4 py-4"
-        style={{
-          borderTopLeftRadius: 14,
-          borderTopRightRadius: 14,
-          borderBottomLeftRadius: 14,
-        }}
-      >
-        <Text className="font-body text-base text-text-main">
-          {message.content}
-        </Text>
-      </View>
-    </View>
-  );
-}
-
-function FeedbackBubble({ feedback }: { feedback: FeedbackResultResponse }) {
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
-  const summary = feedback.languageEvaluation?.summary;
-  const score = feedback.overallScore != null ? Math.round(feedback.overallScore) : null;
-
-  return (
-    <View className="self-start max-w-[85%]">
-      <View
-        className="bg-white px-4 py-4 gap-2"
-        style={{
-          borderTopLeftRadius: 14,
-          borderTopRightRadius: 14,
-          borderBottomRightRadius: 14,
-        }}
-      >
-        <Text className="font-heading text-base text-text-main">
-          Tóm tắt đánh giá
-        </Text>
-        {score != null && (
-          <Text className="font-body text-sm" style={{ color: theme.primary }}>
-            Điểm tổng: {score}/100
-          </Text>
-        )}
-        {summary ? (
-          <Text className="font-body text-sm text-text-main">{summary}</Text>
-        ) : (
-          <Text className="font-body text-sm" style={{ color: theme.textMuted }}>
-            Buổi học đã hoàn thành!
-          </Text>
-        )}
-      </View>
-    </View>
-  );
 }
 
 export function ConversationPracticeScreen({
@@ -227,27 +138,24 @@ export function ConversationPracticeScreen({
       style={{ paddingTop: insets.top }}
     >
       {/* Header */}
-      <View className="flex-row items-center px-4 h-16 gap-8">
-        <View className="flex-row items-center gap-2 flex-1">
+      <ScreenHeader
+        title={title}
+        leftAction={
           <TouchableOpacity
             onPress={handleAbandonSession}
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           >
             <X size={24} color={theme.textDefault} />
           </TouchableOpacity>
-          <Text
-            className="font-heading text-xl text-text-main flex-1"
-            numberOfLines={1}
+        }
+        rightAction={
+          <TouchableOpacity
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           >
-            {title}
-          </Text>
-        </View>
-        <TouchableOpacity
-          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-        >
-          <AlignJustify size={24} color={theme.textDefault} />
-        </TouchableOpacity>
-      </View>
+            <AlignJustify size={24} color={theme.textDefault} />
+          </TouchableOpacity>
+        }
+      />
 
       {/* Divider */}
       <View className="h-px bg-border" />
@@ -272,26 +180,7 @@ export function ConversationPracticeScreen({
 
         {feedback && <FeedbackBubble feedback={feedback} />}
 
-        {turnState === "LOADING" && (
-          <View className="self-start">
-            <View
-              className="bg-white px-4 py-3 flex-row items-center gap-2"
-              style={{
-                borderTopLeftRadius: 14,
-                borderTopRightRadius: 14,
-                borderBottomRightRadius: 14,
-              }}
-            >
-              <ActivityIndicator size="small" color={theme.primary} />
-              <Text
-                className="font-body text-sm"
-                style={{ color: theme.textMuted }}
-              >
-                AI đang trả lời...
-              </Text>
-            </View>
-          </View>
-        )}
+        {turnState === "LOADING" && <TypingIndicator />}
       </ScrollView>
 
       {/* Bottom Controls */}
@@ -301,13 +190,11 @@ export function ConversationPracticeScreen({
       >
         {feedback ? (
           /* Session completed — show Tiếp tục button */
-          <TouchableOpacity
+          <PrimaryButton
+            text="Tiếp tục"
+            variant="dark"
             onPress={() => router.replace("/conversation-feedback")}
-            className="bg-primary-dark rounded-xl py-4 items-center"
-            activeOpacity={0.85}
-          >
-            <Text className="font-heading text-base text-white">Tiếp tục</Text>
-          </TouchableOpacity>
+          />
         ) : (
           /* Session active — show Mic + Kết thúc */
           <View className="flex-row items-center">
@@ -329,28 +216,13 @@ export function ConversationPracticeScreen({
             </View>
 
             {/* Mic button - center */}
-            <View className="items-center gap-2">
-              <Text
-                className="font-body text-base"
-                style={{ color: theme.textMuted }}
-              >
-                {micLabel}
-              </Text>
-              <Pressable
-                onPressIn={handleMicPressIn}
-                onPressOut={handleMicPressOut}
-                disabled={micDisabled}
-                className={`w-[62px] h-[62px] rounded-xl items-center justify-center ${
-                  isRecording
-                    ? "bg-error-default"
-                    : micDisabled
-                      ? "bg-border"
-                      : "bg-primary-dark"
-                }`}
-              >
-                <Mic size={32} color="#FFFFFF" />
-              </Pressable>
-            </View>
+            <MicButton
+              isRecording={isRecording}
+              disabled={micDisabled}
+              label={micLabel}
+              onPressIn={handleMicPressIn}
+              onPressOut={handleMicPressOut}
+            />
 
             {/* Spacer - right */}
             <View className="flex-1" />

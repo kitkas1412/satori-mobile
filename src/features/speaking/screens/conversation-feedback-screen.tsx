@@ -1,32 +1,11 @@
-import { CheckCircle, Circle, ChevronRight } from "lucide-react-native";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { CheckCircle, Circle } from "lucide-react-native";
+import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
+import { PrimaryButton, ScreenHeader, ScoreCircle } from "@/components/ui";
 import { useConversationStore } from "@/stores";
-
-function ScoreCircle({ score, label }: { score: number | null; label: string }) {
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
-  const displayScore = score != null ? Math.round(score) : "--";
-
-  return (
-    <View className="items-center gap-1 flex-1">
-      <View
-        className="w-16 h-16 rounded-full items-center justify-center border-2"
-        style={{ borderColor: theme.primary }}
-      >
-        <Text className="font-heading text-xl" style={{ color: theme.primary }}>
-          {displayScore}
-        </Text>
-      </View>
-      <Text className="font-body text-xs text-center" style={{ color: theme.textMuted }}>
-        {label}
-      </Text>
-    </View>
-  );
-}
 
 export function ConversationFeedbackScreen() {
   const insets = useSafeAreaInsets();
@@ -63,11 +42,7 @@ export function ConversationFeedbackScreen() {
       style={{ backgroundColor: theme.background, paddingTop: insets.top }}
     >
       {/* Header */}
-      <View className="px-4 py-4">
-        <Text className="font-heading text-2xl" style={{ color: theme.textDefault }}>
-          Kết quả buổi học
-        </Text>
-      </View>
+      <ScreenHeader title="Kết quả buổi học" titleSize="2xl" />
 
       <ScrollView
         className="flex-1"
@@ -220,15 +195,11 @@ export function ConversationFeedbackScreen() {
         className="px-4"
         style={{ paddingBottom: Math.max(insets.bottom, 16) + 8 }}
       >
-        <TouchableOpacity
+        <PrimaryButton
+          text="Về trang luyện nói"
+          variant="dark"
           onPress={handleGoHome}
-          className="bg-primary-dark rounded-xl py-4 items-center"
-          activeOpacity={0.85}
-        >
-          <Text className="font-heading text-base" style={{ color: theme.white }}>
-            Về trang luyện nói
-          </Text>
-        </TouchableOpacity>
+        />
       </View>
     </View>
   );
