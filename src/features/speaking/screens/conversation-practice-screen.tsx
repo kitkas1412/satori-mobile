@@ -12,7 +12,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { PrimaryButton, ScreenHeader } from "@/components/ui";
+import { LoadingOverlay, PrimaryButton, ScreenHeader } from "@/components/ui";
 import {
   FeedbackBubble,
   MessageBubble,
@@ -115,24 +115,8 @@ export function ConversationPracticeScreen({
           ? "Đang ghi âm..."
           : "Chạm để nói";
 
-  if (isInitializing) {
-    return (
-      <View
-        className="flex-1 bg-background-default items-center justify-center"
-        style={{ paddingTop: insets.top }}
-      >
-        <ActivityIndicator size="large" color={theme.primary} />
-        <Text
-          className="font-body text-sm mt-3"
-          style={{ color: theme.textMuted }}
-        >
-          Đang khởi tạo buổi học...
-        </Text>
-      </View>
-    );
-  }
-
   return (
+    <>
     <View
       className="flex-1 bg-background-default"
       style={{ paddingTop: insets.top }}
@@ -230,5 +214,7 @@ export function ConversationPracticeScreen({
         )}
       </View>
     </View>
+      <LoadingOverlay visible={isInitializing} title="Đang khởi tạo..." message="Vui lòng đợi trong giây lát" />
+    </>
   );
 }

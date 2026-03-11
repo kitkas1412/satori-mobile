@@ -1,10 +1,10 @@
 import { Bell } from "lucide-react-native";
-import { ActivityIndicator, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
-import { ScreenHeader } from "@/components/ui";
+import { LoadingOverlay, ScreenHeader } from "@/components/ui";
 
 import {
   ConversationBanner,
@@ -76,6 +76,7 @@ export function SpeakingScreen() {
   const { data: sections, isLoading, isError } = useConversationThemes();
 
   return (
+    <>
     <View className="flex-1" style={{ backgroundColor: theme.background }}>
       {/* Header */}
       <ScreenHeader
@@ -114,14 +115,6 @@ export function SpeakingScreen() {
         >
           <ConversationBanner />
 
-          {isLoading && (
-            <ActivityIndicator
-              size="large"
-              color={theme.primary}
-              className="mt-4"
-            />
-          )}
-
           {isError && (
             <Text
               className="text-sm font-body text-center mt-4"
@@ -141,5 +134,7 @@ export function SpeakingScreen() {
         </ScrollView>
       )}
     </View>
+      <LoadingOverlay visible={isLoading} title="Đang tải..." />
+    </>
   );
 }

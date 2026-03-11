@@ -6,6 +6,7 @@ import { KeyRound, LogOut } from "lucide-react-native";
 import { Alert, Pressable, Text, View } from "react-native";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
+import { LoadingOverlay } from "@/components/ui";
 
 export default function ProfileScreen() {
   const { user } = useAuthStore();
@@ -36,6 +37,7 @@ export default function ProfileScreen() {
   };
 
   return (
+    <>
     <View className="flex-1" style={{ backgroundColor: theme.background }}>
       <StatusBar style="dark" />
 
@@ -84,17 +86,19 @@ export default function ProfileScreen() {
           onPress={handleLogout}
           disabled={isPending}
           className="flex-row items-center justify-center py-4 px-6 rounded-xl active:opacity-80"
-          style={{ backgroundColor: theme.error, opacity: isPending ? 0.5 : 1 }}
+          style={{ backgroundColor: theme.error }}
         >
           <LogOut size={20} color="white" />
           <Text
             className="text-white text-base font-semibold ml-2"
             style={{ color: theme.textInverse }}
           >
-            {isPending ? "Đang đăng xuất..." : "Đăng xuất"}
+            Đăng xuất
           </Text>
         </Pressable>
       </View>
     </View>
+      <LoadingOverlay visible={isPending} title="Đang đăng xuất..." />
+    </>
   );
 }
