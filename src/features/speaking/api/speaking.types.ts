@@ -110,6 +110,12 @@ export interface VocabularyUsed {
   jlptLevel: string;
 }
 
+// POST: /learner/roleplay/sessions/{{session_id}}/messages
+export interface SendMessageResponse {
+  messages: Messages[];
+  missions: Missions[];
+}
+
 // POST: /learner/roleplay/sessions/{{session_id}}/complete
 export interface FeedbackResultResponse {
   sessionId: string;

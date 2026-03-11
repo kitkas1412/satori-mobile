@@ -1,12 +1,12 @@
 import { api } from "@/lib/axios";
 import type { ApiResponse } from "@/types/api";
-import type { Messages } from "./speaking.types";
+import type { SendMessageResponse } from "./speaking.types";
 
 export async function sendMessageApi(
   sessionId: string,
   content: string,
   audioUri?: string,
-): Promise<Messages[]> {
+): Promise<SendMessageResponse> {
   const formData = new FormData();
 
   const messagePart = JSON.stringify({ content, hintRequest: false });
@@ -28,11 +28,10 @@ export async function sendMessageApi(
     } as unknown as Blob);
   }
 
-  const response = await api.post<ApiResponse<Messages[]>>(
+  const response = await api.post<ApiResponse<SendMessageResponse>>(
     `/learner/roleplay/sessions/${sessionId}/messages`,
     formData,
     { headers: { "Content-Type": "multipart/form-data" } },
   );
-  const data = response.data.data;
-  return Array.isArray(data) ? data : [data];
+  return response.data.data;
 }

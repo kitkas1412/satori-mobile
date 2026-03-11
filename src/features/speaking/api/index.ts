@@ -8,6 +8,7 @@ export type {
   Content,
   Messages,
   RoleplaySessionResponse,
+  SendMessageResponse,
   Missions,
   SessionStatus,
   TurnState,

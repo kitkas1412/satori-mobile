@@ -19,7 +19,7 @@ export function useConversationSession() {
   const [isInitializing, setIsInitializing] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
 
-  const { setSession, addMessages, setFeedback, clearSession } =
+  const { setSession, addMessages, removeMessage, setMissions, setFeedback, clearSession } =
     useConversationStore();
   const sessionId = useConversationStore((s) => s.sessionId);
 
@@ -50,26 +50,36 @@ export function useConversationSession() {
         Alert.alert("Không nhận được giọng nói", "Vui lòng thử nói lại.");
         return;
       }
+      const optimisticId = `optimistic-${Date.now()}`;
       const optimisticUserMessage = {
-        id: `optimistic-${Date.now()}`,
+        id: optimisticId,
+        sessionId: sessionId,
         role: "USER" as const,
         content: transcript,
+        japaneseContent: null,
         translation: null,
         romaji: null,
         sequenceNumber: -1,
         audioUrl: null,
         userAudioUrl: audioUri ?? null,
+        correction: null,
+        vocabularyUsed: null,
+        isHintRequest: false,
+        createdAt: new Date().toISOString(),
+        messageType: "TEXT",
+        pronunciationScore: null,
       };
       addMessages([optimisticUserMessage]);
       setTurnState("LOADING");
       try {
-        const newMessages = await sendMessageApi(
+        const result = await sendMessageApi(
           sessionId,
           transcript,
           audioUri ?? undefined
         );
-        addMessages(newMessages);
-        const assistantMessage = newMessages.find((m) => m.role === "ASSISTANT");
+        addMessages(result.messages);
+        setMissions(result.missions);
+        const assistantMessage = result.messages.find((m) => m.role === "ASSISTANT");
         setTurnState("AI_TURN");
         if (assistantMessage) {
           await playAssistantMessage(assistantMessage.content, assistantMessage.audioUrl).catch(() => {});
@@ -80,7 +90,7 @@ export function useConversationSession() {
         setTurnState("USER_TURN");
       }
     },
-    [sessionId, addMessages]
+    [sessionId, addMessages, setMissions]
   );
 
   const completeSession = useCallback(async () => {

@@ -221,8 +221,8 @@ export function ConversationPracticeScreen({
           scrollViewRef.current?.scrollToEnd({ animated: true })
         }
       >
-        {messages.map((message) => (
-          <MessageBubble key={message.id} message={message} />
+        {messages.map((message, index) => (
+          <MessageBubble key={message.id ?? `msg-${index}`} message={message} />
         ))}
 
         {turnState === "LOADING" && (
