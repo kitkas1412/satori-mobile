@@ -1,11 +1,11 @@
 import { ChevronDown, ChevronRight } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
-import { LessonCard } from "./lesson-card";
+import { TopicCard } from "./topic-card";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
 
-interface LessonSectionProps {
+interface ThemeSectionProps {
   lessonNumber: number;
   lessonTitle: string;
   lessonDescription: string;
@@ -22,7 +22,7 @@ interface LessonSectionProps {
   onLessonPress?: (id: string) => void;
 }
 
-export function LessonSection({
+export function ThemeSection({
   lessonNumber,
   lessonTitle,
   lessonDescription,
@@ -31,7 +31,7 @@ export function LessonSection({
   lessons,
   defaultExpanded = true,
   onLessonPress,
-}: LessonSectionProps) {
+}: ThemeSectionProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
@@ -89,7 +89,7 @@ export function LessonSection({
       {isExpanded && (
         <View className="gap-2">
           {lessons.map((lesson) => (
-            <LessonCard
+            <TopicCard
               key={lesson.id}
               title={lesson.title}
               subtitle={lesson.subtitle}

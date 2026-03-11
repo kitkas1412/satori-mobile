@@ -1,12 +1,12 @@
 import { api } from "@/lib/axios";
 import type { ApiResponse } from "@/types/api";
-import type { RoleplayMessage } from "./speaking.types";
+import type { Messages } from "./speaking.types";
 
 export async function sendMessageApi(
   sessionId: string,
   content: string,
-  audioUri?: string
-): Promise<RoleplayMessage[]> {
+  audioUri?: string,
+): Promise<Messages[]> {
   const formData = new FormData();
 
   const messagePart = JSON.stringify({ content, hintRequest: false });
@@ -20,9 +20,7 @@ export async function sendMessageApi(
     const filename = audioUri.split("/").pop() ?? "recording.wav";
     const ext = filename.split(".").pop()?.toLowerCase();
     const mimeType =
-      ext === "caf" ? "audio/x-caf" :
-      ext === "wav" ? "audio/wav" :
-      "audio/m4a";
+      ext === "caf" ? "audio/x-caf" : ext === "wav" ? "audio/wav" : "audio/m4a";
     formData.append("audio", {
       uri: audioUri,
       type: mimeType,
@@ -30,10 +28,10 @@ export async function sendMessageApi(
     } as unknown as Blob);
   }
 
-  const response = await api.post<ApiResponse<RoleplayMessage[]>>(
+  const response = await api.post<ApiResponse<Messages[]>>(
     `/learner/roleplay/sessions/${sessionId}/messages`,
     formData,
-    { headers: { "Content-Type": "multipart/form-data" } }
+    { headers: { "Content-Type": "multipart/form-data" } },
   );
   const data = response.data.data;
   return Array.isArray(data) ? data : [data];

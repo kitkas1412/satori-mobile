@@ -14,14 +14,14 @@ import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useConversationSession, useRecorder } from "@/features/speaking/hooks";
 import { useConversationStore } from "@/stores";
-import type { RoleplayMessage } from "@/features/speaking/api";
+import type { Messages } from "@/features/speaking/api";
 
 interface ConversationPracticeScreenProps {
   topicId: string;
   title: string;
 }
 
-function MessageBubble({ message }: { message: RoleplayMessage }) {
+function MessageBubble({ message }: { message: Messages }) {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const [showTranslation, setShowTranslation] = useState(false);
@@ -45,7 +45,10 @@ function MessageBubble({ message }: { message: RoleplayMessage }) {
               {message.content}
             </Text>
             {showTranslation && message.translation ? (
-              <Text className="font-body text-sm" style={{ color: theme.textMuted }}>
+              <Text
+                className="font-body text-sm"
+                style={{ color: theme.textMuted }}
+              >
                 {message.translation}
               </Text>
             ) : null}
@@ -114,7 +117,7 @@ export function ConversationPracticeScreen({
           style: "destructive",
           onPress: () => abandonSession(),
         },
-      ]
+      ],
     );
   }
 
@@ -163,7 +166,10 @@ export function ConversationPracticeScreen({
         style={{ paddingTop: insets.top }}
       >
         <ActivityIndicator size="large" color={theme.primary} />
-        <Text className="font-body text-sm mt-3" style={{ color: theme.textMuted }}>
+        <Text
+          className="font-body text-sm mt-3"
+          style={{ color: theme.textMuted }}
+        >
           Đang khởi tạo buổi học...
         </Text>
       </View>
@@ -230,7 +236,10 @@ export function ConversationPracticeScreen({
               }}
             >
               <ActivityIndicator size="small" color={theme.primary} />
-              <Text className="font-body text-sm" style={{ color: theme.textMuted }}>
+              <Text
+                className="font-body text-sm"
+                style={{ color: theme.textMuted }}
+              >
                 AI đang trả lời...
               </Text>
             </View>
@@ -259,7 +268,10 @@ export function ConversationPracticeScreen({
 
           {/* Mic button - center */}
           <View className="items-center gap-2">
-            <Text className="font-body text-base" style={{ color: theme.textMuted }}>
+            <Text
+              className="font-body text-base"
+              style={{ color: theme.textMuted }}
+            >
               {micLabel}
             </Text>
             <Pressable

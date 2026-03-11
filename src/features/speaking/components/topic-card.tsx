@@ -6,7 +6,7 @@ import { Colors } from "@/constants/theme";
 type LessonStatus = "completed" | "active" | "locked";
 type LessonType = "pronunciation" | "stress" | "conversation";
 
-interface LessonCardProps {
+interface TopicCardProps {
   title: string;
   subtitle: string;
   type: LessonType;
@@ -14,13 +14,13 @@ interface LessonCardProps {
   onPress?: () => void;
 }
 
-export function LessonCard({
+export function TopicCard({
   title,
   subtitle,
   type,
   status,
   onPress,
-}: LessonCardProps) {
+}: TopicCardProps) {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 

@@ -1,3 +1,3 @@
 export { ConversationBanner } from "./conversation-banner";
-export { LessonCard } from "./lesson-card";
-export { LessonSection } from "./lesson-section";
+export { TopicCard } from "./topic-card";
+export { ThemeSection } from "./theme-section";

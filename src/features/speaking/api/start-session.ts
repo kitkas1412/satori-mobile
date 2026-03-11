@@ -1,11 +1,13 @@
 import { api } from "@/lib/axios";
 import type { ApiResponse } from "@/types/api";
-import type { RoleplaySession } from "./speaking.types";
+import type { RoleplaySessionResponse } from "./speaking.types";
 
-export async function startSessionApi(topicId: string): Promise<RoleplaySession> {
-  const response = await api.post<ApiResponse<RoleplaySession>>(
+export async function startSessionApi(
+  topicId: string,
+): Promise<RoleplaySessionResponse> {
+  const response = await api.post<ApiResponse<RoleplaySessionResponse>>(
     "/learner/roleplay/sessions",
-    { topicId }
+    { topicId },
   );
   return response.data.data;
 }

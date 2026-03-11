@@ -6,7 +6,7 @@ export const speakingQueryKeys = {
   topics: (themeId: string) => ["speaking", "topics", themeId] as const,
 };
 
-export function useLessonSections() {
+export function useConversationThemes() {
   return useQuery({
     queryKey: speakingQueryKeys.themes,
     queryFn: getThemesApi,

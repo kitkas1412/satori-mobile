@@ -7,21 +7,24 @@ import { Colors } from "@/constants/theme";
 
 import {
   ConversationBanner,
-  LessonSection,
+  ThemeSection,
 } from "@/features/speaking/components";
 import { useAuthStore } from "@/stores";
-import { useLessonSections, useTopicsByTheme } from "@/features/speaking/hooks";
-import type { LessonSectionItem } from "@/features/speaking/api";
+import {
+  useConversationThemes,
+  useThemeTopics,
+} from "@/features/speaking/hooks";
+import type { Content } from "@/features/speaking/api";
 
 function TopicSection({
   section,
   defaultExpanded,
 }: {
-  section: LessonSectionItem;
+  section: Content;
   defaultExpanded: boolean;
 }) {
   const router = useRouter();
-  const { data: topics } = useTopicsByTheme(section.id);
+  const { data: topics } = useThemeTopics(section.id);
 
   const difficultyLabel = (score: number) => {
     if (score === 1) return "Dễ";
@@ -50,7 +53,7 @@ function TopicSection({
   }
 
   return (
-    <LessonSection
+    <ThemeSection
       lessonNumber={section.orderIndex}
       lessonTitle={section.title}
       lessonDescription={section.descriptionVi}
@@ -68,7 +71,7 @@ export function SpeakingScreen() {
   const user = useAuthStore((state) => state.user);
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
-  const { data: sections, isLoading, isError } = useLessonSections();
+  const { data: sections, isLoading, isError } = useConversationThemes();
 
   return (
     <View className="flex-1" style={{ backgroundColor: theme.background }}>
