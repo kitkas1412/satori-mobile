@@ -5,33 +5,42 @@
 
 import { Platform } from "react-native";
 
-const tintColorLight = "#7b92ef"; // primary-default
-const tintColorDark = "#FFFFFF"; // typography-white
-
 export const Colors = {
   light: {
-    text: "#475569", // text-muted
-    background: "#F6F7F9", // background-default
-    surface: "#FFFFFF", // background-surface
-    primary: "#7b92ef", // primary-default
-    tint: tintColorLight,
-    icon: "#475569", // text-muted
-    tabIconDefault: "#475569", // text-muted
-    tabIconSelected: tintColorLight,
-    textMuted: "#475569", // text-muted
-    border: "rgba(0,0,0,0.1)",
+    textDefault: "hsl(220, 14.3%, 4.1%)",
+    textMuted: "hsl(215, 19.3%, 34.5%)",
+    textInverse: "hsl(220, 14.3%, 95.9%)",
+    background: "hsl(220, 20%, 97.1%)",
+    cardBackground: "hsl(0, 0%, 100%)",
+    primary: "hsl(228, 63.1%, 56.5%)",
+    secondary: "hsl(40, 90%, 52.9%)",
+    iconDefault: "hsl(220, 14.3%, 4.1%)",
+    iconSelected: "hsl(228, 63.1%, 56.5%)",
+    success: "hsl(160, 84.1%, 39.4%)",
+    warning: "hsl(40, 90%, 52.9%)",
+    error: "hsl(0, 84.2%, 60.2%)",
+    purple: "hsl(266, 48%, 48.2%)",
+    white: "hsl(0, 0%, 100%)",
+    shadow: "hsl(0, 0%, 0%)",
+    border: "hsl(213, 26.8%, 83.9%)",
   },
   dark: {
-    text: "#ECEDEE",
-    background: "#181719", // background-dark
-    surface: "#1F2937",
-    primary: "#7b92ef", // primary-default
-    tint: tintColorDark,
-    icon: "#9BA1A6",
-    tabIconDefault: "#9BA1A6",
-    tabIconSelected: tintColorDark,
-    textMuted: "#9BA1A6",
-    border: "rgba(255,255,255,0.1)",
+    textDefault: "hsl(220, 14.3%, 95.9%)",
+    textMuted: "hsl(215, 19.3%, 65.5%)",
+    textInverse: "hsl(220, 14.3%, 4.1%)",
+    background: "hsl(220, 20%, 10.2%)",
+    cardBackground: "hsl(0, 0%, 0%)",
+    primary: "hsl(228, 63.1%, 44.5%)",
+    secondary: "hsl(40, 90%, 47.1%)",
+    iconDefault: "hsl(220, 14.3%, 95.9%)",
+    iconSelected: "hsl(228, 63.1%, 44.5%)",
+    success: "hsl(160, 84.1%, 60.6%)",
+    warning: "hsl(40, 90%, 47.1%)",
+    error: "hsl(0, 84.2%, 39.8%)",
+    purple: "hsl(266, 48%, 51.8%)",
+    white: "hsl(0, 0%, 100%)",
+    shadow: "hsl(0, 0%, 100%)",
+    border: "hsl(213, 26.8%, 16.1%)",
   },
 };
 

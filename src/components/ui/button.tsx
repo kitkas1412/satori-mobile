@@ -6,7 +6,7 @@ interface PrimaryButtonProps {
   onPress: () => void;
   disabled?: boolean;
   loading?: boolean;
-  variant?: "primary" | "danger" | "secondary";
+  variant?: "primary" | "danger" | "secondary" | "dark";
   icon?: React.ReactNode;
   fullWidth?: boolean;
   accessibilityLabel?: string;
@@ -32,6 +32,8 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
         return "bg-error-500";
       case "secondary":
         return "bg-gray-500";
+      case "dark":
+        return "bg-primary-dark";
       case "primary":
       default:
         return "bg-primary-default";
@@ -47,11 +49,11 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
       accessibilityLabel={accessibilityLabel || text}
     >
       {loading ? (
-        <ActivityIndicator color="#F3F4F6" />
+        <ActivityIndicator color="hsl(220, 14%, 96%)" />
       ) : (
         <View className="flex-row items-center gap-2">
           {icon}
-          <Text className="font-heading text-lg text-[#F3F4F6]">{text}</Text>
+          <Text className="font-heading text-lg text-[hsl(220,14%,96%)]">{text}</Text>
         </View>
       )}
     </TouchableOpacity>

@@ -19,7 +19,7 @@ export function DailyReport() {
       <View className="flex-row gap-4">
         <View className="flex-1 bg-background-surface rounded-2xl border border-border p-4">
           <View className="flex-row items-center gap-1.5 mb-2">
-            <Clock className="w-5 h-5" color={"#7B92EF"} />
+            <Clock className="w-5 h-5" color={"hsl(228, 78%, 71%)"} />
             <Text className="text-text-muted text-sm font-body">
               Thời gian học
             </Text>
@@ -31,7 +31,7 @@ export function DailyReport() {
 
         <View className="flex-1 bg-background-surface rounded-2xl border border-border p-4">
           <View className="flex-row items-center gap-1.5 mb-2">
-            <CircleCheck className="w-5 h-5" color={"#10B981"} />
+            <CircleCheck className="w-5 h-5" color={"hsl(160, 84%, 39%)"} />
             <Text className="text-text-muted text-sm font-body">
               Bài đã học
             </Text>

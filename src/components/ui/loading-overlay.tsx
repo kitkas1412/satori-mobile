@@ -27,12 +27,12 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
         <LoadingSpinner size={spinnerSize} />
         <View className="items-center gap-3">
           {title && (
-            <Text className="font-heading text-2xl text-[#374155] text-center">
+            <Text className="font-heading text-2xl text-[hsl(220,21%,27%)] text-center">
               {title}
             </Text>
           )}
           {message && (
-            <Text className="font-body text-base text-[#64748b] text-center">
+            <Text className="font-body text-base text-[hsl(215,16%,47%)] text-center">
               {message}
             </Text>
           )}

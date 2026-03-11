@@ -1,64 +1,35 @@
 import { PrimaryButton } from "@/components/ui";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
-import { useForgotPassword } from "@/features/authentication/hooks";
-import { validateEmail } from "@/features/authentication/utils";
+import { useForgotPasswordForm } from "@/features/authentication/hooks";
 import { useRouter } from "expo-router";
-import React, { useRef, useState } from "react";
-import { Alert, KeyboardAvoidingView, TextInput, View } from "react-native";
+import React from "react";
+import { KeyboardAvoidingView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { BackButton, EmailInput, SectionHeader } from "../components";
 
 export function ForgotPasswordScreen() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const emailInputRef = useRef<TextInput>(null);
-  const { mutate: forgotPassword, isPending } = useForgotPassword();
-
-  const handleEmailChange = (text: string) => {
-    setEmail(text);
-    if (emailError && text.trim()) {
-      setEmailError("");
-    }
-  };
-
-  const handleEmailBlur = () => {
-    if (email.trim() && !validateEmail(email.trim())) {
-      setEmailError("Hãy nhập email hợp lệ");
-    }
-  };
-
-  const handleSubmit = () => {
-    if (!email || !validateEmail(email.trim())) {
-      setEmailError("Hãy nhập email hợp lệ");
-      return;
-    }
-
-    forgotPassword(
-      { email },
-      {
-        onSuccess: (data) => {
-          // Navigate to OTP screen with email parameter
-          router.push({
-            pathname: "/(auth)/reset-password-otp",
-            params: { email },
-          });
-        },
-        onError: (error: any) => {
-          const errorMessage =
-            error?.response?.data?.message ||
-            error?.message ||
-            "Có lỗi xảy ra khi gửi email khôi phục mật khẩu";
-          Alert.alert("Lỗi", errorMessage);
-        },
-      },
-    );
-  };
+  const {
+    email,
+    emailError,
+    submitError,
+    emailInputRef,
+    isFormValid,
+    isLoading,
+    handleEmailChange,
+    handleEmailBlur,
+    handleSubmit,
+  } = useForgotPasswordForm((email) =>
+    router.push({
+      pathname: "/(auth)/reset-password-otp",
+      params: { email },
+    }),
+  );
 
   return (
     <KeyboardAvoidingView
       behavior="padding"
-      className="flex-1 bg-[#F6F7F9]"
+      className="flex-1 bg-[hsl(220,20%,97%)]"
       keyboardVerticalOffset={0}
     >
       <SafeAreaView className="flex-1">
@@ -78,7 +49,7 @@ export function ForgotPasswordScreen() {
             value={email}
             onChangeText={handleEmailChange}
             onBlur={handleEmailBlur}
-            error={emailError}
+            error={submitError || emailError}
             autoFocus={true}
           />
         </View>
@@ -89,13 +60,13 @@ export function ForgotPasswordScreen() {
           <PrimaryButton
             text="Gửi mã OTP"
             onPress={handleSubmit}
-            disabled={!email || !!emailError || isPending}
-            loading={isPending}
+            disabled={!isFormValid || isLoading}
+            loading={isLoading}
           />
         </View>
       </SafeAreaView>
 
-      <LoadingOverlay visible={isPending} />
+      <LoadingOverlay visible={isLoading} />
     </KeyboardAvoidingView>
   );
 }

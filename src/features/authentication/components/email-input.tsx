@@ -43,7 +43,7 @@ export const EmailInput = forwardRef<TextInput, EmailInputProps>(
           <MaterialIcons
             name="mail-outline"
             size={24}
-            color={hasError ? "#ef4444" : "rgba(0,0,0,0.6)"}
+            color={hasError ? "hsl(0, 84%, 60%)" : "hsla(0, 0%, 0%, 0.6)"}
           />
         }
         keyboardType="email-address"

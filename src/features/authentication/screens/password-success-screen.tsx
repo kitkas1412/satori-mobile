@@ -12,7 +12,7 @@ export function PasswordSuccessScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F6F7F9]">
+    <SafeAreaView className="flex-1 bg-[hsl(220,20%,97%)]">
       <View className="flex-1 items-center px-4">
         <View className="mt-[126px] mb-[46px]">
           <Image
