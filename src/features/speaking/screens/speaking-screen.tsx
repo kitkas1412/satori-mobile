@@ -2,6 +2,7 @@ import { Bell } from "lucide-react-native";
 import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
 import { LoadingOverlay, ScreenHeader } from "@/components/ui";
@@ -20,9 +21,13 @@ import type { Content } from "@/features/speaking/api";
 function TopicSection({
   section,
   defaultExpanded,
+  showFirstUnpracticedBorder,
+  onHasUnpracticed,
 }: {
   section: Content;
   defaultExpanded: boolean;
+  showFirstUnpracticedBorder: boolean;
+  onHasUnpracticed: (sectionId: string, orderIndex: number) => void;
 }) {
   const router = useRouter();
   const { data: topics } = useThemeTopics(section.id);
@@ -45,6 +50,14 @@ function TopicSection({
       practiced: topic.practiced,
     })) ?? [];
 
+  const hasUnpracticed = topics?.some((t) => !t.practiced) ?? false;
+
+  useEffect(() => {
+    if (hasUnpracticed) {
+      onHasUnpracticed(section.id, section.orderIndex);
+    }
+  }, [hasUnpracticed, section.id, section.orderIndex, onHasUnpracticed]);
+
   function handleLessonPress(id: string) {
     const topic = topics?.find((t) => t.id === id);
     if (!topic) return;
@@ -63,6 +76,7 @@ function TopicSection({
       totalCount={section.topicCount}
       lessons={lessons}
       defaultExpanded={defaultExpanded}
+      showFirstUnpracticedBorder={showFirstUnpracticedBorder}
       onLessonPress={handleLessonPress}
     />
   );
@@ -74,6 +88,16 @@ export function SpeakingScreen() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const { data: sections, isLoading, isError } = useConversationThemes();
+
+  const [firstUnpracticedSectionId, setFirstUnpracticedSectionId] = useState<string | null>(null);
+  const firstUnpracticedOrderIndexRef = useRef<number>(Infinity);
+
+  const handleHasUnpracticed = useCallback((sectionId: string, orderIndex: number) => {
+    if (orderIndex < firstUnpracticedOrderIndexRef.current) {
+      firstUnpracticedOrderIndexRef.current = orderIndex;
+      setFirstUnpracticedSectionId(sectionId);
+    }
+  }, []);
 
   return (
     <>
@@ -129,6 +153,11 @@ export function SpeakingScreen() {
               key={section.id}
               section={section}
               defaultExpanded={index === 0}
+              showFirstUnpracticedBorder={
+                firstUnpracticedSectionId === null ||
+                firstUnpracticedSectionId === section.id
+              }
+              onHasUnpracticed={handleHasUnpracticed}
             />
           ))}
         </ScrollView>
