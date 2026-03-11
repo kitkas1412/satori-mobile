@@ -99,13 +99,12 @@ export function useConversationSession() {
     try {
       const feedback = await completeSessionApi(sessionId);
       setFeedback(feedback);
-      router.replace("/conversation-feedback");
     } catch {
       Alert.alert("Lỗi", "Không thể hoàn thành buổi học. Vui lòng thử lại.");
     } finally {
       setIsCompleting(false);
     }
-  }, [sessionId, setFeedback, router]);
+  }, [sessionId, setFeedback]);
 
   const abandonSession = useCallback(async () => {
     if (!sessionId) return;

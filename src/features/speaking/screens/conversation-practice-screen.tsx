@@ -10,11 +10,12 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useConversationSession, useRecorder } from "@/features/speaking/hooks";
 import { useConversationStore } from "@/stores";
-import type { Messages } from "@/features/speaking/api";
+import type { FeedbackResultResponse, Messages } from "@/features/speaking/api";
 
 interface ConversationPracticeScreenProps {
   topicId: string;
@@ -79,6 +80,42 @@ function MessageBubble({ message }: { message: Messages }) {
   );
 }
 
+function FeedbackBubble({ feedback }: { feedback: FeedbackResultResponse }) {
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
+  const summary = feedback.languageEvaluation?.summary;
+  const score = feedback.overallScore != null ? Math.round(feedback.overallScore) : null;
+
+  return (
+    <View className="self-start max-w-[85%]">
+      <View
+        className="bg-white px-4 py-4 gap-2"
+        style={{
+          borderTopLeftRadius: 14,
+          borderTopRightRadius: 14,
+          borderBottomRightRadius: 14,
+        }}
+      >
+        <Text className="font-heading text-base text-text-main">
+          Tóm tắt đánh giá
+        </Text>
+        {score != null && (
+          <Text className="font-body text-sm" style={{ color: theme.primary }}>
+            Điểm tổng: {score}/100
+          </Text>
+        )}
+        {summary ? (
+          <Text className="font-body text-sm text-text-main">{summary}</Text>
+        ) : (
+          <Text className="font-body text-sm" style={{ color: theme.textMuted }}>
+            Buổi học đã hoàn thành!
+          </Text>
+        )}
+      </View>
+    </View>
+  );
+}
+
 export function ConversationPracticeScreen({
   topicId,
   title,
@@ -86,17 +123,21 @@ export function ConversationPracticeScreen({
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
+  const router = useRouter();
   const scrollViewRef = useRef<ScrollView>(null);
   const pressStartTimeRef = useRef<number | null>(null);
   const isTapModeRef = useRef(false);
 
   const messages = useConversationStore((s) => s.messages);
+  const feedback = useConversationStore((s) => s.feedback);
 
   const {
     turnState,
     isInitializing,
+    isCompleting,
     initSession,
     sendMessage,
+    completeSession,
     abandonSession,
   } = useConversationSession();
 
@@ -106,7 +147,7 @@ export function ConversationPracticeScreen({
     initSession(topicId);
   }, [topicId]);
 
-  function handleEndSession() {
+  function handleAbandonSession() {
     Alert.alert(
       "Kết thúc buổi học",
       "Tiến độ sẽ không được lưu. Bạn chắc chắn chứ?",
@@ -119,6 +160,10 @@ export function ConversationPracticeScreen({
         },
       ],
     );
+  }
+
+  async function handleCompleteSession() {
+    await completeSession();
   }
 
   async function handleMicPressIn() {
@@ -185,7 +230,7 @@ export function ConversationPracticeScreen({
       <View className="flex-row items-center px-4 h-16 gap-8">
         <View className="flex-row items-center gap-2 flex-1">
           <TouchableOpacity
-            onPress={handleEndSession}
+            onPress={handleAbandonSession}
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           >
             <X size={24} color={theme.textDefault} />
@@ -225,6 +270,8 @@ export function ConversationPracticeScreen({
           <MessageBubble key={message.id ?? `msg-${index}`} message={message} />
         ))}
 
+        {feedback && <FeedbackBubble feedback={feedback} />}
+
         {turnState === "LOADING" && (
           <View className="self-start">
             <View
@@ -252,47 +299,63 @@ export function ConversationPracticeScreen({
         className="px-4 gap-3"
         style={{ paddingBottom: Math.max(insets.bottom, 16) + 8 }}
       >
-        {/* Mic + End button row */}
-        <View className="flex-row items-center">
-          {/* End button - left */}
-          <View className="flex-1 justify-center">
-            <TouchableOpacity
-              onPress={handleEndSession}
-              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-            >
-              <Text className="font-heading text-lg text-primary-dark">
-                Kết thúc
+        {feedback ? (
+          /* Session completed — show Tiếp tục button */
+          <TouchableOpacity
+            onPress={() => router.replace("/conversation-feedback")}
+            className="bg-primary-dark rounded-xl py-4 items-center"
+            activeOpacity={0.85}
+          >
+            <Text className="font-heading text-base text-white">Tiếp tục</Text>
+          </TouchableOpacity>
+        ) : (
+          /* Session active — show Mic + Kết thúc */
+          <View className="flex-row items-center">
+            {/* Kết thúc button - left */}
+            <View className="flex-1 justify-center">
+              <TouchableOpacity
+                onPress={handleCompleteSession}
+                disabled={isCompleting}
+                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+              >
+                {isCompleting ? (
+                  <ActivityIndicator size="small" color={theme.primary} />
+                ) : (
+                  <Text className="font-heading text-lg text-primary-dark">
+                    Kết thúc
+                  </Text>
+                )}
+              </TouchableOpacity>
+            </View>
+
+            {/* Mic button - center */}
+            <View className="items-center gap-2">
+              <Text
+                className="font-body text-base"
+                style={{ color: theme.textMuted }}
+              >
+                {micLabel}
               </Text>
-            </TouchableOpacity>
-          </View>
+              <Pressable
+                onPressIn={handleMicPressIn}
+                onPressOut={handleMicPressOut}
+                disabled={micDisabled}
+                className={`w-[62px] h-[62px] rounded-xl items-center justify-center ${
+                  isRecording
+                    ? "bg-error-default"
+                    : micDisabled
+                      ? "bg-border"
+                      : "bg-primary-dark"
+                }`}
+              >
+                <Mic size={32} color="#FFFFFF" />
+              </Pressable>
+            </View>
 
-          {/* Mic button - center */}
-          <View className="items-center gap-2">
-            <Text
-              className="font-body text-base"
-              style={{ color: theme.textMuted }}
-            >
-              {micLabel}
-            </Text>
-            <Pressable
-              onPressIn={handleMicPressIn}
-              onPressOut={handleMicPressOut}
-              disabled={micDisabled}
-              className={`w-[62px] h-[62px] rounded-xl items-center justify-center ${
-                isRecording
-                  ? "bg-error-default"
-                  : micDisabled
-                    ? "bg-border"
-                    : "bg-primary-dark"
-              }`}
-            >
-              <Mic size={32} color="#FFFFFF" />
-            </Pressable>
+            {/* Spacer - right */}
+            <View className="flex-1" />
           </View>
-
-          {/* Spacer - right */}
-          <View className="flex-1" />
-        </View>
+        )}
       </View>
     </View>
   );
