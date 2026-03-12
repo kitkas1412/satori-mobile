@@ -62,8 +62,8 @@ function TopicSection({
     const topic = topics?.find((t) => t.id === id);
     if (!topic) return;
     router.push({
-      pathname: "/conversation-practice",
-      params: { topicId: topic.id, title: topic.title },
+      pathname: "/topic-detail",
+      params: { topicId: topic.id },
     });
   }
 

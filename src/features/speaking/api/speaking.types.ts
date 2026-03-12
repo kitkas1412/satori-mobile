@@ -37,13 +37,41 @@ export interface TopicResponse {
   category: string;
   jlptLevel: string;
   difficultyScore: number;
-  isRoleplay: boolean;
   thumbnailUrl: string | null;
   status: string;
   orderIndex: number;
   practiceCount: number;
   lastPracticedAt: string | null;
   practiced: boolean;
+}
+
+// GET: /learner/conversation/topics/{{topic_id}}
+export interface TopicDetailResponse {
+  id: string;
+  themeId: string;
+  themeName: string | null;
+  courseId: string | null;
+  courseName: string | null;
+  title: string;
+  titleJapanese: string;
+  description: string;
+  descriptionVi: string;
+  scenario: string | null;
+  vocabularyHints: string[] | null;
+  grammarPoints: string[] | null;
+  usefulExpressions: string[] | null;
+  category: string;
+  jlptLevel: string;
+  difficultyScore: number;
+  roleplayContext: string | null;
+  thumbnailUrl: string | null;
+  status: string;
+  orderIndex: number;
+  missions: Missions[] | null;
+  createdBy: string | null;
+  updatedBy: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
 }
 
 // POST: /learner/roleplay/sessions

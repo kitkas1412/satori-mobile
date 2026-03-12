@@ -36,7 +36,11 @@ export function TopicCard({
       onPress={onPress}
       className="p-4 pt-6 pb-4 flex-row gap-4 h-[97px]"
       style={{
-        backgroundColor: theme.background,
+        backgroundColor: showBorder
+          ? colorScheme === "dark"
+            ? "hsl(220, 20%, 14%)"
+            : "hsl(220, 20%, 93%)"
+          : theme.background,
         ...(showBorder && {
           borderWidth: 2,
           borderColor: theme.border,
