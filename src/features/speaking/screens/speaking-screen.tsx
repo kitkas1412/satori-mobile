@@ -107,7 +107,7 @@ export function SpeakingScreen() {
         {/* Header */}
         <ScreenHeader
           title="Luyện nói"
-          paddingTop={insets.top}
+          paddingTop={insets.top + 16}
           rightAction={
             <View className="relative">
               <View

@@ -33,7 +33,7 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
   };
 
   const getSubtitleClass = () => {
-    const base = "font-bodys text-black";
+    const base = "font-body text-black";
     const alignClass = alignment === "center" ? "text-center" : "text-left";
 
     switch (size) {
