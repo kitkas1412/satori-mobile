@@ -15,11 +15,11 @@ interface ThemeSectionProps {
     id: string;
     title: string;
     subtitle: string;
-    type: "pronunciation" | "stress" | "conversation";
     status: "completed" | "active" | "locked";
     practiced?: boolean;
   }[];
   defaultExpanded?: boolean;
+  showFirstUnpracticedBorder?: boolean;
   onLessonPress?: (id: string) => void;
 }
 
@@ -31,6 +31,7 @@ export function ThemeSection({
   totalCount,
   lessons,
   defaultExpanded = true,
+  showFirstUnpracticedBorder = true,
   onLessonPress,
 }: ThemeSectionProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
@@ -92,9 +93,9 @@ export function ThemeSection({
       {isExpanded && (
         <View>
           {lessons.map((lesson, index) => {
-            const firstUnpracticedIndex = lessons.findIndex(
-              (l) => !l.practiced,
-            );
+            const firstUnpracticedIndex = showFirstUnpracticedBorder
+              ? lessons.findIndex((l) => !l.practiced)
+              : -1;
             const isFirstUnpracticed = index === firstUnpracticedIndex;
             return (
               <View key={lesson.id}>
@@ -112,10 +113,9 @@ export function ThemeSection({
                 <TopicCard
                   title={lesson.title}
                   subtitle={lesson.subtitle}
-                  type={lesson.type}
                   status={lesson.status}
                   practiced={lesson.practiced}
-                  showBorder={isFirstUnpracticed}
+                  showBorder={showFirstUnpracticedBorder && isFirstUnpracticed}
                   accentColor={accentColor}
                   onPress={() => onLessonPress?.(lesson.id)}
                 />

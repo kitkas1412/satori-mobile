@@ -13,6 +13,8 @@ import {
 import type { TurnState } from "../api";
 import { playAssistantMessage } from "./use-audio-player";
 
+const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
 export function useConversationSession() {
   const router = useRouter();
   const [turnState, setTurnState] = useState<TurnState>("AI_TURN");
@@ -27,12 +29,15 @@ export function useConversationSession() {
     setIsInitializing(true);
     try {
       const session = await startSessionApi(topicId);
-      setSession(session.id, session.messages, session.missions);
-      const firstAssistantMessage = session.messages.find((m) => m.role === "ASSISTANT");
+      setSession(session.id, [], session.missions);
       setTurnState("AI_TURN");
       setIsInitializing(false);
-      if (firstAssistantMessage) {
-        await playAssistantMessage(firstAssistantMessage.content, firstAssistantMessage.audioUrl).catch(() => {});
+      for (const msg of session.messages) {
+        await delay(600);
+        addMessages([msg]);
+        if (msg.role === "ASSISTANT") {
+          await playAssistantMessage(msg.content, msg.audioUrl).catch(() => {});
+        }
       }
       setTurnState("USER_TURN");
     } catch {
@@ -77,12 +82,15 @@ export function useConversationSession() {
           transcript,
           audioUri ?? undefined
         );
-        addMessages(result.messages);
+        const userMessages = result.messages.filter((m) => m.role !== "ASSISTANT");
+        const assistantMessages = result.messages.filter((m) => m.role === "ASSISTANT");
+        addMessages(userMessages);
         setMissions(result.missions);
-        const assistantMessage = result.messages.find((m) => m.role === "ASSISTANT");
         setTurnState("AI_TURN");
-        if (assistantMessage) {
-          await playAssistantMessage(assistantMessage.content, assistantMessage.audioUrl).catch(() => {});
+        for (const msg of assistantMessages) {
+          await delay(600);
+          addMessages([msg]);
+          await playAssistantMessage(msg.content, msg.audioUrl).catch(() => {});
         }
         setTurnState("USER_TURN");
       } catch {

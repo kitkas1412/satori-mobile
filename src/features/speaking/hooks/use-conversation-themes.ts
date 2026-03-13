@@ -4,6 +4,7 @@ import { getThemesApi } from "../api";
 export const speakingQueryKeys = {
   themes: ["speaking", "themes"] as const,
   topics: (themeId: string) => ["speaking", "topics", themeId] as const,
+  topicDetail: (topicId: string) => ["speaking", "topicDetail", topicId] as const,
 };
 
 export function useConversationThemes() {

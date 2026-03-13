@@ -1,10 +1,15 @@
 import { Image } from "expo-image";
 import { Bell } from "lucide-react-native";
 import { Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export function Header() {
+  const insets = useSafeAreaInsets();
   return (
-    <View className="flex-row items-center justify-between px-4 pt-16 pb-4">
+    <View
+      className="flex-row items-center justify-between px-4 pb-4"
+      style={{ paddingTop: insets.top }}
+    >
       <View className="flex-row items-center gap-2">
         <Image
           source={require("../../../../assets/images/avatar.png")}
