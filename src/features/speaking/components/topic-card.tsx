@@ -4,12 +4,10 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
 
 type LessonStatus = "completed" | "active" | "locked";
-type LessonType = "pronunciation" | "stress" | "conversation";
 
 interface TopicCardProps {
   title: string;
   subtitle: string;
-  type: LessonType;
   status: LessonStatus;
   practiced?: boolean;
   showBorder?: boolean;
@@ -20,7 +18,6 @@ interface TopicCardProps {
 export function TopicCard({
   title,
   subtitle,
-  type,
   status,
   practiced,
   showBorder,

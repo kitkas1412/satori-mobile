@@ -43,9 +43,6 @@ function TopicSection({
       id: topic.id,
       title: topic.title,
       subtitle: difficultyLabel(topic.difficultyScore),
-      type: topic.isRoleplay
-        ? ("conversation" as const)
-        : ("pronunciation" as const),
       status: "active" as const,
       practiced: topic.practiced,
     })) ?? [];
@@ -89,80 +86,85 @@ export function SpeakingScreen() {
   const theme = Colors[colorScheme ?? "light"];
   const { data: sections, isLoading, isError } = useConversationThemes();
 
-  const [firstUnpracticedSectionId, setFirstUnpracticedSectionId] = useState<string | null>(null);
+  const [firstUnpracticedSectionId, setFirstUnpracticedSectionId] = useState<
+    string | null
+  >(null);
   const firstUnpracticedOrderIndexRef = useRef<number>(Infinity);
 
-  const handleHasUnpracticed = useCallback((sectionId: string, orderIndex: number) => {
-    if (orderIndex < firstUnpracticedOrderIndexRef.current) {
-      firstUnpracticedOrderIndexRef.current = orderIndex;
-      setFirstUnpracticedSectionId(sectionId);
-    }
-  }, []);
+  const handleHasUnpracticed = useCallback(
+    (sectionId: string, orderIndex: number) => {
+      if (orderIndex < firstUnpracticedOrderIndexRef.current) {
+        firstUnpracticedOrderIndexRef.current = orderIndex;
+        setFirstUnpracticedSectionId(sectionId);
+      }
+    },
+    [],
+  );
 
   return (
     <>
-    <View className="flex-1" style={{ backgroundColor: theme.background }}>
-      {/* Header */}
-      <ScreenHeader
-        title="Luyện nói"
-        paddingTop={insets.top + 16}
-        rightAction={
-          <View className="relative">
-            <View
-              className="w-9 h-9 rounded-full items-center justify-center"
-              style={{ backgroundColor: theme.secondary }}
-            >
-              <Bell size={20} fill={theme.white} color={theme.white} />
+      <View className="flex-1" style={{ backgroundColor: theme.background }}>
+        {/* Header */}
+        <ScreenHeader
+          title="Luyện nói"
+          paddingTop={insets.top}
+          rightAction={
+            <View className="relative">
+              <View
+                className="w-9 h-9 rounded-full items-center justify-center"
+                style={{ backgroundColor: theme.secondary }}
+              >
+                <Bell size={20} fill={theme.white} color={theme.white} />
+              </View>
+              <View
+                className="absolute top-0 right-0 w-[7px] h-[7px] rounded-full"
+                style={{ backgroundColor: theme.error }}
+              />
             </View>
-            <View
-              className="absolute top-0 right-0 w-[7px] h-[7px] rounded-full"
-              style={{ backgroundColor: theme.error }}
-            />
-          </View>
-        }
-      />
+          }
+        />
 
-      {user?.status === "INACTIVE" ? (
-        <View className="flex-1 items-center justify-center px-4">
-          <Text
-            className="text-base text-center font-body"
-            style={{ color: theme.textDefault }}
-          >
-            Tính năng đang tạm khoá. Vui lòng thử lại sau
-          </Text>
-        </View>
-      ) : (
-        <ScrollView
-          className="flex-1"
-          contentContainerClassName="px-4 pb-8 gap-4"
-          showsVerticalScrollIndicator={false}
-        >
-          <ConversationBanner />
-
-          {isError && (
+        {user?.status === "INACTIVE" ? (
+          <View className="flex-1 items-center justify-center px-4">
             <Text
-              className="text-sm font-body text-center mt-4"
-              style={{ color: theme.textMuted }}
+              className="text-base text-center font-body"
+              style={{ color: theme.textDefault }}
             >
-              Không thể tải dữ liệu. Vui lòng thử lại sau.
+              Tính năng đang tạm khoá. Vui lòng thử lại sau
             </Text>
-          )}
+          </View>
+        ) : (
+          <ScrollView
+            className="flex-1"
+            contentContainerClassName="px-4 pb-8 gap-4"
+            showsVerticalScrollIndicator={false}
+          >
+            <ConversationBanner />
 
-          {sections?.map((section, index) => (
-            <TopicSection
-              key={section.id}
-              section={section}
-              defaultExpanded={index === 0}
-              showFirstUnpracticedBorder={
-                firstUnpracticedSectionId === null ||
-                firstUnpracticedSectionId === section.id
-              }
-              onHasUnpracticed={handleHasUnpracticed}
-            />
-          ))}
-        </ScrollView>
-      )}
-    </View>
+            {isError && (
+              <Text
+                className="text-sm font-body text-center mt-4"
+                style={{ color: theme.textMuted }}
+              >
+                Không thể tải dữ liệu. Vui lòng thử lại sau.
+              </Text>
+            )}
+
+            {sections?.map((section, index) => (
+              <TopicSection
+                key={section.id}
+                section={section}
+                defaultExpanded={index === 0}
+                showFirstUnpracticedBorder={
+                  firstUnpracticedSectionId === null ||
+                  firstUnpracticedSectionId === section.id
+                }
+                onHasUnpracticed={handleHasUnpracticed}
+              />
+            ))}
+          </ScrollView>
+        )}
+      </View>
       <LoadingOverlay visible={isLoading} title="Đang tải..." />
     </>
   );

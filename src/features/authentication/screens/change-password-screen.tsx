@@ -10,10 +10,12 @@ import {
   Text,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BackButton, PasswordInput, PasswordValidation } from "../components";
 
 export function ChangePasswordScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const {
     currentPassword,
     newPassword,
@@ -42,7 +44,7 @@ export function ChangePasswordScreen() {
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="always"
       >
-        <View className="flex-col px-4 pt-16 pb-4">
+        <View className="flex-col px-4 pb-4" style={{ paddingTop: insets.top }}>
           <BackButton onPress={() => router.back()} />
 
           <PasswordInput

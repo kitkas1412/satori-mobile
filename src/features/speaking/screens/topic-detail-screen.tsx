@@ -80,12 +80,11 @@ export function TopicDetailScreen({ topicId }: TopicDetailScreenProps) {
       <View className="flex-1" style={{ backgroundColor: theme.background }}>
         {/* Header */}
         <View
-          className="px-4 justify-end"
-          style={{ paddingTop: insets.top, height: insets.top + 64 }}
+          className="flex-row items-center px-4 pb-4"
+          style={{ paddingTop: insets.top }}
         >
           <TouchableOpacity
             onPress={() => router.back()}
-            className="w-10 h-10 items-center justify-center"
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
             <X size={24} color={theme.textDefault} strokeWidth={2} />

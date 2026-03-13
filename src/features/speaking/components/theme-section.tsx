@@ -15,7 +15,6 @@ interface ThemeSectionProps {
     id: string;
     title: string;
     subtitle: string;
-    type: "pronunciation" | "stress" | "conversation";
     status: "completed" | "active" | "locked";
     practiced?: boolean;
   }[];
@@ -114,7 +113,6 @@ export function ThemeSection({
                 <TopicCard
                   title={lesson.title}
                   subtitle={lesson.subtitle}
-                  type={lesson.type}
                   status={lesson.status}
                   practiced={lesson.practiced}
                   showBorder={showFirstUnpracticedBorder && isFirstUnpracticed}

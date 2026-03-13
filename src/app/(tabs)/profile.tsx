@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { KeyRound, LogOut } from "lucide-react-native";
 import { Alert, Pressable, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
 import { LoadingOverlay } from "@/components/ui";
@@ -14,6 +15,7 @@ export default function ProfileScreen() {
   const { mutate: logoutUser, isPending } = useLogout();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
+  const insets = useSafeAreaInsets();
 
   const handleLogout = () => {
     Alert.alert(
@@ -41,7 +43,7 @@ export default function ProfileScreen() {
     <View className="flex-1" style={{ backgroundColor: theme.background }}>
       <StatusBar style="dark" />
 
-      <View className="px-6 pt-16 pb-6">
+      <View className="px-6 pb-6" style={{ paddingTop: insets.top }}>
         <Text
           className="text-2xl font-bold"
           style={{ color: theme.textDefault }}
