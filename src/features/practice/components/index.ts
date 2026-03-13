@@ -1,3 +1,3 @@
 export { AiBanner } from "./ai-banner";
-export { LessonCard } from "./lesson-card";
-export { LessonSection } from "./lesson-section";
+export { AssignmentCard } from "./assignment-card";
+export type { AssignmentCardProps, AssignmentStatus } from "./assignment-card";

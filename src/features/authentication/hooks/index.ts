@@ -1,8 +1,12 @@
 export { useChangePassword } from "./use-change-password";
+export { useChangePasswordForm } from "./use-change-password-form";
 export { useForgotPassword } from "./use-forgot-password";
+export { useForgotPasswordForm } from "./use-forgot-password-form";
 export { useLogin } from "./use-login";
 export { useLoginForm } from "./use-login-form";
 export { useLogout } from "./use-logout";
 export { useResendOTP } from "./use-resend-otp";
 export { useResetPassword } from "./use-reset-password";
+export { useResetPasswordForm } from "./use-reset-password-form";
+export { useResetPasswordOTPForm } from "./use-reset-password-otp-form";
 export { useVerifyOTP } from "./use-verify-otp";

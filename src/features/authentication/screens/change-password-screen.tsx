@@ -1,96 +1,37 @@
 import { PrimaryButton } from "@/components/ui";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
-import { useChangePassword } from "@/features/authentication/hooks";
+import { useChangePasswordForm } from "@/features/authentication/hooks";
 import { getPasswordValidationStatus } from "@/features/authentication/utils/password-validation";
-import { useAuthStore } from "@/stores/auth-store";
 import { useRouter } from "expo-router";
-import React, { useRef, useState } from "react";
+import React from "react";
 import {
-  Alert,
   KeyboardAvoidingView,
   ScrollView,
   Text,
-  TextInput,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BackButton, PasswordInput, PasswordValidation } from "../components";
 
 export function ChangePasswordScreen() {
   const router = useRouter();
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [currentPasswordError, setCurrentPasswordError] = useState("");
-  const newPasswordRef = useRef<TextInput>(null);
-  const confirmPasswordRef = useRef<TextInput>(null);
-
-  const { logout } = useAuthStore();
-  const { mutate: changePassword, isPending } = useChangePassword();
-
-  const handleSubmit = () => {
-    if (!isFormValid) return;
-
-    changePassword(
-      {
-        currentPassword,
-        newPassword,
-        confirmPassword,
-        logoutOtherDevices: true,
-      },
-      {
-        onSuccess: () => {
-          Alert.alert(
-            "Thành công",
-            "Vui lòng đăng nhập lại với mật khẩu mới.",
-            [
-              {
-                text: "OK",
-                onPress: () => {
-                  logout();
-                  router.replace("/(auth)/login");
-                },
-              },
-            ],
-          );
-        },
-        onError: (error: any) => {
-          const errorMessage =
-            error?.response?.data?.message ||
-            error?.message ||
-            "Có lỗi xảy ra khi đổi mật khẩu";
-
-          // Kiểm tra nếu lỗi là do mật khẩu hiện tại sai
-          if (
-            errorMessage.toLowerCase().includes("mật khẩu hiện tại") ||
-            errorMessage.toLowerCase().includes("incorrect password") ||
-            errorMessage.toLowerCase().includes("wrong password") ||
-            errorMessage.toLowerCase().includes("current password")
-          ) {
-            setCurrentPasswordError(errorMessage);
-          } else {
-            Alert.alert("Lỗi", errorMessage);
-          }
-        },
-      },
-    );
-  };
-
-  const isFormValid =
-    currentPassword.length > 0 &&
-    newPassword.length >= 8 &&
-    /[A-Z]/.test(newPassword) &&
-    /[a-z]/.test(newPassword) &&
-    /[0-9]/.test(newPassword) &&
-    /[!@#$%^&*(),.?":{}|<>]/.test(newPassword) &&
-    newPassword === confirmPassword &&
-    newPassword !== currentPassword;
-
-  const passwordsDontMatch =
-    confirmPassword.length > 0 && newPassword !== confirmPassword;
-  const newPasswordSameAsOld =
-    newPassword.length > 0 &&
-    currentPassword.length > 0 &&
-    newPassword === currentPassword;
+  const insets = useSafeAreaInsets();
+  const {
+    currentPassword,
+    newPassword,
+    confirmPassword,
+    currentPasswordError,
+    newPasswordRef,
+    confirmPasswordRef,
+    isFormValid,
+    passwordsDontMatch,
+    newPasswordSameAsOld,
+    isLoading,
+    setNewPassword,
+    setConfirmPassword,
+    handleCurrentPasswordChange,
+    handleSubmit,
+  } = useChangePasswordForm(() => router.replace("/(auth)/login"));
 
   return (
     <KeyboardAvoidingView
@@ -103,20 +44,15 @@ export function ChangePasswordScreen() {
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="always"
       >
-        <View className="flex-col px-4 pt-16 pb-4">
+        <View className="flex-col px-4 pb-4" style={{ paddingTop: insets.top }}>
           <BackButton onPress={() => router.back()} />
 
           <PasswordInput
             value={currentPassword}
-            onChangeText={(text) => {
-              setCurrentPassword(text);
-              if (currentPasswordError) {
-                setCurrentPasswordError("");
-              }
-            }}
+            onChangeText={handleCurrentPasswordChange}
             label="Mật khẩu hiện tại"
             error={!!currentPasswordError}
-            editable={!isPending}
+            editable={!isLoading}
             autoFocus={true}
             onSubmitEditing={() => newPasswordRef.current?.focus()}
             returnKeyType="next"
@@ -138,7 +74,7 @@ export function ChangePasswordScreen() {
                 ? "Mật khẩu mới phải khác mật khẩu hiện tại"
                 : undefined
             }
-            editable={!isPending}
+            editable={!isLoading}
             onSubmitEditing={() => confirmPasswordRef.current?.focus()}
             returnKeyType="next"
           />
@@ -155,7 +91,7 @@ export function ChangePasswordScreen() {
             onChangeText={setConfirmPassword}
             label="Xác nhận mật khẩu mới"
             error={passwordsDontMatch ? "Mật khẩu không trùng khớp" : undefined}
-            editable={!isPending}
+            editable={!isLoading}
             onSubmitEditing={handleSubmit}
             returnKeyType="done"
           />
@@ -167,13 +103,13 @@ export function ChangePasswordScreen() {
           <PrimaryButton
             text="Xác nhận"
             onPress={handleSubmit}
-            disabled={!isFormValid || isPending}
-            loading={isPending}
+            disabled={!isFormValid || isLoading}
+            loading={isLoading}
           />
         </View>
       </ScrollView>
 
-      <LoadingOverlay visible={isPending} />
+      <LoadingOverlay visible={isLoading} />
     </KeyboardAvoidingView>
   );
 }

@@ -18,7 +18,7 @@ export function WelcomeScreen() {
   };
 
   return (
-    <View className="flex-1 bg-[#f6f7f9]">
+    <View className="flex-1 bg-[hsl(220,20%,97%)]">
       <StatusBar barStyle="dark-content" />
 
       <View className="w-full h-[452px]">
@@ -44,7 +44,7 @@ export function WelcomeScreen() {
 
       {Platform.OS === "ios" && (
         <View className="absolute bottom-2 left-0 right-0 items-center">
-          <View className="w-[134px] h-[5px] bg-[#757575] rounded-full" />
+          <View className="w-[134px] h-[5px] bg-[hsl(0,0%,46%)] rounded-full" />
         </View>
       )}
     </View>

@@ -19,6 +19,7 @@ export interface User {
   fullName: string;
   avatarUrl: string | null;
   role: string;
+  status: string;
 }
 
 export interface LoginData {

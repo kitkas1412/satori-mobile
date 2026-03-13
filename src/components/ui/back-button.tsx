@@ -14,7 +14,7 @@ export const BackButton: React.FC<BackButtonProps> = ({ onPress }) => {
       onPress={onPress}
       hitSlop={{ top: 30, bottom: 30, left: 30, right: 30 }}
     >
-      <ArrowLeft size={24} color="rgba(0,0,0,0.6)" />
+      <ArrowLeft size={24} color="hsla(0, 0%, 0%, 0.6)" />
     </TouchableOpacity>
   );
 };

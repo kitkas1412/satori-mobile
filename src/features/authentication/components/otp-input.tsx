@@ -93,10 +93,10 @@ export const OTPInput: React.FC<OTPInputProps> = ({
               key={index}
               className={`w-12 h-14 bg-white border-[1.85px] ${
                 isActive
-                  ? "border-[#7B92EF]"
+                  ? "border-[hsl(228,78%,71%)]"
                   : hasValue
-                    ? "border-[#7B92EF]"
-                    : "border-[#E5E7EB]"
+                    ? "border-[hsl(228,78%,71%)]"
+                    : "border-[hsl(220,13%,91%)]"
               } rounded-lg items-center justify-center`}
             >
               <TextInput
@@ -110,7 +110,7 @@ export const OTPInput: React.FC<OTPInputProps> = ({
               />
               {/* Show cursor indicator for active box */}
               {isActive && !hasValue && (
-                <View className="absolute w-[2px] h-6 bg-[#7B92EF]" />
+                <View className="absolute w-[2px] h-6 bg-[hsl(228,78%,71%)]" />
               )}
             </View>
           );
