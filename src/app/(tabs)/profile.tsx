@@ -3,11 +3,11 @@ import { useAuthStore } from "@/stores/auth-store";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { KeyRound, LogOut } from "lucide-react-native";
-import { Alert, Pressable, Text, View } from "react-native";
+import { Alert, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
-import { LoadingOverlay, ScreenHeader } from "@/components/ui";
+import { LoadingOverlay, PrimaryButton, ScreenHeader } from "@/components/ui";
 
 export default function ProfileScreen() {
   const { user } = useAuthStore();
@@ -67,34 +67,22 @@ export default function ProfileScreen() {
         )}
 
         <View className="px-6 mt-4 gap-3">
-          <Pressable
+          <PrimaryButton
+            text="Thay đổi mật khẩu"
             onPress={() => router.push("/change-password")}
-            className="flex-row items-center justify-center py-4 px-6 rounded-xl active:opacity-80"
+            icon={<KeyRound size={20} color="white" />}
+            variant="primary"
             style={{ backgroundColor: theme.primary }}
-          >
-            <KeyRound size={20} color="white" />
-            <Text
-              className="text-base font-semibold ml-2"
-              style={{ color: theme.textInverse }}
-            >
-              Thay đổi mật khẩu
-            </Text>
-          </Pressable>
+          />
 
-          <Pressable
+          <PrimaryButton
+            text="Đăng xuất"
             onPress={handleLogout}
-            disabled={isPending}
-            className="flex-row items-center justify-center py-4 px-6 rounded-xl active:opacity-80"
+            icon={<LogOut size={20} color="white" />}
+            variant="danger"
+            loading={isPending}
             style={{ backgroundColor: theme.error }}
-          >
-            <LogOut size={20} color="white" />
-            <Text
-              className="text-white text-base font-semibold ml-2"
-              style={{ color: theme.textInverse }}
-            >
-              Đăng xuất
-            </Text>
-          </Pressable>
+          />
         </View>
       </View>
       <LoadingOverlay visible={isPending} title="Đang đăng xuất..." />
