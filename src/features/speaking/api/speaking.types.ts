@@ -74,6 +74,12 @@ export interface TopicDetailResponse {
   updatedAt: string | null;
 }
 
+// POST: /learner/roleplay/free-talk/sessions
+export interface FreeTalkSessionRequest {
+  jlptLevel: string;
+  language: string;
+}
+
 // POST: /learner/roleplay/sessions
 export interface RoleplaySessionResponse {
   id: string;
