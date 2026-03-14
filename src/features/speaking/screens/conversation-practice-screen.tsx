@@ -24,12 +24,16 @@ import { useConversationSession, useRecorder } from "@/features/speaking/hooks";
 import { useConversationStore } from "@/stores";
 
 interface ConversationPracticeScreenProps {
-  topicId: string;
+  topicId?: string;
+  jlptLevel?: string;
+  language?: string;
   title: string;
 }
 
 export function ConversationPracticeScreen({
   topicId,
+  jlptLevel,
+  language,
   title,
 }: ConversationPracticeScreenProps) {
   const insets = useSafeAreaInsets();
@@ -50,6 +54,7 @@ export function ConversationPracticeScreen({
     isInitializing,
     isCompleting,
     initSession,
+    initFreeTalkSession,
     sendMessage,
     completeSession,
     abandonSession,
@@ -58,8 +63,12 @@ export function ConversationPracticeScreen({
   const { startRecording, stopRecording, isRecording } = useRecorder();
 
   useEffect(() => {
-    initSession(topicId);
-  }, [topicId]);
+    if (topicId) {
+      initSession(topicId);
+    } else if (jlptLevel && language) {
+      initFreeTalkSession(jlptLevel, language);
+    }
+  }, [topicId, jlptLevel, language]);
 
   function handleAbandonSession() {
     Alert.alert(
@@ -136,12 +145,14 @@ export function ConversationPracticeScreen({
             </TouchableOpacity>
           }
           rightAction={
-            <TouchableOpacity
-              onPress={() => setIsMissionsVisible(true)}
-              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-            >
-              <List size={24} color={theme.textDefault} />
-            </TouchableOpacity>
+            topicId ? (
+              <TouchableOpacity
+                onPress={() => setIsMissionsVisible(true)}
+                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+              >
+                <List size={24} color={theme.textDefault} />
+              </TouchableOpacity>
+            ) : undefined
           }
         />
 
@@ -226,10 +237,12 @@ export function ConversationPracticeScreen({
         title="Đang khởi tạo..."
         message="Vui lòng đợi trong giây lát"
       />
-      <MissionsModal
-        visible={isMissionsVisible}
-        onClose={() => setIsMissionsVisible(false)}
-      />
+      {topicId && (
+        <MissionsModal
+          visible={isMissionsVisible}
+          onClose={() => setIsMissionsVisible(false)}
+        />
+      )}
     </>
   );
 }
