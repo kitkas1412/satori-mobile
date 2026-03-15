@@ -1,5 +1,5 @@
 import React from "react";
-import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, StyleProp, Text, TouchableOpacity, View, ViewStyle } from "react-native";
 
 interface PrimaryButtonProps {
   text: string;
@@ -10,6 +10,7 @@ interface PrimaryButtonProps {
   icon?: React.ReactNode;
   fullWidth?: boolean;
   accessibilityLabel?: string;
+  style?: StyleProp<ViewStyle>;
 }
 
 export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
@@ -21,6 +22,7 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
   icon,
   fullWidth = true,
   accessibilityLabel,
+  style,
 }) => {
   const isDisabled = disabled || loading;
 
@@ -45,6 +47,7 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
       onPress={onPress}
       disabled={isDisabled}
       className={`rounded-[14px] items-center justify-center px-[14px] py-[16.5px] ${getBackgroundColor()} ${fullWidth ? "w-full" : ""}`}
+      style={style}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel || text}
     >

@@ -5,6 +5,7 @@ import {
   abandonSessionApi,
   completeSessionApi,
   sendMessageApi,
+  startFreeTalkSessionApi,
   startSessionApi,
 } from "../api";
 import {
@@ -25,10 +26,10 @@ export function useConversationSession() {
     useConversationStore();
   const sessionId = useConversationStore((s) => s.sessionId);
 
-  const initSession = useCallback(async (topicId: string) => {
+  const _startSession = useCallback(async (starter: () => Promise<import("../api").RoleplaySessionResponse>) => {
     setIsInitializing(true);
     try {
-      const session = await startSessionApi(topicId);
+      const session = await starter();
       setSession(session.id, [], session.missions);
       setTurnState("AI_TURN");
       setIsInitializing(false);
@@ -46,7 +47,18 @@ export function useConversationSession() {
     } finally {
       setIsInitializing(false);
     }
-  }, [router, setSession]);
+  }, [router, setSession, addMessages]);
+
+  const initSession = useCallback(
+    (topicId: string) => _startSession(() => startSessionApi(topicId)),
+    [_startSession],
+  );
+
+  const initFreeTalkSession = useCallback(
+    (jlptLevel: string, language: string) =>
+      _startSession(() => startFreeTalkSessionApi({ jlptLevel, language })),
+    [_startSession],
+  );
 
   const sendMessage = useCallback(
     async (transcript: string, audioUri?: string | null) => {
@@ -131,6 +143,7 @@ export function useConversationSession() {
     isInitializing,
     isCompleting,
     initSession,
+    initFreeTalkSession,
     sendMessage,
     completeSession,
     abandonSession,
