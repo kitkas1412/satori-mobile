@@ -1,6 +1,6 @@
 import { Bell, BookOpen, Sparkles } from "lucide-react-native";
 import { useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 
@@ -10,37 +10,37 @@ import { ScreenHeader } from "@/components/ui/screen-header";
 import { SectionHeader } from "@/components/ui/section-header";
 import { AiBanner } from "../components/ai-banner";
 import { AssignmentCard } from "../components/assignment-card";
-import type { AssignmentCardProps } from "../components/assignment-card";
+import type { AssignmentCardProps, AssignmentStatus } from "../components/assignment-card";
+import type { Assignment, LearnerSubmissionStatus } from "../api";
+import { useAssignments } from "../hooks";
 
 type ActiveTab = "teacher" | "ai";
 
-const MOCK_ASSIGNMENTS: AssignmentCardProps[] = [
-  {
-    title: "Luyện phát âm: Phụ âm đầu",
-    subtitle: "Thực hành 15 từ",
-    dueDate: "22/01/2026",
-    status: "in_progress",
-    progress: { current: 7, total: 15 },
-  },
-  {
-    title: "Bài tập Unit 3: Gia đình",
-    subtitle: "10 câu hỏi về từ vựng và ngữ pháp",
-    dueDate: "25/01/2026",
-    status: "not_started",
-  },
-  {
-    title: "Hội thoại: Giới thiệu bản thân",
-    subtitle: "Hoàn thành bài đối thoại",
-    dueDate: "20/01/2026",
-    status: "completed",
-  },
-];
+function mapAssignmentToCardProps(a: Assignment): AssignmentCardProps {
+  const subtitle =
+    a.assignmentType === "QUIZ"
+      ? `${a.questionCount} câu hỏi • Trắc nghiệm`
+      : "Bài viết";
+
+  const date = new Date(a.dueDate);
+  const dueDate = `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
+
+  const STATUS_MAP: Record<LearnerSubmissionStatus, AssignmentStatus> = {
+    GRADED: "completed",
+    IN_PROGRESS: "in_progress",
+    NOT_STARTED: "not_started",
+  };
+  const status = STATUS_MAP[a.learnerSubmissionStatus];
+
+  return { title: a.title, subtitle, dueDate, status };
+}
 
 export function PracticeScreen() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("teacher");
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
+  const { data, isLoading, isError } = useAssignments();
 
   const bellAction = (
     <View className="relative">
@@ -120,17 +120,36 @@ export function PracticeScreen() {
 
         {activeTab === "teacher" ? (
           <View className="px-4 gap-3">
-            {/* Section heading */}
             <SectionHeader
               title="Bài tập từ giáo viên"
               subtitle="Hoàn thành các bài tập được giao bởi giáo viên"
               size="sm"
             />
 
-            {/* Assignment cards */}
-            {MOCK_ASSIGNMENTS.map((item, index) => (
-              <AssignmentCard key={index} {...item} />
-            ))}
+            {isLoading ? (
+              <ActivityIndicator color={theme.primary} />
+            ) : isError ? (
+              <Text
+                className="font-body text-sm text-center"
+                style={{ color: theme.textMuted }}
+              >
+                Không thể tải bài tập. Vui lòng thử lại.
+              </Text>
+            ) : !data?.content.length ? (
+              <Text
+                className="font-body text-sm text-center"
+                style={{ color: theme.textMuted }}
+              >
+                Chưa có bài tập nào.
+              </Text>
+            ) : (
+              data.content.map((item) => (
+                <AssignmentCard
+                  key={item.id}
+                  {...mapAssignmentToCardProps(item)}
+                />
+              ))
+            )}
           </View>
         ) : (
           <View className="px-4">
