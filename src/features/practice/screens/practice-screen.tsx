@@ -1,6 +1,6 @@
 import { Bell, BookOpen, Sparkles } from "lucide-react-native";
 import { useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
+import { Alert, ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useRouter } from "expo-router";
@@ -30,6 +30,7 @@ function mapAssignmentToCardProps(a: Assignment): AssignmentCardProps {
     GRADED: "completed",
     IN_PROGRESS: "in_progress",
     NOT_STARTED: "not_started",
+    OVERDUE: "overdue",
   };
   const status = STATUS_MAP[a.learnerSubmissionStatus];
 
@@ -149,11 +150,15 @@ export function PracticeScreen() {
                 <AssignmentCard
                   key={item.id}
                   {...mapAssignmentToCardProps(item)}
-                  onPress={
-                    item.assignmentType === "QUIZ"
-                      ? () => router.push({ pathname: "/assignment-quiz", params: { id: item.id } })
-                      : undefined
-                  }
+                  onPress={() => {
+                    if (item.learnerSubmissionStatus === "GRADED") {
+                      Alert.alert("Không thể làm lại", "Bài tập đã được chấm điểm, bạn không thể làm lại.");
+                    } else if (item.learnerSubmissionStatus === "OVERDUE") {
+                      Alert.alert("Bài tập đã quá hạn", "Bài tập này đã hết hạn nộp.");
+                    } else if (item.assignmentType === "QUIZ") {
+                      router.push({ pathname: "/assignment-quiz", params: { id: item.id } });
+                    }
+                  }}
                 />
               ))
             )}

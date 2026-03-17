@@ -1,10 +1,12 @@
 import { ChevronLeft, ChevronRight, X } from "lucide-react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
+  Alert,
   ActivityIndicator,
   Pressable,
   ScrollView,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -13,7 +15,7 @@ import { StatusBar } from "expo-status-bar";
 
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { useAssignmentDetail } from "../hooks";
+import { useStartAssignment } from "../hooks";
 import type { Question, QuestionOption } from "../api";
 
 interface QuizScreenProps {
@@ -76,14 +78,18 @@ function QuestionView({
   index,
   total,
   selectedOptionId,
+  fillBlankAnswer,
   onSelectOption,
+  onFillBlankChange,
   theme,
 }: {
   question: Question;
   index: number;
   total: number;
   selectedOptionId: string | undefined;
+  fillBlankAnswer: string | undefined;
   onSelectOption: (optionId: string) => void;
+  onFillBlankChange: (text: string) => void;
   theme: (typeof Colors)["light"];
 }) {
   const progressPct = (index + 1) / total;
@@ -142,28 +148,47 @@ function QuestionView({
         </Text>
       </View>
 
-      {/* Options */}
-      <View className="gap-3">
-        {question.options.map((option) => {
-          const label = option.id === "TRUE" || option.id === "FALSE"
-            ? option.id === "TRUE" ? "○" : "×"
-            : option.id;
-          return (
-            <OptionButton
-              key={option.id}
-              option={option}
-              label={label}
-              selected={selectedOptionId === option.id}
-              onPress={() =>
-                onSelectOption(
-                  selectedOptionId === option.id ? "" : option.id,
-                )
-              }
-              theme={theme}
-            />
-          );
-        })}
-      </View>
+      {/* Answer area */}
+      {question.questionType === "fill_blank" ? (
+        <TextInput
+          value={fillBlankAnswer ?? ""}
+          onChangeText={onFillBlankChange}
+          placeholder="Nhập câu trả lời..."
+          placeholderTextColor={theme.textMuted}
+          className="font-body text-base rounded-xl p-4"
+          style={{
+            borderWidth: 1.5,
+            borderColor: fillBlankAnswer ? theme.primary : theme.border,
+            backgroundColor: fillBlankAnswer ? "#EFF6FF" : "#FFFFFF",
+            color: theme.textDefault,
+          }}
+        />
+      ) : (
+        <View className="gap-3">
+          {(question.options ?? []).map((option) => {
+            const label =
+              option.id === "TRUE" || option.id === "FALSE"
+                ? option.id === "TRUE"
+                  ? "○"
+                  : "×"
+                : option.id;
+            return (
+              <OptionButton
+                key={option.id}
+                option={option}
+                label={label}
+                selected={selectedOptionId === option.id}
+                onPress={() =>
+                  onSelectOption(
+                    selectedOptionId === option.id ? "" : option.id,
+                  )
+                }
+                theme={theme}
+              />
+            );
+          })}
+        </View>
+      )}
     </ScrollView>
   );
 }
@@ -173,21 +198,34 @@ export function QuizScreen({ id }: QuizScreenProps) {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
-  const { data, isLoading, isError } = useAssignmentDetail(id);
+  const { mutate, data, isPending, isError } = useStartAssignment();
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (id) mutate(id);
+  }, [id]);
 
   const questions = data?.questions ?? [];
   const total = questions.length;
   const current = questions[currentIndex];
   const isFirst = currentIndex === 0;
+  const isLast = currentIndex === total - 1;
 
   function handleSelectOption(optionId: string) {
     if (!current) return;
     setAnswers((prev) => ({
       ...prev,
       [current.assignmentQuestionId]: optionId,
+    }));
+  }
+
+  function handleFillBlankChange(text: string) {
+    if (!current) return;
+    setAnswers((prev) => ({
+      ...prev,
+      [current.assignmentQuestionId]: text,
     }));
   }
 
@@ -206,7 +244,16 @@ export function QuizScreen({ id }: QuizScreenProps) {
       {/* Header */}
       <View className="flex-row items-center px-4 py-3 gap-3">
         <Pressable
-          onPress={() => router.back()}
+          onPress={() =>
+            Alert.alert(
+              "Thoát bài tập?",
+              "Tiến độ của bạn sẽ không được lưu.",
+              [
+                { text: "Tiếp tục làm", style: "cancel" },
+                { text: "Thoát", style: "destructive", onPress: () => router.back() },
+              ],
+            )
+          }
           hitSlop={8}
           className="items-center justify-center"
           style={{ width: 24, height: 24 }}
@@ -217,7 +264,7 @@ export function QuizScreen({ id }: QuizScreenProps) {
           className="font-heading text-xl flex-1"
           style={{ color: theme.textMuted }}
         >
-          Chọn đáp án đúng
+          {data?.title ?? "Bài tập"}
         </Text>
       </View>
 
@@ -225,7 +272,7 @@ export function QuizScreen({ id }: QuizScreenProps) {
       <View style={{ height: 1, backgroundColor: theme.border, opacity: 0.5 }} />
 
       {/* Content */}
-      {isLoading ? (
+      {isPending ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator color={theme.primary} />
         </View>
@@ -255,7 +302,9 @@ export function QuizScreen({ id }: QuizScreenProps) {
               index={currentIndex}
               total={total}
               selectedOptionId={answers[current.assignmentQuestionId]}
+              fillBlankAnswer={answers[current.assignmentQuestionId]}
               onSelectOption={handleSelectOption}
+              onFillBlankChange={handleFillBlankChange}
               theme={theme}
             />
           </View>
@@ -271,14 +320,18 @@ export function QuizScreen({ id }: QuizScreenProps) {
               className="flex-1 flex-row items-center justify-center gap-2 rounded-xl"
               style={{
                 height: 52,
-                backgroundColor: "#E2E8F0",
+                backgroundColor: isFirst ? "#E2E8F0" : theme.primary,
                 opacity: isFirst ? 0.5 : 1,
               }}
             >
-              <ChevronLeft size={20} color="#94A3B8" strokeWidth={2.5} />
+              <ChevronLeft
+                size={20}
+                color={isFirst ? "#94A3B8" : "#FFFFFF"}
+                strokeWidth={2.5}
+              />
               <Text
                 className="font-heading text-base"
-                style={{ color: "#94A3B8" }}
+                style={{ color: isFirst ? "#94A3B8" : "#FFFFFF" }}
               >
                 Quay lại
               </Text>
@@ -293,9 +346,11 @@ export function QuizScreen({ id }: QuizScreenProps) {
                 className="font-heading text-base"
                 style={{ color: "#FFFFFF" }}
               >
-                Tiếp theo
+                {isLast ? "Nộp bài" : "Tiếp theo"}
               </Text>
-              <ChevronRight size={20} color="#FFFFFF" strokeWidth={2.5} />
+              {!isLast && (
+                <ChevronRight size={20} color="#FFFFFF" strokeWidth={2.5} />
+              )}
             </Pressable>
           </View>
         </>

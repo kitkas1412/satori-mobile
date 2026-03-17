@@ -1,13 +1,15 @@
 // GET /learner/assignments
 export type AssignmentType = "QUIZ" | "WRITING";
-export type AssignmentApiStatus = "PUBLISHED" | "CLOSED";
-export type LearnerSubmissionStatus = "GRADED" | "IN_PROGRESS" | "NOT_STARTED";
+export type LearnerSubmissionStatus =
+  | "GRADED"
+  | "IN_PROGRESS"
+  | "NOT_STARTED"
+  | "OVERDUE";
 
 export interface Assignment {
   id: string;
   title: string;
   assignmentType: AssignmentType;
-  status: AssignmentApiStatus;
   dueDate: string;
   questionCount: number;
   createdAt: string;
@@ -33,18 +35,26 @@ export interface QuestionOption {
 export interface Question {
   assignmentQuestionId: string;
   orderIndex: number;
+  points: number | null;
+  questionId: string;
   questionText: string;
-  questionType: "multiple_choice" | "true_false";
-  options: QuestionOption[];
+  questionType: "multiple_choice" | "true_false" | "fill_blank";
+  options: QuestionOption[] | null;
   imageUrl: string | null;
   jlptLevel: string;
 }
 
-export interface AssignmentDetail extends Assignment {
+// POST /learner/assignments/:id/start
+export interface AssignmentDetail {
+  id: string;
+  title: string;
   description: string | null;
   instructions: string | null;
+  assignmentType: AssignmentType;
   startDate: string | null;
-  timeLimitMinutes: number | null;
+  dueDate: string;
+  audioUrl: string | null;
   actualQuestionCount: number;
   questions: Question[];
+  writingContent: string | null;
 }

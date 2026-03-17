@@ -4,7 +4,7 @@ import { Pressable, Text, View } from "react-native";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
-export type AssignmentStatus = "in_progress" | "not_started" | "completed";
+export type AssignmentStatus = "in_progress" | "not_started" | "completed" | "overdue";
 
 export interface AssignmentCardProps {
   title: string;
@@ -19,12 +19,14 @@ const STATUS_LABEL: Record<AssignmentStatus, string> = {
   in_progress: "Đang làm",
   not_started: "Chưa làm",
   completed: "Hoàn thành",
+  overdue: "Quá hạn",
 };
 
 const STATUS_COLOR: Record<AssignmentStatus, string> = {
   in_progress: "#155dfc",
   not_started: "#f54900",
   completed: "#00a63e",
+  overdue: "#9ca3af",
 };
 
 export function AssignmentCard({
