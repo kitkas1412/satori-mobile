@@ -24,3 +24,27 @@ export interface AssignmentsPageData {
   last: boolean;
   first: boolean;
 }
+
+export interface QuestionOption {
+  id: string;
+  text: string;
+}
+
+export interface Question {
+  assignmentQuestionId: string;
+  orderIndex: number;
+  questionText: string;
+  questionType: "multiple_choice" | "true_false";
+  options: QuestionOption[];
+  imageUrl: string | null;
+  jlptLevel: string;
+}
+
+export interface AssignmentDetail extends Assignment {
+  description: string | null;
+  instructions: string | null;
+  startDate: string | null;
+  timeLimitMinutes: number | null;
+  actualQuestionCount: number;
+  questions: Question[];
+}

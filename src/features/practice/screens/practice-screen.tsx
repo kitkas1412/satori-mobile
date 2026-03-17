@@ -3,6 +3,7 @@ import { useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
+import { useRouter } from "expo-router";
 
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -40,6 +41,7 @@ export function PracticeScreen() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const { data, isLoading, isError } = useAssignments();
 
   const bellAction = (
@@ -147,6 +149,11 @@ export function PracticeScreen() {
                 <AssignmentCard
                   key={item.id}
                   {...mapAssignmentToCardProps(item)}
+                  onPress={
+                    item.assignmentType === "QUIZ"
+                      ? () => router.push({ pathname: "/assignment-quiz", params: { id: item.id } })
+                      : undefined
+                  }
                 />
               ))
             )}
