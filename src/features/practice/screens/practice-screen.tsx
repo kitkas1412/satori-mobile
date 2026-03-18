@@ -1,9 +1,8 @@
 import { Bell, BookOpen, Sparkles } from "lucide-react-native";
 import { useState } from "react";
-import { Alert, ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
-import { useRouter } from "expo-router";
 
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -11,39 +10,17 @@ import { ScreenHeader } from "@/components/ui/screen-header";
 import { SectionHeader } from "@/components/ui/section-header";
 import { AiBanner } from "../components/ai-banner";
 import { AssignmentCard } from "../components/assignment-card";
-import type { AssignmentCardProps, AssignmentStatus } from "../components/assignment-card";
-import type { Assignment, LearnerSubmissionStatus } from "../api";
-import { useAssignments } from "../hooks";
+import { useAssignments, mapAssignmentToCardProps, useAssignmentNavigation } from "../hooks";
 
 type ActiveTab = "teacher" | "ai";
-
-function mapAssignmentToCardProps(a: Assignment): AssignmentCardProps {
-  const subtitle =
-    a.assignmentType === "QUIZ"
-      ? `${a.questionCount} câu hỏi • Trắc nghiệm`
-      : "Bài viết";
-
-  const date = new Date(a.dueDate);
-  const dueDate = `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
-
-  const STATUS_MAP: Record<LearnerSubmissionStatus, AssignmentStatus> = {
-    GRADED: "completed",
-    IN_PROGRESS: "in_progress",
-    NOT_STARTED: "not_started",
-    OVERDUE: "overdue",
-  };
-  const status = STATUS_MAP[a.learnerSubmissionStatus];
-
-  return { title: a.title, subtitle, dueDate, status };
-}
 
 export function PracticeScreen() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("teacher");
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
-  const router = useRouter();
   const { data, isLoading, isError } = useAssignments();
+  const { handleAssignmentPress } = useAssignmentNavigation();
 
   const bellAction = (
     <View className="relative">
@@ -84,13 +61,13 @@ export function PracticeScreen() {
           >
             <BookOpen
               size={20}
-              color={activeTab === "teacher" ? "#fff" : theme.textMuted}
+              color={activeTab === "teacher" ? theme.white : theme.textMuted}
               strokeWidth={2}
             />
             <Text
               className="font-heading text-sm"
               style={{
-                color: activeTab === "teacher" ? "#fff" : theme.textMuted,
+                color: activeTab === "teacher" ? theme.white : theme.textMuted,
               }}
             >
               Bài tập GV
@@ -107,13 +84,13 @@ export function PracticeScreen() {
           >
             <Sparkles
               size={20}
-              color={activeTab === "ai" ? "#fff" : theme.textMuted}
+              color={activeTab === "ai" ? theme.white : theme.textMuted}
               strokeWidth={2}
             />
             <Text
               className="font-heading text-sm"
               style={{
-                color: activeTab === "ai" ? "#fff" : theme.textMuted,
+                color: activeTab === "ai" ? theme.white : theme.textMuted,
               }}
             >
               Ôn luyện AI
@@ -150,15 +127,7 @@ export function PracticeScreen() {
                 <AssignmentCard
                   key={item.id}
                   {...mapAssignmentToCardProps(item)}
-                  onPress={() => {
-                    if (item.learnerSubmissionStatus === "GRADED") {
-                      Alert.alert("Không thể làm lại", "Bài tập đã được chấm điểm, bạn không thể làm lại.");
-                    } else if (item.learnerSubmissionStatus === "OVERDUE") {
-                      Alert.alert("Bài tập đã quá hạn", "Bài tập này đã hết hạn nộp.");
-                    } else if (item.assignmentType === "QUIZ") {
-                      router.push({ pathname: "/assignment-quiz", params: { id: item.id } });
-                    }
-                  }}
+                  onPress={() => handleAssignmentPress(item)}
                 />
               ))
             )}

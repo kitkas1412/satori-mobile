@@ -4,14 +4,17 @@ import { Pressable, Text, View } from "react-native";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
-export type AssignmentStatus = "in_progress" | "not_started" | "completed" | "overdue";
+export type AssignmentStatus =
+  | "in_progress"
+  | "not_started"
+  | "completed"
+  | "overdue";
 
 export interface AssignmentCardProps {
   title: string;
   subtitle: string;
   dueDate: string;
   status: AssignmentStatus;
-  progress?: { current: number; total: number };
   onPress?: () => void;
 }
 
@@ -22,34 +25,28 @@ const STATUS_LABEL: Record<AssignmentStatus, string> = {
   overdue: "Quá hạn",
 };
 
-const STATUS_COLOR: Record<AssignmentStatus, string> = {
-  in_progress: "#155dfc",
-  not_started: "#f54900",
-  completed: "#00a63e",
-  overdue: "#9ca3af",
-};
-
 export function AssignmentCard({
   title,
   subtitle,
   dueDate,
   status,
-  progress,
   onPress,
 }: AssignmentCardProps) {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
-  const progressPct =
-    progress && progress.total > 0
-      ? progress.current / progress.total
-      : 0;
+  const statusColor: Record<AssignmentStatus, string> = {
+    in_progress: theme.primary,
+    not_started: theme.warning,
+    completed: theme.success,
+    overdue: theme.error,
+  };
 
   return (
     <Pressable
       onPress={onPress}
       className="bg-background-surface rounded-2xl p-4 gap-3"
-      style={{ borderWidth: 0.6, borderColor: "rgba(0,0,0,0.1)" }}
+      style={{ borderWidth: 0.6, borderColor: theme.border }}
     >
       {/* Title + icon */}
       <View className="flex-row items-start justify-between gap-3">
@@ -57,6 +54,7 @@ export function AssignmentCard({
           <Text
             className="font-heading text-base"
             style={{ color: theme.textMuted }}
+            numberOfLines={2}
           >
             {title}
           </Text>
@@ -68,7 +66,11 @@ export function AssignmentCard({
           </Text>
         </View>
         {status === "completed" ? (
-          <CircleCheck size={20} color={STATUS_COLOR.completed} strokeWidth={2} />
+          <CircleCheck
+            size={20}
+            color={statusColor.completed}
+            strokeWidth={2}
+          />
         ) : (
           <Circle size={20} color={theme.border} strokeWidth={1.5} />
         )}
@@ -87,43 +89,12 @@ export function AssignmentCard({
         </View>
         <Text
           className="font-heading text-xs"
-          style={{ color: STATUS_COLOR[status] }}
+          style={{ color: statusColor[status] }}
         >
           {STATUS_LABEL[status]}
         </Text>
       </View>
 
-      {/* Progress bar (in_progress only) */}
-      {status === "in_progress" && progress && (
-        <View className="gap-1">
-          <View className="flex-row items-center justify-between">
-            <Text
-              className="font-body text-tiny-xs"
-              style={{ color: theme.textMuted, opacity: 0.7 }}
-            >
-              Tiến độ
-            </Text>
-            <Text
-              className="font-heading text-tiny-xs"
-              style={{ color: theme.textMuted }}
-            >
-              {progress.current}/{progress.total}
-            </Text>
-          </View>
-          <View
-            className="h-2 rounded-full overflow-hidden"
-            style={{ backgroundColor: "#e5e7eb" }}
-          >
-            <View
-              className="h-full rounded-full"
-              style={{
-                backgroundColor: "#2b7fff",
-                width: `${progressPct * 100}%`,
-              }}
-            />
-          </View>
-        </View>
-      )}
     </Pressable>
   );
 }
