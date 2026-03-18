@@ -35,6 +35,8 @@ export function useAssignmentNavigation() {
       Alert.alert("Bài tập đã quá hạn", "Bài tập này đã hết hạn nộp.");
     } else if (item.assignmentType === "QUIZ") {
       router.push({ pathname: "/assignment-quiz", params: { id: item.id } });
+    } else if (item.assignmentType === "WRITING") {
+      router.push({ pathname: "/assignment-writing", params: { id: item.id } });
     }
   }
 
