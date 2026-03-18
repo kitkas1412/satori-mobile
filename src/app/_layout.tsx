@@ -95,6 +95,14 @@ function RootLayoutNav() {
         name="conversation-feedback"
         options={{ headerShown: false, gestureEnabled: false }}
       />
+      <Stack.Screen
+        name="assignment-quiz"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="assignment-result"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
     </Stack>
   );
 }
