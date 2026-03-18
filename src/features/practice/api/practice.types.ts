@@ -83,6 +83,21 @@ export interface SubmitQuizResponse {
   createdAt: string;
 }
 
+export interface WritingContent {
+  id: string;
+  assignmentId: string;
+  prompt: string;
+  sourceText: string | null;
+  createdAt: string;
+}
+
+export interface SubmitWritingResponse {
+  id: string;
+  assignmentId: string;
+  status: LearnerSubmissionStatus;
+  submittedAt: string;
+}
+
 // POST /learner/assignments/:id/start
 export interface AssignmentDetail {
   id: string;
@@ -95,5 +110,5 @@ export interface AssignmentDetail {
   audioUrl: string | null;
   actualQuestionCount: number;
   questions: Question[];
-  writingContent: string | null;
+  writingContent: WritingContent | null;
 }
