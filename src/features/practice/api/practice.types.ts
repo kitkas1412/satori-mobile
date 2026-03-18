@@ -44,6 +44,45 @@ export interface Question {
   jlptLevel: string;
 }
 
+// POST /learner/assignments/:id/submit-quiz
+export interface SubmitQuizAnswer {
+  questionId: string;
+  selectedAnswer: string;
+  timeSpent: number;
+}
+
+export interface SubmitQuizRequest {
+  answers: string; // JSON.stringify(SubmitQuizAnswer[])
+  timeSpentSeconds: number;
+}
+
+export interface QuizDetail {
+  questionId: string;
+  questionText: string;
+  questionType: string;
+  selectedAnswer: string;
+  correctAnswer: string;
+  explanation: string;
+  options: QuestionOption[];
+  correct: boolean;
+}
+
+export interface SubmitQuizResponse {
+  id: string;
+  assignmentId: string;
+  assignmentTitle: string;
+  status: LearnerSubmissionStatus;
+  attemptNumber: number;
+  score: number;
+  correctCount: number;
+  totalQuestions: number;
+  timeSpentSeconds: number;
+  feedback: string | null;
+  quizDetails: QuizDetail[];
+  submittedAt: string;
+  createdAt: string;
+}
+
 // POST /learner/assignments/:id/start
 export interface AssignmentDetail {
   id: string;

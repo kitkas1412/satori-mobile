@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight, X } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Alert,
   ActivityIndicator,
@@ -15,7 +15,8 @@ import { StatusBar } from "expo-status-bar";
 
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { useStartAssignment } from "../hooks";
+import { useStartAssignment, useSubmitAssignment } from "../hooks";
+import { usePracticeStore } from "@/stores";
 import type { Question, QuestionOption } from "../api";
 
 interface QuizScreenProps {
@@ -193,12 +194,17 @@ function QuestionView({
   );
 }
 
+
 export function QuizScreen({ id }: QuizScreenProps) {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
   const { mutate, data, isPending, isError } = useStartAssignment();
+  const submitMutation = useSubmitAssignment();
+  const startedAtRef = useRef<number>(0);
+
+  const setQuizResult = usePracticeStore((s) => s.setQuizResult);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -206,6 +212,12 @@ export function QuizScreen({ id }: QuizScreenProps) {
   useEffect(() => {
     if (id) mutate(id);
   }, [id]);
+
+  useEffect(() => {
+    if (!isPending && data && startedAtRef.current === 0) {
+      startedAtRef.current = Date.now();
+    }
+  }, [isPending, data]);
 
   const questions = data?.questions ?? [];
   const total = questions.length;
@@ -235,6 +247,38 @@ export function QuizScreen({ id }: QuizScreenProps) {
 
   function handleNext() {
     if (currentIndex < total - 1) setCurrentIndex((i) => i + 1);
+  }
+
+  function handleSubmit() {
+    if (!data) return;
+    const timeSpentSeconds = Math.max(
+      1,
+      Math.round((Date.now() - startedAtRef.current) / 1000),
+    );
+    const timePerQuestion = Math.round(timeSpentSeconds / total);
+    const answersPayload = data.questions.map((q) => ({
+      questionId: q.questionId,
+      selectedAnswer: answers[q.assignmentQuestionId] ?? "",
+      timeSpent: timePerQuestion,
+    }));
+    submitMutation.mutate(
+      {
+        assignmentId: id,
+        body: {
+          answers: JSON.stringify(answersPayload),
+          timeSpentSeconds,
+        },
+      },
+      {
+        onSuccess: (result) => {
+          setQuizResult(id, result);
+          router.push("/assignment-result");
+        },
+        onError: () => {
+          Alert.alert("Lỗi", "Không thể nộp bài. Vui lòng thử lại.");
+        },
+      },
+    );
   }
 
   return (
@@ -338,18 +382,29 @@ export function QuizScreen({ id }: QuizScreenProps) {
             </Pressable>
 
             <Pressable
-              onPress={handleNext}
+              onPress={isLast ? handleSubmit : handleNext}
+              disabled={isLast && submitMutation.isPending}
               className="flex-1 flex-row items-center justify-center gap-2 rounded-xl"
-              style={{ height: 52, backgroundColor: theme.primary }}
+              style={{
+                height: 52,
+                backgroundColor: theme.primary,
+                opacity: isLast && submitMutation.isPending ? 0.6 : 1,
+              }}
             >
-              <Text
-                className="font-heading text-base"
-                style={{ color: "#FFFFFF" }}
-              >
-                {isLast ? "Nộp bài" : "Tiếp theo"}
-              </Text>
-              {!isLast && (
-                <ChevronRight size={20} color="#FFFFFF" strokeWidth={2.5} />
+              {isLast && submitMutation.isPending ? (
+                <ActivityIndicator color="#FFFFFF" size="small" />
+              ) : (
+                <>
+                  <Text
+                    className="font-heading text-base"
+                    style={{ color: "#FFFFFF" }}
+                  >
+                    {isLast ? "Nộp bài" : "Tiếp theo"}
+                  </Text>
+                  {!isLast && (
+                    <ChevronRight size={20} color="#FFFFFF" strokeWidth={2.5} />
+                  )}
+                </>
               )}
             </Pressable>
           </View>
