@@ -18,7 +18,7 @@ export function QuizResultScreen() {
 
   if (!result) return null;
 
-  const { quizResult, accuracy, wrongCount, performanceLabel, handleContinue } = result;
+  const { quizResult, wrongCount, performanceLabel, handleContinue } = result;
 
   return (
     <View
@@ -136,22 +136,6 @@ export function QuizResultScreen() {
             </View>
           </View>
 
-          <View style={{ height: 1, backgroundColor: theme.border }} />
-
-          <View className="flex-row items-center justify-between">
-            <Text
-              className="font-body-bold text-sm"
-              style={{ color: theme.textMuted }}
-            >
-              Độ chính xác
-            </Text>
-            <Text
-              className="font-heading text-lg"
-              style={{ color: theme.primary }}
-            >
-              {accuracy}%
-            </Text>
-          </View>
         </View>
 
         {/* Per-question breakdown */}

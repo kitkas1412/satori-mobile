@@ -1,9 +1,11 @@
 import { Alert } from "react-native";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 
 import { usePracticeStore } from "@/stores";
 import type { Question } from "../api";
 import { useSubmitAssignment } from "./use-submit-assignment";
+import { practiceQueryKeys } from "./use-assignments";
 
 interface UseQuizSubmitParams {
   assignmentId: string;
@@ -19,6 +21,7 @@ export function useQuizSubmit({
   getTimeStats,
 }: UseQuizSubmitParams) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const submitMutation = useSubmitAssignment();
   const setQuizResult = usePracticeStore((s) => s.setQuizResult);
 
@@ -43,6 +46,7 @@ export function useQuizSubmit({
       {
         onSuccess: (result) => {
           setQuizResult(assignmentId, result);
+          queryClient.invalidateQueries({ queryKey: practiceQueryKeys.assignments });
           router.push("/assignment-result");
         },
         onError: () => {

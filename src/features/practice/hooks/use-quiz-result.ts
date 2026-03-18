@@ -9,10 +9,6 @@ export function useQuizResult() {
 
   if (!quizResult) return null;
 
-  const accuracy =
-    quizResult.totalQuestions > 0
-      ? Math.round((quizResult.correctCount / quizResult.totalQuestions) * 100)
-      : 0;
   const wrongCount = quizResult.totalQuestions - quizResult.correctCount;
   const performanceLabel =
     quizResult.score >= 80
@@ -26,5 +22,5 @@ export function useQuizResult() {
     router.replace("/(tabs)/practice");
   }
 
-  return { quizResult, accuracy, wrongCount, performanceLabel, handleContinue };
+  return { quizResult, wrongCount, performanceLabel, handleContinue };
 }
