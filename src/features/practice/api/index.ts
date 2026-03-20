@@ -19,3 +19,4 @@ export { submitAssignmentApi } from "./submit-assignment";
 export { submitWritingApi } from "./submit-writing";
 export { getSubmissionApi } from "./get-submission";
 export { getWritingSubmissionApi } from "./get-writing-submission";
+export { cancelAssignmentApi } from "./cancel-assignment";

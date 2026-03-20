@@ -3,10 +3,12 @@ import { Alert, Image, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { useState } from "react";
 
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { usePracticeStore } from "@/stores";
+import { cancelAssignmentApi } from "../api";
 
 export function WritingResultScreen() {
   const router = useRouter();
@@ -16,6 +18,7 @@ export function WritingResultScreen() {
 
   const writingResult = usePracticeStore((s) => s.writingResult);
   const clearWritingResult = usePracticeStore((s) => s.clearWritingResult);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   const isGraded = writingResult?.status === "GRADED";
 
@@ -35,9 +38,21 @@ export function WritingResultScreen() {
         {
           text: "Hủy nộp bài",
           style: "destructive",
-          onPress: () => {
-            clearWritingResult();
-            router.replace("/(tabs)/practice");
+          onPress: async () => {
+            if (!writingResult?.assignmentId) return;
+            try {
+              setIsCancelling(true);
+              await cancelAssignmentApi(writingResult.assignmentId);
+              clearWritingResult();
+              router.replace({
+                pathname: "/assignment-writing",
+                params: { id: writingResult.assignmentId },
+              });
+            } catch {
+              Alert.alert("Lỗi", "Không thể hủy nộp bài. Vui lòng thử lại.");
+            } finally {
+              setIsCancelling(false);
+            }
           },
         },
       ],
@@ -220,16 +235,18 @@ export function WritingResultScreen() {
           {!isGraded && (
             <Pressable
               onPress={handleCancelSubmission}
+              disabled={isCancelling}
               className="flex-1 items-center justify-center rounded-xl"
               style={{
                 height: 48,
                 backgroundColor: theme.white,
                 borderWidth: 2,
                 borderColor: "#ff4d4f",
+                opacity: isCancelling ? 0.5 : 1,
               }}
             >
               <Text className="font-heading text-sm" style={{ color: "#ff4d4f" }}>
-                Hủy nộp bài
+                {isCancelling ? "Đang hủy..." : "Hủy nộp bài"}
               </Text>
             </Pressable>
           )}
