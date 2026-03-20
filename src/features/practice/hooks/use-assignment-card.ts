@@ -8,7 +8,7 @@ import type {
   AssignmentStatus,
 } from "../components/assignment-card";
 import type { Content, LearnerSubmissionStatus } from "../api";
-import { getSubmissionApi } from "../api";
+import { getSubmissionApi, getWritingSubmissionApi } from "../api";
 
 const STATUS_MAP: Record<LearnerSubmissionStatus, AssignmentStatus> = {
   GRADED: "graded",
@@ -35,15 +35,16 @@ export function mapAssignmentToCardProps(a: Content): AssignmentCardProps {
 export function useAssignmentNavigation() {
   const router = useRouter();
   const setQuizResult = usePracticeStore((s) => s.setQuizResult);
+  const setWritingResult = usePracticeStore((s) => s.setWritingResult);
   const [isLoadingSubmission, setIsLoadingSubmission] = useState(false);
 
   async function handleAssignmentPress(item: Content) {
     if (item.learnerSubmissionStatus === "GRADED") {
+      if (!item.learnerSubmissionId) {
+        Alert.alert("Lỗi", "Không tìm thấy thông tin bài nộp.");
+        return;
+      }
       if (item.assignmentType === "QUIZ") {
-        if (!item.learnerSubmissionId) {
-          Alert.alert("Lỗi", "Không tìm thấy thông tin bài nộp.");
-          return;
-        }
         try {
           setIsLoadingSubmission(true);
           const submission = await getSubmissionApi(item.learnerSubmissionId);
@@ -57,11 +58,38 @@ export function useAssignmentNavigation() {
         } finally {
           setIsLoadingSubmission(false);
         }
-      } else {
+      } else if (item.assignmentType === "WRITING") {
+        try {
+          setIsLoadingSubmission(true);
+          const submission = await getWritingSubmissionApi(item.learnerSubmissionId);
+          setWritingResult(submission);
+          router.push({ pathname: "/assignment-writing-result" });
+        } catch {
+          Alert.alert(
+            "Lỗi",
+            "Không thể tải kết quả bài tập. Vui lòng thử lại.",
+          );
+        } finally {
+          setIsLoadingSubmission(false);
+        }
+      }
+    } else if (item.learnerSubmissionStatus === "SUBMITTED" && item.assignmentType === "WRITING") {
+      if (!item.learnerSubmissionId) {
+        Alert.alert("Lỗi", "Không tìm thấy thông tin bài nộp.");
+        return;
+      }
+      try {
+        setIsLoadingSubmission(true);
+        const submission = await getWritingSubmissionApi(item.learnerSubmissionId);
+        setWritingResult(submission);
+        router.push({ pathname: "/assignment-writing-result" });
+      } catch {
         Alert.alert(
-          "Không thể làm lại",
-          "Bài tập đã được chấm điểm, bạn không thể làm lại.",
+          "Lỗi",
+          "Không thể tải kết quả bài tập. Vui lòng thử lại.",
         );
+      } finally {
+        setIsLoadingSubmission(false);
       }
     } else if (item.learnerSubmissionStatus === "OVERDUE") {
       Alert.alert("Bài tập đã quá hạn", "Bài tập này đã hết hạn nộp.");

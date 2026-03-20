@@ -17,6 +17,8 @@ export function WritingResultScreen() {
   const writingResult = usePracticeStore((s) => s.writingResult);
   const clearWritingResult = usePracticeStore((s) => s.clearWritingResult);
 
+  const isGraded = writingResult?.status === "GRADED";
+
   const imageUrls = writingResult?.imageUrls ?? [];
 
   function handleGoHome() {
@@ -155,38 +157,40 @@ export function WritingResultScreen() {
         </View>
 
         {/* Warning box */}
-        <View
-          style={{
-            backgroundColor: "#fff1f0",
-            borderRadius: 14,
-            borderWidth: 1,
-            borderColor: "#ffccc7",
-            padding: 16,
-          }}
-        >
-          <View className="flex-row gap-2 items-start">
-            <AlertTriangle
-              size={20}
-              color="#cf1322"
-              strokeWidth={1.5}
-              style={{ marginTop: 1 }}
-            />
-            <View className="flex-1 gap-1">
-              <Text
-                className="font-heading text-sm"
-                style={{ color: "#cf1322" }}
-              >
-                Lưu ý
-              </Text>
-              <Text
-                className="font-body text-xs"
-                style={{ color: "#cf1322", lineHeight: 19 }}
-              >
-                Nếu hủy nộp bài, giáo viên sẽ không nhận được bài làm của bạn.
-              </Text>
+        {!isGraded && (
+          <View
+            style={{
+              backgroundColor: "#fff1f0",
+              borderRadius: 14,
+              borderWidth: 1,
+              borderColor: "#ffccc7",
+              padding: 16,
+            }}
+          >
+            <View className="flex-row gap-2 items-start">
+              <AlertTriangle
+                size={20}
+                color="#cf1322"
+                strokeWidth={1.5}
+                style={{ marginTop: 1 }}
+              />
+              <View className="flex-1 gap-1">
+                <Text
+                  className="font-heading text-sm"
+                  style={{ color: "#cf1322" }}
+                >
+                  Lưu ý
+                </Text>
+                <Text
+                  className="font-body text-xs"
+                  style={{ color: "#cf1322", lineHeight: 19 }}
+                >
+                  Nếu hủy nộp bài, giáo viên sẽ không nhận được bài làm của bạn.
+                </Text>
+              </View>
             </View>
           </View>
-        </View>
+        )}
       </ScrollView>
 
       {/* Bottom buttons */}
@@ -213,20 +217,22 @@ export function WritingResultScreen() {
             </Text>
           </Pressable>
 
-          <Pressable
-            onPress={handleCancelSubmission}
-            className="flex-1 items-center justify-center rounded-xl"
-            style={{
-              height: 48,
-              backgroundColor: theme.white,
-              borderWidth: 2,
-              borderColor: "#ff4d4f",
-            }}
-          >
-            <Text className="font-heading text-sm" style={{ color: "#ff4d4f" }}>
-              Hủy nộp bài
-            </Text>
-          </Pressable>
+          {!isGraded && (
+            <Pressable
+              onPress={handleCancelSubmission}
+              className="flex-1 items-center justify-center rounded-xl"
+              style={{
+                height: 48,
+                backgroundColor: theme.white,
+                borderWidth: 2,
+                borderColor: "#ff4d4f",
+              }}
+            >
+              <Text className="font-heading text-sm" style={{ color: "#ff4d4f" }}>
+                Hủy nộp bài
+              </Text>
+            </Pressable>
+          )}
         </View>
       </View>
     </View>
