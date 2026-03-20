@@ -1,9 +1,9 @@
 import { api } from "@/lib/axios";
 import type { ApiResponse } from "@/types/api";
-import type { AssignmentsPageData } from "./practice.types";
+import type { AssignmentsResponse } from "./practice.types";
 
-export async function getAssignmentsApi(): Promise<AssignmentsPageData> {
-  const response = await api.get<ApiResponse<AssignmentsPageData>>(
+export async function getAssignmentsApi(): Promise<AssignmentsResponse> {
+  const response = await api.get<ApiResponse<AssignmentsResponse>>(
     "/learner/assignments",
     { params: { page: 1, size: 10 } },
   );

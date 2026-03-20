@@ -1,9 +1,11 @@
 import { api } from "@/lib/axios";
 import type { ApiResponse } from "@/types/api";
-import type { AssignmentDetail } from "./practice.types";
+import type { AssignmentDetailResponse } from "./practice.types";
 
-export async function startAssignmentApi(id: string): Promise<AssignmentDetail> {
-  const response = await api.post<ApiResponse<AssignmentDetail>>(
+export async function startAssignmentApi(
+  id: string,
+): Promise<AssignmentDetailResponse> {
+  const response = await api.post<ApiResponse<AssignmentDetailResponse>>(
     `/learner/assignments/${id}/start`,
   );
   return response.data.data;

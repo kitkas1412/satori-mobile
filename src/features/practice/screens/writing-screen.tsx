@@ -52,7 +52,6 @@ export function WritingScreen({ id }: WritingScreenProps) {
   const { handleSubmit, isPending: isSubmitting } = useWritingSubmit({
     assignmentId: id,
     images,
-    getTimeSpentSeconds,
   });
 
   async function handlePickImage() {
@@ -144,7 +143,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
           }
           hitSlop={8}
         >
-          <ChevronLeft size={24} color={theme.textDefault} strokeWidth={2} />
+          <X size={24} color={theme.textDefault} strokeWidth={2} />
         </Pressable>
         <Text
           className="font-heading text-lg"
@@ -368,8 +367,6 @@ export function WritingScreen({ id }: WritingScreenProps) {
               paddingTop: 16,
               paddingHorizontal: 16,
               paddingBottom: insets.bottom + 8,
-              borderTopWidth: 1,
-              borderTopColor: theme.border,
             }}
           >
             <PrimaryButton
