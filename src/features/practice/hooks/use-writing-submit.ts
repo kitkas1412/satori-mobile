@@ -6,20 +6,20 @@ import type { ImagePickerAsset } from "expo-image-picker";
 
 import { submitWritingApi } from "../api";
 import { practiceQueryKeys } from "./use-assignments";
+import { usePracticeStore } from "@/stores";
 
 interface UseWritingSubmitParams {
   assignmentId: string;
   images: ImagePickerAsset[];
-  getTimeSpentSeconds: () => number;
 }
 
 export function useWritingSubmit({
   assignmentId,
   images,
-  getTimeSpentSeconds,
 }: UseWritingSubmitParams) {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const setWritingResult = usePracticeStore((s) => s.setWritingResult);
 
   const mutation = useMutation({
     mutationFn: () =>
@@ -28,12 +28,13 @@ export function useWritingSubmit({
         images.map((img) => ({
           uri: img.uri,
           name: img.fileName ?? `image_${Date.now()}.jpg`,
+          mimeType: img.mimeType ?? undefined,
         })),
-        getTimeSpentSeconds(),
       ),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: practiceQueryKeys.assignments });
-      router.replace("/(tabs)/practice");
+      setWritingResult(data);
+      router.replace("/assignment-writing-result");
     },
     onError: () => {
       Alert.alert("Lỗi", "Không thể nộp bài. Vui lòng thử lại.");

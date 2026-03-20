@@ -52,7 +52,6 @@ export function WritingScreen({ id }: WritingScreenProps) {
   const { handleSubmit, isPending: isSubmitting } = useWritingSubmit({
     assignmentId: id,
     images,
-    getTimeSpentSeconds,
   });
 
   async function handlePickImage() {

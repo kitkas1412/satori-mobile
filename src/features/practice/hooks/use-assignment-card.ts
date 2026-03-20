@@ -1,17 +1,24 @@
+import { useState } from "react";
 import { Alert } from "react-native";
 import { useRouter } from "expo-router";
 
-import type { AssignmentCardProps, AssignmentStatus } from "../components/assignment-card";
-import type { Assignment, LearnerSubmissionStatus } from "../api";
+import { usePracticeStore } from "@/stores";
+import type {
+  AssignmentCardProps,
+  AssignmentStatus,
+} from "../components/assignment-card";
+import type { Content, LearnerSubmissionStatus } from "../api";
+import { getSubmissionApi } from "../api";
 
 const STATUS_MAP: Record<LearnerSubmissionStatus, AssignmentStatus> = {
-  GRADED: "completed",
+  GRADED: "graded",
   IN_PROGRESS: "in_progress",
   NOT_STARTED: "not_started",
   OVERDUE: "overdue",
+  SUBMITTED: "submitted",
 };
 
-export function mapAssignmentToCardProps(a: Assignment): AssignmentCardProps {
+export function mapAssignmentToCardProps(a: Content): AssignmentCardProps {
   const subtitle =
     a.assignmentType === "QUIZ"
       ? `${a.questionCount} câu hỏi • Trắc nghiệm`
@@ -27,10 +34,35 @@ export function mapAssignmentToCardProps(a: Assignment): AssignmentCardProps {
 
 export function useAssignmentNavigation() {
   const router = useRouter();
+  const setQuizResult = usePracticeStore((s) => s.setQuizResult);
+  const [isLoadingSubmission, setIsLoadingSubmission] = useState(false);
 
-  function handleAssignmentPress(item: Assignment) {
+  async function handleAssignmentPress(item: Content) {
     if (item.learnerSubmissionStatus === "GRADED") {
-      Alert.alert("Không thể làm lại", "Bài tập đã được chấm điểm, bạn không thể làm lại.");
+      if (item.assignmentType === "QUIZ") {
+        if (!item.learnerSubmissionId) {
+          Alert.alert("Lỗi", "Không tìm thấy thông tin bài nộp.");
+          return;
+        }
+        try {
+          setIsLoadingSubmission(true);
+          const submission = await getSubmissionApi(item.learnerSubmissionId);
+          setQuizResult(item.id, submission);
+          router.push({ pathname: "/assignment-result" });
+        } catch {
+          Alert.alert(
+            "Lỗi",
+            "Không thể tải kết quả bài tập. Vui lòng thử lại.",
+          );
+        } finally {
+          setIsLoadingSubmission(false);
+        }
+      } else {
+        Alert.alert(
+          "Không thể làm lại",
+          "Bài tập đã được chấm điểm, bạn không thể làm lại.",
+        );
+      }
     } else if (item.learnerSubmissionStatus === "OVERDUE") {
       Alert.alert("Bài tập đã quá hạn", "Bài tập này đã hết hạn nộp.");
     } else if (item.assignmentType === "QUIZ") {
@@ -40,5 +72,5 @@ export function useAssignmentNavigation() {
     }
   }
 
-  return { handleAssignmentPress };
+  return { handleAssignmentPress, isLoadingSubmission };
 }

@@ -107,6 +107,10 @@ function RootLayoutNav() {
         name="assignment-writing"
         options={{ headerShown: false, gestureEnabled: false }}
       />
+      <Stack.Screen
+        name="assignment-writing-result"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
     </Stack>
   );
 }

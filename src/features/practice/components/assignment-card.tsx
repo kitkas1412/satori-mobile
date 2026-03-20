@@ -8,7 +8,9 @@ export type AssignmentStatus =
   | "in_progress"
   | "not_started"
   | "completed"
-  | "overdue";
+  | "overdue"
+  | "graded"
+  | "submitted";
 
 export interface AssignmentCardProps {
   title: string;
@@ -23,6 +25,8 @@ const STATUS_LABEL: Record<AssignmentStatus, string> = {
   not_started: "Chưa làm",
   completed: "Hoàn thành",
   overdue: "Quá hạn",
+  graded: "Đã chấm điểm",
+  submitted: "Đã nộp",
 };
 
 export function AssignmentCard({
@@ -40,6 +44,8 @@ export function AssignmentCard({
     not_started: theme.warning,
     completed: theme.success,
     overdue: theme.error,
+    graded: theme.success,
+    submitted: theme.primary,
   };
 
   return (
@@ -65,10 +71,10 @@ export function AssignmentCard({
             {subtitle}
           </Text>
         </View>
-        {status === "completed" ? (
+        {status === "completed" || status === "graded" || status === "submitted" ? (
           <CircleCheck
             size={20}
-            color={statusColor.completed}
+            color={statusColor[status]}
             strokeWidth={2}
           />
         ) : (

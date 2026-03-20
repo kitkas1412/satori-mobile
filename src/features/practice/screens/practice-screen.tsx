@@ -6,6 +6,7 @@ import { StatusBar } from "expo-status-bar";
 
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { ScreenHeader } from "@/components/ui/screen-header";
 import { SectionHeader } from "@/components/ui/section-header";
 import { AiBanner } from "../components/ai-banner";
@@ -20,7 +21,7 @@ export function PracticeScreen() {
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
   const { data, isLoading, isError } = useAssignments();
-  const { handleAssignmentPress } = useAssignmentNavigation();
+  const { handleAssignmentPress, isLoadingSubmission } = useAssignmentNavigation();
 
   const bellAction = (
     <View className="relative">
@@ -33,6 +34,7 @@ export function PracticeScreen() {
 
   return (
     <View className="flex-1 bg-background-default">
+      <LoadingOverlay visible={isLoadingSubmission} title="Đang tải kết quả..." />
       <StatusBar style="dark" />
       <ScrollView
         showsVerticalScrollIndicator={false}

@@ -2,7 +2,7 @@ import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 
 import { Colors } from "@/constants/theme";
 import { MarkdownText, ProgressBar } from "@/components/ui";
-import type { Question, QuestionOption } from "../api";
+import type { Question, Option } from "../api";
 
 function OptionButton({
   option,
@@ -11,7 +11,7 @@ function OptionButton({
   onPress,
   theme,
 }: {
-  option: QuestionOption;
+  option: Option;
   label: string;
   selected: boolean;
   onPress: () => void;
@@ -82,14 +82,24 @@ export function QuestionView({
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32, paddingTop: 16 }}
+      contentContainerStyle={{
+        paddingHorizontal: 16,
+        paddingBottom: 32,
+        paddingTop: 16,
+      }}
     >
       {/* Question counter */}
       <View className="flex-row items-center justify-between mb-3">
-        <Text className="font-heading text-sm" style={{ color: theme.textMuted }}>
+        <Text
+          className="font-heading text-sm"
+          style={{ color: theme.textMuted }}
+        >
           問題
         </Text>
-        <Text className="font-heading text-sm" style={{ color: theme.textMuted }}>
+        <Text
+          className="font-heading text-sm"
+          style={{ color: theme.textMuted }}
+        >
           {index + 1}/{total}
         </Text>
       </View>
@@ -110,7 +120,11 @@ export function QuestionView({
           elevation: 2,
         }}
       >
-        <MarkdownText fontSize={18} fontFamily="Nunito_700Bold" color={theme.textDefault}>
+        <MarkdownText
+          fontSize={18}
+          fontFamily="Nunito_700Bold"
+          color={theme.textDefault}
+        >
           {question.questionText}
         </MarkdownText>
       </View>
@@ -146,7 +160,9 @@ export function QuestionView({
                 label={label}
                 selected={selectedOptionId === option.id}
                 onPress={() =>
-                  onSelectOption(selectedOptionId === option.id ? "" : option.id)
+                  onSelectOption(
+                    selectedOptionId === option.id ? "" : option.id,
+                  )
                 }
                 theme={theme}
               />
