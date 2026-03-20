@@ -192,15 +192,6 @@ export function WritingScreen({ id }: WritingScreenProps) {
                 {data.title}
               </Text>
 
-              {data.description ? (
-                <Text
-                  className="font-body text-xs"
-                  style={{ color: theme.textMuted, lineHeight: 18 }}
-                >
-                  {data.description}
-                </Text>
-              ) : null}
-
               {dueDate ? (
                 <View className="flex-row items-center gap-1.5">
                   <CalendarDays
