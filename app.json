@@ -4,40 +4,66 @@
     "slug": "satori-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/satori-icon.png",
     "scheme": "satorimobile",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSSpeechRecognitionUsageDescription": "Satori Nihongo cần quyền nhận dạng giọng nói để chuyển lời nói của bạn thành văn bản.",
+        "NSMicrophoneUsageDescription": "Satori Nihongo cần quyền truy cập microphone để bạn có thể hội thoại tiếng Nhật với AI.",
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "bundleIdentifier": "com.kitkas1412.satorimobile"
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "foregroundImage": "./assets/images/satori-icon.png",
+        "backgroundImage": "./assets/images/satori-icon.png",
+        "monochromeImage": "./assets/images/satori-icon.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.kitkas1412.satorimobile"
+      "package": "com.kitkas1412.satorimobile",
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.CAMERA"
+      ]
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/satori-icon.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/satori-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
           "dark": {
             "backgroundColor": "#000000"
           }
+        }
+      ],
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Satori Nihongo cần quyền truy cập microphone để bạn có thể hội thoại tiếng Nhật với AI.",
+          "speechRecognitionPermission": "Satori Nihongo cần quyền nhận dạng giọng nói để chuyển lời nói của bạn thành văn bản."
+        }
+      ],
+      "expo-audio",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Satori Nihongo cần quyền truy cập thư viện ảnh để bạn có thể tải lên bài làm.",
+          "cameraPermission": "Satori Nihongo cần quyền truy cập camera để bạn có thể chụp ảnh bài làm."
         }
       ]
     ],
