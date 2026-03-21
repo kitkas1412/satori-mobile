@@ -5,7 +5,7 @@ export { useQuizNavigation } from "./use-quiz-navigation";
 export { useQuizAnswers } from "./use-quiz-answers";
 export { useQuizTimer } from "./use-quiz-timer";
 export { useQuizSubmit } from "./use-quiz-submit";
-export { mapAssignmentToCardProps, useAssignmentNavigation } from "./use-assignment-card";
+export { useAssignmentNavigation } from "./use-assignment-navigation";
 export { useQuizResult } from "./use-quiz-result";
 export { useWritingSubmit } from "./use-writing-submit";
 export { useWritingImages } from "./use-writing-images";

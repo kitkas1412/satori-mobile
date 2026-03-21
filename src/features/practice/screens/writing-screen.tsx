@@ -148,7 +148,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
                   }}
                 >
                   <MarkdownText fontSize={14} color={theme.textDefault}>
-                    {`Yêu cầu: ${data.writingContent?.prompt}`}
+                    {`Đề bài: ${data.writingContent?.prompt}`}
                   </MarkdownText>
                 </View>
               ) : null}
@@ -282,19 +282,21 @@ export function WritingScreen({ id }: WritingScreenProps) {
               </Text>
             </View>
 
-            {/* Kết quả đánh giá AI — hiển thị sau khi gọi evaluate thành công */}
-            {evaluateFeedback ? (
-              <View
-                style={{
-                  backgroundColor: theme.cardBackground,
-                  borderRadius: 14,
-                  borderWidth: 1,
-                  borderColor: "rgba(0,0,0,0.1)",
-                  padding: 16,
-                  gap: 10,
-                }}
-              >
+            {/* Card nhận xét AI — luôn hiển thị */}
+            <View
+              style={{
+                backgroundColor: theme.cardBackground,
+                borderRadius: 14,
+                borderWidth: 1,
+                borderColor: "rgba(0,0,0,0.1)",
+                padding: 16,
+                gap: 12,
+              }}
+            >
+              {/* Header: icon + tiêu đề, nút Đánh giá lại khi đã có feedback */}
+              <View className="flex-row items-center justify-between">
                 <View className="flex-row items-center gap-2">
+                  <Sparkles size={18} color={theme.primary} strokeWidth={2} />
                   <Text
                     className="font-heading text-base"
                     style={{ color: theme.textDefault }}
@@ -302,14 +304,84 @@ export function WritingScreen({ id }: WritingScreenProps) {
                     Nhận xét từ AI
                   </Text>
                 </View>
-                <Text
-                  className="font-body text-sm leading-relaxed"
-                  style={{ color: theme.textDefault }}
-                >
-                  {evaluateFeedback}
-                </Text>
+                {evaluateFeedback ? (
+                  <Pressable
+                    onPress={() => handleEvaluate()}
+                    disabled={isEvaluating || isSubmitting}
+                    className="flex-row items-center gap-1"
+                  >
+                    <Sparkles
+                      size={14}
+                      color={
+                        isEvaluating || isSubmitting
+                          ? theme.textMuted
+                          : theme.primary
+                      }
+                      strokeWidth={2}
+                    />
+                    <Text
+                      className="font-body text-xs"
+                      style={{
+                        color:
+                          isEvaluating || isSubmitting
+                            ? theme.textMuted
+                            : theme.primary,
+                      }}
+                    >
+                      Đánh giá lại
+                    </Text>
+                  </Pressable>
+                ) : null}
               </View>
-            ) : null}
+
+              {/* Chưa có feedback: mô tả + nút đánh giá */}
+              {!evaluateFeedback ? (
+                <>
+                  <Text
+                    className="font-body text-sm"
+                    style={{ color: theme.textDefault, opacity: 0.7 }}
+                  >
+                    Nhờ AI đánh giá bài viết của bạn trước khi nộp để nhận góp ý
+                    chi tiết.
+                  </Text>
+                  <Pressable
+                    onPress={() => handleEvaluate()}
+                    disabled={
+                      images.length === 0 || isEvaluating || isSubmitting
+                    }
+                    className="flex-row items-center justify-center gap-2 rounded-xl"
+                    style={{
+                      height: 48,
+                      borderWidth: 2,
+                      borderColor:
+                        images.length === 0 ? theme.border : theme.primary,
+                    }}
+                  >
+                    <Sparkles
+                      size={18}
+                      color={
+                        images.length === 0 ? theme.textMuted : theme.primary
+                      }
+                      strokeWidth={2}
+                    />
+                    <Text
+                      className="font-heading text-sm"
+                      style={{
+                        color:
+                          images.length === 0 ? theme.textMuted : theme.primary,
+                      }}
+                    >
+                      AI Đánh giá
+                    </Text>
+                  </Pressable>
+                </>
+              ) : (
+                /* Đã có feedback: hiển thị nội dung */
+                <MarkdownText fontSize={14} color={theme.textDefault}>
+                  {evaluateFeedback}
+                </MarkdownText>
+              )}
+            </View>
           </ScrollView>
 
           {/* Thanh hành động cố định dưới cùng */}
@@ -318,35 +390,8 @@ export function WritingScreen({ id }: WritingScreenProps) {
               paddingTop: 16,
               paddingHorizontal: 16,
               paddingBottom: insets.bottom + 8,
-              gap: 10,
             }}
           >
-            {/* Nút AI Đánh giá — chỉ bật khi đã có ảnh */}
-            <Pressable
-              onPress={() => handleEvaluate()}
-              disabled={images.length === 0 || isEvaluating || isSubmitting}
-              className="flex-row items-center justify-center gap-2 rounded-xl"
-              style={{
-                height: 48,
-                borderWidth: 2,
-                borderColor: images.length === 0 ? theme.border : theme.primary,
-              }}
-            >
-              <Sparkles
-                size={18}
-                color={images.length === 0 ? theme.textMuted : theme.primary}
-                strokeWidth={2}
-              />
-              <Text
-                className="font-heading text-sm"
-                style={{
-                  color: images.length === 0 ? theme.textMuted : theme.primary,
-                }}
-              >
-                AI Đánh giá
-              </Text>
-            </Pressable>
-
             <PrimaryButton
               text="Nộp bài"
               onPress={handleSubmit}
