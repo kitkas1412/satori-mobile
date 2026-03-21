@@ -11,7 +11,11 @@ import { ScreenHeader } from "@/components/ui/screen-header";
 import { SectionHeader } from "@/components/ui/section-header";
 import { AiBanner } from "../components/ai-banner";
 import { AssignmentCard } from "../components/assignment-card";
-import { useAssignments, mapAssignmentToCardProps, useAssignmentNavigation } from "../hooks";
+import {
+  useAssignments,
+  mapAssignmentToCardProps,
+  useAssignmentNavigation,
+} from "../hooks";
 
 type ActiveTab = "teacher" | "ai";
 
@@ -21,7 +25,8 @@ export function PracticeScreen() {
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
   const { data, isLoading, isError } = useAssignments();
-  const { handleAssignmentPress, isLoadingSubmission } = useAssignmentNavigation();
+  const { handleAssignmentPress, isLoadingSubmission } =
+    useAssignmentNavigation();
 
   const bellAction = (
     <View className="relative">
@@ -66,7 +71,7 @@ export function PracticeScreen() {
               strokeWidth={2}
             />
             <Text
-              className="font-heading text-sm"
+              className="font-heading text-base"
               style={{
                 color: activeTab === "teacher" ? theme.white : theme.textMuted,
               }}
@@ -89,7 +94,7 @@ export function PracticeScreen() {
               strokeWidth={2}
             />
             <Text
-              className="font-heading text-sm"
+              className="font-heading text-base"
               style={{
                 color: activeTab === "ai" ? theme.white : theme.textMuted,
               }}
@@ -104,7 +109,7 @@ export function PracticeScreen() {
             <SectionHeader
               title="Bài tập từ giáo viên"
               subtitle="Hoàn thành các bài tập được giao bởi giáo viên"
-              size="sm"
+              size="lg"
             />
 
             {isError ? (
@@ -138,7 +143,10 @@ export function PracticeScreen() {
         )}
       </ScrollView>
       <LoadingOverlay visible={isLoading} title="Đang tải bài tập..." />
-      <LoadingOverlay visible={isLoadingSubmission} title="Đang tải kết quả..." />
+      <LoadingOverlay
+        visible={isLoadingSubmission}
+        title="Đang tải kết quả..."
+      />
     </View>
   );
 }

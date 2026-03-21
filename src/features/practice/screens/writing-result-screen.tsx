@@ -1,9 +1,4 @@
-import {
-  CheckCircle2,
-  ChevronLeft,
-  Clock,
-  X,
-} from "lucide-react-native";
+import { CheckCircle2, ChevronLeft, Clock, X } from "lucide-react-native";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
@@ -19,7 +14,15 @@ export function WritingResultScreen() {
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
 
-  const { writingResult, isGraded, imageUrls, score, isCancelling, handleGoHome, handleCancelSubmission } = useWritingResult();
+  const {
+    writingResult,
+    isGraded,
+    imageUrls,
+    score,
+    isCancelling,
+    handleGoHome,
+    handleCancelSubmission,
+  } = useWritingResult();
 
   return (
     <View
@@ -97,9 +100,15 @@ export function WritingResultScreen() {
             title="Đang chờ chấm bài"
             description="Bài làm của bạn đã được gửi đến giáo viên. Kết quả sẽ được cập nhật sau khi giáo viên hoàn thành chấm bài."
             extra={
-              <View className="flex-row items-center gap-2" style={{ opacity: 0.8 }}>
+              <View
+                className="flex-row items-center gap-2"
+                style={{ opacity: 0.8 }}
+              >
                 <Clock size={14} color="#0958d9" strokeWidth={1.5} />
-                <Text className="font-body text-xs" style={{ color: "#0958d9" }}>
+                <Text
+                  className="font-body text-xs"
+                  style={{ color: "#0958d9" }}
+                >
                   Thời gian chấm bài thường từ 1-3 ngày
                 </Text>
               </View>
@@ -115,14 +124,26 @@ export function WritingResultScreen() {
             extra={
               <>
                 <View className="flex-row items-center justify-between">
-                  <Text className="font-body text-sm" style={{ color: theme.textMuted }}>
+                  <Text
+                    className="font-body text-sm"
+                    style={{ color: theme.textMuted }}
+                  >
                     Điểm số:
                   </Text>
-                  <Text className="font-heading text-2xl" style={{ color: "#389e0d" }}>
+                  <Text
+                    className="font-heading text-2xl"
+                    style={{ color: "#389e0d" }}
+                  >
                     {Math.round(score)}/100
                   </Text>
                 </View>
-                <View style={{ backgroundColor: theme.white, borderRadius: 10, padding: 12 }}>
+                <View
+                  style={{
+                    backgroundColor: theme.white,
+                    borderRadius: 10,
+                    padding: 12,
+                  }}
+                >
                   {writingResult?.feedback ? (
                     <Text
                       className="font-body text-xs"
@@ -278,7 +299,7 @@ export function WritingResultScreen() {
               className="font-heading text-sm"
               style={{ color: theme.white }}
             >
-              Về trang chủ
+              Quay về
             </Text>
           </Pressable>
 

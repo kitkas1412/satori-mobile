@@ -58,25 +58,23 @@ export function AssignmentCard({
       <View className="flex-row items-start justify-between gap-3">
         <View className="flex-1 gap-1">
           <Text
-            className="font-heading text-base"
+            className="font-heading text-lg"
             style={{ color: theme.textMuted }}
             numberOfLines={2}
           >
             {title}
           </Text>
           <Text
-            className="font-body text-xs"
+            className="font-body text-sm"
             style={{ color: theme.textMuted, opacity: 0.7 }}
           >
             {subtitle}
           </Text>
         </View>
-        {status === "completed" || status === "graded" || status === "submitted" ? (
-          <CircleCheck
-            size={20}
-            color={statusColor[status]}
-            strokeWidth={2}
-          />
+        {status === "completed" ||
+        status === "graded" ||
+        status === "submitted" ? (
+          <CircleCheck size={20} color={statusColor[status]} strokeWidth={2} />
         ) : (
           <Circle size={20} color={theme.border} strokeWidth={1.5} />
         )}
@@ -100,7 +98,6 @@ export function AssignmentCard({
           {STATUS_LABEL[status]}
         </Text>
       </View>
-
     </Pressable>
   );
 }

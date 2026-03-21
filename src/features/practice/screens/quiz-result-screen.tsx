@@ -130,7 +130,6 @@ export function QuizResultScreen() {
               </View>
             </View>
           </View>
-
         </View>
 
         {/* Per-question breakdown */}
@@ -154,7 +153,7 @@ export function QuizResultScreen() {
         )}
 
         {/* Action button */}
-        <PrimaryButton text="Tiếp tục" onPress={handleContinue} />
+        <PrimaryButton text="Quay về" onPress={handleContinue} />
       </ScrollView>
     </View>
   );

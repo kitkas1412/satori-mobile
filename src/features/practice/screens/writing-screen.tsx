@@ -1,20 +1,25 @@
-import { CalendarDays, ImageIcon, X } from "lucide-react-native";
+import { CalendarDays, CameraIcon, ImageIcon, X } from "lucide-react-native";
 import { useEffect } from "react";
-import {
-  Image,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
+import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { LoadingOverlay, MarkdownText, PrimaryButton, ScreenAsyncView, ScreenHeader } from "@/components/ui";
-import { useStartAssignment, useWritingSubmit, useExitAssignment, useWritingImages } from "../hooks";
+import {
+  LoadingOverlay,
+  MarkdownText,
+  PrimaryButton,
+  ScreenAsyncView,
+  ScreenHeader,
+} from "@/components/ui";
+import {
+  useStartAssignment,
+  useWritingSubmit,
+  useExitAssignment,
+  useWritingImages,
+} from "../hooks";
 
 interface WritingScreenProps {
   id: string;
@@ -27,7 +32,13 @@ export function WritingScreen({ id }: WritingScreenProps) {
   const insets = useSafeAreaInsets();
 
   const { mutate, data, isPending, isError } = useStartAssignment();
-  const { images, handlePickImage, handleTakePhoto, handleRemoveImage, dueDate } = useWritingImages({ data });
+  const {
+    images,
+    handlePickImage,
+    handleTakePhoto,
+    handleRemoveImage,
+    dueDate,
+  } = useWritingImages({ data });
 
   useEffect(() => {
     if (id) mutate(id);
@@ -82,7 +93,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
               }}
             >
               <Text
-                className="font-heading text-base"
+                className="font-heading text-lg"
                 style={{ color: theme.textDefault }}
               >
                 {data?.title}
@@ -113,7 +124,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
                     marginTop: 4,
                   }}
                 >
-                  <MarkdownText fontSize={13} color={theme.textDefault}>
+                  <MarkdownText fontSize={14} color={theme.textDefault}>
                     {`Yêu cầu: ${data.writingContent?.prompt}`}
                   </MarkdownText>
                 </View>
@@ -134,7 +145,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
               {/* Card header */}
               <View className="flex-row items-center justify-between">
                 <Text
-                  className="font-heading text-sm"
+                  className="font-heading text-lg"
                   style={{ color: theme.textDefault }}
                 >
                   Bài làm của bạn
@@ -173,7 +184,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
                     borderColor: theme.primary,
                   }}
                 >
-                  <ImageIcon size={20} color={theme.primary} strokeWidth={2} />
+                  <CameraIcon size={20} color={theme.primary} strokeWidth={2} />
                   <Text
                     className="font-heading text-sm"
                     style={{ color: theme.primary }}
