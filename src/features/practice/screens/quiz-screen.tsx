@@ -1,7 +1,6 @@
 import { ChevronLeft, ChevronRight, X } from "lucide-react-native";
 import { useEffect } from "react";
 import {
-  Alert,
   ActivityIndicator,
   Pressable,
   Text,
@@ -13,8 +12,8 @@ import { StatusBar } from "expo-status-bar";
 
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { MarkdownText } from "@/components/ui";
-import { useStartAssignment, useQuizNavigation, useQuizAnswers, useQuizTimer, useQuizSubmit } from "../hooks";
+import { LoadingOverlay, ScreenAsyncView, ScreenHeader } from "@/components/ui";
+import { useStartAssignment, useQuizNavigation, useQuizAnswers, useQuizTimer, useQuizSubmit, useExitAssignment } from "../hooks";
 import { QuestionView } from "../components";
 
 interface QuizScreenProps {
@@ -40,6 +39,7 @@ export function QuizScreen({ id }: QuizScreenProps) {
     answers,
     getTimeStats,
   });
+  const { handleExit } = useExitAssignment(() => router.back());
 
   const current = questions[currentIndex];
 
@@ -50,75 +50,46 @@ export function QuizScreen({ id }: QuizScreenProps) {
   return (
     <View className="flex-1 bg-background-default" style={{ paddingTop: insets.top }}>
       <StatusBar style="dark" />
+      <LoadingOverlay visible={isPending} title="Đang tải bài tập..." />
+      <LoadingOverlay visible={isSubmitting} title="Đang nộp bài..." />
 
-      {/* Header */}
-      <View className="flex-row items-center px-4 py-3 gap-3">
-        <Pressable
-          onPress={() =>
-            Alert.alert(
-              "Thoát bài tập?",
-              "Tiến độ của bạn sẽ không được lưu.",
-              [
-                { text: "Tiếp tục làm", style: "cancel" },
-                { text: "Thoát", style: "destructive", onPress: () => router.back() },
-              ],
-            )
-          }
-          hitSlop={8}
-          className="items-center justify-center"
-          style={{ width: 24, height: 24 }}
-        >
-          <X size={22} color={theme.textMuted} strokeWidth={2} />
-        </Pressable>
-        <MarkdownText
-          fontSize={20}
-          fontFamily="Nunito_700Bold"
-          color={theme.textMuted}
-          containerStyle={{ flex: 1 }}
-        >
-          {data?.title ?? "Bài tập"}
-        </MarkdownText>
-      </View>
-
-      {/* Divider */}
-      <View style={{ height: 1, backgroundColor: theme.border, opacity: 0.5 }} />
-
-      {/* Content */}
-      {isPending ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator color={theme.primary} />
-        </View>
-      ) : isError || !data ? (
-        <View className="flex-1 items-center justify-center px-8">
-          <Text
-            className="font-body text-sm text-center"
-            style={{ color: theme.textMuted }}
+      <ScreenHeader
+        title={data?.title ?? "Bài tập"}
+        showDivider
+        leftAction={
+          <Pressable
+            onPress={handleExit}
+            hitSlop={8}
+            className="items-center justify-center"
+            style={{ width: 24, height: 24 }}
           >
-            Không thể tải bài tập. Vui lòng thử lại.
-          </Text>
-        </View>
-      ) : total === 0 ? (
-        <View className="flex-1 items-center justify-center px-8">
-          <Text
-            className="font-body text-sm text-center"
-            style={{ color: theme.textMuted }}
-          >
-            Bài tập này chưa có câu hỏi.
-          </Text>
-        </View>
-      ) : (
+            <X size={22} color={theme.textMuted} strokeWidth={2} />
+          </Pressable>
+        }
+        rightAction={<View style={{ width: 24 }} />}
+      />
+
+      <ScreenAsyncView
+        isLoading={false}
+        isError={!isPending && (isError || !data)}
+        isEmpty={!isPending && total === 0}
+        errorText="Không thể tải bài tập. Vui lòng thử lại."
+        emptyText="Bài tập này chưa có câu hỏi."
+      >
         <>
           <View className="flex-1">
-            <QuestionView
-              question={current}
-              index={currentIndex}
-              total={total}
-              selectedOptionId={answers[current.assignmentQuestionId]}
-              fillBlankAnswer={answers[current.assignmentQuestionId]}
-              onSelectOption={(optionId) => handleSelectOption(current.assignmentQuestionId, optionId)}
-              onFillBlankChange={(text) => handleFillBlankChange(current.assignmentQuestionId, text)}
-              theme={theme}
-            />
+            {current && (
+              <QuestionView
+                question={current}
+                index={currentIndex}
+                total={total}
+                selectedOptionId={answers[current.assignmentQuestionId]}
+                fillBlankAnswer={answers[current.assignmentQuestionId]}
+                onSelectOption={(optionId) => handleSelectOption(current.assignmentQuestionId, optionId)}
+                onFillBlankChange={(text) => handleFillBlankChange(current.assignmentQuestionId, text)}
+                theme={theme}
+              />
+            )}
           </View>
 
           {/* Bottom action bar */}
@@ -177,7 +148,7 @@ export function QuizScreen({ id }: QuizScreenProps) {
             </Pressable>
           </View>
         </>
-      )}
+      </ScreenAsyncView>
     </View>
   );
 }

@@ -1,6 +1,6 @@
 import { Bell, BookOpen, Sparkles } from "lucide-react-native";
 import { useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 
@@ -34,7 +34,6 @@ export function PracticeScreen() {
 
   return (
     <View className="flex-1 bg-background-default">
-      <LoadingOverlay visible={isLoadingSubmission} title="Đang tải kết quả..." />
       <StatusBar style="dark" />
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -108,9 +107,7 @@ export function PracticeScreen() {
               size="sm"
             />
 
-            {isLoading ? (
-              <ActivityIndicator color={theme.primary} />
-            ) : isError ? (
+            {isError ? (
               <Text
                 className="font-body text-sm text-center"
                 style={{ color: theme.textMuted }}
@@ -140,6 +137,8 @@ export function PracticeScreen() {
           </View>
         )}
       </ScrollView>
+      <LoadingOverlay visible={isLoading} title="Đang tải bài tập..." />
+      <LoadingOverlay visible={isLoadingSubmission} title="Đang tải kết quả..." />
     </View>
   );
 }

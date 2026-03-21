@@ -1,10 +1,7 @@
-import { CalendarDays, ChevronLeft, ImageIcon, X } from "lucide-react-native";
-import { useEffect, useRef, useState } from "react";
+import { CalendarDays, ImageIcon, X } from "lucide-react-native";
+import { useEffect } from "react";
 import {
-  ActivityIndicator,
-  Alert,
   Image,
-  Linking,
   Pressable,
   ScrollView,
   Text,
@@ -13,13 +10,11 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import * as ImagePicker from "expo-image-picker";
-import type { ImagePickerAsset } from "expo-image-picker";
 
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { MarkdownText, PrimaryButton } from "@/components/ui";
-import { useStartAssignment, useWritingSubmit } from "../hooks";
+import { LoadingOverlay, MarkdownText, PrimaryButton, ScreenAsyncView, ScreenHeader } from "@/components/ui";
+import { useStartAssignment, useWritingSubmit, useExitAssignment, useWritingImages } from "../hooks";
 
 interface WritingScreenProps {
   id: string;
@@ -32,83 +27,17 @@ export function WritingScreen({ id }: WritingScreenProps) {
   const insets = useSafeAreaInsets();
 
   const { mutate, data, isPending, isError } = useStartAssignment();
-  const [images, setImages] = useState<ImagePickerAsset[]>([]);
-  const startedAtRef = useRef<number>(0);
+  const { images, handlePickImage, handleTakePhoto, handleRemoveImage, dueDate } = useWritingImages({ data });
 
   useEffect(() => {
     if (id) mutate(id);
   }, [id]);
 
-  useEffect(() => {
-    if (data && startedAtRef.current === 0) {
-      startedAtRef.current = Date.now();
-    }
-  }, [data]);
-
-  function getTimeSpentSeconds() {
-    return Math.max(1, Math.round((Date.now() - startedAtRef.current) / 1000));
-  }
-
   const { handleSubmit, isPending: isSubmitting } = useWritingSubmit({
     assignmentId: id,
     images,
   });
-
-  async function handlePickImage() {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert(
-        "Cần quyền truy cập",
-        "Vui lòng cấp quyền truy cập thư viện ảnh trong Cài đặt.",
-        [
-          { text: "Hủy", style: "cancel" },
-          { text: "Mở Cài đặt", onPress: () => Linking.openSettings() },
-        ],
-      );
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: "images",
-      allowsMultipleSelection: true,
-      quality: 0.8,
-    });
-    if (!result.canceled) {
-      setImages((prev) => [...prev, ...result.assets]);
-    }
-  }
-
-  async function handleTakePhoto() {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert(
-        "Cần quyền truy cập",
-        "Vui lòng cấp quyền truy cập camera trong Cài đặt.",
-        [
-          { text: "Hủy", style: "cancel" },
-          { text: "Mở Cài đặt", onPress: () => Linking.openSettings() },
-        ],
-      );
-      return;
-    }
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: "images",
-      quality: 0.8,
-    });
-    if (!result.canceled) {
-      setImages((prev) => [...prev, ...result.assets]);
-    }
-  }
-
-  function handleRemoveImage(index: number) {
-    setImages((prev) => prev.filter((_, i) => i !== index));
-  }
-
-  const dueDate = data?.dueDate
-    ? (() => {
-        const d = new Date(data.dueDate);
-        return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
-      })()
-    : null;
+  const { handleExit } = useExitAssignment(() => router.back());
 
   return (
     <View
@@ -116,58 +45,25 @@ export function WritingScreen({ id }: WritingScreenProps) {
       style={{ paddingTop: insets.top }}
     >
       <StatusBar style="dark" />
+      <LoadingOverlay visible={isPending} title="Đang tải bài tập..." />
+      <LoadingOverlay visible={isSubmitting} title="Đang nộp bài..." />
 
-      {/* Header */}
-      <View
-        className="flex-row items-center px-4 gap-3"
-        style={{
-          paddingVertical: 12,
-          borderBottomWidth: 1,
-          borderBottomColor: theme.border,
-        }}
+      <ScreenHeader
+        title="Nộp bài tập"
+        showDivider
+        leftAction={
+          <Pressable onPress={handleExit} hitSlop={8}>
+            <X size={24} color={theme.textDefault} strokeWidth={2} />
+          </Pressable>
+        }
+        rightAction={<View style={{ width: 24 }} />}
+      />
+
+      <ScreenAsyncView
+        isLoading={false}
+        isError={!isPending && (isError || !data)}
+        errorText="Không thể tải bài tập. Vui lòng thử lại."
       >
-        <Pressable
-          onPress={() =>
-            Alert.alert(
-              "Thoát bài tập?",
-              "Tiến độ của bạn sẽ không được lưu.",
-              [
-                { text: "Tiếp tục làm", style: "cancel" },
-                {
-                  text: "Thoát",
-                  style: "destructive",
-                  onPress: () => router.back(),
-                },
-              ],
-            )
-          }
-          hitSlop={8}
-        >
-          <X size={24} color={theme.textDefault} strokeWidth={2} />
-        </Pressable>
-        <Text
-          className="font-heading text-lg"
-          style={{ color: theme.textDefault }}
-        >
-          Nộp bài tập
-        </Text>
-      </View>
-
-      {/* Content */}
-      {isPending ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator color={theme.primary} />
-        </View>
-      ) : isError || !data ? (
-        <View className="flex-1 items-center justify-center px-8">
-          <Text
-            className="font-body text-sm text-center"
-            style={{ color: theme.textMuted }}
-          >
-            Không thể tải bài tập. Vui lòng thử lại.
-          </Text>
-        </View>
-      ) : (
         <>
           <ScrollView
             className="flex-1"
@@ -189,7 +85,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
                 className="font-heading text-base"
                 style={{ color: theme.textDefault }}
               >
-                {data.title}
+                {data?.title}
               </Text>
 
               {dueDate ? (
@@ -208,7 +104,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
                 </View>
               ) : null}
 
-              {data.writingContent?.prompt ? (
+              {data?.writingContent?.prompt ? (
                 <View
                   style={{
                     backgroundColor: theme.background,
@@ -218,7 +114,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
                   }}
                 >
                   <MarkdownText fontSize={13} color={theme.textDefault}>
-                    {`Yêu cầu: ${data.writingContent.prompt}`}
+                    {`Yêu cầu: ${data.writingContent?.prompt}`}
                   </MarkdownText>
                 </View>
               ) : null}
@@ -372,7 +268,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
             />
           </View>
         </>
-      )}
+      </ScreenAsyncView>
     </View>
   );
 }
