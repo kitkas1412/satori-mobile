@@ -1,5 +1,15 @@
-import { CalendarDays, CameraIcon, ImageIcon, X } from "lucide-react-native";
-import { useEffect } from "react";
+// Màn hình nộp bài viết.
+// Học viên tải lên ảnh bài làm từ thư viện hoặc chụp trực tiếp, sau đó nhấn nộp bài.
+// Nút nộp bài bị vô hiệu hóa nếu chưa chọn ảnh nào.
+
+import {
+  CalendarDays,
+  CameraIcon,
+  ImageIcon,
+  Sparkles,
+  X,
+} from "lucide-react-native";
+import { useEffect, useState } from "react";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -19,6 +29,7 @@ import {
   useWritingSubmit,
   useExitAssignment,
   useWritingImages,
+  useWritingEvaluate,
 } from "../hooks";
 
 interface WritingScreenProps {
@@ -40,6 +51,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
     dueDate,
   } = useWritingImages({ data });
 
+  // Tự động gọi API bắt đầu bài tập ngay khi màn hình được mount
   useEffect(() => {
     if (id) mutate(id);
   }, [id]);
@@ -50,6 +62,15 @@ export function WritingScreen({ id }: WritingScreenProps) {
   });
   const { handleExit } = useExitAssignment(() => router.back());
 
+  const [evaluateFeedback, setEvaluateFeedback] = useState("");
+
+  const { handleEvaluate, isPending: isEvaluating } = useWritingEvaluate({
+    assignmentId: id,
+    prompt: data?.writingContent?.prompt ?? "",
+    images,
+    onSuccess: (feedback) => setEvaluateFeedback(feedback),
+  });
+
   return (
     <View
       className="flex-1 bg-background-default"
@@ -58,7 +79,9 @@ export function WritingScreen({ id }: WritingScreenProps) {
       <StatusBar style="dark" />
       <LoadingOverlay visible={isPending} title="Đang tải bài tập..." />
       <LoadingOverlay visible={isSubmitting} title="Đang nộp bài..." />
+      <LoadingOverlay visible={isEvaluating} title="Đang đánh giá bài..." />
 
+      {/* Header với nút X để thoát bài */}
       <ScreenHeader
         title="Nộp bài tập"
         showDivider
@@ -81,7 +104,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
             contentContainerStyle={{ padding: 16, gap: 16 }}
             showsVerticalScrollIndicator={false}
           >
-            {/* Assignment Info Card */}
+            {/* Thẻ thông tin bài tập: tiêu đề, hạn nộp, yêu cầu đề bài */}
             <View
               style={{
                 backgroundColor: theme.cardBackground,
@@ -131,7 +154,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
               ) : null}
             </View>
 
-            {/* Your Work Card */}
+            {/* Thẻ bài làm: chọn/chụp ảnh và xem trước danh sách ảnh đã chọn */}
             <View
               style={{
                 backgroundColor: theme.cardBackground,
@@ -142,7 +165,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
                 gap: 12,
               }}
             >
-              {/* Card header */}
+              {/* Header thẻ: tiêu đề + số lượng ảnh đã chọn */}
               <View className="flex-row items-center justify-between">
                 <Text
                   className="font-heading text-lg"
@@ -158,7 +181,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
                 </Text>
               </View>
 
-              {/* Action buttons */}
+              {/* Nút chọn ảnh từ thư viện và chụp camera */}
               <View className="flex-row gap-3">
                 <Pressable
                   onPress={handlePickImage}
@@ -194,7 +217,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
                 </Pressable>
               </View>
 
-              {/* Image preview area */}
+              {/* Khu vực xem trước: placeholder khi chưa có ảnh, hoặc danh sách ảnh cuộn ngang */}
               {images.length === 0 ? (
                 <View
                   className="items-center justify-center"
@@ -230,6 +253,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
                           source={{ uri: img.uri }}
                           style={{ width: 100, height: 100, borderRadius: 8 }}
                         />
+                        {/* Nút X để xóa ảnh khỏi danh sách */}
                         <Pressable
                           onPress={() => handleRemoveImage(index)}
                           hitSlop={4}
@@ -257,20 +281,76 @@ export function WritingScreen({ id }: WritingScreenProps) {
                 Bạn có thể tải lên nhiều hình ảnh bài viết của mình
               </Text>
             </View>
+
+            {/* Kết quả đánh giá AI — hiển thị sau khi gọi evaluate thành công */}
+            {evaluateFeedback ? (
+              <View
+                style={{
+                  backgroundColor: theme.cardBackground,
+                  borderRadius: 14,
+                  borderWidth: 1,
+                  borderColor: "rgba(0,0,0,0.1)",
+                  padding: 16,
+                  gap: 10,
+                }}
+              >
+                <View className="flex-row items-center gap-2">
+                  <Text
+                    className="font-heading text-base"
+                    style={{ color: theme.textDefault }}
+                  >
+                    Nhận xét từ AI
+                  </Text>
+                </View>
+                <Text
+                  className="font-body text-sm leading-relaxed"
+                  style={{ color: theme.textDefault }}
+                >
+                  {evaluateFeedback}
+                </Text>
+              </View>
+            ) : null}
           </ScrollView>
 
-          {/* Bottom submit bar */}
+          {/* Thanh hành động cố định dưới cùng */}
           <View
             style={{
               paddingTop: 16,
               paddingHorizontal: 16,
               paddingBottom: insets.bottom + 8,
+              gap: 10,
             }}
           >
+            {/* Nút AI Đánh giá — chỉ bật khi đã có ảnh */}
+            <Pressable
+              onPress={() => handleEvaluate()}
+              disabled={images.length === 0 || isEvaluating || isSubmitting}
+              className="flex-row items-center justify-center gap-2 rounded-xl"
+              style={{
+                height: 48,
+                borderWidth: 2,
+                borderColor: images.length === 0 ? theme.border : theme.primary,
+              }}
+            >
+              <Sparkles
+                size={18}
+                color={images.length === 0 ? theme.textMuted : theme.primary}
+                strokeWidth={2}
+              />
+              <Text
+                className="font-heading text-sm"
+                style={{
+                  color: images.length === 0 ? theme.textMuted : theme.primary,
+                }}
+              >
+                AI Đánh giá
+              </Text>
+            </Pressable>
+
             <PrimaryButton
               text="Nộp bài"
               onPress={handleSubmit}
-              disabled={images.length === 0 || isSubmitting}
+              disabled={images.length === 0 || isSubmitting || isEvaluating}
               loading={isSubmitting}
               style={{
                 backgroundColor:

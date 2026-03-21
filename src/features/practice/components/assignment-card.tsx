@@ -1,9 +1,13 @@
+// Card hiển thị thông tin tóm tắt của một bài tập trong danh sách.
+// Màu sắc và icon thay đổi theo trạng thái bài tập.
+
 import { Circle, CircleCheck, Clock } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
+// Các trạng thái bài tập có thể hiển thị trên card
 export type AssignmentStatus =
   | "in_progress"
   | "not_started"
@@ -20,6 +24,7 @@ export interface AssignmentCardProps {
   onPress?: () => void;
 }
 
+// Nhãn hiển thị tiếng Việt tương ứng với từng trạng thái
 const STATUS_LABEL: Record<AssignmentStatus, string> = {
   in_progress: "Đang làm",
   not_started: "Chưa làm",
@@ -39,6 +44,7 @@ export function AssignmentCard({
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
+  // Màu badge trạng thái: xanh lá = hoàn thành/chấm, vàng = chưa làm, đỏ = quá hạn, v.v.
   const statusColor: Record<AssignmentStatus, string> = {
     in_progress: theme.primary,
     not_started: theme.warning,
@@ -54,12 +60,12 @@ export function AssignmentCard({
       className="bg-background-surface rounded-2xl p-4 gap-3"
       style={{ borderWidth: 0.6, borderColor: theme.border }}
     >
-      {/* Title + icon */}
+      {/* Tiêu đề + icon trạng thái */}
       <View className="flex-row items-start justify-between gap-3">
         <View className="flex-1 gap-1">
           <Text
             className="font-heading text-lg"
-            style={{ color: theme.textMuted }}
+            style={{ color: theme.textDefault }}
             numberOfLines={2}
           >
             {title}
@@ -71,6 +77,7 @@ export function AssignmentCard({
             {subtitle}
           </Text>
         </View>
+        {/* Hiển thị CircleCheck (có tick) khi bài đã hoàn thành/chấm/nộp, Circle trống khi chưa */}
         {status === "completed" ||
         status === "graded" ||
         status === "submitted" ? (
@@ -80,7 +87,7 @@ export function AssignmentCard({
         )}
       </View>
 
-      {/* Due date + status */}
+      {/* Hạn nộp + nhãn trạng thái */}
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-1">
           <Clock size={16} color={theme.textMuted} strokeWidth={1.5} />

@@ -1,3 +1,6 @@
+// Component hiển thị kết quả một câu hỏi trong màn hình kết quả trắc nghiệm.
+// Có thể mở rộng (expand) để xem đáp án đúng, đáp án đã chọn và giải thích.
+
 import { Check, ChevronDown, ChevronUp, X } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
@@ -21,11 +24,13 @@ export function QuizAnswerItem({ item, index, theme }: QuizAnswerItemProps) {
       className="bg-background-surface rounded-2xl overflow-hidden"
       style={{
         borderWidth: 1.5,
+        // Viền xanh lá nếu đúng, đỏ nếu sai
         borderColor: item.correct ? theme.success : theme.error,
       }}
     >
-      {/* Row: indicator + question text + chevron */}
+      {/* Hàng tóm tắt: indicator đúng/sai + nội dung câu hỏi + chevron */}
       <View className="flex-row items-center gap-3 p-4">
+        {/* Chấm tròn màu xanh (đúng) hoặc đỏ (sai) */}
         <View
           className="items-center justify-center rounded-full"
           style={{
@@ -46,6 +51,7 @@ export function QuizAnswerItem({ item, index, theme }: QuizAnswerItemProps) {
             {`${index + 1}. ${item.questionText}`}
           </MarkdownText>
         </View>
+        {/* Chevron chỉ hướng mở/đóng */}
         {expanded ? (
           <ChevronUp size={16} color={theme.textMuted} strokeWidth={2} />
         ) : (
@@ -53,7 +59,7 @@ export function QuizAnswerItem({ item, index, theme }: QuizAnswerItemProps) {
         )}
       </View>
 
-      {/* Expanded detail */}
+      {/* Phần chi tiết mở rộng: đáp án đã chọn, đáp án đúng, giải thích */}
       {expanded && (
         <View
           className="px-4 pb-4 gap-2"
@@ -62,6 +68,7 @@ export function QuizAnswerItem({ item, index, theme }: QuizAnswerItemProps) {
             borderTopColor: item.correct ? theme.success : theme.error,
           }}
         >
+          {/* Câu sai: hiển thị cả đáp án đã chọn (đỏ) và đáp án đúng (xanh) */}
           {!item.correct && (
             <View className="gap-2 pt-3">
               <View className="flex-row flex-wrap items-center gap-1">
@@ -82,6 +89,7 @@ export function QuizAnswerItem({ item, index, theme }: QuizAnswerItemProps) {
               </View>
             </View>
           )}
+          {/* Câu đúng: chỉ hiển thị đáp án đúng để xác nhận */}
           {item.correct && (
             <View className="pt-3">
               <View className="flex-row flex-wrap items-center gap-1">
@@ -94,6 +102,7 @@ export function QuizAnswerItem({ item, index, theme }: QuizAnswerItemProps) {
               </View>
             </View>
           )}
+          {/* Giải thích — chỉ hiển thị nếu có */}
           {!!item.explanation && (
             <View
               className="rounded-xl p-3"

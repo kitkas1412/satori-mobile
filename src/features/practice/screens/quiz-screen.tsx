@@ -1,3 +1,7 @@
+// Màn hình làm bài trắc nghiệm.
+// Tự động bắt đầu bài tập khi mount, hiển thị từng câu hỏi với thanh điều hướng
+// và nút "Tiếp theo" / "Nộp bài" ở câu cuối.
+
 import { ChevronLeft, ChevronRight, X } from "lucide-react-native";
 import { useEffect } from "react";
 import {
@@ -32,6 +36,7 @@ export function QuizScreen({ id }: QuizScreenProps) {
 
   const { currentIndex, isFirst, isLast, handleBack, handleNext } = useQuizNavigation(total);
   const { answers, handleSelectOption, handleFillBlankChange } = useQuizAnswers();
+  // Bắt đầu đếm giờ khi bài tập đã tải xong (isPending = false và data có giá trị)
   const { getTimeStats } = useQuizTimer(!isPending && !!data);
   const { handleSubmit, isPending: isSubmitting } = useQuizSubmit({
     assignmentId: id,
@@ -43,6 +48,7 @@ export function QuizScreen({ id }: QuizScreenProps) {
 
   const current = questions[currentIndex];
 
+  // Tự động gọi API bắt đầu bài tập ngay khi màn hình được mount
   useEffect(() => {
     if (id) mutate(id);
   }, [id]);
@@ -53,6 +59,7 @@ export function QuizScreen({ id }: QuizScreenProps) {
       <LoadingOverlay visible={isPending} title="Đang tải bài tập..." />
       <LoadingOverlay visible={isSubmitting} title="Đang nộp bài..." />
 
+      {/* Header với nút X để thoát bài */}
       <ScreenHeader
         title={data?.title ?? "Bài tập"}
         showDivider
@@ -77,6 +84,7 @@ export function QuizScreen({ id }: QuizScreenProps) {
         emptyText="Bài tập này chưa có câu hỏi."
       >
         <>
+          {/* Khu vực hiển thị câu hỏi hiện tại */}
           <View className="flex-1">
             {current && (
               <QuestionView
@@ -92,11 +100,12 @@ export function QuizScreen({ id }: QuizScreenProps) {
             )}
           </View>
 
-          {/* Bottom action bar */}
+          {/* Thanh điều hướng dưới cùng: nút Quay lại và Tiếp theo/Nộp bài */}
           <View
             className="flex-row gap-4 px-4"
             style={{ paddingBottom: insets.bottom + 16, paddingTop: 12 }}
           >
+            {/* Nút Quay lại — bị vô hiệu hóa ở câu đầu tiên */}
             <Pressable
               onPress={handleBack}
               disabled={isFirst}
@@ -120,6 +129,7 @@ export function QuizScreen({ id }: QuizScreenProps) {
               </Text>
             </Pressable>
 
+            {/* Nút Tiếp theo (câu chưa cuối) hoặc Nộp bài (câu cuối) */}
             <Pressable
               onPress={isLast ? handleSubmit : handleNext}
               disabled={isLast && isSubmitting}
