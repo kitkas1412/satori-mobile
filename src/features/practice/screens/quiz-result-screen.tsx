@@ -27,9 +27,9 @@ export function QuizResultScreen() {
     >
       <StatusBar style="dark" />
 
-      {/* Header */}
       <ScreenHeader
         title="Kết quả"
+        showDivider
         leftAction={
           <Pressable
             onPress={handleContinue}
@@ -41,11 +41,6 @@ export function QuizResultScreen() {
           </Pressable>
         }
         rightAction={<View style={{ width: 24 }} />}
-      />
-
-      {/* Divider */}
-      <View
-        style={{ height: 1, backgroundColor: theme.border, opacity: 0.5 }}
       />
 
       <ScrollView
@@ -135,7 +130,6 @@ export function QuizResultScreen() {
               </View>
             </View>
           </View>
-
         </View>
 
         {/* Per-question breakdown */}
@@ -159,7 +153,7 @@ export function QuizResultScreen() {
         )}
 
         {/* Action button */}
-        <PrimaryButton text="Tiếp tục" onPress={handleContinue} />
+        <PrimaryButton text="Quay về" onPress={handleContinue} />
       </ScrollView>
     </View>
   );

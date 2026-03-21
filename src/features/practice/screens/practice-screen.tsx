@@ -1,6 +1,6 @@
 import { Bell, BookOpen, Sparkles } from "lucide-react-native";
 import { useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 
@@ -11,7 +11,11 @@ import { ScreenHeader } from "@/components/ui/screen-header";
 import { SectionHeader } from "@/components/ui/section-header";
 import { AiBanner } from "../components/ai-banner";
 import { AssignmentCard } from "../components/assignment-card";
-import { useAssignments, mapAssignmentToCardProps, useAssignmentNavigation } from "../hooks";
+import {
+  useAssignments,
+  mapAssignmentToCardProps,
+  useAssignmentNavigation,
+} from "../hooks";
 
 type ActiveTab = "teacher" | "ai";
 
@@ -21,7 +25,8 @@ export function PracticeScreen() {
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
   const { data, isLoading, isError } = useAssignments();
-  const { handleAssignmentPress, isLoadingSubmission } = useAssignmentNavigation();
+  const { handleAssignmentPress, isLoadingSubmission } =
+    useAssignmentNavigation();
 
   const bellAction = (
     <View className="relative">
@@ -34,7 +39,6 @@ export function PracticeScreen() {
 
   return (
     <View className="flex-1 bg-background-default">
-      <LoadingOverlay visible={isLoadingSubmission} title="Đang tải kết quả..." />
       <StatusBar style="dark" />
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -67,7 +71,7 @@ export function PracticeScreen() {
               strokeWidth={2}
             />
             <Text
-              className="font-heading text-sm"
+              className="font-heading text-base"
               style={{
                 color: activeTab === "teacher" ? theme.white : theme.textMuted,
               }}
@@ -90,7 +94,7 @@ export function PracticeScreen() {
               strokeWidth={2}
             />
             <Text
-              className="font-heading text-sm"
+              className="font-heading text-base"
               style={{
                 color: activeTab === "ai" ? theme.white : theme.textMuted,
               }}
@@ -105,12 +109,10 @@ export function PracticeScreen() {
             <SectionHeader
               title="Bài tập từ giáo viên"
               subtitle="Hoàn thành các bài tập được giao bởi giáo viên"
-              size="sm"
+              size="lg"
             />
 
-            {isLoading ? (
-              <ActivityIndicator color={theme.primary} />
-            ) : isError ? (
+            {isError ? (
               <Text
                 className="font-body text-sm text-center"
                 style={{ color: theme.textMuted }}
@@ -140,6 +142,11 @@ export function PracticeScreen() {
           </View>
         )}
       </ScrollView>
+      <LoadingOverlay visible={isLoading} title="Đang tải bài tập..." />
+      <LoadingOverlay
+        visible={isLoadingSubmission}
+        title="Đang tải kết quả..."
+      />
     </View>
   );
 }
