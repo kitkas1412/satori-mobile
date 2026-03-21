@@ -6,41 +6,27 @@ import { StatusBar } from "expo-status-bar";
 
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { ScreenHeader } from "@/components/ui/screen-header";
 import { SectionHeader } from "@/components/ui/section-header";
 import { AiBanner } from "../components/ai-banner";
 import { AssignmentCard } from "../components/assignment-card";
-import type { AssignmentCardProps } from "../components/assignment-card";
+import {
+  useAssignments,
+  mapAssignmentToCardProps,
+  useAssignmentNavigation,
+} from "../hooks";
 
 type ActiveTab = "teacher" | "ai";
-
-const MOCK_ASSIGNMENTS: AssignmentCardProps[] = [
-  {
-    title: "Luyện phát âm: Phụ âm đầu",
-    subtitle: "Thực hành 15 từ",
-    dueDate: "22/01/2026",
-    status: "in_progress",
-    progress: { current: 7, total: 15 },
-  },
-  {
-    title: "Bài tập Unit 3: Gia đình",
-    subtitle: "10 câu hỏi về từ vựng và ngữ pháp",
-    dueDate: "25/01/2026",
-    status: "not_started",
-  },
-  {
-    title: "Hội thoại: Giới thiệu bản thân",
-    subtitle: "Hoàn thành bài đối thoại",
-    dueDate: "20/01/2026",
-    status: "completed",
-  },
-];
 
 export function PracticeScreen() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("teacher");
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
+  const { data, isLoading, isError } = useAssignments();
+  const { handleAssignmentPress, isLoadingSubmission } =
+    useAssignmentNavigation();
 
   const bellAction = (
     <View className="relative">
@@ -81,13 +67,13 @@ export function PracticeScreen() {
           >
             <BookOpen
               size={20}
-              color={activeTab === "teacher" ? "#fff" : theme.textMuted}
+              color={activeTab === "teacher" ? theme.white : theme.textMuted}
               strokeWidth={2}
             />
             <Text
-              className="font-heading text-sm"
+              className="font-heading text-base"
               style={{
-                color: activeTab === "teacher" ? "#fff" : theme.textMuted,
+                color: activeTab === "teacher" ? theme.white : theme.textMuted,
               }}
             >
               Bài tập GV
@@ -104,13 +90,13 @@ export function PracticeScreen() {
           >
             <Sparkles
               size={20}
-              color={activeTab === "ai" ? "#fff" : theme.textMuted}
+              color={activeTab === "ai" ? theme.white : theme.textMuted}
               strokeWidth={2}
             />
             <Text
-              className="font-heading text-sm"
+              className="font-heading text-base"
               style={{
-                color: activeTab === "ai" ? "#fff" : theme.textMuted,
+                color: activeTab === "ai" ? theme.white : theme.textMuted,
               }}
             >
               Ôn luyện AI
@@ -120,17 +106,35 @@ export function PracticeScreen() {
 
         {activeTab === "teacher" ? (
           <View className="px-4 gap-3">
-            {/* Section heading */}
             <SectionHeader
               title="Bài tập từ giáo viên"
               subtitle="Hoàn thành các bài tập được giao bởi giáo viên"
-              size="sm"
+              size="lg"
             />
 
-            {/* Assignment cards */}
-            {MOCK_ASSIGNMENTS.map((item, index) => (
-              <AssignmentCard key={index} {...item} />
-            ))}
+            {isError ? (
+              <Text
+                className="font-body text-sm text-center"
+                style={{ color: theme.textMuted }}
+              >
+                Không thể tải bài tập. Vui lòng thử lại.
+              </Text>
+            ) : !data?.content.length ? (
+              <Text
+                className="font-body text-sm text-center"
+                style={{ color: theme.textMuted }}
+              >
+                Chưa có bài tập nào.
+              </Text>
+            ) : (
+              data.content.map((item) => (
+                <AssignmentCard
+                  key={item.id}
+                  {...mapAssignmentToCardProps(item)}
+                  onPress={() => handleAssignmentPress(item)}
+                />
+              ))
+            )}
           </View>
         ) : (
           <View className="px-4">
@@ -138,6 +142,11 @@ export function PracticeScreen() {
           </View>
         )}
       </ScrollView>
+      <LoadingOverlay visible={isLoading} title="Đang tải bài tập..." />
+      <LoadingOverlay
+        visible={isLoadingSubmission}
+        title="Đang tải kết quả..."
+      />
     </View>
   );
 }

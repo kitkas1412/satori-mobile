@@ -22,6 +22,7 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 
 import { QueryProvider } from "@/components/providers/query-provider";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
+import { useTokenValidation } from "@/features/authentication/hooks";
 import { useAuthStore } from "@/stores/auth-store";
 import "../../global.css";
 
@@ -32,13 +33,30 @@ export const unstable_settings = {
   anchor: "(tabs)",
 };
 
+/**
+ * Component điều hướng gốc của app, đồng thời đóng vai trò Auth Guard.
+ *
+ * Logic điều hướng:
+ * - Chờ store load xong từ SecureStore (`isHydrated`) và kiểm tra token xong (`isValidating`)
+ *   trước khi redirect, tránh flash màn hình login khi app khởi động.
+ * - Nếu chưa đăng nhập và không ở trong nhóm auth → redirect về welcome.
+ * - Nếu đã đăng nhập và đang ở trong nhóm auth → redirect về tabs (trang chính).
+ *
+ * `useTokenValidation` chạy ngầm khi app khởi động để kiểm tra accessToken còn hợp lệ không.
+ * Nếu token hết hạn và refresh thất bại, auth store sẽ được clear → isAuthenticated = false
+ * → useEffect này sẽ redirect về welcome tự động.
+ */
 function RootLayoutNav() {
   const router = useRouter();
   const segments = useSegments();
   const { isAuthenticated, isHydrated } = useAuthStore();
+  const { isValidating } = useTokenValidation();
 
   useEffect(() => {
+    // Chờ store load từ SecureStore trước khi kiểm tra
     if (!isHydrated) return;
+    // Chờ quá trình validate token hoàn tất trước khi redirect
+    if (isValidating) return;
 
     const inAuthGroup = segments[0] === "(auth)";
 
@@ -47,7 +65,7 @@ function RootLayoutNav() {
     } else if (isAuthenticated && inAuthGroup) {
       router.replace("/(tabs)");
     }
-  }, [isAuthenticated, isHydrated, segments]);
+  }, [isAuthenticated, isHydrated, isValidating, segments]);
 
   return (
     <Stack>
@@ -93,6 +111,22 @@ function RootLayoutNav() {
       />
       <Stack.Screen
         name="conversation-feedback"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="assignment-quiz"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="assignment-result"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="assignment-writing"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="assignment-writing-result"
         options={{ headerShown: false, gestureEnabled: false }}
       />
     </Stack>

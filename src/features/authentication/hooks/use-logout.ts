@@ -9,19 +9,19 @@ export function useLogout() {
 
   return useMutation({
     mutationFn: async () => {
-      // If no token, skip API call (already logged out or expired)
+      // Không có token → bỏ qua API call (đã đăng xuất hoặc token hết hạn)
       if (!token) {
-        console.log("No token found, skipping logout API call");
+        console.log("Không tìm thấy token, bỏ qua API đăng xuất");
         return { success: true, message: "Already logged out" };
       }
 
       try {
         return await logoutApi();
       } catch (error: any) {
-        // If 401, token already expired - continue with local cleanup
+        // Nếu 401, token đã hết hạn → tiếp tục dọn dẹp local
         if (error?.response?.status === 401) {
           console.log(
-            "Token expired during logout, proceeding with local cleanup",
+            "Token hết hạn khi đăng xuất, tiến hành dọn dẹp local",
           );
           return { success: true, message: "Token expired" };
         }
@@ -29,25 +29,25 @@ export function useLogout() {
       }
     },
     onSuccess: () => {
-      // Clear all React Query cache
+      // Xóa toàn bộ cache của React Query
       queryClient.clear();
 
-      // Clear auth store (triggers SecureStore cleanup via persist middleware)
+      // Xóa auth store (kích hoạt dọn dẹp SecureStore qua persist middleware)
       logout();
 
-      // Navigation handled automatically by _layout.tsx auth guard
+      // Điều hướng được xử lý tự động bởi auth guard trong _layout.tsx
     },
     onError: (error: any) => {
-      // BR-68: Still logout locally even if API fails (offline or timeout)
+      // BR-68: Vẫn đăng xuất local dù API thất bại (offline hoặc timeout)
       console.error(
-        "Logout API failed, proceeding with local cleanup:",
+        "API đăng xuất thất bại, tiến hành dọn dẹp local:",
         error?.message,
       );
 
       queryClient.clear();
       logout();
 
-      // Auth guard in _layout.tsx will handle navigation to login screen
+      // Auth guard trong _layout.tsx sẽ xử lý điều hướng về màn hình đăng nhập
     },
   });
 }

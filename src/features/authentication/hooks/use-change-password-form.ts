@@ -3,11 +3,16 @@ import { useRef, useState } from "react";
 import { Alert, TextInput } from "react-native";
 import { useChangePassword } from "./use-change-password";
 
+/**
+ * Hook quản lý form đổi mật khẩu cho người dùng đang đăng nhập.
+ * Sau khi đổi thành công, người dùng sẽ bị đăng xuất và phải đăng nhập lại.
+ * @param onSuccess Callback sau khi đăng xuất (thường điều hướng về màn hình login).
+ */
 export function useChangePasswordForm(onSuccess: () => void) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [currentPasswordError, setCurrentPasswordError] = useState("");
+  const [currentPasswordError, setCurrentPasswordError] = useState(""); // Lỗi riêng cho ô mật khẩu hiện tại
   const newPasswordRef = useRef<TextInput>(null);
   const confirmPasswordRef = useRef<TextInput>(null);
 
@@ -68,6 +73,7 @@ export function useChangePasswordForm(onSuccess: () => void) {
     );
   };
 
+  // Điều kiện hợp lệ: mật khẩu cũ không rỗng, mật khẩu mới đủ mạnh, 2 ô khớp, và khác mật khẩu cũ
   const isFormValid =
     currentPassword.length > 0 &&
     newPassword.length >= 8 &&
@@ -78,8 +84,10 @@ export function useChangePasswordForm(onSuccess: () => void) {
     newPassword === confirmPassword &&
     newPassword !== currentPassword;
 
+  // Hiển thị cảnh báo ngay khi user nhập ô confirm password
   const passwordsDontMatch =
     confirmPassword.length > 0 && newPassword !== confirmPassword;
+  // Cảnh báo khi mật khẩu mới trùng mật khẩu cũ
   const newPasswordSameAsOld =
     newPassword.length > 0 &&
     currentPassword.length > 0 &&
