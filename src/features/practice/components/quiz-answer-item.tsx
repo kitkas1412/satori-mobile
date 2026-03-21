@@ -21,8 +21,9 @@ export function QuizAnswerItem({ item, index, theme }: QuizAnswerItemProps) {
   return (
     <Pressable
       onPress={() => setExpanded((v) => !v)}
-      className="bg-background-surface rounded-2xl overflow-hidden"
+      className="rounded-2xl overflow-hidden"
       style={{
+        backgroundColor: theme.white,
         borderWidth: 1.5,
         // Viền xanh lá nếu đúng, đỏ nếu sai
         borderColor: item.correct ? theme.success : theme.error,
@@ -72,7 +73,10 @@ export function QuizAnswerItem({ item, index, theme }: QuizAnswerItemProps) {
           {!item.correct && (
             <View className="gap-2 pt-3">
               <View className="flex-row flex-wrap items-center gap-1">
-                <Text className="font-body text-xs" style={{ color: theme.textMuted }}>
+                <Text
+                  className="font-body text-xs"
+                  style={{ color: theme.textMuted }}
+                >
                   Bạn chọn:
                 </Text>
                 <MarkdownText fontSize={12} color={theme.error}>
@@ -80,7 +84,10 @@ export function QuizAnswerItem({ item, index, theme }: QuizAnswerItemProps) {
                 </MarkdownText>
               </View>
               <View className="flex-row flex-wrap items-center gap-1">
-                <Text className="font-body text-xs" style={{ color: theme.textMuted }}>
+                <Text
+                  className="font-body text-xs"
+                  style={{ color: theme.textMuted }}
+                >
                   Đáp án đúng:
                 </Text>
                 <MarkdownText fontSize={12} color={theme.success}>
@@ -93,7 +100,10 @@ export function QuizAnswerItem({ item, index, theme }: QuizAnswerItemProps) {
           {item.correct && (
             <View className="pt-3">
               <View className="flex-row flex-wrap items-center gap-1">
-                <Text className="font-body text-xs" style={{ color: theme.textMuted }}>
+                <Text
+                  className="font-body text-xs"
+                  style={{ color: theme.textMuted }}
+                >
                   Đáp án đúng:
                 </Text>
                 <MarkdownText fontSize={12} color={theme.success}>

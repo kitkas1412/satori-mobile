@@ -57,8 +57,12 @@ export function AssignmentCard({
   return (
     <Pressable
       onPress={onPress}
-      className="bg-background-surface rounded-2xl p-4 gap-3"
-      style={{ borderWidth: 0.6, borderColor: theme.border }}
+      className="rounded-2xl p-4 gap-3"
+      style={{
+        backgroundColor: theme.white,
+        borderWidth: 0.6,
+        borderColor: theme.border,
+      }}
     >
       {/* Tiêu đề + icon trạng thái */}
       <View className="flex-row items-start justify-between gap-3">

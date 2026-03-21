@@ -148,7 +148,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
                   }}
                 >
                   <MarkdownText fontSize={14} color={theme.textDefault}>
-                    {`Yêu cầu: ${data.writingContent?.prompt}`}
+                    {`Đề bài: ${data.writingContent?.prompt}`}
                   </MarkdownText>
                 </View>
               ) : null}
@@ -341,12 +341,14 @@ export function WritingScreen({ id }: WritingScreenProps) {
                     className="font-body text-sm"
                     style={{ color: theme.textDefault, opacity: 0.7 }}
                   >
-                    Nhờ AI đánh giá bài viết của bạn trước khi nộp để nhận góp
-                    ý chi tiết.
+                    Nhờ AI đánh giá bài viết của bạn trước khi nộp để nhận góp ý
+                    chi tiết.
                   </Text>
                   <Pressable
                     onPress={() => handleEvaluate()}
-                    disabled={images.length === 0 || isEvaluating || isSubmitting}
+                    disabled={
+                      images.length === 0 || isEvaluating || isSubmitting
+                    }
                     className="flex-row items-center justify-center gap-2 rounded-xl"
                     style={{
                       height: 48,
