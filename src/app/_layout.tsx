@@ -20,8 +20,9 @@ import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
+import { useColorScheme as useNativeWindColorScheme } from "nativewind";
+
 import { QueryProvider } from "@/components/providers/query-provider";
-import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { useTokenValidation } from "@/features/authentication/hooks";
 import { useAuthStore } from "@/stores/auth-store";
 import "../../global.css";
@@ -135,6 +136,7 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const { setColorScheme } = useNativeWindColorScheme();
 
   const [fontsLoaded] = useFonts({
     Nunito_700Bold,
@@ -149,20 +151,22 @@ export default function RootLayout() {
     }
   }, [fontsLoaded]);
 
+  useEffect(() => {
+    setColorScheme("light");
+  }, []);
+
   if (!fontsLoaded) {
     return null;
   }
 
   return (
     <QueryProvider>
-      <GluestackUIProvider mode="light">
-        <ThemeProvider
-          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-        >
-          <RootLayoutNav />
-          <StatusBar style="auto" />
-        </ThemeProvider>
-      </GluestackUIProvider>
+      <ThemeProvider
+        value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+      >
+        <RootLayoutNav />
+        <StatusBar style="auto" />
+      </ThemeProvider>
     </QueryProvider>
   );
 }
