@@ -1,6 +1,11 @@
+// Banner thông báo trạng thái dùng chung trong tính năng Practice.
+// Hỗ trợ ba loại: info (xanh dương), success (xanh lá), warning (đỏ).
+
 import { AlertTriangle, Award, Info } from "lucide-react-native";
 import { Text, View } from "react-native";
 
+// Cấu hình màu sắc và icon cho từng loại banner.
+// Dùng object thay vì switch/if để dễ mở rộng thêm loại mới.
 const BANNER_CONFIG = {
   info: {
     borderColor: "#91caff",
@@ -26,7 +31,7 @@ interface StatusBannerProps {
   type: keyof typeof BANNER_CONFIG;
   title: string;
   description?: string;
-  extra?: React.ReactNode;
+  extra?: React.ReactNode; // Nội dung tùy chỉnh hiển thị bên dưới description
 }
 
 export function StatusBanner({ type, title, description, extra }: StatusBannerProps) {
@@ -43,6 +48,7 @@ export function StatusBanner({ type, title, description, extra }: StatusBannerPr
         gap: 8,
       }}
     >
+      {/* Hàng tiêu đề: icon + text */}
       <View className="flex-row items-center gap-2">
         <Icon size={20} color={textColor} strokeWidth={1.5} />
         <Text className="font-heading text-sm" style={{ color: textColor }}>

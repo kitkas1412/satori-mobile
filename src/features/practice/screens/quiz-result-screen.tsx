@@ -1,3 +1,6 @@
+// Màn hình kết quả bài trắc nghiệm.
+// Hiển thị điểm số, nhãn đánh giá, thống kê đúng/sai và chi tiết đáp án từng câu.
+
 import { Check, X } from "lucide-react-native";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -16,6 +19,7 @@ export function QuizResultScreen() {
 
   const result = useQuizResult();
 
+  // Không render nếu chưa có kết quả trong store (tránh màn hình trắng)
   if (!result) return null;
 
   const { quizResult, wrongCount, performanceLabel, handleContinue } = result;
@@ -27,6 +31,7 @@ export function QuizResultScreen() {
     >
       <StatusBar style="dark" />
 
+      {/* Header với nút X để quay về danh sách bài tập */}
       <ScreenHeader
         title="Kết quả"
         showDivider
@@ -52,7 +57,7 @@ export function QuizResultScreen() {
           gap: 32,
         }}
       >
-        {/* Score section */}
+        {/* Phần điểm số: vòng tròn điểm + nhãn đánh giá */}
         <View className="items-center gap-2">
           <ScoreRing score={quizResult.score} />
           <Text
@@ -69,7 +74,7 @@ export function QuizResultScreen() {
           </Text>
         </View>
 
-        {/* Stats card */}
+        {/* Thẻ thống kê: số câu đúng và số câu sai */}
         <View
           className="bg-background-surface rounded-2xl p-5 gap-4"
           style={{
@@ -132,7 +137,7 @@ export function QuizResultScreen() {
           </View>
         </View>
 
-        {/* Per-question breakdown */}
+        {/* Chi tiết đáp án từng câu — chỉ hiển thị nếu có dữ liệu */}
         {quizResult.quizDetails.length > 0 && (
           <View className="gap-3">
             <Text
@@ -152,7 +157,7 @@ export function QuizResultScreen() {
           </View>
         )}
 
-        {/* Action button */}
+        {/* Nút quay về danh sách bài tập */}
         <PrimaryButton text="Quay về" onPress={handleContinue} />
       </ScrollView>
     </View>

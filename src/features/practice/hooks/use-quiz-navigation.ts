@@ -1,3 +1,5 @@
+// Hook quản lý việc điều hướng qua lại giữa các câu hỏi trong bài trắc nghiệm.
+
 import { useState } from "react";
 
 export function useQuizNavigation(total: number) {

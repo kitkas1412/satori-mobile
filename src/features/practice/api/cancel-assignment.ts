@@ -1,3 +1,6 @@
+// Gọi API hủy nộp bài tập (POST /learner/assignments/:id/cancel).
+// Dùng khi học viên muốn rút lại bài đã nộp và làm lại từ đầu.
+
 import { api } from "@/lib/axios";
 import type { ApiResponse } from "@/types/api";
 import type { SubmitWritingResponse } from "./practice.types";

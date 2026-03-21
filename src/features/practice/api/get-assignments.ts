@@ -1,3 +1,6 @@
+// Gọi API lấy danh sách bài tập của học viên (GET /learner/assignments).
+// Lấy trang đầu tiên với 10 bài tập mỗi trang.
+
 import { api } from "@/lib/axios";
 import type { ApiResponse } from "@/types/api";
 import type { AssignmentsResponse } from "./practice.types";

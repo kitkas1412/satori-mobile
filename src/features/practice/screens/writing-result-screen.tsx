@@ -1,3 +1,8 @@
+// Màn hình kết quả/chi tiết bài nộp viết.
+// Hiển thị hai trạng thái:
+// - Chưa chấm (SUBMITTED): thông báo đang chờ + tùy chọn hủy nộp bài
+// - Đã chấm (GRADED): điểm số, nhận xét giáo viên + ảnh bài làm
+
 import { CheckCircle2, ChevronLeft, Clock, X } from "lucide-react-native";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -32,6 +37,7 @@ export function WritingResultScreen() {
       <StatusBar style="dark" />
       <LoadingOverlay visible={isCancelling} title="Đang hủy nộp bài..." />
 
+      {/* Header: tiêu đề thay đổi theo trạng thái chấm bài */}
       <ScreenHeader
         title={isGraded ? "Bài tập đã nộp" : "Chi tiết bài nộp"}
         showDivider
@@ -52,7 +58,7 @@ export function WritingResultScreen() {
           gap: 16,
         }}
       >
-        {/* Hero section */}
+        {/* Phần hero: icon trạng thái + tiêu đề + mô tả */}
         <View className="items-center gap-3">
           <View
             style={{
@@ -71,6 +77,7 @@ export function WritingResultScreen() {
                 opacity: 0.2,
               }}
             />
+            {/* Màu xanh lá khi đã chấm, màu xanh dương khi chờ chấm */}
             <CheckCircle2
               size={80}
               color={isGraded ? "#00a63e" : "#0958d9"}
@@ -93,7 +100,7 @@ export function WritingResultScreen() {
           </Text>
         </View>
 
-        {/* SUBMITTED: Waiting info card */}
+        {/* Banner chờ chấm — chỉ hiển thị khi bài chưa được chấm */}
         {!isGraded && (
           <StatusBanner
             type="info"
@@ -116,7 +123,7 @@ export function WritingResultScreen() {
           />
         )}
 
-        {/* GRADED: Score & feedback card */}
+        {/* Banner điểm số + nhận xét — chỉ hiển thị khi đã được chấm */}
         {isGraded && (
           <StatusBanner
             type="success"
@@ -165,7 +172,7 @@ export function WritingResultScreen() {
           />
         )}
 
-        {/* Image card */}
+        {/* Thẻ ảnh bài làm đã nộp */}
         <View
           style={{
             backgroundColor: theme.cardBackground,
@@ -208,6 +215,7 @@ export function WritingResultScreen() {
                       }}
                       resizeMode="cover"
                     />
+                    {/* Số thứ tự ảnh */}
                     <View
                       style={{
                         position: "absolute",
@@ -264,7 +272,7 @@ export function WritingResultScreen() {
           )}
         </View>
 
-        {/* SUBMITTED: Warning card */}
+        {/* Banner cảnh báo hủy nộp bài — chỉ hiển thị khi chưa chấm */}
         {!isGraded && (
           <StatusBanner
             type="warning"
@@ -274,7 +282,7 @@ export function WritingResultScreen() {
         )}
       </ScrollView>
 
-      {/* Bottom buttons */}
+      {/* Thanh nút cố định dưới cùng: Quay về + Hủy nộp bài (nếu chưa chấm) */}
       <View
         style={{
           position: "absolute",

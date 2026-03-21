@@ -1,3 +1,6 @@
+// Gọi API bắt đầu một bài tập (POST /learner/assignments/:id/start).
+// Server trả về thông tin chi tiết bài tập bao gồm danh sách câu hỏi hoặc nội dung bài viết.
+
 import { api } from "@/lib/axios";
 import type { ApiResponse } from "@/types/api";
 import type { AssignmentDetailResponse } from "./practice.types";

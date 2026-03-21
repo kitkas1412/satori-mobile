@@ -1,3 +1,7 @@
+// Màn hình nộp bài viết.
+// Học viên tải lên ảnh bài làm từ thư viện hoặc chụp trực tiếp, sau đó nhấn nộp bài.
+// Nút nộp bài bị vô hiệu hóa nếu chưa chọn ảnh nào.
+
 import { CalendarDays, CameraIcon, ImageIcon, X } from "lucide-react-native";
 import { useEffect } from "react";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
@@ -40,6 +44,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
     dueDate,
   } = useWritingImages({ data });
 
+  // Tự động gọi API bắt đầu bài tập ngay khi màn hình được mount
   useEffect(() => {
     if (id) mutate(id);
   }, [id]);
@@ -59,6 +64,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
       <LoadingOverlay visible={isPending} title="Đang tải bài tập..." />
       <LoadingOverlay visible={isSubmitting} title="Đang nộp bài..." />
 
+      {/* Header với nút X để thoát bài */}
       <ScreenHeader
         title="Nộp bài tập"
         showDivider
@@ -81,7 +87,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
             contentContainerStyle={{ padding: 16, gap: 16 }}
             showsVerticalScrollIndicator={false}
           >
-            {/* Assignment Info Card */}
+            {/* Thẻ thông tin bài tập: tiêu đề, hạn nộp, yêu cầu đề bài */}
             <View
               style={{
                 backgroundColor: theme.cardBackground,
@@ -131,7 +137,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
               ) : null}
             </View>
 
-            {/* Your Work Card */}
+            {/* Thẻ bài làm: chọn/chụp ảnh và xem trước danh sách ảnh đã chọn */}
             <View
               style={{
                 backgroundColor: theme.cardBackground,
@@ -142,7 +148,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
                 gap: 12,
               }}
             >
-              {/* Card header */}
+              {/* Header thẻ: tiêu đề + số lượng ảnh đã chọn */}
               <View className="flex-row items-center justify-between">
                 <Text
                   className="font-heading text-lg"
@@ -158,7 +164,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
                 </Text>
               </View>
 
-              {/* Action buttons */}
+              {/* Nút chọn ảnh từ thư viện và chụp camera */}
               <View className="flex-row gap-3">
                 <Pressable
                   onPress={handlePickImage}
@@ -194,7 +200,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
                 </Pressable>
               </View>
 
-              {/* Image preview area */}
+              {/* Khu vực xem trước: placeholder khi chưa có ảnh, hoặc danh sách ảnh cuộn ngang */}
               {images.length === 0 ? (
                 <View
                   className="items-center justify-center"
@@ -230,6 +236,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
                           source={{ uri: img.uri }}
                           style={{ width: 100, height: 100, borderRadius: 8 }}
                         />
+                        {/* Nút X để xóa ảnh khỏi danh sách */}
                         <Pressable
                           onPress={() => handleRemoveImage(index)}
                           hitSlop={4}
@@ -259,7 +266,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
             </View>
           </ScrollView>
 
-          {/* Bottom submit bar */}
+          {/* Thanh nộp bài cố định dưới cùng — bị vô hiệu hóa khi chưa có ảnh */}
           <View
             style={{
               paddingTop: 16,

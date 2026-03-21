@@ -1,3 +1,6 @@
+// Hook hiển thị hộp thoại xác nhận trước khi thoát khỏi bài đang làm.
+// Nhận callback onExit để xử lý hành động thoát (ví dụ: router.back()).
+
 import { Alert } from "react-native";
 
 export function useExitAssignment(onExit: () => void) {
