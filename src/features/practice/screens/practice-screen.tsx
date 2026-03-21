@@ -71,13 +71,14 @@ export function PracticeScreen() {
           >
             <BookOpen
               size={20}
-              color={activeTab === "teacher" ? theme.white : theme.textMuted}
+              color={activeTab === "teacher" ? theme.white : theme.textDefault}
               strokeWidth={2}
             />
             <Text
               className="font-heading text-base"
               style={{
-                color: activeTab === "teacher" ? theme.white : theme.textMuted,
+                color:
+                  activeTab === "teacher" ? theme.white : theme.textDefault,
               }}
             >
               Bài tập GV
@@ -94,13 +95,13 @@ export function PracticeScreen() {
           >
             <Sparkles
               size={20}
-              color={activeTab === "ai" ? theme.white : theme.textMuted}
+              color={activeTab === "ai" ? theme.white : theme.textDefault}
               strokeWidth={2}
             />
             <Text
               className="font-heading text-base"
               style={{
-                color: activeTab === "ai" ? theme.white : theme.textMuted,
+                color: activeTab === "ai" ? theme.white : theme.textDefault,
               }}
             >
               Ôn luyện AI

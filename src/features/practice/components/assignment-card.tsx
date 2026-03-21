@@ -65,7 +65,7 @@ export function AssignmentCard({
         <View className="flex-1 gap-1">
           <Text
             className="font-heading text-lg"
-            style={{ color: theme.textMuted }}
+            style={{ color: theme.textDefault }}
             numberOfLines={2}
           >
             {title}

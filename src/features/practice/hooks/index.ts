@@ -9,5 +9,6 @@ export { mapAssignmentToCardProps, useAssignmentNavigation } from "./use-assignm
 export { useQuizResult } from "./use-quiz-result";
 export { useWritingSubmit } from "./use-writing-submit";
 export { useWritingImages } from "./use-writing-images";
+export { useWritingEvaluate } from "./use-writing-evaluate";
 export { useWritingResult } from "./use-writing-result";
 export { useExitAssignment } from "./use-exit-assignment";

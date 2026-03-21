@@ -136,6 +136,18 @@ export interface QuizDetail {
   correct: boolean;
 }
 
+// POST /learner/assignments/writing/evaluate
+// Dữ liệu gửi lên trong key "data" của FormData
+export interface EvaluateWritingRequest {
+  assignmentId: string;
+  prompt: string;
+}
+
+// Response trả về từ endpoint evaluate
+export interface EvaluateWritingResponse {
+  feedback: string;
+}
+
 // Response sau khi nộp hoặc lấy kết quả bài viết
 export interface SubmitWritingResponse {
   id: string;
