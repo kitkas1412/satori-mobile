@@ -1,4 +1,8 @@
-import { Check, ListChecks, X } from "lucide-react-native";
+// Màn hình chi tiết topic, hiển thị trước khi người dùng bắt đầu luyện tập.
+// Bao gồm: tên topic, độ khó, mô tả và danh sách nhiệm vụ cần hoàn thành.
+// Người dùng nhấn "Hiểu rồi" để chuyển sang màn hình luyện tập.
+
+import { ListChecks, X } from "lucide-react-native";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -6,54 +10,13 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
 import { LoadingOverlay, PrimaryButton } from "@/components/ui";
 import { useTopicDetail } from "@/features/speaking/hooks";
-import type { Missions } from "@/features/speaking/api";
+import { MissionItem } from "@/features/speaking/components";
 
+/** Chuyển điểm độ khó thành nhãn hiển thị: 1 = Dễ, 2 = Trung Bình, khác = Khó */
 function difficultyLabel(score: number): string {
   if (score === 1) return "Dễ";
   if (score === 2) return "Trung Bình";
   return "Khó";
-}
-
-function MissionItem({
-  mission,
-  index,
-  theme,
-}: {
-  mission: Missions;
-  index: number;
-  theme: typeof Colors.light;
-}) {
-  const isCompleted = mission.status === "COMPLETED";
-
-  return (
-    <View className="flex-row items-center justify-between py-3">
-      <View className="flex-row items-center gap-4 flex-1">
-        <Text
-          className="font-heading text-[32px] w-7 text-center"
-          style={{ color: theme.textMuted, lineHeight: 40 }}
-        >
-          {index + 1}
-        </Text>
-        <Text
-          className="font-body text-base flex-1"
-          style={{ color: theme.textMuted }}
-        >
-          {mission.titleVi}
-        </Text>
-      </View>
-
-      <View
-        className="items-center justify-center rounded-full ml-3"
-        style={{
-          width: 40,
-          height: 40,
-          backgroundColor: isCompleted ? theme.success : theme.border,
-        }}
-      >
-        <Check size={22} color="white" strokeWidth={2.5} />
-      </View>
-    </View>
-  );
 }
 
 interface TopicDetailScreenProps {
@@ -68,6 +31,7 @@ export function TopicDetailScreen({ topicId }: TopicDetailScreenProps) {
 
   const { data: topic, isLoading } = useTopicDetail(topicId);
 
+  /** Điều hướng sang màn hình luyện tập với topicId, dùng replace để không quay lại được trang này */
   function handleStart() {
     router.replace({
       pathname: "/conversation-practice",
@@ -159,11 +123,7 @@ export function TopicDetailScreen({ topicId }: TopicDetailScreenProps) {
                             style={{ height: 1, backgroundColor: theme.border }}
                           />
                         )}
-                        <MissionItem
-                          mission={mission}
-                          index={index}
-                          theme={theme}
-                        />
+                        <MissionItem mission={mission} index={index} />
                       </View>
                     ))}
                   </View>
