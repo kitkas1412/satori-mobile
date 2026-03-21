@@ -7,3 +7,5 @@ export { useTopicDetail } from "./use-topic-detail";
 export { useRecorder } from "./use-audio-recorder";
 export { useConversationSession } from "./use-conversation-session";
 export { playAssistantMessage } from "./use-audio-player";
+export { useFirstUnpracticedSection } from "./use-first-unpracticed-section";
+export { useMicInteraction } from "./use-mic-interaction";
