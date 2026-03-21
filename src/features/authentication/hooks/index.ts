@@ -3,6 +3,7 @@ export { useChangePasswordForm } from "./use-change-password-form";
 export { useForgotPassword } from "./use-forgot-password";
 export { useForgotPasswordForm } from "./use-forgot-password-form";
 export { useLogin } from "./use-login";
+export { useTokenValidation } from "./use-token-validation";
 export { useLoginForm } from "./use-login-form";
 export { useLogout } from "./use-logout";
 export { useResendOTP } from "./use-resend-otp";
