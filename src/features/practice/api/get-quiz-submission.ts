@@ -5,7 +5,7 @@ import { api } from "@/lib/axios";
 import type { ApiResponse } from "@/types/api";
 import type { SubmitQuizResponse } from "./practice.types";
 
-export async function getSubmissionApi(
+export async function getQuizSubmissionApi(
   submissionId: string,
 ): Promise<SubmitQuizResponse> {
   const response = await api.get<ApiResponse<SubmitQuizResponse>>(

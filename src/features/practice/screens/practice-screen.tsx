@@ -14,9 +14,9 @@ import { ScreenHeader } from "@/components/ui/screen-header";
 import { SectionHeader } from "@/components/ui/section-header";
 import { AiBanner } from "../components/ai-banner";
 import { AssignmentCard } from "../components/assignment-card";
+import { mapAssignmentToCardProps } from "../utils";
 import {
   useAssignments,
-  mapAssignmentToCardProps,
   useAssignmentNavigation,
 } from "../hooks";
 
