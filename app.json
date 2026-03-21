@@ -29,7 +29,8 @@
       "package": "com.kitkas1412.satorimobile",
       "permissions": [
         "android.permission.RECORD_AUDIO",
-        "android.permission.MODIFY_AUDIO_SETTINGS"
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.CAMERA"
       ]
     },
     "web": {
@@ -57,7 +58,14 @@
           "speechRecognitionPermission": "Satori Nihongo cần quyền nhận dạng giọng nói để chuyển lời nói của bạn thành văn bản."
         }
       ],
-      "expo-audio"
+      "expo-audio",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Satori Nihongo cần quyền truy cập thư viện ảnh để bạn có thể tải lên bài làm.",
+          "cameraPermission": "Satori Nihongo cần quyền truy cập camera để bạn có thể chụp ảnh bài làm."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

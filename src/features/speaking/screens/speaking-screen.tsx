@@ -11,11 +11,12 @@ import {
   ConversationBanner,
   ThemeSection,
 } from "@/features/speaking/components";
-import { useAuthStore } from "@/stores";
+import { useAppStore, useAuthStore } from "@/stores";
 import {
   useConversationThemes,
   useThemeTopics,
 } from "@/features/speaking/hooks";
+import { useProfile } from "@/hooks/api/use-profile";
 import type { Content } from "@/features/speaking/api";
 
 function TopicSection({
@@ -81,7 +82,10 @@ function TopicSection({
 
 export function SpeakingScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const user = useAuthStore((state) => state.user);
+  const language = useAppStore((state) => state.language);
+  const { data: profile } = useProfile();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const { data: sections, isLoading, isError } = useConversationThemes();
@@ -139,7 +143,16 @@ export function SpeakingScreen() {
             contentContainerClassName="px-4 pb-8 gap-4"
             showsVerticalScrollIndicator={false}
           >
-            <ConversationBanner />
+            <ConversationBanner
+              onPress={() => {
+                const jlptLevel = profile?.learningPreferences?.targetJlptLevel;
+                if (!jlptLevel) return;
+                router.push({
+                  pathname: "/conversation-practice",
+                  params: { jlptLevel, language, title: "Nói chuyện với AI" },
+                });
+              }}
+            />
 
             {isError && (
               <Text
