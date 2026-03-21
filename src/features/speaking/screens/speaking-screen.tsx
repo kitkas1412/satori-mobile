@@ -1,84 +1,25 @@
+// Màn hình chính của feature Luyện nói.
+// Hiển thị banner free-talk và danh sách các section (chủ đề) để người dùng chọn luyện tập.
+// Tự động highlight section đầu tiên còn topic chưa được luyện.
+
 import { Bell } from "lucide-react-native";
 import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { useCallback, useEffect, useRef, useState } from "react";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
 import { LoadingOverlay, ScreenHeader } from "@/components/ui";
 
 import {
   ConversationBanner,
-  ThemeSection,
+  TopicSection,
 } from "@/features/speaking/components";
 import { useAppStore, useAuthStore } from "@/stores";
 import {
   useConversationThemes,
-  useThemeTopics,
+  useFirstUnpracticedSection,
 } from "@/features/speaking/hooks";
 import { useProfile } from "@/hooks/api/use-profile";
-import type { Content } from "@/features/speaking/api";
-
-function TopicSection({
-  section,
-  defaultExpanded,
-  showFirstUnpracticedBorder,
-  onHasUnpracticed,
-}: {
-  section: Content;
-  defaultExpanded: boolean;
-  showFirstUnpracticedBorder: boolean;
-  onHasUnpracticed: (sectionId: string, orderIndex: number) => void;
-}) {
-  const router = useRouter();
-  const { data: topics } = useThemeTopics(section.id);
-
-  const difficultyLabel = (score: number) => {
-    if (score === 1) return "Dễ";
-    if (score === 2) return "Trung Bình";
-    return "Khó";
-  };
-
-  const lessons =
-    topics?.map((topic) => ({
-      id: topic.id,
-      title: topic.title,
-      subtitle: difficultyLabel(topic.difficultyScore),
-      status: "active" as const,
-      practiced: topic.practiced,
-    })) ?? [];
-
-  const hasUnpracticed = topics?.some((t) => !t.practiced) ?? false;
-
-  useEffect(() => {
-    if (hasUnpracticed) {
-      onHasUnpracticed(section.id, section.orderIndex);
-    }
-  }, [hasUnpracticed, section.id, section.orderIndex, onHasUnpracticed]);
-
-  function handleLessonPress(id: string) {
-    const topic = topics?.find((t) => t.id === id);
-    if (!topic) return;
-    router.push({
-      pathname: "/topic-detail",
-      params: { topicId: topic.id },
-    });
-  }
-
-  return (
-    <ThemeSection
-      lessonNumber={section.orderIndex}
-      lessonTitle={section.title}
-      lessonDescription={section.descriptionVi}
-      completedCount={0}
-      totalCount={section.topicCount}
-      lessons={lessons}
-      defaultExpanded={defaultExpanded}
-      showFirstUnpracticedBorder={showFirstUnpracticedBorder}
-      onLessonPress={handleLessonPress}
-    />
-  );
-}
 
 export function SpeakingScreen() {
   const insets = useSafeAreaInsets();
@@ -90,20 +31,8 @@ export function SpeakingScreen() {
   const theme = Colors[colorScheme ?? "light"];
   const { data: sections, isLoading, isError } = useConversationThemes();
 
-  const [firstUnpracticedSectionId, setFirstUnpracticedSectionId] = useState<
-    string | null
-  >(null);
-  const firstUnpracticedOrderIndexRef = useRef<number>(Infinity);
-
-  const handleHasUnpracticed = useCallback(
-    (sectionId: string, orderIndex: number) => {
-      if (orderIndex < firstUnpracticedOrderIndexRef.current) {
-        firstUnpracticedOrderIndexRef.current = orderIndex;
-        setFirstUnpracticedSectionId(sectionId);
-      }
-    },
-    [],
-  );
+  const { firstUnpracticedSectionId, handleHasUnpracticed } =
+    useFirstUnpracticedSection();
 
   return (
     <>
@@ -128,6 +57,7 @@ export function SpeakingScreen() {
           }
         />
 
+        {/* Khoá tính năng nếu tài khoản người dùng đang bị tạm ngưng */}
         {user?.status === "INACTIVE" ? (
           <View className="flex-1 items-center justify-center px-4">
             <Text
@@ -143,6 +73,10 @@ export function SpeakingScreen() {
             contentContainerClassName="px-4 pb-8 gap-4"
             showsVerticalScrollIndicator={false}
           >
+            {/*
+             * Banner free-talk: lấy targetJlptLevel từ profile để truyền vào session.
+             * Nếu chưa cài đặt mục tiêu JLPT thì không điều hướng.
+             */}
             <ConversationBanner
               onPress={() => {
                 const jlptLevel = profile?.learningPreferences?.targetJlptLevel;
@@ -167,7 +101,10 @@ export function SpeakingScreen() {
               <TopicSection
                 key={section.id}
                 section={section}
+                // Section đầu tiên trong danh sách luôn được mở rộng mặc định
                 defaultExpanded={index === 0}
+                // Hiển thị viền highlight nếu chưa xác định được section nào,
+                // hoặc nếu đây chính là section cần học tiếp theo
                 showFirstUnpracticedBorder={
                   firstUnpracticedSectionId === null ||
                   firstUnpracticedSectionId === section.id

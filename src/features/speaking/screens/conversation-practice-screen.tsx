@@ -1,5 +1,13 @@
+// Màn hình luyện hội thoại với AI — trung tâm của feature Speaking.
+// Hỗ trợ 2 chế độ:
+//   - Guided (có topicId): luyện theo topic với danh sách nhiệm vụ
+//   - Free-talk (có jlptLevel + language): hội thoại tự do không theo topic
+//
+// Luồng: khởi tạo session → người dùng nói (mic) → AI phản hồi → lặp lại
+//        → nhấn "Kết thúc" → xem kết quả → chuyển sang FeedbackScreen
+
 import { List, X } from "lucide-react-native";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -8,6 +16,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useRef } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Colors } from "@/constants/theme";
@@ -20,7 +29,11 @@ import {
   MissionsModal,
   TypingIndicator,
 } from "@/features/speaking/components";
-import { useConversationSession, useRecorder } from "@/features/speaking/hooks";
+import {
+  useConversationSession,
+  useMicInteraction,
+  useRecorder,
+} from "@/features/speaking/hooks";
 import { useConversationStore } from "@/stores";
 
 interface ConversationPracticeScreenProps {
@@ -41,8 +54,6 @@ export function ConversationPracticeScreen({
   const theme = Colors[colorScheme ?? "light"];
   const router = useRouter();
   const scrollViewRef = useRef<ScrollView>(null);
-  const pressStartTimeRef = useRef<number | null>(null);
-  const isTapModeRef = useRef(false);
 
   const [isMissionsVisible, setIsMissionsVisible] = useState(false);
 
@@ -62,6 +73,18 @@ export function ConversationPracticeScreen({
 
   const { startRecording, stopRecording, isRecording } = useRecorder();
 
+  const { handleMicPressIn, handleMicPressOut, micDisabled, micLabel } =
+    useMicInteraction({
+      turnState,
+      isRecording,
+      startRecording,
+      stopRecording,
+      sendMessage,
+    });
+
+  // Khởi tạo session khi màn hình mount:
+  // - Nếu có topicId → guided session theo topic
+  // - Nếu có jlptLevel + language → free-talk session
   useEffect(() => {
     if (topicId) {
       initSession(topicId);
@@ -70,6 +93,7 @@ export function ConversationPracticeScreen({
     }
   }, [topicId, jlptLevel, language]);
 
+  /** Hiển thị hộp thoại xác nhận trước khi bỏ dở session (tiến độ sẽ không được lưu) */
   function handleAbandonSession() {
     Alert.alert(
       "Kết thúc buổi học",
@@ -85,47 +109,10 @@ export function ConversationPracticeScreen({
     );
   }
 
+  /** Hoàn thành session và chờ kết quả từ AI (nút "Kết thúc" ở bottom bar) */
   async function handleCompleteSession() {
     await completeSession();
   }
-
-  async function handleMicPressIn() {
-    if (turnState !== "USER_TURN") return;
-    pressStartTimeRef.current = Date.now();
-    if (!isRecording) {
-      await startRecording();
-    }
-  }
-
-  async function handleMicPressOut() {
-    if (!isRecording) return;
-    const elapsed = Date.now() - (pressStartTimeRef.current ?? 0);
-    const TAP_THRESHOLD = 300;
-
-    if (elapsed < TAP_THRESHOLD) {
-      if (isTapModeRef.current) {
-        isTapModeRef.current = false;
-        const { transcript, audioUri } = await stopRecording();
-        await sendMessage(transcript, audioUri);
-      } else {
-        isTapModeRef.current = true;
-      }
-    } else {
-      isTapModeRef.current = false;
-      const { transcript, audioUri } = await stopRecording();
-      await sendMessage(transcript, audioUri);
-    }
-  }
-
-  const micDisabled = turnState !== "USER_TURN";
-  const micLabel =
-    turnState === "LOADING"
-      ? "AI đang trả lời..."
-      : turnState === "AI_TURN"
-        ? "Chờ AI..."
-        : isRecording
-          ? "Đang ghi âm..."
-          : "Chạm để nói";
 
   return (
     <>
@@ -169,6 +156,7 @@ export function ConversationPracticeScreen({
             gap: 16,
           }}
           showsVerticalScrollIndicator={false}
+          // Tự động cuộn xuống cuối mỗi khi có tin nhắn mới được thêm vào
           onContentSizeChange={() =>
             scrollViewRef.current?.scrollToEnd({ animated: true })
           }
@@ -191,14 +179,14 @@ export function ConversationPracticeScreen({
           style={{ paddingBottom: Math.max(insets.bottom, 16) + 8 }}
         >
           {feedback ? (
-            /* Session completed — show Tiếp tục button */
+            /* Session đã hoàn thành — hiển thị nút chuyển sang màn hình kết quả */
             <PrimaryButton
               text="Tiếp tục"
               variant="dark"
               onPress={() => router.replace("/conversation-feedback")}
             />
           ) : (
-            /* Session active — show Mic + Kết thúc */
+            /* Session đang diễn ra — hiển thị nút Kết thúc (trái) và nút Mic (giữa) */
             <View className="flex-row items-center">
               {/* Kết thúc button - left */}
               <View className="flex-1 justify-center">
