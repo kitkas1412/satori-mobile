@@ -1,11 +1,12 @@
-import { PrimaryButton } from "@/components/ui";
+import { IconButton, PrimaryButton } from "@/components/ui";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { useForgotPasswordForm } from "@/features/authentication/hooks";
 import { useRouter } from "expo-router";
 import React from "react";
 import { KeyboardAvoidingView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { BackButton, EmailInput, SectionHeader } from "../components";
+import { ArrowLeft } from "lucide-react-native";
+import { EmailInput, SectionHeader } from "../components";
 
 export function ForgotPasswordScreen() {
   const router = useRouter();
@@ -34,7 +35,7 @@ export function ForgotPasswordScreen() {
     >
       <SafeAreaView className="flex-1">
         <View className="flex-col px-4">
-          <BackButton onPress={() => router.back()} />
+          <IconButton icon={<ArrowLeft size={24} color="hsla(0, 0%, 0%, 0.6)" />} onPress={() => router.back()} />
 
           <View className="mt-8">
             <SectionHeader

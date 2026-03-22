@@ -130,6 +130,10 @@ function RootLayoutNav() {
         name="assignment-writing-result"
         options={{ headerShown: false, gestureEnabled: false }}
       />
+      <Stack.Screen
+        name="theme-selector"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
     </Stack>
   );
 }
@@ -161,9 +165,7 @@ export default function RootLayout() {
 
   return (
     <QueryProvider>
-      <ThemeProvider
-        value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-      >
+      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <RootLayoutNav />
         <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
       </ThemeProvider>

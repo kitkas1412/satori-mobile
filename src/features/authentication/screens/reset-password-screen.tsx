@@ -1,4 +1,4 @@
-import { PrimaryButton } from "@/components/ui";
+import { IconButton, PrimaryButton } from "@/components/ui";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { useResetPasswordForm } from "@/features/authentication/hooks";
 import { getPasswordValidationStatus } from "@/features/authentication/utils/password-validation";
@@ -11,7 +11,8 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { BackButton, PasswordInput, PasswordValidation } from "../components";
+import { ArrowLeft } from "lucide-react-native";
+import { PasswordInput, PasswordValidation } from "../components";
 
 export function ResetPasswordScreen() {
   const router = useRouter();
@@ -40,7 +41,7 @@ export function ResetPasswordScreen() {
     >
       <SafeAreaView className="flex-1">
         <View className="flex-col px-4">
-          <BackButton onPress={() => router.back()} />
+          <IconButton icon={<ArrowLeft size={24} color="hsla(0, 0%, 0%, 0.6)" />} onPress={() => router.back()} />
 
           <PasswordInput
             value={newPassword}
