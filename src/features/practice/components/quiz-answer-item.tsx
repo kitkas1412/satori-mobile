@@ -23,7 +23,7 @@ export function QuizAnswerItem({ item, index, theme }: QuizAnswerItemProps) {
       onPress={() => setExpanded((v) => !v)}
       className="rounded-2xl overflow-hidden"
       style={{
-        backgroundColor: theme.white,
+        backgroundColor: theme.cardBackground,
         borderWidth: 1.5,
         // Viền xanh lá nếu đúng, đỏ nếu sai
         borderColor: item.correct ? theme.success : theme.error,
@@ -65,6 +65,7 @@ export function QuizAnswerItem({ item, index, theme }: QuizAnswerItemProps) {
         <View
           className="px-4 pb-4 gap-2"
           style={{
+            backgroundColor: theme.cardBackground,
             borderTopWidth: 1,
             borderTopColor: item.correct ? theme.success : theme.error,
           }}
