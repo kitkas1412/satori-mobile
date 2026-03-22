@@ -152,8 +152,8 @@ export default function RootLayout() {
   }, [fontsLoaded]);
 
   useEffect(() => {
-    setColorScheme("light");
-  }, []);
+    setColorScheme(colorScheme ?? "light");
+  }, [colorScheme]);
 
   if (!fontsLoaded) {
     return null;
@@ -165,7 +165,7 @@ export default function RootLayout() {
         value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
       >
         <RootLayoutNav />
-        <StatusBar style="auto" />
+        <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
       </ThemeProvider>
     </QueryProvider>
   );
