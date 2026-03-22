@@ -73,10 +73,10 @@ export function WritingScreen({ id }: WritingScreenProps) {
 
   return (
     <View
-      className="flex-1 bg-background-default"
-      style={{ paddingTop: insets.top }}
+      className="flex-1"
+      style={{ paddingTop: insets.top, backgroundColor: theme.background }}
     >
-      <StatusBar style="dark" />
+      <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
       <LoadingOverlay visible={isPending} title="Đang tải bài tập..." />
       <LoadingOverlay visible={isSubmitting} title="Đang nộp bài..." />
       <LoadingOverlay visible={isEvaluating} title="Đang đánh giá bài..." />

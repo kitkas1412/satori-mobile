@@ -54,8 +54,8 @@ export function QuizScreen({ id }: QuizScreenProps) {
   }, [id]);
 
   return (
-    <View className="flex-1 bg-background-default" style={{ paddingTop: insets.top }}>
-      <StatusBar style="dark" />
+    <View className="flex-1" style={{ paddingTop: insets.top, backgroundColor: theme.background }}>
+      <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
       <LoadingOverlay visible={isPending} title="Đang tải bài tập..." />
       <LoadingOverlay visible={isSubmitting} title="Đang nộp bài..." />
 

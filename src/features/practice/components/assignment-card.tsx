@@ -59,7 +59,7 @@ export function AssignmentCard({
       onPress={onPress}
       className="rounded-2xl p-4 gap-3"
       style={{
-        backgroundColor: theme.white,
+        backgroundColor: theme.cardBackground,
         borderWidth: 0.6,
         borderColor: theme.border,
       }}
