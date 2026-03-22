@@ -31,10 +31,10 @@ export function WritingResultScreen() {
 
   return (
     <View
-      className="flex-1 bg-background-default"
-      style={{ paddingTop: insets.top }}
+      className="flex-1"
+      style={{ paddingTop: insets.top, backgroundColor: theme.background }}
     >
-      <StatusBar style="dark" />
+      <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
       <LoadingOverlay visible={isCancelling} title="Đang hủy nộp bài..." />
 
       {/* Header: tiêu đề thay đổi theo trạng thái chấm bài */}
@@ -80,7 +80,7 @@ export function WritingResultScreen() {
             {/* Màu xanh lá khi đã chấm, màu xanh dương khi chờ chấm */}
             <CheckCircle2
               size={80}
-              color={isGraded ? "#00a63e" : "#0958d9"}
+              color={isGraded ? theme.success : theme.primary}
               strokeWidth={1.5}
             />
           </View>
@@ -111,10 +111,10 @@ export function WritingResultScreen() {
                 className="flex-row items-center gap-2"
                 style={{ opacity: 0.8 }}
               >
-                <Clock size={14} color="#0958d9" strokeWidth={1.5} />
+                <Clock size={14} color={theme.primary} strokeWidth={1.5} />
                 <Text
                   className="font-body text-xs"
-                  style={{ color: "#0958d9" }}
+                  style={{ color: theme.primary }}
                 >
                   Thời gian chấm bài thường từ 1-3 ngày
                 </Text>
@@ -139,7 +139,7 @@ export function WritingResultScreen() {
                   </Text>
                   <Text
                     className="font-heading text-2xl"
-                    style={{ color: "#389e0d" }}
+                    style={{ color: theme.success }}
                   >
                     {Math.round(score)}/100
                   </Text>
@@ -318,15 +318,15 @@ export function WritingResultScreen() {
               className="flex-1 items-center justify-center rounded-xl"
               style={{
                 height: 48,
-                backgroundColor: theme.white,
+                backgroundColor: theme.background,
                 borderWidth: 2,
-                borderColor: "#ff4d4f",
+                borderColor: theme.error,
                 opacity: isCancelling ? 0.5 : 1,
               }}
             >
               <Text
                 className="font-heading text-sm"
-                style={{ color: "#ff4d4f" }}
+                style={{ color: theme.error }}
               >
                 {isCancelling ? "Đang hủy..." : "Hủy nộp bài"}
               </Text>

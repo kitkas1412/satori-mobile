@@ -26,10 +26,10 @@ export function QuizResultScreen() {
 
   return (
     <View
-      className="flex-1 bg-background-default"
-      style={{ paddingTop: insets.top }}
+      className="flex-1"
+      style={{ paddingTop: insets.top, backgroundColor: theme.background }}
     >
-      <StatusBar style="dark" />
+      <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
 
       {/* Header với nút X để quay về danh sách bài tập */}
       <ScreenHeader
@@ -76,8 +76,9 @@ export function QuizResultScreen() {
 
         {/* Thẻ thống kê: số câu đúng và số câu sai */}
         <View
-          className="bg-background-surface rounded-2xl p-5 gap-4"
+          className="rounded-2xl p-5 gap-4"
           style={{
+            backgroundColor: theme.cardBackground,
             shadowColor: theme.shadow,
             shadowOffset: { width: 0, height: 1 },
             shadowOpacity: 0.1,

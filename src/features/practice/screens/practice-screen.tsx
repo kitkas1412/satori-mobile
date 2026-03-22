@@ -15,10 +15,7 @@ import { SectionHeader } from "@/components/ui/section-header";
 import { AiBanner } from "../components/ai-banner";
 import { AssignmentCard } from "../components/assignment-card";
 import { mapAssignmentToCardProps } from "../utils";
-import {
-  useAssignments,
-  useAssignmentNavigation,
-} from "../hooks";
+import { useAssignments, useAssignmentNavigation } from "../hooks";
 
 type ActiveTab = "teacher" | "ai";
 
@@ -42,8 +39,8 @@ export function PracticeScreen() {
   );
 
   return (
-    <View className="flex-1 bg-background-default">
-      <StatusBar style="dark" />
+    <View className="flex-1" style={{ backgroundColor: theme.background }}>
+      <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 24 }}
@@ -57,8 +54,12 @@ export function PracticeScreen() {
 
         {/* Thanh chuyển đổi tab GV / AI */}
         <View
-          className="mx-4 flex-row bg-background-surface rounded-2xl p-1 mb-3"
-          style={{ borderWidth: 0.6, borderColor: "rgba(0,0,0,0.05)" }}
+          className="mx-4 flex-row rounded-2xl p-1 mb-3"
+          style={{
+            backgroundColor: theme.cardBackground,
+            borderWidth: 0.6,
+            borderColor: "rgba(0,0,0,0.05)",
+          }}
         >
           <Pressable
             onPress={() => setActiveTab("teacher")}

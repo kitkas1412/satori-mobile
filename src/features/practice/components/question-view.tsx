@@ -25,11 +25,11 @@ function OptionButton({
   return (
     <Pressable
       onPress={onPress}
-      className="flex-row items-center gap-4 rounded-xl p-4 bg-background-surface"
+      className="flex-row items-center gap-4 rounded-xl p-4"
       style={{
         borderWidth: selected ? 2 : 1.5,
         borderColor: selected ? theme.primary : theme.border,
-        backgroundColor: selected ? theme.primary : theme.white,
+        backgroundColor: selected ? theme.primary : theme.cardBackground,
       }}
     >
       {/* Vòng tròn nhãn (A, B, C... hoặc ○/×) */}
@@ -41,7 +41,7 @@ function OptionButton({
           borderRadius: 16,
           borderWidth: selected ? 2 : 1.5,
           borderColor: selected ? theme.white : theme.border,
-          backgroundColor: selected ? theme.primary : theme.white,
+          backgroundColor: selected ? theme.primary : theme.cardBackground,
         }}
       >
         <Text
@@ -118,8 +118,9 @@ export function QuestionView({
 
       {/* Thẻ câu hỏi */}
       <View
-        className="bg-background-surface rounded-2xl p-5 mb-6"
+        className="rounded-2xl p-5 mb-6"
         style={{
+          backgroundColor: theme.cardBackground,
           shadowColor: theme.shadow,
           shadowOffset: { width: 0, height: 1 },
           shadowOpacity: 0.1,
@@ -147,7 +148,9 @@ export function QuestionView({
           style={{
             borderWidth: 1.5,
             borderColor: fillBlankAnswer ? theme.primary : theme.border,
-            backgroundColor: fillBlankAnswer ? theme.primary : theme.white,
+            backgroundColor: fillBlankAnswer
+              ? theme.primary
+              : theme.cardBackground,
             color: theme.textDefault,
           }}
         />
