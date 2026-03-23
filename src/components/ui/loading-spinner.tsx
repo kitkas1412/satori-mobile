@@ -1,3 +1,5 @@
+import { Colors } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import React, { useEffect } from "react";
 import { View } from "react-native";
 import Animated, {
@@ -13,6 +15,7 @@ interface LoadingSpinnerProps {
 }
 
 export function LoadingSpinner({ size = 80 }: LoadingSpinnerProps) {
+  const theme = useColorScheme() ?? "light";
   const rotation = useSharedValue(0);
 
   useEffect(() => {
@@ -48,8 +51,8 @@ export function LoadingSpinner({ size = 80 }: LoadingSpinnerProps) {
             borderRadius: outerSize * 0.59375,
             borderWidth,
             borderColor: "transparent",
-            borderTopColor: "hsl(228, 78%, 71%)",
-            borderRightColor: "hsl(228, 78%, 71%)",
+            borderTopColor: Colors[theme].primary,
+            borderRightColor: Colors[theme].primary,
           },
           animatedStyle,
         ]}
