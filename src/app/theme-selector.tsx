@@ -1,4 +1,4 @@
-import { ThemeSelectorScreen } from "@/features/profile/screens/theme-selector-screen";
+import { ThemeSelectorScreen } from "@/features/setting";
 
 export default function ThemeSelector() {
   return <ThemeSelectorScreen />;
