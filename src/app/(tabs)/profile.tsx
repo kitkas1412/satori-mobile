@@ -1,22 +1,22 @@
+import { LoadingOverlay, PrimaryButton, ScreenHeader } from "@/components/ui";
 import { useLogout } from "@/features/authentication/hooks";
+import { ThemeSelector } from "@/features/setting/components";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useAuthStore } from "@/stores/auth-store";
+import { Colors } from "@/constants/theme";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { KeyRound, LogOut } from "lucide-react-native";
 import { Alert, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useColorScheme } from "@/hooks/use-color-scheme";
-import { Colors } from "@/constants/theme";
-import { LoadingOverlay, PrimaryButton, ScreenHeader } from "@/components/ui";
 
-export default function ProfileScreen() {
+export default function ProfileTab() {
   const { user } = useAuthStore();
   const router = useRouter();
   const { mutate: logoutUser, isPending } = useLogout();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
-
 
   const handleLogout = () => {
     Alert.alert(
@@ -42,12 +42,9 @@ export default function ProfileScreen() {
   return (
     <>
       <View className="flex-1" style={{ backgroundColor: theme.background }}>
-        <StatusBar style="dark" />
+        <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
 
-        <ScreenHeader
-          title="Cá nhân"
-          paddingTop={insets.top + 16}
-        />
+        <ScreenHeader title="Cá nhân" paddingTop={insets.top + 16} />
 
         {user && (
           <View
@@ -65,6 +62,8 @@ export default function ProfileScreen() {
             </Text>
           </View>
         )}
+
+        <ThemeSelector />
 
         <View className="px-6 mt-4 gap-3">
           <PrimaryButton

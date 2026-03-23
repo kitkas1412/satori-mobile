@@ -1,9 +1,14 @@
+// Component hiển thị một câu hỏi trong bài trắc nghiệm.
+// Hỗ trợ hai loại câu hỏi: trắc nghiệm (multiple_choice / true_false) và điền vào chỗ trống (fill_blank).
+
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 
 import { Colors } from "@/constants/theme";
 import { MarkdownText, ProgressBar } from "@/components/ui";
 import type { Question, Option } from "../api";
 
+// Component một lựa chọn trong câu trắc nghiệm.
+// Thay đổi màu nền và viền khi được chọn.
 function OptionButton({
   option,
   label,
@@ -20,13 +25,14 @@ function OptionButton({
   return (
     <Pressable
       onPress={onPress}
-      className="flex-row items-center gap-4 rounded-xl p-4 bg-background-surface"
+      className="flex-row items-center gap-4 rounded-xl p-4"
       style={{
         borderWidth: selected ? 2 : 1.5,
         borderColor: selected ? theme.primary : theme.border,
-        backgroundColor: selected ? theme.primary : theme.white,
+        backgroundColor: selected ? theme.primary : theme.cardBackground,
       }}
     >
+      {/* Vòng tròn nhãn (A, B, C... hoặc ○/×) */}
       <View
         className="items-center justify-center"
         style={{
@@ -35,7 +41,7 @@ function OptionButton({
           borderRadius: 16,
           borderWidth: selected ? 2 : 1.5,
           borderColor: selected ? theme.white : theme.border,
-          backgroundColor: selected ? theme.primary : theme.white,
+          backgroundColor: selected ? theme.primary : theme.cardBackground,
         }}
       >
         <Text
@@ -77,6 +83,7 @@ export function QuestionView({
   onFillBlankChange,
   theme,
 }: QuestionViewProps) {
+  // Tiến độ tính theo số câu đã xem (index + 1 trên tổng số)
   const progress = (index + 1) / total;
 
   return (
@@ -88,7 +95,7 @@ export function QuestionView({
         paddingTop: 16,
       }}
     >
-      {/* Question counter */}
+      {/* Bộ đếm câu hỏi: hiển thị "問題" (mondai) và số thứ tự */}
       <View className="flex-row items-center justify-between mb-3">
         <Text
           className="font-heading text-sm"
@@ -104,15 +111,16 @@ export function QuestionView({
         </Text>
       </View>
 
-      {/* Progress bar */}
+      {/* Thanh tiến độ */}
       <View className="mb-6">
         <ProgressBar progress={progress} />
       </View>
 
-      {/* Question card */}
+      {/* Thẻ câu hỏi */}
       <View
-        className="bg-background-surface rounded-2xl p-5 mb-6"
+        className="rounded-2xl p-5 mb-6"
         style={{
+          backgroundColor: theme.cardBackground,
           shadowColor: theme.shadow,
           shadowOffset: { width: 0, height: 1 },
           shadowOpacity: 0.1,
@@ -129,7 +137,7 @@ export function QuestionView({
         </MarkdownText>
       </View>
 
-      {/* Answer area */}
+      {/* Khu vực trả lời: ô nhập text (fill_blank) hoặc danh sách lựa chọn */}
       {question.questionType === "fill_blank" ? (
         <TextInput
           value={fillBlankAnswer ?? ""}
@@ -140,13 +148,17 @@ export function QuestionView({
           style={{
             borderWidth: 1.5,
             borderColor: fillBlankAnswer ? theme.primary : theme.border,
-            backgroundColor: fillBlankAnswer ? theme.primary : theme.white,
+            backgroundColor: fillBlankAnswer
+              ? theme.primary
+              : theme.cardBackground,
             color: theme.textDefault,
           }}
         />
       ) : (
         <View className="gap-3">
           {(question.options ?? []).map((option) => {
+            // Câu đúng/sai (true_false): dùng ký hiệu ○ (đúng) và × (sai) thay vì id dạng chữ.
+            // Các câu khác: dùng id trực tiếp làm nhãn (thường là A, B, C, D).
             const label =
               option.id === "TRUE" || option.id === "FALSE"
                 ? option.id === "TRUE"
@@ -159,6 +171,7 @@ export function QuestionView({
                 option={option}
                 label={label}
                 selected={selectedOptionId === option.id}
+                // Nhấn lại lựa chọn đang chọn sẽ bỏ chọn (truyền chuỗi rỗng)
                 onPress={() =>
                   onSelectOption(
                     selectedOptionId === option.id ? "" : option.id,

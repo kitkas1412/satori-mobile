@@ -1,3 +1,6 @@
+// Màn hình chính của tính năng Ôn tập.
+// Hiển thị hai tab: "Bài tập GV" (danh sách bài tập từ giáo viên) và "Ôn luyện AI" (banner AI).
+
 import { Bell, BookOpen, Sparkles } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
@@ -11,11 +14,8 @@ import { ScreenHeader } from "@/components/ui/screen-header";
 import { SectionHeader } from "@/components/ui/section-header";
 import { AiBanner } from "../components/ai-banner";
 import { AssignmentCard } from "../components/assignment-card";
-import {
-  useAssignments,
-  mapAssignmentToCardProps,
-  useAssignmentNavigation,
-} from "../hooks";
+import { mapAssignmentToCardProps } from "../utils";
+import { useAssignments, useAssignmentNavigation } from "../hooks";
 
 type ActiveTab = "teacher" | "ai";
 
@@ -28,6 +28,7 @@ export function PracticeScreen() {
   const { handleAssignmentPress, isLoadingSubmission } =
     useAssignmentNavigation();
 
+  // Biểu tượng chuông thông báo với chấm đỏ báo có thông báo mới
   const bellAction = (
     <View className="relative">
       <View className="w-9 h-9 bg-secondary-default rounded-full items-center justify-center">
@@ -38,23 +39,27 @@ export function PracticeScreen() {
   );
 
   return (
-    <View className="flex-1 bg-background-default">
-      <StatusBar style="dark" />
+    <View className="flex-1" style={{ backgroundColor: theme.background }}>
+      <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 24 }}
       >
-        {/* Header */}
+        {/* Tiêu đề màn hình */}
         <ScreenHeader
           title="Ôn tập"
           rightAction={bellAction}
           paddingTop={insets.top + 16}
         />
 
-        {/* Tab Switcher */}
+        {/* Thanh chuyển đổi tab GV / AI */}
         <View
-          className="mx-4 flex-row bg-background-surface rounded-2xl p-1 mb-3"
-          style={{ borderWidth: 0.6, borderColor: "rgba(0,0,0,0.05)" }}
+          className="mx-4 flex-row rounded-2xl p-1 mb-3"
+          style={{
+            backgroundColor: theme.cardBackground,
+            borderWidth: 0.6,
+            borderColor: "rgba(0,0,0,0.05)",
+          }}
         >
           <Pressable
             onPress={() => setActiveTab("teacher")}
@@ -67,13 +72,14 @@ export function PracticeScreen() {
           >
             <BookOpen
               size={20}
-              color={activeTab === "teacher" ? theme.white : theme.textMuted}
+              color={activeTab === "teacher" ? theme.white : theme.textDefault}
               strokeWidth={2}
             />
             <Text
               className="font-heading text-base"
               style={{
-                color: activeTab === "teacher" ? theme.white : theme.textMuted,
+                color:
+                  activeTab === "teacher" ? theme.white : theme.textDefault,
               }}
             >
               Bài tập GV
@@ -90,13 +96,13 @@ export function PracticeScreen() {
           >
             <Sparkles
               size={20}
-              color={activeTab === "ai" ? theme.white : theme.textMuted}
+              color={activeTab === "ai" ? theme.white : theme.textDefault}
               strokeWidth={2}
             />
             <Text
               className="font-heading text-base"
               style={{
-                color: activeTab === "ai" ? theme.white : theme.textMuted,
+                color: activeTab === "ai" ? theme.white : theme.textDefault,
               }}
             >
               Ôn luyện AI
@@ -112,6 +118,7 @@ export function PracticeScreen() {
               size="lg"
             />
 
+            {/* Hiển thị lỗi, danh sách rỗng, hoặc danh sách bài tập */}
             {isError ? (
               <Text
                 className="font-body text-sm text-center"
@@ -142,7 +149,10 @@ export function PracticeScreen() {
           </View>
         )}
       </ScrollView>
+
+      {/* Overlay loading khi đang tải danh sách bài tập */}
       <LoadingOverlay visible={isLoading} title="Đang tải bài tập..." />
+      {/* Overlay loading khi đang tải kết quả bài đã nộp */}
       <LoadingOverlay
         visible={isLoadingSubmission}
         title="Đang tải kết quả..."

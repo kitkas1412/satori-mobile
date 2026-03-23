@@ -1,36 +1,17 @@
+// Hook xử lý logic điều hướng khi học viên nhấn vào một bài tập.
+// Hành vi khác nhau tùy theo trạng thái bài tập:
+// - GRADED: tải kết quả đã chấm và điều hướng đến màn hình kết quả
+// - SUBMITTED + WRITING: tải bài đã nộp đang chờ chấm
+// - OVERDUE: hiển thị thông báo hết hạn
+// - Còn lại: điều hướng đến màn hình làm bài tương ứng
+
 import { useState } from "react";
 import { Alert } from "react-native";
 import { useRouter } from "expo-router";
 
 import { usePracticeStore } from "@/stores";
-import type {
-  AssignmentCardProps,
-  AssignmentStatus,
-} from "../components/assignment-card";
-import type { Content, LearnerSubmissionStatus } from "../api";
-import { getSubmissionApi, getWritingSubmissionApi } from "../api";
-
-const STATUS_MAP: Record<LearnerSubmissionStatus, AssignmentStatus> = {
-  GRADED: "graded",
-  IN_PROGRESS: "in_progress",
-  NOT_STARTED: "not_started",
-  OVERDUE: "overdue",
-  SUBMITTED: "submitted",
-};
-
-export function mapAssignmentToCardProps(a: Content): AssignmentCardProps {
-  const subtitle =
-    a.assignmentType === "QUIZ"
-      ? `${a.questionCount} câu hỏi • Trắc nghiệm`
-      : "Bài viết";
-
-  const date = new Date(a.dueDate);
-  const dueDate = `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
-
-  const status = STATUS_MAP[a.learnerSubmissionStatus];
-
-  return { title: a.title, subtitle, dueDate, status };
-}
+import type { Content } from "../api";
+import { getQuizSubmissionApi, getWritingSubmissionApi } from "../api";
 
 export function useAssignmentNavigation() {
   const router = useRouter();
@@ -47,7 +28,10 @@ export function useAssignmentNavigation() {
       if (item.assignmentType === "QUIZ") {
         try {
           setIsLoadingSubmission(true);
-          const submission = await getSubmissionApi(item.learnerSubmissionId);
+          const submission = await getQuizSubmissionApi(
+            item.learnerSubmissionId,
+          );
+          // Lưu kết quả vào store để màn hình kết quả có thể đọc
           setQuizResult(item.id, submission);
           router.push({ pathname: "/assignment-result" });
         } catch {
@@ -61,7 +45,9 @@ export function useAssignmentNavigation() {
       } else if (item.assignmentType === "WRITING") {
         try {
           setIsLoadingSubmission(true);
-          const submission = await getWritingSubmissionApi(item.learnerSubmissionId);
+          const submission = await getWritingSubmissionApi(
+            item.learnerSubmissionId,
+          );
           setWritingResult(submission);
           router.push({ pathname: "/assignment-writing-result" });
         } catch {
@@ -73,21 +59,24 @@ export function useAssignmentNavigation() {
           setIsLoadingSubmission(false);
         }
       }
-    } else if (item.learnerSubmissionStatus === "SUBMITTED" && item.assignmentType === "WRITING") {
+    } else if (
+      item.learnerSubmissionStatus === "SUBMITTED" &&
+      item.assignmentType === "WRITING"
+    ) {
+      // Bài viết đã nộp nhưng chưa chấm — cho xem lại trang chi tiết bài nộp
       if (!item.learnerSubmissionId) {
         Alert.alert("Lỗi", "Không tìm thấy thông tin bài nộp.");
         return;
       }
       try {
         setIsLoadingSubmission(true);
-        const submission = await getWritingSubmissionApi(item.learnerSubmissionId);
+        const submission = await getWritingSubmissionApi(
+          item.learnerSubmissionId,
+        );
         setWritingResult(submission);
         router.push({ pathname: "/assignment-writing-result" });
       } catch {
-        Alert.alert(
-          "Lỗi",
-          "Không thể tải kết quả bài tập. Vui lòng thử lại.",
-        );
+        Alert.alert("Lỗi", "Không thể tải kết quả bài tập. Vui lòng thử lại.");
       } finally {
         setIsLoadingSubmission(false);
       }
