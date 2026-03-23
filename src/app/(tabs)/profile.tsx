@@ -1,6 +1,6 @@
 import { LoadingOverlay, PrimaryButton, ScreenHeader } from "@/components/ui";
 import { useLogout } from "@/features/authentication/hooks";
-import { ThemeSelector } from "@/features/setting";
+import { ThemeSelector } from "@/features/setting/components";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useAuthStore } from "@/stores/auth-store";
 import { Colors } from "@/constants/theme";
