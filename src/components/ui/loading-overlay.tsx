@@ -1,4 +1,6 @@
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { Colors } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import React from "react";
 import { Modal, Text, View } from "react-native";
 
@@ -17,21 +19,29 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
   spinnerSize = 80,
   transparent = false,
 }) => {
+  const theme = useColorScheme() ?? "light";
   return (
     <Modal visible={visible} transparent statusBarTranslucent>
       <View
-        className={`flex-1 items-center justify-center ${transparent ? "bg-black/50" : "bg-background-default"}`}
+        className="flex-1 items-center justify-center"
+        style={!transparent ? { backgroundColor: Colors[theme].background } : { backgroundColor: "rgba(0,0,0,0.5)" }}
       >
         <View className="items-center gap-3">
           <LoadingSpinner size={spinnerSize} />
           <View className="items-center gap-3">
             {title && (
-              <Text className="font-heading text-2xl text-[hsl(220,21%,27%)] text-center">
+              <Text
+                className="font-heading text-2xl text-center"
+                style={{ color: Colors[theme].textDefault }}
+              >
                 {title}
               </Text>
             )}
             {message && (
-              <Text className="font-body text-base text-[hsl(215,16%,47%)] text-center">
+              <Text
+                className="font-body text-base text-center"
+                style={{ color: Colors[theme].textMuted }}
+              >
                 {message}
               </Text>
             )}
