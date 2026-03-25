@@ -24,13 +24,13 @@ export function MissionItem({ mission, index }: MissionItemProps) {
       <View className="flex-row items-center gap-4 flex-1">
         <Text
           className="font-heading text-[32px] w-7 text-center"
-          style={{ color: theme.textMuted, lineHeight: 40 }}
+          style={{ color: theme.text.secondary, lineHeight: 40 }}
         >
           {index + 1}
         </Text>
         <Text
           className="font-body text-base flex-1"
-          style={{ color: theme.textMuted }}
+          style={{ color: theme.text.secondary }}
         >
           {mission.titleVi}
         </Text>
@@ -41,7 +41,9 @@ export function MissionItem({ mission, index }: MissionItemProps) {
         style={{
           width: 40,
           height: 40,
-          backgroundColor: isCompleted ? theme.success : theme.border,
+          backgroundColor: isCompleted
+            ? theme.icon.success
+            : theme.icon.disabled,
         }}
       >
         <Check size={22} color="white" strokeWidth={2.5} />

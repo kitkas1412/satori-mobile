@@ -19,7 +19,7 @@ export type SessionStatus = "ACTIVE" | "COMPLETED" | "ABANDONED";
 
 // GET: /learner/conversation/themes?page=0&size=10
 /** Cấu trúc phân trang dùng chung cho các danh sách trả về từ API */
-export interface ThemeResponse<T> {
+export interface TopicListResponse<T> {
   content: T[];
   pageNumber: number;
   pageSize: number;
@@ -29,8 +29,8 @@ export interface ThemeResponse<T> {
   first: boolean;
 }
 
-/** Một chủ đề lớn (theme/section) chứa nhiều topic con */
-export interface Content {
+/** Một chủ đề lớn (topic/section) chứa nhiều conversation con */
+export interface Topic {
   id: string;
   title: string;
   titleJapanese: string;
@@ -46,8 +46,8 @@ export interface Content {
 }
 
 // GET: /learner/conversation/themes/{{theme_id}}/topics
-/** Một topic hội thoại trong danh sách của một theme */
-export interface TopicResponse {
+/** Một conversation hội thoại trong danh sách của một topic */
+export interface ConversationResponse {
   id: string;
   themeId: string;
   title: string;
@@ -67,8 +67,8 @@ export interface TopicResponse {
 }
 
 // GET: /learner/conversation/topics/{{topic_id}}
-/** Chi tiết đầy đủ của một topic, bao gồm gợi ý từ vựng, ngữ pháp và danh sách nhiệm vụ */
-export interface TopicDetailResponse {
+/** Chi tiết đầy đủ của một conversation, bao gồm gợi ý từ vựng, ngữ pháp và danh sách nhiệm vụ */
+export interface ConversationDetailResponse {
   id: string;
   themeId: string;
   themeName: string | null;

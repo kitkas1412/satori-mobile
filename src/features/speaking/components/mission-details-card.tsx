@@ -22,33 +22,36 @@ export function MissionDetailsCard({
 
   return (
     <View
-      className="rounded-2xl p-4 gap-3"
-      style={{ backgroundColor: theme.cardBackground }}
+      className="rounded-2xl p-4 gap-3 border"
+      style={{
+        backgroundColor: theme.background.surface,
+        borderColor: theme.border.subtle,
+      }}
     >
       <Text
         className="font-heading text-base"
-        style={{ color: theme.textDefault }}
+        style={{ color: theme.text.primary }}
       >
         Nhiệm vụ
       </Text>
       {missionDetails.map((mission, index) => (
         <View key={index} className="flex-row items-start gap-3">
           {mission.status === "COMPLETED" ? (
-            <CheckCircle size={20} color={theme.success} />
+            <CheckCircle size={20} color={theme.success.default} />
           ) : (
-            <Circle size={20} color={theme.textMuted} />
+            <Circle size={20} color={theme.icon.secondary} />
           )}
           <View className="flex-1">
             <Text
               className="font-body text-sm"
-              style={{ color: theme.textDefault }}
+              style={{ color: theme.text.primary }}
             >
               {mission.title}
             </Text>
             {mission.titleJapanese ? (
               <Text
                 className="font-body text-xs"
-                style={{ color: theme.textMuted }}
+                style={{ color: theme.text.secondary }}
               >
                 {mission.titleJapanese}
               </Text>
@@ -56,7 +59,7 @@ export function MissionDetailsCard({
             {mission.reasoning ? (
               <Text
                 className="font-body text-xs mt-1"
-                style={{ color: theme.textMuted }}
+                style={{ color: theme.text.secondary }}
               >
                 {mission.reasoning}
               </Text>
@@ -64,7 +67,7 @@ export function MissionDetailsCard({
           </View>
           <Text
             className="font-body text-xs"
-            style={{ color: theme.textMuted }}
+            style={{ color: theme.text.secondary }}
           >
             {mission.progressPct}%
           </Text>

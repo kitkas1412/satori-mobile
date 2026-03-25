@@ -18,26 +18,31 @@ export function MessageBubble({ message }: { message: Messages }) {
           onPress={() => setShowTranslation((v) => !v)}
         >
           <View
-            className="bg-white px-4 py-4 gap-2"
+            className="px-4 border py-4 gap-2"
             style={{
+              backgroundColor: theme.background.surface,
               borderTopLeftRadius: 14,
               borderTopRightRadius: 14,
               borderBottomRightRadius: 14,
+              borderColor: theme.border.subtle,
             }}
           >
-            <Text className="font-body text-base text-text-main">
+            <Text
+              className="font-body text-base"
+              style={{ color: theme.text.primary }}
+            >
               {message.content}
             </Text>
             {showTranslation && message.translation ? (
               <Text
                 className="font-body text-sm"
-                style={{ color: theme.textMuted }}
+                style={{ color: theme.text.secondary }}
               >
                 {message.translation}
               </Text>
             ) : null}
             <View className="self-end">
-              <Languages size={12} color={theme.textMuted} />
+              <Languages size={12} color={theme.text.secondary} />
             </View>
           </View>
         </TouchableOpacity>
@@ -48,14 +53,18 @@ export function MessageBubble({ message }: { message: Messages }) {
   return (
     <View className="self-end max-w-[85%]">
       <View
-        className="bg-primary-default px-4 py-4"
+        className="px-4 py-4"
         style={{
           borderTopLeftRadius: 14,
           borderTopRightRadius: 14,
           borderBottomLeftRadius: 14,
+          backgroundColor: theme.brand.primary,
         }}
       >
-        <Text className="font-body text-base text-text-main">
+        <Text
+          className="font-body text-base"
+          style={{ color: theme.text.inverse }}
+        >
           {message.content}
         </Text>
       </View>
@@ -77,27 +86,40 @@ export function FeedbackBubble({
   return (
     <View className="self-start max-w-[85%]">
       <View
-        className="bg-white px-4 py-4 gap-2"
+        className="border px-4 py-4 gap-2"
         style={{
+          backgroundColor: theme.background.surface,
           borderTopLeftRadius: 14,
           borderTopRightRadius: 14,
           borderBottomRightRadius: 14,
+          borderColor: theme.border.subtle,
         }}
       >
-        <Text className="font-heading text-base text-text-main">
+        <Text
+          className="font-heading text-base"
+          style={{ color: theme.text.primary }}
+        >
           Tóm tắt đánh giá
         </Text>
         {score != null && (
-          <Text className="font-body text-sm" style={{ color: theme.primary }}>
+          <Text
+            className="font-body text-sm"
+            style={{ color: theme.brand.primary }}
+          >
             Điểm tổng: {score}/100
           </Text>
         )}
         {summary ? (
-          <Text className="font-body text-sm text-text-main">{summary}</Text>
+          <Text
+            className="font-body text-sm"
+            style={{ color: theme.text.primary }}
+          >
+            {summary}
+          </Text>
         ) : (
           <Text
             className="font-body text-sm"
-            style={{ color: theme.textMuted }}
+            style={{ color: theme.text.secondary }}
           >
             Buổi học đã hoàn thành!
           </Text>

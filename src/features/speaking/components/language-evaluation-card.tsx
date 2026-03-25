@@ -19,12 +19,15 @@ export function LanguageEvaluationCard({
 
   return (
     <View
-      className="rounded-2xl p-4 gap-3"
-      style={{ backgroundColor: theme.cardBackground }}
+      className="rounded-2xl p-4 gap-3 border"
+      style={{
+        backgroundColor: theme.background.surface,
+        borderColor: theme.border.subtle,
+      }}
     >
       <Text
         className="font-heading text-base"
-        style={{ color: theme.textDefault }}
+        style={{ color: theme.text.primary }}
       >
         Đánh giá ngôn ngữ
       </Text>
@@ -40,17 +43,17 @@ export function LanguageEvaluationCard({
           <View
             key={label}
             className="rounded-lg px-3 py-2 items-center"
-            style={{ backgroundColor: theme.background }}
+            style={{ backgroundColor: theme.border.subtle }}
           >
             <Text
               className="font-heading text-sm"
-              style={{ color: theme.primary }}
+              style={{ color: theme.brand.primary }}
             >
               {val != null ? Math.round(val) : "--"}
             </Text>
             <Text
               className="font-body text-xs"
-              style={{ color: theme.textMuted }}
+              style={{ color: theme.text.secondary }}
             >
               {label}
             </Text>
@@ -62,7 +65,7 @@ export function LanguageEvaluationCard({
       {languageEvaluation.summary ? (
         <Text
           className="font-body text-sm"
-          style={{ color: theme.textDefault }}
+          style={{ color: theme.text.secondary }}
         >
           {languageEvaluation.summary}
         </Text>
@@ -73,7 +76,7 @@ export function LanguageEvaluationCard({
         <View className="gap-1">
           <Text
             className="font-heading text-sm"
-            style={{ color: theme.success }}
+            style={{ color: theme.success.default }}
           >
             Điểm mạnh
           </Text>
@@ -81,7 +84,7 @@ export function LanguageEvaluationCard({
             <Text
               key={i}
               className="font-body text-sm"
-              style={{ color: theme.textDefault }}
+              style={{ color: theme.text.secondary }}
             >
               • {s}
             </Text>
@@ -94,7 +97,7 @@ export function LanguageEvaluationCard({
         <View className="gap-1">
           <Text
             className="font-heading text-sm"
-            style={{ color: theme.secondary }}
+            style={{ color: theme.warning.default }}
           >
             Cần cải thiện
           </Text>
@@ -102,7 +105,7 @@ export function LanguageEvaluationCard({
             <Text
               key={i}
               className="font-body text-sm"
-              style={{ color: theme.textDefault }}
+              style={{ color: theme.text.secondary }}
             >
               • {s}
             </Text>

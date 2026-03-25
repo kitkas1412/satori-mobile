@@ -117,8 +117,8 @@ export function ConversationPracticeScreen({
   return (
     <>
       <View
-        className="flex-1 bg-background-default"
-        style={{ paddingTop: insets.top }}
+        className="flex-1"
+        style={{ paddingTop: insets.top, backgroundColor: theme.background.page }}
       >
         {/* Header */}
         <ScreenHeader
@@ -128,7 +128,7 @@ export function ConversationPracticeScreen({
               onPress={handleAbandonSession}
               hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
             >
-              <X size={24} color={theme.textDefault} />
+              <X size={24} color={theme.text.primary} />
             </TouchableOpacity>
           }
           rightAction={
@@ -137,14 +137,14 @@ export function ConversationPracticeScreen({
                 onPress={() => setIsMissionsVisible(true)}
                 hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
               >
-                <List size={24} color={theme.textDefault} />
+                <List size={24} color={theme.text.primary} />
               </TouchableOpacity>
             ) : undefined
           }
         />
 
         {/* Divider */}
-        <View className="h-px bg-border" />
+        <View className="h-px" style={{ backgroundColor: theme.border.subtle }} />
 
         {/* Messages */}
         <ScrollView
@@ -196,9 +196,9 @@ export function ConversationPracticeScreen({
                   hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
                 >
                   {isCompleting ? (
-                    <ActivityIndicator size="small" color={theme.primary} />
+                    <ActivityIndicator size="small" color={theme.brand.primary} />
                   ) : (
-                    <Text className="font-heading text-lg text-primary-dark">
+                    <Text className="font-heading text-lg" style={{ color: theme.brand.primary }}>
                       Kết thúc
                     </Text>
                   )}
