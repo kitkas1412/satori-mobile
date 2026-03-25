@@ -1,5 +1,5 @@
-// Màn hình chi tiết topic, hiển thị trước khi người dùng bắt đầu luyện tập.
-// Bao gồm: tên topic, độ khó, mô tả và danh sách nhiệm vụ cần hoàn thành.
+// Màn hình chi tiết conversation, hiển thị trước khi người dùng bắt đầu luyện tập.
+// Bao gồm: tên conversation, độ khó, mô tả và danh sách nhiệm vụ cần hoàn thành.
 // Người dùng nhấn "Hiểu rồi" để chuyển sang màn hình luyện tập.
 
 import { ListChecks, X } from "lucide-react-native";
@@ -9,7 +9,7 @@ import { useRouter } from "expo-router";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
 import { LoadingOverlay, PrimaryButton } from "@/components/ui";
-import { useTopicDetail } from "@/features/speaking/hooks";
+import { useConversationDetail } from "@/features/speaking/hooks";
 import { MissionItem } from "@/features/speaking/components";
 
 /** Chuyển điểm độ khó thành nhãn hiển thị: 1 = Dễ, 2 = Trung Bình, khác = Khó */
@@ -19,29 +19,35 @@ function difficultyLabel(score: number): string {
   return "Khó";
 }
 
-interface TopicDetailScreenProps {
-  topicId: string;
+interface ConversationDetailScreenProps {
+  conversationId: string;
 }
 
-export function TopicDetailScreen({ topicId }: TopicDetailScreenProps) {
+export function ConversationDetailScreen({
+  conversationId,
+}: ConversationDetailScreenProps) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
-  const { data: topic, isLoading } = useTopicDetail(topicId);
+  const { data: conversation, isLoading } =
+    useConversationDetail(conversationId);
 
-  /** Điều hướng sang màn hình luyện tập với topicId, dùng replace để không quay lại được trang này */
+  /** Điều hướng sang màn hình luyện tập với conversationId, dùng replace để không quay lại được trang này */
   function handleStart() {
     router.replace({
       pathname: "/conversation-practice",
-      params: { topicId, title: topic?.title ?? "" },
+      params: { topicId: conversationId, title: conversation?.title ?? "" },
     });
   }
 
   return (
     <>
-      <View className="flex-1" style={{ backgroundColor: theme.background }}>
+      <View
+        className="flex-1"
+        style={{ backgroundColor: theme.background.page }}
+      >
         {/* Header */}
         <View
           className="flex-row items-center px-4 pb-4"
@@ -51,7 +57,7 @@ export function TopicDetailScreen({ topicId }: TopicDetailScreenProps) {
             onPress={() => router.back()}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <X size={24} color={theme.textDefault} strokeWidth={2} />
+            <X size={24} color={theme.icon.primary} strokeWidth={2} />
           </TouchableOpacity>
         </View>
 
@@ -60,30 +66,27 @@ export function TopicDetailScreen({ topicId }: TopicDetailScreenProps) {
           contentContainerClassName="px-6 pb-32 pt-4"
           showsVerticalScrollIndicator={false}
         >
-          {topic && (
+          {conversation && (
             <>
               {/* Title + difficulty badge */}
               <View className="flex-row items-center gap-3 flex-wrap">
                 <Text
                   className="font-heading text-[28px] font-bold"
-                  style={{ color: theme.textDefault }}
+                  style={{ color: theme.text.primary }}
                 >
-                  {topic.title}
+                  {conversation.title}
                 </Text>
                 <View
                   className="px-3 py-1 rounded-full"
                   style={{
-                    backgroundColor:
-                      colorScheme === "dark"
-                        ? "hsl(228, 40%, 22%)"
-                        : "hsl(228, 60%, 93%)",
+                    backgroundColor: theme.brand.primarySubtle,
                   }}
                 >
                   <Text
                     className="font-body text-xs font-semibold"
-                    style={{ color: theme.primary }}
+                    style={{ color: theme.brand.primary }}
                   >
-                    {difficultyLabel(topic.difficultyScore)}
+                    {difficultyLabel(conversation.difficultyScore)}
                   </Text>
                 </View>
               </View>
@@ -91,24 +94,24 @@ export function TopicDetailScreen({ topicId }: TopicDetailScreenProps) {
               {/* Description */}
               <Text
                 className="font-body text-sm mt-3 leading-6"
-                style={{ color: theme.textMuted }}
+                style={{ color: theme.text.secondary }}
               >
-                {topic.descriptionVi}
+                {conversation.descriptionVi}
               </Text>
 
               {/* Missions section */}
-              {topic.missions && topic.missions.length > 0 && (
+              {conversation.missions && conversation.missions.length > 0 && (
                 <View className="mt-10">
                   {/* Section heading */}
                   <View className="flex-row items-center gap-3 mb-4">
                     <ListChecks
                       size={24}
-                      color={theme.textDefault}
+                      color={theme.icon.primary}
                       strokeWidth={2}
                     />
                     <Text
                       className="font-heading text-xl font-bold"
-                      style={{ color: theme.textDefault }}
+                      style={{ color: theme.text.primary }}
                     >
                       Nhiệm vụ
                     </Text>
@@ -116,11 +119,14 @@ export function TopicDetailScreen({ topicId }: TopicDetailScreenProps) {
 
                   {/* Mission list */}
                   <View>
-                    {topic.missions.map((mission, index) => (
+                    {conversation.missions.map((mission, index) => (
                       <View key={mission.id}>
                         {index > 0 && (
                           <View
-                            style={{ height: 1, backgroundColor: theme.border }}
+                            style={{
+                              height: 1,
+                              backgroundColor: theme.border.subtle,
+                            }}
                           />
                         )}
                         <MissionItem mission={mission} index={index} />
@@ -134,7 +140,7 @@ export function TopicDetailScreen({ topicId }: TopicDetailScreenProps) {
         </ScrollView>
 
         {/* Footer button */}
-        {topic && (
+        {conversation && (
           <View
             className="absolute bottom-0 left-0 right-0 px-6"
             style={{ paddingBottom: Math.max(insets.bottom, 16) + 8 }}

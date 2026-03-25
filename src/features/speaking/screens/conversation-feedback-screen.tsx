@@ -34,11 +34,14 @@ export function ConversationFeedbackScreen() {
     return (
       <View
         className="flex-1 items-center justify-center"
-        style={{ backgroundColor: theme.background, paddingTop: insets.top }}
+        style={{
+          backgroundColor: theme.background.page,
+          paddingTop: insets.top,
+        }}
       >
         <Text
           className="font-body text-base"
-          style={{ color: theme.textMuted }}
+          style={{ color: theme.text.secondary }}
         >
           Không có dữ liệu phản hồi.
         </Text>
@@ -58,40 +61,49 @@ export function ConversationFeedbackScreen() {
   return (
     <View
       className="flex-1"
-      style={{ backgroundColor: theme.background, paddingTop: insets.top }}
+      style={{
+        backgroundColor: theme.background.page,
+        paddingTop: insets.top + 16,
+      }}
     >
       {/* Header */}
       <ScreenHeader title="Kết quả buổi học" titleSize="2xl" />
+
+      {/* Divider */}
+      <View className="h-px" style={{ backgroundColor: theme.border.subtle }} />
 
       <ScrollView
         className="flex-1"
         contentContainerStyle={{
           paddingHorizontal: 16,
-          paddingBottom: 32,
-          gap: 20,
+          paddingBottom: 24,
+          gap: 16,
         }}
         showsVerticalScrollIndicator={false}
       >
         {/* Overall Score */}
         <View
-          className="rounded-2xl p-6 items-center gap-2"
-          style={{ backgroundColor: theme.cardBackground }}
+          className="rounded-2xl border mt-4 p-6 items-center"
+          style={{
+            backgroundColor: theme.background.surface,
+            borderColor: theme.border.subtle,
+          }}
         >
           <Text
             className="font-body text-sm"
-            style={{ color: theme.textMuted }}
+            style={{ color: theme.text.secondary }}
           >
             Điểm tổng
           </Text>
           <Text
-            className="font-heading text-5xl"
-            style={{ color: theme.primary }}
+            className="font-heading"
+            style={{ fontSize: 48, color: theme.info.default }}
           >
             {overallScore != null ? Math.round(overallScore) : "--"}
           </Text>
           <Text
             className="font-body text-xs"
-            style={{ color: theme.textMuted }}
+            style={{ color: theme.text.secondary }}
           >
             / 100
           </Text>
@@ -99,12 +111,15 @@ export function ConversationFeedbackScreen() {
 
         {/* Score Breakdown */}
         <View
-          className="rounded-2xl p-4"
-          style={{ backgroundColor: theme.cardBackground }}
+          className="rounded-2xl p-4 border"
+          style={{
+            backgroundColor: theme.background.surface,
+            borderColor: theme.border.subtle,
+          }}
         >
           <Text
             className="font-heading text-base mb-4"
-            style={{ color: theme.textDefault }}
+            style={{ color: theme.text.primary }}
           >
             Chi tiết điểm
           </Text>

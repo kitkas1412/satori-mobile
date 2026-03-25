@@ -24,7 +24,11 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
     <Modal visible={visible} transparent statusBarTranslucent>
       <View
         className="flex-1 items-center justify-center"
-        style={!transparent ? { backgroundColor: Colors[theme].background } : { backgroundColor: "rgba(0,0,0,0.5)" }}
+        style={
+          !transparent
+            ? { backgroundColor: Colors[theme].background.page }
+            : { backgroundColor: "rgba(0,0,0,0.5)" }
+        }
       >
         <View className="items-center gap-3">
           <LoadingSpinner size={spinnerSize} />
@@ -32,7 +36,7 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
             {title && (
               <Text
                 className="font-heading text-2xl text-center"
-                style={{ color: Colors[theme].textDefault }}
+                style={{ color: Colors[theme].text.primary }}
               >
                 {title}
               </Text>
@@ -40,7 +44,7 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
             {message && (
               <Text
                 className="font-body text-base text-center"
-                style={{ color: Colors[theme].textMuted }}
+                style={{ color: Colors[theme].text.secondary }}
               >
                 {message}
               </Text>
