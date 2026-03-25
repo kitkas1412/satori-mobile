@@ -103,7 +103,7 @@ function RootLayoutNav() {
         options={{ headerShown: false, gestureEnabled: false }}
       />
       <Stack.Screen
-        name="topic-detail"
+        name="conversation-detail"
         options={{ headerShown: false, gestureEnabled: true }}
       />
       <Stack.Screen

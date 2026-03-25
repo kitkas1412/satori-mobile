@@ -51,8 +51,8 @@ export function LoadingSpinner({ size = 80 }: LoadingSpinnerProps) {
             borderRadius: outerSize * 0.59375,
             borderWidth,
             borderColor: "transparent",
-            borderTopColor: Colors[theme].primary,
-            borderRightColor: Colors[theme].primary,
+            borderTopColor: Colors[theme].brand.primary,
+            borderRightColor: Colors[theme].brand.primary,
           },
           animatedStyle,
         ]}

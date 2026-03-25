@@ -16,8 +16,9 @@ import {
 } from "@/features/speaking/components";
 import { useAppStore, useAuthStore } from "@/stores";
 import {
-  useConversationThemes,
+  useTopics,
   useFirstUnpracticedSection,
+  useConversationNavigation,
 } from "@/features/speaking/hooks";
 import { useProfile } from "@/hooks/api/use-profile";
 
@@ -29,14 +30,18 @@ export default function SpeakingScreen() {
   const { data: profile } = useProfile();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
-  const { data: sections, isLoading, isError } = useConversationThemes();
+  const { data: sections, isLoading, isError } = useTopics();
 
   const { firstUnpracticedSectionId, handleHasUnpracticed } =
     useFirstUnpracticedSection();
+  const { handleConversationPress } = useConversationNavigation();
 
   return (
     <>
-      <View className="flex-1" style={{ backgroundColor: theme.background }}>
+      <View
+        className="flex-1"
+        style={{ backgroundColor: theme.background.page }}
+      >
         {/* Header */}
         <ScreenHeader
           title="Luyện nói"
@@ -45,14 +50,10 @@ export default function SpeakingScreen() {
             <View className="relative">
               <View
                 className="w-9 h-9 rounded-full items-center justify-center"
-                style={{ backgroundColor: theme.secondary }}
+                style={{ backgroundColor: theme.icon.disabled }}
               >
-                <Bell size={20} fill={theme.white} color={theme.white} />
+                <Bell size={20} color={theme.icon.onBrand} />
               </View>
-              <View
-                className="absolute top-0 right-0 w-[7px] h-[7px] rounded-full"
-                style={{ backgroundColor: theme.error }}
-              />
             </View>
           }
         />
@@ -62,7 +63,7 @@ export default function SpeakingScreen() {
           <View className="flex-1 items-center justify-center px-4">
             <Text
               className="text-base text-center font-body"
-              style={{ color: theme.textDefault }}
+              style={{ color: theme.text.secondary }}
             >
               Tính năng đang tạm khoá. Vui lòng thử lại sau
             </Text>
@@ -91,7 +92,7 @@ export default function SpeakingScreen() {
             {isError && (
               <Text
                 className="text-sm font-body text-center mt-4"
-                style={{ color: theme.textMuted }}
+                style={{ color: theme.text.secondary }}
               >
                 Không thể tải dữ liệu. Vui lòng thử lại sau.
               </Text>
@@ -110,6 +111,7 @@ export default function SpeakingScreen() {
                   firstUnpracticedSectionId === section.id
                 }
                 onHasUnpracticed={handleHasUnpracticed}
+                onConversationPress={handleConversationPress}
               />
             ))}
           </ScrollView>
