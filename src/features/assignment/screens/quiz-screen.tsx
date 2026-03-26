@@ -4,12 +4,7 @@
 
 import { ChevronLeft, ChevronRight, X } from "lucide-react-native";
 import { useEffect } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -17,7 +12,14 @@ import { StatusBar } from "expo-status-bar";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { LoadingOverlay, ScreenAsyncView, ScreenHeader } from "@/components/ui";
-import { useStartAssignment, useQuizNavigation, useQuizAnswers, useQuizTimer, useQuizSubmit, useExitAssignment } from "../hooks";
+import {
+  useStartAssignment,
+  useQuizNavigation,
+  useQuizAnswers,
+  useQuizTimer,
+  useQuizSubmit,
+  useExitAssignment,
+} from "../hooks";
 import { QuestionView } from "../components";
 
 interface QuizScreenProps {
@@ -34,8 +36,10 @@ export function QuizScreen({ id }: QuizScreenProps) {
   const questions = data?.questions ?? [];
   const total = questions.length;
 
-  const { currentIndex, isFirst, isLast, handleBack, handleNext } = useQuizNavigation(total);
-  const { answers, handleSelectOption, handleFillBlankChange } = useQuizAnswers();
+  const { currentIndex, isFirst, isLast, handleBack, handleNext } =
+    useQuizNavigation(total);
+  const { answers, handleSelectOption, handleFillBlankChange } =
+    useQuizAnswers();
   // Bắt đầu đếm giờ khi bài tập đã tải xong (isPending = false và data có giá trị)
   const { getTimeStats } = useQuizTimer(!isPending && !!data);
   const { handleSubmit, isPending: isSubmitting } = useQuizSubmit({
@@ -54,7 +58,10 @@ export function QuizScreen({ id }: QuizScreenProps) {
   }, [id]);
 
   return (
-    <View className="flex-1" style={{ paddingTop: insets.top, backgroundColor: theme.background }}>
+    <View
+      className="flex-1"
+      style={{ paddingTop: insets.top, backgroundColor: theme.background.page }}
+    >
       <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
       <LoadingOverlay visible={isPending} title="Đang tải bài tập..." />
       <LoadingOverlay visible={isSubmitting} title="Đang nộp bài..." />
@@ -70,7 +77,7 @@ export function QuizScreen({ id }: QuizScreenProps) {
             className="items-center justify-center"
             style={{ width: 24, height: 24 }}
           >
-            <X size={22} color={theme.textMuted} strokeWidth={2} />
+            <X size={22} color={theme.icon.primary} strokeWidth={2} />
           </Pressable>
         }
         rightAction={<View style={{ width: 24 }} />}
@@ -93,8 +100,12 @@ export function QuizScreen({ id }: QuizScreenProps) {
                 total={total}
                 selectedOptionId={answers[current.assignmentQuestionId]}
                 fillBlankAnswer={answers[current.assignmentQuestionId]}
-                onSelectOption={(optionId) => handleSelectOption(current.assignmentQuestionId, optionId)}
-                onFillBlankChange={(text) => handleFillBlankChange(current.assignmentQuestionId, text)}
+                onSelectOption={(optionId) =>
+                  handleSelectOption(current.assignmentQuestionId, optionId)
+                }
+                onFillBlankChange={(text) =>
+                  handleFillBlankChange(current.assignmentQuestionId, text)
+                }
                 theme={theme}
               />
             )}
@@ -112,18 +123,21 @@ export function QuizScreen({ id }: QuizScreenProps) {
               className="flex-1 flex-row items-center justify-center gap-2 rounded-xl"
               style={{
                 height: 52,
-                backgroundColor: isFirst ? theme.border : theme.primary,
-                opacity: isFirst ? 0.5 : 1,
+                backgroundColor: isFirst
+                  ? theme.brand.primarySubtle
+                  : theme.brand.primary,
               }}
             >
               <ChevronLeft
                 size={20}
-                color={isFirst ? theme.textMuted : theme.white}
+                color={isFirst ? theme.icon.disabled : theme.icon.onBrand}
                 strokeWidth={2.5}
               />
               <Text
                 className="font-heading text-base"
-                style={{ color: isFirst ? theme.textMuted : theme.white }}
+                style={{
+                  color: isFirst ? theme.text.disabled : theme.text.onBrand,
+                }}
               >
                 Quay lại
               </Text>
@@ -136,22 +150,25 @@ export function QuizScreen({ id }: QuizScreenProps) {
               className="flex-1 flex-row items-center justify-center gap-2 rounded-xl"
               style={{
                 height: 52,
-                backgroundColor: theme.primary,
-                opacity: isLast && isSubmitting ? 0.6 : 1,
+                backgroundColor: theme.brand.primary,
               }}
             >
               {isLast && isSubmitting ? (
-                <ActivityIndicator color={theme.white} size="small" />
+                <ActivityIndicator color={theme.icon.onBrand} size="small" />
               ) : (
                 <>
                   <Text
                     className="font-heading text-base"
-                    style={{ color: theme.white }}
+                    style={{ color: theme.text.onBrand }}
                   >
                     {isLast ? "Nộp bài" : "Tiếp theo"}
                   </Text>
                   {!isLast && (
-                    <ChevronRight size={20} color={theme.white} strokeWidth={2.5} />
+                    <ChevronRight
+                      size={20}
+                      color={theme.icon.onBrand}
+                      strokeWidth={2.5}
+                    />
                   )}
                 </>
               )}
