@@ -1,7 +1,10 @@
 import { IconButton, PrimaryButton } from "@/components/ui";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
+import { Colors } from "@/constants/theme";
 import { useResetPasswordOTPForm } from "@/features/authentication/hooks";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { ArrowLeft } from "lucide-react-native";
 import React from "react";
 import {
   KeyboardAvoidingView,
@@ -11,11 +14,12 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ArrowLeft } from "lucide-react-native";
 import { OTPInput, SectionHeader } from "../components";
 
 export function ResetPasswordOTPScreen() {
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme];
   const params = useLocalSearchParams<{ email?: string }>();
   const email = params.email || "email@example.com";
 
@@ -42,28 +46,29 @@ export function ResetPasswordOTPScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      className="flex-1 bg-[hsl(220,20%,97%)]"
+      className="flex-1"
+      style={{ backgroundColor: theme.background.page }}
       keyboardVerticalOffset={0}
     >
       <SafeAreaView className="flex-1">
         <View className="flex-col px-4">
-          <IconButton icon={<ArrowLeft size={24} color="hsla(0, 0%, 0%, 0.6)" />} onPress={() => router.back()} />
+          <IconButton icon={<ArrowLeft size={24} color={theme.icon.primary} />} onPress={() => router.back()} />
 
           <View className="mt-8">
             <SectionHeader title="Thay đổi mật khẩu" />
           </View>
 
-          <Text className="font-body text-xs text-black mt-7">
+          <Text className="font-body text-xs mt-7" style={{ color: theme.text.primary }}>
             Một email chứa OTP đặt lại mật khẩu đã được gửi đến địa chỉ email
             của bạn:
           </Text>
 
-          <Text className="font-heading text-xs text-[hsl(40,90%,53%)] mt-3">
+          <Text className="font-heading text-xs mt-3" style={{ color: theme.warning.default }}>
             {email}
           </Text>
 
           <View className="mt-9">
-            <Text className="font-heading text-lg text-black mb-3">
+            <Text className="font-heading text-lg mb-3" style={{ color: theme.text.primary }}>
               Nhập mã OTP
             </Text>
 
@@ -72,6 +77,7 @@ export function ResetPasswordOTPScreen() {
               value={otp}
               onChangeText={handleOTPChange}
               autoFocus={true}
+              theme={theme}
             />
 
             {verifyError ? (
@@ -93,12 +99,13 @@ export function ResetPasswordOTPScreen() {
             ) : null}
 
             <View className="flex-row items-center justify-center mt-3">
-              <Text className="font-body text-xs text-[hsl(220,9%,46%)]">
+              <Text className="font-body text-xs" style={{ color: theme.text.tertiary }}>
                 Không nhận được mã?{" "}
               </Text>
               <TouchableOpacity onPress={handleResendOTP} disabled={!canResend}>
                 <Text
-                  className={`font-body text-xs ${canResend ? "text-[hsl(228,78%,71%)]" : "text-[hsl(218,11%,65%)]"}`}
+                  className="font-body text-xs"
+                  style={{ color: canResend ? theme.text.link : theme.text.disabled }}
                 >
                   {isResendPending
                     ? "Đang gửi..."

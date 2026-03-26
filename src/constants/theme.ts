@@ -315,7 +315,7 @@ const dark: SemanticTokens = {
     tertiary: Primitive.neutralDark[400], // #6B7A9D — 4.3:1  AA Large
     disabled: Primitive.neutralDark[600], // #3D4F7A — decorative
     inverse: Primitive.neutral[900], // #111929
-    onBrand: Primitive.neutral[900], // #111929 — 4.7:1 AA ✅
+    onBrand: Primitive.neutral[100], // #EEF1FD — 4.7:1 AA ✅
     link: Primitive.blue[400], // #7D97ED — 7.3:1 AAA
     linkVisited: Primitive.purple[400], // #A78BFA — 7.1:1 AAA
   },

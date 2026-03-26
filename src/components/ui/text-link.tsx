@@ -1,3 +1,5 @@
+import { Colors } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import React from "react";
 import { Text, TouchableOpacity, TouchableOpacityProps } from "react-native";
 
@@ -16,6 +18,9 @@ export const TextLink: React.FC<TextLinkProps> = ({
   className,
   ...props
 }) => {
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme];
+
   const getVariantClass = () => {
     switch (variant) {
       case "secondary":
@@ -24,8 +29,13 @@ export const TextLink: React.FC<TextLinkProps> = ({
         return "text-error-500";
       case "primary":
       default:
-        return "text-primary-dark";
+        return "";
     }
+  };
+
+  const getVariantStyle = () => {
+    if (variant === "primary") return { color: theme.text.link };
+    return undefined;
   };
 
   const getSizeClass = () => {
@@ -58,7 +68,7 @@ export const TextLink: React.FC<TextLinkProps> = ({
       hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
       {...props}
     >
-      <Text className={`font-heading ${getSizeClass()} ${getVariantClass()}`}>
+      <Text className={`font-heading ${getSizeClass()} ${getVariantClass()}`} style={getVariantStyle()}>
         {text}
       </Text>
     </TouchableOpacity>
