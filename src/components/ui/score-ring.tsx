@@ -36,7 +36,7 @@ export function ScoreRing({ score, size = 200 }: ScoreRingProps) {
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke={theme.border}
+          stroke={theme.border.subtle}
           strokeWidth={strokeWidth}
           fill="none"
         />
@@ -44,7 +44,7 @@ export function ScoreRing({ score, size = 200 }: ScoreRingProps) {
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke={theme.success}
+          stroke={theme.success.default}
           strokeWidth={strokeWidth}
           fill="none"
           strokeDasharray={circumference}
@@ -55,11 +55,14 @@ export function ScoreRing({ score, size = 200 }: ScoreRingProps) {
       <View style={{ alignItems: "center" }}>
         <Text
           className="font-heading"
-          style={{ fontSize: 56, lineHeight: 64, color: theme.textDefault }}
+          style={{ fontSize: 56, lineHeight: 64, color: theme.text.primary }}
         >
           {Math.round(score)}
         </Text>
-        <Text className="font-body" style={{ fontSize: 16, color: theme.textMuted }}>
+        <Text
+          className="font-body"
+          style={{ fontSize: 16, color: theme.text.secondary }}
+        >
           điểm
         </Text>
       </View>

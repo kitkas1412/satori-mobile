@@ -23,10 +23,10 @@ export function QuizAnswerItem({ item, index, theme }: QuizAnswerItemProps) {
       onPress={() => setExpanded((v) => !v)}
       className="rounded-2xl overflow-hidden"
       style={{
-        backgroundColor: theme.cardBackground,
+        backgroundColor: theme.background.surface,
         borderWidth: 1.5,
         // Viền xanh lá nếu đúng, đỏ nếu sai
-        borderColor: item.correct ? theme.success : theme.error,
+        borderColor: item.correct ? theme.success.default : theme.error.default,
       }}
     >
       {/* Hàng tóm tắt: indicator đúng/sai + nội dung câu hỏi + chevron */}
@@ -37,26 +37,28 @@ export function QuizAnswerItem({ item, index, theme }: QuizAnswerItemProps) {
           style={{
             width: 28,
             height: 28,
-            backgroundColor: item.correct ? theme.success : theme.error,
+            backgroundColor: item.correct
+              ? theme.success.default
+              : theme.error.default,
             flexShrink: 0,
           }}
         >
           {item.correct ? (
-            <Check size={14} color={theme.white} strokeWidth={2.5} />
+            <Check size={14} color={theme.icon.onBrand} strokeWidth={2.5} />
           ) : (
-            <X size={14} color={theme.white} strokeWidth={2.5} />
+            <X size={14} color={theme.icon.onBrand} strokeWidth={2.5} />
           )}
         </View>
         <View style={{ flex: 1 }}>
-          <MarkdownText fontSize={14} color={theme.textDefault}>
+          <MarkdownText fontSize={14} color={theme.text.primary}>
             {`${index + 1}. ${item.questionText}`}
           </MarkdownText>
         </View>
         {/* Chevron chỉ hướng mở/đóng */}
         {expanded ? (
-          <ChevronUp size={16} color={theme.textMuted} strokeWidth={2} />
+          <ChevronUp size={16} color={theme.icon.primary} strokeWidth={2} />
         ) : (
-          <ChevronDown size={16} color={theme.textMuted} strokeWidth={2} />
+          <ChevronDown size={16} color={theme.icon.primary} strokeWidth={2} />
         )}
       </View>
 
@@ -65,9 +67,11 @@ export function QuizAnswerItem({ item, index, theme }: QuizAnswerItemProps) {
         <View
           className="px-4 pb-4 gap-2"
           style={{
-            backgroundColor: theme.cardBackground,
+            backgroundColor: theme.background.surface,
             borderTopWidth: 1,
-            borderTopColor: item.correct ? theme.success : theme.error,
+            borderTopColor: item.correct
+              ? theme.success.default
+              : theme.error.default,
           }}
         >
           {/* Câu sai: hiển thị cả đáp án đã chọn (đỏ) và đáp án đúng (xanh) */}
@@ -76,22 +80,22 @@ export function QuizAnswerItem({ item, index, theme }: QuizAnswerItemProps) {
               <View className="flex-row flex-wrap items-center gap-1">
                 <Text
                   className="font-body text-xs"
-                  style={{ color: theme.textMuted }}
+                  style={{ color: theme.text.secondary }}
                 >
                   Bạn chọn:
                 </Text>
-                <MarkdownText fontSize={12} color={theme.error}>
+                <MarkdownText fontSize={12} color={theme.error.default}>
                   {item.selectedAnswer}
                 </MarkdownText>
               </View>
               <View className="flex-row flex-wrap items-center gap-1">
                 <Text
                   className="font-body text-xs"
-                  style={{ color: theme.textMuted }}
+                  style={{ color: theme.text.secondary }}
                 >
                   Đáp án đúng:
                 </Text>
-                <MarkdownText fontSize={12} color={theme.success}>
+                <MarkdownText fontSize={12} color={theme.success.text}>
                   {item.correctAnswer}
                 </MarkdownText>
               </View>
@@ -103,11 +107,11 @@ export function QuizAnswerItem({ item, index, theme }: QuizAnswerItemProps) {
               <View className="flex-row flex-wrap items-center gap-1">
                 <Text
                   className="font-body text-xs"
-                  style={{ color: theme.textMuted }}
+                  style={{ color: theme.text.secondary }}
                 >
                   Đáp án đúng:
                 </Text>
-                <MarkdownText fontSize={12} color={theme.success}>
+                <MarkdownText fontSize={12} color={theme.success.text}>
                   {item.correctAnswer}
                 </MarkdownText>
               </View>
@@ -117,9 +121,9 @@ export function QuizAnswerItem({ item, index, theme }: QuizAnswerItemProps) {
           {!!item.explanation && (
             <View
               className="rounded-xl p-3"
-              style={{ backgroundColor: theme.background }}
+              style={{ backgroundColor: theme.background.surface }}
             >
-              <MarkdownText fontSize={12} color={theme.textMuted}>
+              <MarkdownText fontSize={12} color={theme.text.secondary}>
                 {item.explanation}
               </MarkdownText>
             </View>

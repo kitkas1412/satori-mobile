@@ -38,7 +38,7 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
   const isDisabled = disabled || loading;
 
   const getBackgroundColor = () => {
-    if (isDisabled) return theme.brand.primaryDisabled;
+    if (isDisabled) return theme.brand.primarySubtle;
 
     switch (variant) {
       case "danger":
@@ -49,7 +49,7 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
     }
   };
 
-  const textColor = theme.brand.onPrimary;
+  const textColor = isDisabled ? theme.text.disabled : theme.brand.onPrimary;
 
   return (
     <TouchableOpacity

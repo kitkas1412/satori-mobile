@@ -4,27 +4,15 @@
 import { AlertTriangle, Award, Info } from "lucide-react-native";
 import { Text, View } from "react-native";
 
-// Cấu hình màu sắc và icon cho từng loại banner.
+import { Colors } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+
+// Cấu hình icon cho từng loại banner.
 // Dùng object thay vì switch/if để dễ mở rộng thêm loại mới.
-const BANNER_CONFIG = {
-  info: {
-    borderColor: "#91caff",
-    backgroundColor: "#e6f4ff",
-    textColor: "#0958d9",
-    Icon: Info,
-  },
-  success: {
-    borderColor: "#b7eb8f",
-    backgroundColor: "#f6ffed",
-    textColor: "#389e0d",
-    Icon: Award,
-  },
-  warning: {
-    borderColor: "#ffccc7",
-    backgroundColor: "#fff1f0",
-    textColor: "#cf1322",
-    Icon: AlertTriangle,
-  },
+const BANNER_ICON = {
+  info: Info,
+  success: Award,
+  warning: AlertTriangle,
 } as const;
 
 interface StatusBannerProps {
@@ -35,7 +23,12 @@ interface StatusBannerProps {
 }
 
 export function StatusBanner({ type, title, description, extra }: StatusBannerProps) {
-  const { borderColor, backgroundColor, textColor, Icon } = BANNER_CONFIG[type];
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
+  const Icon = BANNER_ICON[type];
+  const borderColor = theme[type].default;
+  const backgroundColor = theme[type].subtle;
+  const textColor = theme[type].default;
 
   return (
     <View

@@ -1,4 +1,4 @@
-import { WritingResultScreen } from "@/features/practice/screens/writing-result-screen";
+import { WritingResultScreen } from "@/features/assignment/screens/writing-result-screen";
 
 export default function AssignmentWritingResult() {
   return <WritingResultScreen />;

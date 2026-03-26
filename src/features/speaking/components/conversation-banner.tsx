@@ -71,7 +71,7 @@ export function ConversationBanner({ onPress }: ConversationBannerProps) {
             onPress={onPress}
             className=" rounded-[10px] flex-row items-center gap-[6px] pl-[14px] pr-3 h-[35px] self-start"
             style={{
-              shadowColor: theme.shadow,
+              shadowColor: theme.border.strong,
               shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 0.12,
               shadowRadius: 8,

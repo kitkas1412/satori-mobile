@@ -19,17 +19,19 @@ export function ProgressBar({
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
-  const fillColor = color ?? theme.primary;
   const fill = Math.min(1, Math.max(0, progress));
 
   return (
     <View
       className="rounded-full overflow-hidden"
-      style={{ height, backgroundColor: trackColor ?? theme.border }}
+      style={{ height, backgroundColor: trackColor ?? theme.border.subtle }}
     >
       <View
         className="h-full rounded-full"
-        style={{ backgroundColor: fillColor, width: `${fill * 100}%` }}
+        style={{
+          backgroundColor: theme.brand.primary,
+          width: `${fill * 100}%`,
+        }}
       />
     </View>
   );

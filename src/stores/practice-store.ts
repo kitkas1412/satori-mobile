@@ -4,7 +4,7 @@
 // Store được xóa sau khi người dùng rời khỏi màn hình kết quả.
 
 import { create } from "zustand";
-import type { SubmitQuizResponse, SubmitWritingResponse } from "@/features/practice/api";
+import type { SubmitQuizResponse, SubmitWritingResponse } from "@/features/assignment/api";
 
 interface PracticeState {
   quizResult: SubmitQuizResponse | null;
