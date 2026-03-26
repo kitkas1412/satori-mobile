@@ -57,8 +57,17 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
 
   return (
     <View className={`flex-col ${containerAlignClass}`}>
-      <Text className={getTitleClass()} style={{ color: theme.textDefault }}>{title}</Text>
-      {subtitle && <Text className={getSubtitleClass()} style={{ color: theme.textMuted }}>{subtitle}</Text>}
+      <Text className={getTitleClass()} style={{ color: theme.text.primary }}>
+        {title}
+      </Text>
+      {subtitle && (
+        <Text
+          className={getSubtitleClass()}
+          style={{ color: theme.text.secondary }}
+        >
+          {subtitle}
+        </Text>
+      )}
     </View>
   );
 };

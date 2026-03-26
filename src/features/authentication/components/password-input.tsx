@@ -1,4 +1,6 @@
 import { BaseInput } from "@/components/ui/base-input";
+import { Colors } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { forwardRef, useState } from "react";
 import {
@@ -34,6 +36,8 @@ export const PasswordInput = forwardRef<TextInput, PasswordInputProps>(
     },
     ref,
   ) => {
+    const colorScheme = useColorScheme();
+    const theme = Colors[colorScheme];
     const [showPassword, setShowPassword] = useState(false);
 
     return (
@@ -48,7 +52,7 @@ export const PasswordInput = forwardRef<TextInput, PasswordInputProps>(
           <MaterialIcons
             name="lock-outline"
             size={24}
-            color={error ? "hsl(0, 84%, 60%)" : "hsla(0, 0%, 0%, 0.6)"}
+            color={error ? theme.icon.error : theme.icon.primary}
           />
         }
         rightAccessory={
@@ -59,7 +63,7 @@ export const PasswordInput = forwardRef<TextInput, PasswordInputProps>(
             <MaterialIcons
               name={showPassword ? "visibility" : "visibility-off"}
               size={24}
-              color="hsla(0, 0%, 0%, 0.6)"
+              color={theme.icon.primary}
             />
           </TouchableOpacity>
         }

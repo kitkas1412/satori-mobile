@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from "expo-router";
-import { WritingScreen } from "@/features/practice/screens/writing-screen";
+import { WritingScreen } from "@/features/assignment/screens/writing-screen";
 
 export default function AssignmentWriting() {
   const { id } = useLocalSearchParams<{ id: string }>();

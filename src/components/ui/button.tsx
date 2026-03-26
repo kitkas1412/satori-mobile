@@ -8,7 +8,7 @@ import {
   ViewStyle,
 } from "react-native";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { Colors, Primitive } from "@/constants/theme";
+import { Colors } from "@/constants/theme";
 
 interface PrimaryButtonProps {
   text: string;
@@ -38,7 +38,7 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
   const isDisabled = disabled || loading;
 
   const getBackgroundColor = () => {
-    if (isDisabled) return theme.brand.primaryDisabled;
+    if (isDisabled) return theme.brand.primarySubtle;
 
     switch (variant) {
       case "danger":
@@ -49,7 +49,7 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
     }
   };
 
-  const textColor = theme.brand.onPrimary;
+  const textColor = isDisabled ? theme.text.disabled : theme.text.onBrand;
 
   return (
     <TouchableOpacity

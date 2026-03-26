@@ -46,12 +46,12 @@ export function AssignmentCard({
 
   // Màu badge trạng thái: xanh lá = hoàn thành/chấm, vàng = chưa làm, đỏ = quá hạn, v.v.
   const statusColor: Record<AssignmentStatus, string> = {
-    in_progress: theme.primary,
-    not_started: theme.warning,
-    completed: theme.success,
-    overdue: theme.error,
-    graded: theme.success,
-    submitted: theme.primary,
+    in_progress: theme.info.default,
+    not_started: theme.warning.default,
+    completed: theme.success.default,
+    overdue: theme.error.default,
+    graded: theme.success.default,
+    submitted: theme.info.default,
   };
 
   return (
@@ -59,9 +59,9 @@ export function AssignmentCard({
       onPress={onPress}
       className="rounded-2xl p-4 gap-3"
       style={{
-        backgroundColor: theme.cardBackground,
-        borderWidth: 0.6,
-        borderColor: theme.border,
+        backgroundColor: theme.background.surface,
+        borderWidth: 1,
+        borderColor: theme.border.subtle,
       }}
     >
       {/* Tiêu đề + icon trạng thái */}
@@ -69,14 +69,14 @@ export function AssignmentCard({
         <View className="flex-1 gap-1">
           <Text
             className="font-heading text-lg"
-            style={{ color: theme.textDefault }}
+            style={{ color: theme.text.primary }}
             numberOfLines={2}
           >
             {title}
           </Text>
           <Text
             className="font-body text-sm"
-            style={{ color: theme.textMuted, opacity: 0.7 }}
+            style={{ color: theme.text.secondary }}
           >
             {subtitle}
           </Text>
@@ -87,17 +87,17 @@ export function AssignmentCard({
         status === "submitted" ? (
           <CircleCheck size={20} color={statusColor[status]} strokeWidth={2} />
         ) : (
-          <Circle size={20} color={theme.border} strokeWidth={1.5} />
+          <Circle size={20} color={theme.icon.disabled} strokeWidth={1.5} />
         )}
       </View>
 
       {/* Hạn nộp + nhãn trạng thái */}
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-1">
-          <Clock size={16} color={theme.textMuted} strokeWidth={1.5} />
+          <Clock size={16} color={theme.icon.secondary} strokeWidth={1.5} />
           <Text
             className="font-body text-xs"
-            style={{ color: theme.textMuted, opacity: 0.7 }}
+            style={{ color: theme.text.secondary }}
           >
             Hạn: {dueDate}
           </Text>

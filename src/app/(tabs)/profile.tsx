@@ -41,7 +41,7 @@ export default function ProfileTab() {
 
   return (
     <>
-      <View className="flex-1" style={{ backgroundColor: theme.background }}>
+      <View className="flex-1" style={{ backgroundColor: theme.background.page }}>
         <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
 
         <ScreenHeader title="Cá nhân" paddingTop={insets.top + 16} />
@@ -49,15 +49,19 @@ export default function ProfileTab() {
         {user && (
           <View
             className="px-6 py-4 mx-4 rounded-2xl mb-4"
-            style={{ backgroundColor: theme.cardBackground }}
+            style={{
+              backgroundColor: theme.background.surface,
+              borderWidth: 0.5,
+              borderColor: theme.border.subtle,
+            }}
           >
             <Text
               className="text-lg font-semibold mb-1"
-              style={{ color: theme.textDefault }}
+              style={{ color: theme.text.primary }}
             >
               {user.fullName || "Người dùng"}
             </Text>
-            <Text className="text-sm" style={{ color: theme.textMuted }}>
+            <Text className="text-sm" style={{ color: theme.text.secondary }}>
               {user.email}
             </Text>
           </View>
@@ -71,7 +75,7 @@ export default function ProfileTab() {
             onPress={() => router.push("/change-password")}
             icon={<KeyRound size={20} color="white" />}
             variant="primary"
-            style={{ backgroundColor: theme.primary }}
+            style={{ backgroundColor: theme.brand.primary }}
           />
 
           <PrimaryButton
@@ -80,6 +84,7 @@ export default function ProfileTab() {
             icon={<LogOut size={20} color="white" />}
             variant="danger"
             loading={isPending}
+            style={{ backgroundColor: theme.error.default }}
           />
         </View>
       </View>

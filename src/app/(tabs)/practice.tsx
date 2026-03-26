@@ -13,10 +13,13 @@ import { useAuthStore } from "@/stores/auth-store";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { ScreenHeader } from "@/components/ui/screen-header";
 import { SectionHeader } from "@/components/ui/section-header";
-import { AiBanner } from "@/features/practice/components/ai-banner";
-import { AssignmentCard } from "@/features/practice/components/assignment-card";
-import { mapAssignmentToCardProps } from "@/features/practice/utils";
-import { useAssignments, useAssignmentNavigation } from "@/features/practice/hooks";
+import { AiBanner } from "@/features/assignment/components/ai-banner";
+import { AssignmentCard } from "@/features/assignment/components/assignment-card";
+import { mapAssignmentToCardProps } from "@/features/assignment/utils";
+import {
+  useAssignments,
+  useAssignmentNavigation,
+} from "@/features/assignment/hooks";
 
 type ActiveTab = "teacher" | "ai";
 
@@ -44,15 +47,17 @@ export default function PracticeTab() {
   // Biểu tượng chuông thông báo với chấm đỏ báo có thông báo mới
   const bellAction = (
     <View className="relative">
-      <View className="w-9 h-9 bg-secondary-default rounded-full items-center justify-center">
-        <Bell size={20} color={theme.textInverse} strokeWidth={2} />
+      <View
+        className="w-9 h-9 rounded-full items-center justify-center"
+        style={{ backgroundColor: theme.icon.disabled }}
+      >
+        <Bell size={20} color={theme.icon.onBrand} strokeWidth={2} />
       </View>
-      <View className="absolute top-0 right-0 w-2 h-2 bg-error-default rounded-full" />
     </View>
   );
 
   return (
-    <View className="flex-1" style={{ backgroundColor: theme.background }}>
+    <View className="flex-1" style={{ backgroundColor: theme.background.page }}>
       <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -67,11 +72,11 @@ export default function PracticeTab() {
 
         {/* Thanh chuyển đổi tab GV / AI */}
         <View
-          className="mx-4 flex-row rounded-2xl p-1 mb-3"
+          className="border mx-4 flex-row rounded-2xl p-1 mb-3"
           style={{
-            backgroundColor: theme.cardBackground,
-            borderWidth: 0.6,
-            borderColor: "rgba(0,0,0,0.05)",
+            backgroundColor: theme.background.surface,
+            borderWidth: 1,
+            borderColor: theme.border.subtle,
           }}
         >
           <Pressable
@@ -79,20 +84,26 @@ export default function PracticeTab() {
             className="flex-1 flex-row items-center justify-center gap-2 py-3 rounded-xl"
             style={
               activeTab === "teacher"
-                ? { backgroundColor: theme.primary }
-                : undefined
+                ? { backgroundColor: theme.brand.primary }
+                : { backgroundColor: theme.background.surface }
             }
           >
             <BookOpen
               size={20}
-              color={activeTab === "teacher" ? theme.white : theme.textDefault}
+              color={
+                activeTab === "teacher"
+                  ? theme.icon.onBrand
+                  : theme.icon.primary
+              }
               strokeWidth={2}
             />
             <Text
               className="font-heading text-base"
               style={{
                 color:
-                  activeTab === "teacher" ? theme.white : theme.textDefault,
+                  activeTab === "teacher"
+                    ? theme.text.onBrand
+                    : theme.text.primary,
               }}
             >
               Bài tập GV
@@ -103,19 +114,22 @@ export default function PracticeTab() {
             className="flex-1 flex-row items-center justify-center gap-2 py-3 rounded-xl"
             style={
               activeTab === "ai"
-                ? { backgroundColor: theme.primary }
-                : undefined
+                ? { backgroundColor: theme.brand.primary }
+                : { backgroundColor: theme.background.surface }
             }
           >
             <Sparkles
               size={20}
-              color={activeTab === "ai" ? theme.white : theme.textDefault}
+              color={
+                activeTab === "ai" ? theme.icon.onBrand : theme.icon.primary
+              }
               strokeWidth={2}
             />
             <Text
               className="font-heading text-base"
               style={{
-                color: activeTab === "ai" ? theme.white : theme.textDefault,
+                color:
+                  activeTab === "ai" ? theme.icon.onBrand : theme.icon.primary,
               }}
             >
               Ôn luyện AI
@@ -135,14 +149,14 @@ export default function PracticeTab() {
             {isError ? (
               <Text
                 className="font-body text-sm text-center"
-                style={{ color: theme.textMuted }}
+                style={{ color: theme.text.secondary }}
               >
                 Không thể tải bài tập. Vui lòng thử lại.
               </Text>
             ) : !data?.content.length ? (
               <Text
                 className="font-body text-sm text-center"
-                style={{ color: theme.textMuted }}
+                style={{ color: theme.text.secondary }}
               >
                 Chưa có bài tập nào.
               </Text>

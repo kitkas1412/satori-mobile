@@ -201,35 +201,6 @@ type SemanticTokens = {
     info: string;
     purple: string;
   };
-  // Legacy keys — tương thích ngược với code cũ
-  /** @deprecated dùng text.primary */
-  textDefault: string;
-  /** @deprecated dùng text.secondary */
-  textMuted: string;
-  /** @deprecated dùng text.inverse */
-  textInverse: string;
-  /** @deprecated dùng background.page */
-  bgPage: string;
-  /** @deprecated dùng background.surface */
-  cardBackground: string;
-  /** @deprecated dùng brand.primary */
-  primary: string;
-  /** @deprecated dùng icon.primary */
-  iconDefault: string;
-  /** @deprecated dùng brand.primary */
-  iconSelected: string;
-  /** @deprecated dùng success.default */
-  successDefault: string;
-  /** @deprecated dùng warning.default */
-  warningDefault: string;
-  /** @deprecated dùng error.default */
-  errorDefault: string;
-  /** @deprecated dùng purple.default */
-  purpleDefault: string;
-  /** @deprecated dùng border.default */
-  borderDefault: string;
-  white: string;
-  shadow: string;
 };
 
 // ---------------------------------------------------------------------------
@@ -316,22 +287,6 @@ const light: SemanticTokens = {
     info: Primitive.blue[600], // #5477E8
     purple: Primitive.purple[500], // #6B3EEC
   },
-  // Legacy
-  textDefault: Primitive.neutral[900],
-  textMuted: Primitive.neutral[700],
-  textInverse: Primitive.neutralDark[100],
-  bgPage: Primitive.neutral[50],
-  cardBackground: Primitive.neutral[0],
-  primary: Primitive.blue[700],
-  iconDefault: Primitive.neutral[900],
-  iconSelected: Primitive.blue[700],
-  successDefault: Primitive.green[500],
-  warningDefault: Primitive.amber[500],
-  errorDefault: Primitive.red[500],
-  purpleDefault: Primitive.purple[500],
-  borderDefault: Primitive.neutral[400],
-  white: Primitive.neutral[0],
-  shadow: "#000000",
 };
 
 // ---------------------------------------------------------------------------
@@ -360,7 +315,7 @@ const dark: SemanticTokens = {
     tertiary: Primitive.neutralDark[400], // #6B7A9D — 4.3:1  AA Large
     disabled: Primitive.neutralDark[600], // #3D4F7A — decorative
     inverse: Primitive.neutral[900], // #111929
-    onBrand: Primitive.neutral[900], // #111929 — 4.7:1 AA ✅
+    onBrand: Primitive.neutral[100], // #EEF1FD — 4.7:1 AA ✅
     link: Primitive.blue[400], // #7D97ED — 7.3:1 AAA
     linkVisited: Primitive.purple[400], // #A78BFA — 7.1:1 AAA
   },
@@ -418,22 +373,6 @@ const dark: SemanticTokens = {
     info: Primitive.blue[400], // #7D97ED
     purple: Primitive.purple[300], // #AB8CF8
   },
-  // Legacy
-  textDefault: Primitive.neutralDark[100],
-  textMuted: Primitive.neutralDark[300],
-  textInverse: Primitive.neutral[900],
-  bgPage: Primitive.neutral[950],
-  cardBackground: Primitive.neutralDark[800],
-  primary: Primitive.blue[600],
-  iconDefault: Primitive.neutralDark[100],
-  iconSelected: Primitive.blue[600],
-  successDefault: Primitive.green[300],
-  warningDefault: Primitive.amber[200],
-  errorDefault: Primitive.red[300],
-  purpleDefault: Primitive.purple[300],
-  borderDefault: Primitive.neutralDark[500],
-  white: Primitive.neutral[0],
-  shadow: "#FFFFFF",
 };
 
 // ---------------------------------------------------------------------------

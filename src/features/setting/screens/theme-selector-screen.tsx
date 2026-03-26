@@ -33,7 +33,7 @@ export function ThemeSelectorScreen() {
   };
 
   return (
-    <View className="flex-1" style={{ backgroundColor: theme.background }}>
+    <View className="flex-1" style={{ backgroundColor: theme.background.page }}>
       <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
 
       <ScreenHeader
@@ -41,7 +41,7 @@ export function ThemeSelectorScreen() {
         paddingTop={insets.top + 16}
         leftAction={
           <IconButton
-            icon={<ChevronLeft size={24} color={theme.iconDefault} />}
+            icon={<ChevronLeft size={24} color={theme.icon.primary} />}
             onPress={() => router.back()}
           />
         }
@@ -56,29 +56,36 @@ export function ThemeSelectorScreen() {
               key={value}
               onPress={() => setSelectedTheme(value)}
               activeOpacity={0.7}
-              className="flex-row justify-between items-center px-4 py-4 rounded-2xl mb-3 border"
+              className="flex-row justify-between items-center px-4 py-3 rounded-2xl mb-4"
               style={{
-                backgroundColor: theme.cardBackground,
-                borderColor: isSelected ? theme.primary : theme.border,
+                backgroundColor: theme.background.surface,
+                borderColor: isSelected ? theme.border.brand : theme.border.subtle,
+                borderWidth: 1,
               }}
             >
               <Text
                 className="text-base font-body"
-                style={{ color: theme.textDefault }}
+                style={{ color: theme.text.primary }}
               >
                 {label}
               </Text>
 
               <View
-                className="w-5 h-5 rounded-full border-2 items-center justify-center"
+                className="rounded-full border-2 items-center justify-center"
                 style={{
-                  borderColor: isSelected ? theme.primary : theme.border,
+                  width: 20,
+                  height: 20,
+                  borderColor: isSelected ? theme.brand.primary : theme.border.default,
                 }}
               >
                 {isSelected && (
                   <View
-                    className="w-2.5 h-2.5 rounded-full"
-                    style={{ backgroundColor: theme.primary }}
+                    className="rounded-full"
+                    style={{
+                      width: 10,
+                      height: 10,
+                      backgroundColor: theme.brand.primary,
+                    }}
                   />
                 )}
               </View>
