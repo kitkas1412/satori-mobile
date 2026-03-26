@@ -1,7 +1,10 @@
 export { ConversationBanner } from "./conversation-banner";
 export { FeedbackBubble, MessageBubble } from "./message-bubble";
 export { MicButton } from "./mic-button";
+export { MissionDetailsCard } from "./mission-details-card";
+export { MissionItem } from "./mission-item";
 export { MissionsModal } from "./missions-modal";
-export { ThemeSection } from "./theme-section";
-export { TopicCard } from "./topic-card";
+export { ConversationCard } from "./conversation-card";
+export { TopicSection } from "./topic-section";
+export { LanguageEvaluationCard } from "./language-evaluation-card";
 export { TypingIndicator } from "./typing-indicator";

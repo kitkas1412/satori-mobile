@@ -1,6 +1,8 @@
 import React from "react";
 import { View, Text } from "react-native";
 import Svg, { Circle } from "react-native-svg";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { Colors } from "@/constants/theme";
 
 interface ScoreRingProps {
   score: number;
@@ -8,6 +10,8 @@ interface ScoreRingProps {
 }
 
 export function ScoreRing({ score, size = 200 }: ScoreRingProps) {
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
   const strokeWidth = 16;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -15,7 +19,14 @@ export function ScoreRing({ score, size = 200 }: ScoreRingProps) {
   const dashOffset = circumference * (1 - pct);
 
   return (
-    <View style={{ width: size, height: size, alignItems: "center", justifyContent: "center" }}>
+    <View
+      style={{
+        width: size,
+        height: size,
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
       <Svg
         width={size}
         height={size}
@@ -25,7 +36,7 @@ export function ScoreRing({ score, size = 200 }: ScoreRingProps) {
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="#E2E8F0"
+          stroke={theme.border.subtle}
           strokeWidth={strokeWidth}
           fill="none"
         />
@@ -33,7 +44,7 @@ export function ScoreRing({ score, size = 200 }: ScoreRingProps) {
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="#22c55e"
+          stroke={theme.success.default}
           strokeWidth={strokeWidth}
           fill="none"
           strokeDasharray={circumference}
@@ -44,13 +55,13 @@ export function ScoreRing({ score, size = 200 }: ScoreRingProps) {
       <View style={{ alignItems: "center" }}>
         <Text
           className="font-heading"
-          style={{ fontSize: 56, lineHeight: 64, color: "#1e293b" }}
+          style={{ fontSize: 56, lineHeight: 64, color: theme.text.primary }}
         >
           {Math.round(score)}
         </Text>
         <Text
           className="font-body"
-          style={{ fontSize: 16, color: "#64748b" }}
+          style={{ fontSize: 16, color: theme.text.secondary }}
         >
           điểm
         </Text>

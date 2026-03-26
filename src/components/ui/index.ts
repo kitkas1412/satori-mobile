@@ -1,4 +1,5 @@
 export { BaseInput } from "./base-input";
+export { IconButton } from "./icon-button";
 export { MarkdownText } from "./markdown-text";
 export { PrimaryButton } from "./button";
 export { LoadingOverlay } from "./loading-overlay";
@@ -8,3 +9,4 @@ export { ScreenHeader } from "./screen-header";
 export { ScoreCircle } from "./score-circle";
 export { ScoreRing } from "./score-ring";
 export { TextLink } from "./text-link";
+export { ScreenAsyncView } from "./screen-async-view";

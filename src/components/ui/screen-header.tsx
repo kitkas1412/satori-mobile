@@ -9,6 +9,7 @@ interface ScreenHeaderProps {
   rightAction?: React.ReactNode;
   paddingTop?: number;
   titleSize?: "xl" | "2xl";
+  showDivider?: boolean;
 }
 
 export function ScreenHeader({
@@ -17,6 +18,7 @@ export function ScreenHeader({
   rightAction,
   paddingTop = 0,
   titleSize = "xl",
+  showDivider = false,
 }: ScreenHeaderProps) {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
@@ -27,19 +29,30 @@ export function ScreenHeader({
       : "font-heading text-xl flex-1";
 
   return (
-    <View
-      className="flex-row items-center px-4 pb-4 gap-2"
-      style={{ paddingTop }}
-    >
-      {leftAction}
-      <Text
-        className={titleClass}
-        style={{ color: theme.textDefault }}
-        numberOfLines={1}
+    <>
+      <View
+        className="flex-row items-center px-4 pb-4 gap-2"
+        style={{ paddingTop }}
       >
-        {title}
-      </Text>
-      {rightAction}
-    </View>
+        {leftAction}
+        <Text
+          className={titleClass}
+          style={{ color: theme.text.primary }}
+          numberOfLines={1}
+        >
+          {title}
+        </Text>
+        {rightAction}
+      </View>
+      {showDivider && (
+        <View
+          style={{
+            height: 1,
+            backgroundColor: theme.border.subtle,
+            opacity: 0.5,
+          }}
+        />
+      )}
+    </>
   );
 }

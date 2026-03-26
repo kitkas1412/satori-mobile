@@ -70,14 +70,14 @@ export function MarkdownText({
             return <Text key={i} style={[baseStyle, { textDecorationLine: "underline" }]}>{seg.content}</Text>;
           }
           return (
-            <View key={i} style={{ alignItems: "center" }}>
+            <View key={i} style={{ alignItems: "center", paddingTop: furiganaSize + 2 }}>
               <Text
                 style={{
                   fontSize: furiganaSize,
                   fontFamily,
                   color: textColor,
                   position: "absolute",
-                  bottom: resolvedLineHeight,
+                  bottom: Math.round(fontSize * 1.25),
                   left: -30,
                   right: -30,
                   textAlign: "center",

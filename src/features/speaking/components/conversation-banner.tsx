@@ -14,20 +14,23 @@ export function ConversationBanner({ onPress }: ConversationBannerProps) {
   return (
     <View
       className="rounded-[20px] border overflow-hidden h-[156px] shadow-sm"
-      style={{ backgroundColor: theme.background, borderColor: theme.border }}
+      style={{
+        backgroundColor: theme.background.surface,
+        borderColor: theme.border.subtle,
+      }}
     >
       {/* Decorative circles */}
       <View
-        className="absolute w-[130px] h-[130px] rounded-full  opacity-20 -top-8 left-[247px]"
-        style={{ backgroundColor: theme.primary }}
+        className="absolute w-[130px] h-[130px] rounded-full -top-8 left-[247px]"
+        style={{ backgroundColor: theme.brand.primarySubtle }}
       />
       <View
-        className="absolute w-[90px] h-[90px] rounded-full opacity-10 top-[112px] left-[204px]"
-        style={{ backgroundColor: theme.primary }}
+        className="absolute w-[90px] h-[90px] rounded-full top-[112px] left-[204px]"
+        style={{ backgroundColor: theme.brand.primarySubtle }}
       />
       <View
-        className="absolute w-[60px] h-[60px] rounded-full opacity-10 top-[9px] -left-5"
-        style={{ backgroundColor: theme.primary }}
+        className="absolute w-[60px] h-[60px] rounded-full top-[9px] -left-5"
+        style={{ backgroundColor: theme.brand.primarySubtle }}
       />
 
       <View className="flex-row items-start px-5 py-[18px] gap-2 absolute inset-0">
@@ -36,12 +39,12 @@ export function ConversationBanner({ onPress }: ConversationBannerProps) {
           {/* AI POWERED badge */}
           <View
             className="rounded-full flex-row items-center gap-1 px-2 py-[2px] self-start h-[21px]"
-            style={{ backgroundColor: theme.primary }}
+            style={{ backgroundColor: theme.brand.primary }}
           >
-            <Sparkles size={11} color="hsl(220, 14%, 96%)" />
+            <Sparkles size={11} color={theme.icon.onBrand} />
             <Text
               className="text-[10px] font-body-bold tracking-[0.5px]"
-              style={{ color: theme.white }}
+              style={{ color: theme.text.onBrand }}
             >
               AI POWERED
             </Text>
@@ -51,13 +54,13 @@ export function ConversationBanner({ onPress }: ConversationBannerProps) {
           <View className="gap-[3px]">
             <Text
               className="text-lg font-heading-extra leading-[21px]"
-              style={{ color: theme.textDefault }}
+              style={{ color: theme.text.primary }}
             >
               Nói chuyện với AI
             </Text>
             <Text
               className="text-xs font-body leading-[17px]"
-              style={{ color: theme.textMuted }}
+              style={{ color: theme.text.secondary }}
             >
               Chém gió cùng AI, không lo sai sót
             </Text>
@@ -68,22 +71,22 @@ export function ConversationBanner({ onPress }: ConversationBannerProps) {
             onPress={onPress}
             className=" rounded-[10px] flex-row items-center gap-[6px] pl-[14px] pr-3 h-[35px] self-start"
             style={{
-              shadowColor: theme.shadow,
+              shadowColor: theme.border.strong,
               shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 0.12,
               shadowRadius: 8,
               elevation: 3,
-              backgroundColor: theme.background,
+              backgroundColor: theme.background.surface,
             }}
           >
-            <MessageCircle size={14} color={theme.primary} />
+            <MessageCircle size={14} color={theme.icon.info} />
             <Text
               className="text-sm font-heading"
-              style={{ color: theme.primary }}
+              style={{ color: theme.info.default }}
             >
               Bắt đầu trò chuyện
             </Text>
-            <ArrowRight size={13} color={theme.primary} />
+            <ArrowRight size={13} color={theme.icon.info} />
           </Pressable>
         </View>
 
@@ -93,7 +96,7 @@ export function ConversationBanner({ onPress }: ConversationBannerProps) {
           <View className="absolute top-0 left-0 bg-white/30 border border-white/70 rounded-tl-[12px] rounded-tr-[12px] rounded-br-[12px] rounded-bl-[4px] px-[9px] py-[6px] w-[50px]">
             <Text
               className="text-tiny-xs font-body"
-              style={{ color: theme.textMuted }}
+              style={{ color: theme.text.secondary }}
             >
               Hello! 👋
             </Text>
@@ -101,15 +104,29 @@ export function ConversationBanner({ onPress }: ConversationBannerProps) {
 
           {/* Sparkles floating icon */}
           <View className="absolute top-[21px] right-0 bg-white/25 rounded-full w-[22px] h-[22px] items-center justify-center">
-            <Sparkles size={11} color="hsl(220, 14%, 96%)" />
+            <Sparkles size={11} color={theme.background.surface} />
           </View>
 
           {/* Dots bubble */}
-          <View className="absolute top-[25px] left-[26px] bg-white/95 rounded-tl-[16px] rounded-tr-[16px] rounded-br-[4px] rounded-bl-[16px] w-[62px] h-[52px] items-center justify-center shadow-sm">
+          <View
+            className="absolute top-[25px] left-[26px] rounded-tl-[16px] rounded-tr-[16px] rounded-br-[4px] rounded-bl-[16px] w-[62px] h-[52px] items-center justify-center shadow-sm"
+            style={{
+              backgroundColor: theme.background.surface,
+            }}
+          >
             <View className="flex-row gap-1">
-              <View className="w-[6px] h-[6px] rounded-full bg-primary-light" />
-              <View className="w-[6px] h-[6px] rounded-full bg-primary-default" />
-              <View className="w-[6px] h-[6px] rounded-full bg-primary-dark" />
+              <View
+                className="w-[6px] h-[6px] rounded-full"
+                style={{ backgroundColor: theme.brand.primaryDisabled }}
+              />
+              <View
+                className="w-[6px] h-[6px] rounded-full"
+                style={{ backgroundColor: theme.brand.primary }}
+              />
+              <View
+                className="w-[6px] h-[6px] rounded-full "
+                style={{ backgroundColor: theme.brand.primaryHover }}
+              />
             </View>
           </View>
         </View>

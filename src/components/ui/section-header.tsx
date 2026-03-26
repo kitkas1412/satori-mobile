@@ -1,5 +1,7 @@
 import React from "react";
 import { Text, View } from "react-native";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { Colors } from "@/constants/theme";
 
 type Size = "sm" | "md" | "lg";
 type Alignment = "left" | "center";
@@ -17,8 +19,11 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
   size = "md",
   alignment = "left",
 }) => {
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
+
   const getTitleClass = () => {
-    const base = "font-heading text-black";
+    const base = "font-heading";
     const alignClass = alignment === "center" ? "text-center" : "text-left";
 
     switch (size) {
@@ -33,7 +38,7 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
   };
 
   const getSubtitleClass = () => {
-    const base = "font-body text-black";
+    const base = "font-body";
     const alignClass = alignment === "center" ? "text-center" : "text-left";
 
     switch (size) {
@@ -52,8 +57,17 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
 
   return (
     <View className={`flex-col ${containerAlignClass}`}>
-      <Text className={getTitleClass()}>{title}</Text>
-      {subtitle && <Text className={getSubtitleClass()}>{subtitle}</Text>}
+      <Text className={getTitleClass()} style={{ color: theme.text.primary }}>
+        {title}
+      </Text>
+      {subtitle && (
+        <Text
+          className={getSubtitleClass()}
+          style={{ color: theme.text.secondary }}
+        >
+          {subtitle}
+        </Text>
+      )}
     </View>
   );
 };

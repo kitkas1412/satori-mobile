@@ -1,7 +1,9 @@
-import { PrimaryButton } from "@/components/ui";
+import { IconButton, PrimaryButton } from "@/components/ui";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
+import { Colors } from "@/constants/theme";
 import { useResetPasswordForm } from "@/features/authentication/hooks";
 import { getPasswordValidationStatus } from "@/features/authentication/utils/password-validation";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import {
@@ -11,11 +13,15 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { BackButton, PasswordInput, PasswordValidation } from "../components";
+import { ArrowLeft } from "lucide-react-native";
+import { PasswordInput, PasswordValidation } from "../components";
 
 export function ResetPasswordScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ resetToken?: string }>();
+
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme];
 
   const {
     newPassword,
@@ -35,12 +41,13 @@ export function ResetPasswordScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      className="flex-1 bg-[hsl(220,20%,97%)]"
+      className="flex-1"
+      style={{ backgroundColor: theme.background.page }}
       keyboardVerticalOffset={0}
     >
       <SafeAreaView className="flex-1">
         <View className="flex-col px-4">
-          <BackButton onPress={() => router.back()} />
+          <IconButton icon={<ArrowLeft size={24} color={theme.icon.primary} />} onPress={() => router.back()} />
 
           <PasswordInput
             value={newPassword}
