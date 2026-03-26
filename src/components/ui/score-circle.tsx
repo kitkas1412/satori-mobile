@@ -17,15 +17,18 @@ export function ScoreCircle({ score, label }: ScoreCircleProps) {
     <View className="items-center gap-1 flex-1">
       <View
         className="w-16 h-16 rounded-full items-center justify-center border-2"
-        style={{ borderColor: theme.primary }}
+        style={{ borderColor: theme.info.default }}
       >
-        <Text className="font-heading text-xl" style={{ color: theme.primary }}>
+        <Text
+          className="font-heading text-xl"
+          style={{ color: theme.icon.info }}
+        >
           {displayScore}
         </Text>
       </View>
       <Text
         className="font-body text-xs text-center"
-        style={{ color: theme.textMuted }}
+        style={{ color: theme.text.secondary }}
       >
         {label}
       </Text>

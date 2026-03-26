@@ -1,13 +1,13 @@
 export type {
-  TopicResponse,
-  TopicDetailResponse,
+  ConversationResponse,
+  ConversationDetailResponse,
   FeedbackResultResponse,
   FreeTalkSessionRequest,
   LanguageEvaluation,
-  ThemeResponse,
+  TopicListResponse,
   MissionDetails,
   MissionStatus,
-  Content,
+  Topic,
   Messages,
   RoleplaySessionResponse,
   SendMessageResponse,
@@ -15,9 +15,9 @@ export type {
   SessionStatus,
   TurnState,
 } from "./speaking.types";
-export { getThemesApi } from "./get-themes";
 export { getTopicsApi } from "./get-topics";
-export { getTopicDetailApi } from "./get-topic-detail";
+export { getConversationsApi } from "./get-conversations";
+export { getConversationDetailApi } from "./get-conversation-detail";
 export { startSessionApi } from "./start-session";
 export { startFreeTalkSessionApi } from "./start-free-talk-session";
 export { sendMessageApi } from "./send-message";

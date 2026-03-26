@@ -12,12 +12,12 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].iconSelected,
-        tabBarInactiveTintColor: Colors[colorScheme ?? "light"].iconDefault,
+        tabBarActiveTintColor: Colors[colorScheme ?? "light"].brand.primary,
+        tabBarInactiveTintColor: Colors[colorScheme ?? "light"].icon.primary,
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarStyle: {
-          backgroundColor: Colors[colorScheme ?? "light"].background,
+          backgroundColor: Colors[colorScheme ?? "light"].background.page,
         },
         tabBarLabelStyle: {
           fontFamily: "Nunito_700Bold",

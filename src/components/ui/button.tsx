@@ -1,5 +1,14 @@
 import React from "react";
-import { ActivityIndicator, StyleProp, Text, TouchableOpacity, View, ViewStyle } from "react-native";
+import {
+  ActivityIndicator,
+  StyleProp,
+  Text,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+} from "react-native";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { Colors, Primitive } from "@/constants/theme";
 
 interface PrimaryButtonProps {
   text: string;
@@ -24,39 +33,41 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
   accessibilityLabel,
   style,
 }) => {
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
   const isDisabled = disabled || loading;
 
   const getBackgroundColor = () => {
-    if (isDisabled) return "bg-gray-300";
+    if (isDisabled) return theme.brand.primarySubtle;
 
     switch (variant) {
       case "danger":
-        return "bg-error-500";
-      case "secondary":
-        return "bg-gray-500";
-      case "dark":
-        return "bg-primary-dark";
+        return theme.error.default;
       case "primary":
       default:
-        return "bg-primary-default";
+        return theme.brand.primary;
     }
   };
+
+  const textColor = isDisabled ? theme.text.disabled : theme.brand.onPrimary;
 
   return (
     <TouchableOpacity
       onPress={onPress}
       disabled={isDisabled}
-      className={`rounded-[14px] items-center justify-center px-[14px] py-[16.5px] ${getBackgroundColor()} ${fullWidth ? "w-full" : ""}`}
-      style={style}
+      className={`rounded-[14px] items-center justify-center px-[14px] py-[16.5px] ${fullWidth ? "w-full" : ""}`}
+      style={[{ backgroundColor: getBackgroundColor() }, style]}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel || text}
     >
       {loading ? (
-        <ActivityIndicator color="hsl(220, 14%, 96%)" />
+        <ActivityIndicator color={textColor} />
       ) : (
         <View className="flex-row items-center gap-2">
           {icon}
-          <Text className="font-heading text-lg text-[hsl(220,14%,96%)]">{text}</Text>
+          <Text className="font-heading text-lg" style={{ color: textColor }}>
+            {text}
+          </Text>
         </View>
       )}
     </TouchableOpacity>

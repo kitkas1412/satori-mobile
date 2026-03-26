@@ -20,8 +20,9 @@ import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
+import { useColorScheme as useNativeWindColorScheme } from "nativewind";
+
 import { QueryProvider } from "@/components/providers/query-provider";
-import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { useTokenValidation } from "@/features/authentication/hooks";
 import { useAuthStore } from "@/stores/auth-store";
 import "../../global.css";
@@ -102,7 +103,7 @@ function RootLayoutNav() {
         options={{ headerShown: false, gestureEnabled: false }}
       />
       <Stack.Screen
-        name="topic-detail"
+        name="conversation-detail"
         options={{ headerShown: false, gestureEnabled: true }}
       />
       <Stack.Screen
@@ -129,12 +130,17 @@ function RootLayoutNav() {
         name="assignment-writing-result"
         options={{ headerShown: false, gestureEnabled: false }}
       />
+      <Stack.Screen
+        name="theme-selector"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
     </Stack>
   );
 }
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const { setColorScheme } = useNativeWindColorScheme();
 
   const [fontsLoaded] = useFonts({
     Nunito_700Bold,
@@ -149,20 +155,20 @@ export default function RootLayout() {
     }
   }, [fontsLoaded]);
 
+  useEffect(() => {
+    setColorScheme(colorScheme ?? "light");
+  }, [colorScheme]);
+
   if (!fontsLoaded) {
     return null;
   }
 
   return (
     <QueryProvider>
-      <GluestackUIProvider mode="light">
-        <ThemeProvider
-          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-        >
-          <RootLayoutNav />
-          <StatusBar style="auto" />
-        </ThemeProvider>
-      </GluestackUIProvider>
+      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+        <RootLayoutNav />
+        <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+      </ThemeProvider>
     </QueryProvider>
   );
 }

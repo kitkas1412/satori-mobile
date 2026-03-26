@@ -1,3 +1,12 @@
+// Hook trung tâm quản lý toàn bộ vòng đời của một session hội thoại với AI.
+//
+// Bao gồm: khởi tạo session, gửi tin nhắn, hoàn thành, và bỏ dở.
+// Hỗ trợ cả 2 loại session: theo topic (guided) và tự do (free-talk).
+//
+// Luồng cơ bản:
+//   initSession / initFreeTalkSession → sendMessage (nhiều lần) → completeSession
+//   hoặc abandonSession (bỏ dở bất kỳ lúc nào)
+
 import { useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import { Alert } from "react-native";
@@ -8,13 +17,13 @@ import {
   startFreeTalkSessionApi,
   startSessionApi,
 } from "../api";
-import {
-  useConversationStore,
-} from "@/stores";
+import { useConversationStore } from "@/stores";
 import type { TurnState } from "../api";
 import { playAssistantMessage } from "./use-audio-player";
 
-const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+/** Hàm tiện ích tạo độ trễ (ms) để phát tin nhắn AI tuần tự, không bị đổ xuất hiện cùng lúc */
+const delay = (ms: number) =>
+  new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 export function useConversationSession() {
   const router = useRouter();
@@ -22,44 +31,84 @@ export function useConversationSession() {
   const [isInitializing, setIsInitializing] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
 
-  const { setSession, addMessages, removeMessage, setMissions, setFeedback, clearSession } =
-    useConversationStore();
+  const {
+    setSession,
+    addMessages,
+    removeMessage,
+    setMissions,
+    setFeedback,
+    clearSession,
+  } = useConversationStore();
   const sessionId = useConversationStore((s) => s.sessionId);
 
-  const _startSession = useCallback(async (starter: () => Promise<import("../api").RoleplaySessionResponse>) => {
-    setIsInitializing(true);
-    try {
-      const session = await starter();
-      setSession(session.id, [], session.missions);
-      setTurnState("AI_TURN");
-      setIsInitializing(false);
-      for (const msg of session.messages) {
-        await delay(600);
-        addMessages([msg]);
-        if (msg.role === "ASSISTANT") {
-          await playAssistantMessage(msg.content, msg.audioUrl).catch(() => {});
+  /**
+   * Hàm nội bộ dùng chung để khởi tạo session (cả guided và free-talk).
+   * Nhận một hàm `starter` làm tham số để linh hoạt với từng loại API.
+   *
+   * Sau khi API trả về, phát tuần tự các tin nhắn mở đầu từ AI:
+   * - Ẩn overlay loading trước khi bắt đầu phát (để người dùng thấy màn hình chat)
+   * - Delay 600ms giữa mỗi tin nhắn để tạo cảm giác tự nhiên
+   * - Await audio của từng tin nhắn trước khi hiển thị tin tiếp theo
+   */
+  const _startSession = useCallback(
+    async (
+      starter: () => Promise<import("../api").RoleplaySessionResponse>,
+    ) => {
+      setIsInitializing(true);
+      try {
+        const session = await starter();
+        setSession(session.id, [], session.missions);
+        setTurnState("AI_TURN");
+        // Tắt overlay trước khi phát audio để người dùng thấy tin nhắn xuất hiện
+        setIsInitializing(false);
+        for (const msg of session.messages) {
+          await delay(600); // Độ trễ tự nhiên giữa các tin nhắn
+          addMessages([msg]);
+          if (msg.role === "ASSISTANT") {
+            // Đợi audio phát xong trước khi hiển thị tin nhắn tiếp theo
+            await playAssistantMessage(msg.content, msg.audioUrl).catch(
+              () => {}, // Bỏ qua lỗi audio, không block luồng hội thoại
+            );
+          }
         }
+        setTurnState("USER_TURN");
+      } catch {
+        Alert.alert("Lỗi", "Không thể bắt đầu buổi học. Vui lòng thử lại.");
+        router.back();
+      } finally {
+        setIsInitializing(false);
       }
-      setTurnState("USER_TURN");
-    } catch {
-      Alert.alert("Lỗi", "Không thể bắt đầu buổi học. Vui lòng thử lại.");
-      router.back();
-    } finally {
-      setIsInitializing(false);
-    }
-  }, [router, setSession, addMessages]);
+    },
+    [router, setSession, addMessages],
+  );
 
+  /** Khởi tạo session hội thoại theo topic cụ thể */
   const initSession = useCallback(
     (topicId: string) => _startSession(() => startSessionApi(topicId)),
     [_startSession],
   );
 
+  /** Khởi tạo session hội thoại tự do (free-talk) theo cấp độ JLPT */
   const initFreeTalkSession = useCallback(
     (jlptLevel: string, language: string) =>
       _startSession(() => startFreeTalkSessionApi({ jlptLevel, language })),
     [_startSession],
   );
 
+  /**
+   * Gửi tin nhắn của người dùng và xử lý phản hồi từ AI.
+   *
+   * Sử dụng Optimistic UI: hiển thị tin nhắn của người dùng ngay lập tức
+   * (trước khi API trả về) để trải nghiệm mượt mà hơn.
+   *
+   * Thứ tự xử lý response:
+   *   1. addMessages(userMessages) — thay thế tin nhắn optimistic bằng dữ liệu thật
+   *   2. setMissions — cập nhật tiến độ nhiệm vụ
+   *   3. Phát tuần tự từng tin nhắn AI kèm audio
+   *
+   * @param transcript - Văn bản chuyển đổi từ giọng nói của người dùng
+   * @param audioUri - Đường dẫn file ghi âm gốc (nếu có, gửi để chấm điểm phát âm)
+   */
   const sendMessage = useCallback(
     async (transcript: string, audioUri?: string | null) => {
       if (!sessionId) return;
@@ -67,6 +116,8 @@ export function useConversationSession() {
         Alert.alert("Không nhận được giọng nói", "Vui lòng thử nói lại.");
         return;
       }
+
+      // Optimistic UI: hiển thị tin nhắn ngay trước khi API phản hồi
       const optimisticId = `optimistic-${Date.now()}`;
       const optimisticUserMessage = {
         id: optimisticId,
@@ -76,7 +127,7 @@ export function useConversationSession() {
         japaneseContent: null,
         translation: null,
         romaji: null,
-        sequenceNumber: -1,
+        sequenceNumber: -1, // Chưa có số thứ tự thật từ server
         audioUrl: null,
         userAudioUrl: audioUri ?? null,
         correction: null,
@@ -92,15 +143,25 @@ export function useConversationSession() {
         const result = await sendMessageApi(
           sessionId,
           transcript,
-          audioUri ?? undefined
+          audioUri ?? undefined,
         );
-        const userMessages = result.messages.filter((m) => m.role !== "ASSISTANT");
-        const assistantMessages = result.messages.filter((m) => m.role === "ASSISTANT");
+
+        // Tách tin nhắn người dùng (có dữ liệu thật) và tin nhắn AI
+        const userMessages = result.messages.filter(
+          (m) => m.role !== "ASSISTANT",
+        );
+        const assistantMessages = result.messages.filter(
+          (m) => m.role === "ASSISTANT",
+        );
+
+        // Thêm tin nhắn thật của người dùng (store tự xử lý trùng lặp với optimistic)
         addMessages(userMessages);
         setMissions(result.missions);
         setTurnState("AI_TURN");
+
+        // Phát tuần tự từng tin nhắn AI
         for (const msg of assistantMessages) {
-          await delay(600);
+          await delay(600); // Độ trễ tự nhiên trước mỗi tin nhắn
           addMessages([msg]);
           await playAssistantMessage(msg.content, msg.audioUrl).catch(() => {});
         }
@@ -110,9 +171,13 @@ export function useConversationSession() {
         setTurnState("USER_TURN");
       }
     },
-    [sessionId, addMessages, setMissions]
+    [sessionId, addMessages, setMissions],
   );
 
+  /**
+   * Kết thúc session và lấy kết quả đánh giá từ AI.
+   * Sau khi gọi, feedback sẽ được lưu vào store và màn hình sẽ hiển thị nút "Tiếp tục".
+   */
   const completeSession = useCallback(async () => {
     if (!sessionId) return;
     setIsCompleting(true);
@@ -126,12 +191,17 @@ export function useConversationSession() {
     }
   }, [sessionId, setFeedback]);
 
+  /**
+   * Bỏ dở session (người dùng thoát giữa chừng).
+   * Gọi API theo dạng best-effort: nếu API lỗi vẫn xoá session local và về trang chính.
+   * Không hiển thị lỗi vì đây là hành động người dùng chủ động thoát.
+   */
   const abandonSession = useCallback(async () => {
     if (!sessionId) return;
     try {
       await abandonSessionApi(sessionId);
     } catch {
-      // ignore — abandon on best-effort basis
+      // Bỏ qua lỗi — abandon là best-effort, không cần báo lỗi cho người dùng
     } finally {
       clearSession();
       router.replace("/(tabs)/speaking");
