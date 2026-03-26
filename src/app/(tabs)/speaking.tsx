@@ -3,7 +3,8 @@
 // Tự động highlight section đầu tiên còn topic chưa được luyện.
 
 import { Bell } from "lucide-react-native";
-import { ScrollView, Text, View } from "react-native";
+import { useRef, useCallback } from "react";
+import { ScrollView, Text, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -35,6 +36,26 @@ export default function SpeakingScreen() {
   const { firstUnpracticedSectionId, handleHasUnpracticed } =
     useFirstUnpracticedSection();
   const { handleConversationPress } = useConversationNavigation();
+
+  const scrollViewRef = useRef<ScrollView>(null);
+  const sectionYMap = useRef<Record<string, number>>({});
+  const hasScrolledRef = useRef(false);
+  const { height: screenHeight } = useWindowDimensions();
+
+  const handleScrollToCard = useCallback(
+    (sectionId: string, cardY: number, cardHeight: number) => {
+      if (hasScrolledRef.current) return;
+      const sectionY = sectionYMap.current[sectionId] ?? 0;
+      const totalY = sectionY + cardY;
+      const centeredY = totalY - screenHeight / 2 + cardHeight / 2;
+      scrollViewRef.current?.scrollTo({
+        y: Math.max(0, centeredY),
+        animated: true,
+      });
+      hasScrolledRef.current = true;
+    },
+    [screenHeight],
+  );
 
   return (
     <>
@@ -70,6 +91,7 @@ export default function SpeakingScreen() {
           </View>
         ) : (
           <ScrollView
+            ref={scrollViewRef}
             className="flex-1"
             contentContainerClassName="px-4 pb-8 gap-4"
             showsVerticalScrollIndicator={false}
@@ -99,20 +121,30 @@ export default function SpeakingScreen() {
             )}
 
             {sections?.map((section, index) => (
-              <TopicSection
+              <View
                 key={section.id}
-                section={section}
-                // Section đầu tiên trong danh sách luôn được mở rộng mặc định
-                defaultExpanded={index === 0}
-                // Hiển thị viền highlight nếu chưa xác định được section nào,
-                // hoặc nếu đây chính là section cần học tiếp theo
-                showFirstUnpracticedBorder={
-                  firstUnpracticedSectionId === null ||
-                  firstUnpracticedSectionId === section.id
-                }
-                onHasUnpracticed={handleHasUnpracticed}
-                onConversationPress={handleConversationPress}
-              />
+                onLayout={(e) => {
+                  sectionYMap.current[section.id] = e.nativeEvent.layout.y;
+                }}
+              >
+                <TopicSection
+                  section={section}
+                  // Section đầu tiên trong danh sách luôn được mở rộng mặc định
+                  defaultExpanded={index === 0}
+                  // Hiển thị viền highlight nếu chưa xác định được section nào,
+                  // hoặc nếu đây chính là section cần học tiếp theo
+                  showFirstUnpracticedBorder={
+                    firstUnpracticedSectionId === null ||
+                    firstUnpracticedSectionId === section.id
+                  }
+                  onHasUnpracticed={handleHasUnpracticed}
+                  onConversationPress={handleConversationPress}
+                  isTargetSection={firstUnpracticedSectionId === section.id}
+                  onScrollToCard={(cardY, cardHeight) =>
+                    handleScrollToCard(section.id, cardY, cardHeight)
+                  }
+                />
+              </View>
             ))}
           </ScrollView>
         )}

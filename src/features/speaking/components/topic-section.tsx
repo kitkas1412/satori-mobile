@@ -28,6 +28,10 @@ interface TopicSectionProps {
   onHasUnpracticed: (sectionId: string, orderIndex: number) => void;
   /** Callback điều hướng sang màn hình chi tiết conversation */
   onConversationPress: (conversationId: string) => void;
+  /** True nếu đây là section chứa conversation card đầu tiên chưa practiced */
+  isTargetSection?: boolean;
+  /** Callback trả về (cardY, cardHeight) tương đối với root View của section khi target card layout xong */
+  onScrollToCard?: (cardY: number, cardHeight: number) => void;
 }
 
 export function TopicSection({
@@ -36,6 +40,8 @@ export function TopicSection({
   showFirstUnpracticedBorder,
   onHasUnpracticed,
   onConversationPress,
+  isTargetSection,
+  onScrollToCard,
 }: TopicSectionProps) {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
@@ -64,6 +70,13 @@ export function TopicSection({
       onHasUnpracticed(section.id, section.orderIndex);
     }
   }, [hasUnpracticed, section.id, section.orderIndex, onHasUnpracticed]);
+
+  // Tự động expand nếu đây là section chứa card cần scroll đến
+  useEffect(() => {
+    if (isTargetSection && hasUnpracticed && !isExpanded) {
+      setIsExpanded(true);
+    }
+  }, [isTargetSection, hasUnpracticed, isExpanded]);
 
   const firstUnpracticedIndex = showFirstUnpracticedBorder
     ? conversations.findIndex((c) => !c.practiced)
@@ -124,7 +137,18 @@ export function TopicSection({
           {conversations.map((conversation, index) => {
             const isFirstUnpracticed = index === firstUnpracticedIndex;
             return (
-              <View key={conversation.id}>
+              <View
+                key={conversation.id}
+                onLayout={
+                  isFirstUnpracticed && isTargetSection
+                    ? (e) =>
+                        onScrollToCard?.(
+                          e.nativeEvent.layout.y,
+                          e.nativeEvent.layout.height,
+                        )
+                    : undefined
+                }
+              >
                 {index > 0 &&
                   !isFirstUnpracticed &&
                   index !== firstUnpracticedIndex + 1 && (
