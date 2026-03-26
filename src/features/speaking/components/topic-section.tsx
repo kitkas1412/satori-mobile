@@ -1,12 +1,15 @@
 // Component wrapper cho một section (chủ đề lớn) trên màn hình SpeakingScreen.
-// Tự fetch danh sách topics của section, transform sang format ThemeSection cần,
-// và báo cáo lên parent khi section có topic chưa được luyện tập.
+// Tự fetch danh sách topics của section, transform sang format cần thiết,
+// render UI collapsible, và báo cáo lên parent khi section có topic chưa được luyện tập.
 
-import { useEffect } from "react";
-import { useRouter } from "expo-router";
-import { ThemeSection } from "./theme-section";
-import { useThemeTopics } from "@/features/speaking/hooks";
-import type { Content } from "@/features/speaking/api";
+import { useEffect, useState } from "react";
+import { Pressable, Text, View } from "react-native";
+import { ChevronDown, ChevronRight } from "lucide-react-native";
+import { ConversationCard } from "./conversation-card";
+import { useConversations } from "@/features/speaking/hooks";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { Colors } from "@/constants/theme";
+import type { Topic } from "@/features/speaking/api";
 
 /** Chuyển điểm độ khó thành nhãn hiển thị: 1 = Dễ, 2 = Trung Bình, khác = Khó */
 function difficultyLabel(score: number): string {
@@ -16,13 +19,15 @@ function difficultyLabel(score: number): string {
 }
 
 interface TopicSectionProps {
-  section: Content;
+  section: Topic;
   /** Section đầu tiên trong danh sách sẽ được mở rộng mặc định */
   defaultExpanded: boolean;
   /** Hiển thị viền highlight khi đây là section cần học tiếp theo */
   showFirstUnpracticedBorder: boolean;
   /** Callback báo lên parent khi section này có topic chưa luyện tập */
   onHasUnpracticed: (sectionId: string, orderIndex: number) => void;
+  /** Callback điều hướng sang màn hình chi tiết conversation */
+  onConversationPress: (conversationId: string) => void;
 }
 
 export function TopicSection({
@@ -30,12 +35,18 @@ export function TopicSection({
   defaultExpanded,
   showFirstUnpracticedBorder,
   onHasUnpracticed,
+  onConversationPress,
 }: TopicSectionProps) {
-  const router = useRouter();
-  const { data: topics } = useThemeTopics(section.id);
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+  const { data: topics } = useConversations(section.id);
 
-  // Transform dữ liệu topic API sang format mà ThemeSection yêu cầu
-  const lessons =
+  const accentColor =
+    section.orderIndex % 2 === 0 ? theme.purple.default : theme.brand.primary;
+
+  // Transform dữ liệu topic API sang format hiển thị
+  const conversations =
     topics?.map((topic) => ({
       id: topic.id,
       title: topic.title,
@@ -54,27 +65,91 @@ export function TopicSection({
     }
   }, [hasUnpracticed, section.id, section.orderIndex, onHasUnpracticed]);
 
-  /** Điều hướng sang màn hình chi tiết topic khi người dùng chọn một lesson */
-  function handleLessonPress(id: string) {
-    const topic = topics?.find((t) => t.id === id);
-    if (!topic) return;
-    router.push({
-      pathname: "/topic-detail",
-      params: { topicId: topic.id },
-    });
-  }
+  const firstUnpracticedIndex = showFirstUnpracticedBorder
+    ? conversations.findIndex((c) => !c.practiced)
+    : -1;
 
   return (
-    <ThemeSection
-      lessonNumber={section.orderIndex}
-      lessonTitle={section.title}
-      lessonDescription={section.descriptionVi}
-      completedCount={0}
-      totalCount={section.topicCount}
-      lessons={lessons}
-      defaultExpanded={defaultExpanded}
-      showFirstUnpracticedBorder={showFirstUnpracticedBorder}
-      onLessonPress={handleLessonPress}
-    />
+    <View className="gap-2">
+      {/* Header */}
+      <Pressable
+        onPress={() => setIsExpanded((prev) => !prev)}
+        className="gap-1"
+      >
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row gap-1 items-center">
+            <View
+              className="px-2 py-[2px] rounded-[3px]"
+              style={{ backgroundColor: accentColor }}
+            >
+              <Text
+                className="text-xs font-body"
+                style={{ color: theme.text.onBrand }}
+              >
+                Chủ đề {section.orderIndex}
+              </Text>
+            </View>
+            <Text
+              className="text-xs font-body"
+              style={{ color: theme.text.secondary }}
+            >
+              0/{section.topicCount} HỘI THOẠI
+            </Text>
+          </View>
+          {isExpanded ? (
+            <ChevronDown size={24} color={theme.text.secondary} />
+          ) : (
+            <ChevronRight size={24} color={theme.text.secondary} />
+          )}
+        </View>
+        <View>
+          <Text
+            className="text-xl font-bold font-heading"
+            style={{ color: theme.text.primary }}
+          >
+            {section.title}
+          </Text>
+          <Text
+            className="text-sm font-body"
+            style={{ color: theme.text.secondary }}
+          >
+            {section.descriptionVi}
+          </Text>
+        </View>
+      </Pressable>
+
+      {/* Lesson Cards */}
+      {isExpanded && (
+        <View>
+          {conversations.map((conversation, index) => {
+            const isFirstUnpracticed = index === firstUnpracticedIndex;
+            return (
+              <View key={conversation.id}>
+                {index > 0 &&
+                  !isFirstUnpracticed &&
+                  index !== firstUnpracticedIndex + 1 && (
+                    <View
+                      style={{
+                        marginHorizontal: 16,
+                        height: 1,
+                        backgroundColor: theme.border.subtle,
+                      }}
+                    />
+                  )}
+                <ConversationCard
+                  title={conversation.title}
+                  subtitle={conversation.subtitle}
+                  status={conversation.status}
+                  practiced={conversation.practiced}
+                  showBorder={showFirstUnpracticedBorder && isFirstUnpracticed}
+                  accentColor={accentColor}
+                  onPress={() => onConversationPress(conversation.id)}
+                />
+              </View>
+            );
+          })}
+        </View>
+      )}
+    </View>
   );
 }

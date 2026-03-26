@@ -3,19 +3,19 @@ import { Pressable, Text, View } from "react-native";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
 
-type LessonStatus = "completed" | "active" | "locked";
+type ConversationStatus = "completed" | "active" | "locked";
 
-interface TopicCardProps {
+interface ConversationCardProps {
   title: string;
   subtitle: string;
-  status: LessonStatus;
+  status: ConversationStatus;
   practiced?: boolean;
   showBorder?: boolean;
   accentColor?: string;
   onPress?: () => void;
 }
 
-export function TopicCard({
+export function ConversationCard({
   title,
   subtitle,
   status,
@@ -23,10 +23,10 @@ export function TopicCard({
   showBorder,
   accentColor,
   onPress,
-}: TopicCardProps) {
+}: ConversationCardProps) {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
-  const iconColor = accentColor ?? theme.primary;
+  const iconColor = accentColor ?? theme.brand.primary;
 
   return (
     <Pressable
@@ -34,13 +34,11 @@ export function TopicCard({
       className="p-4 pt-6 pb-4 flex-row gap-4 h-[97px]"
       style={{
         backgroundColor: showBorder
-          ? colorScheme === "dark"
-            ? "hsl(220, 20%, 14%)"
-            : "hsl(220, 20%, 93%)"
-          : theme.background,
+          ? theme.border.subtle
+          : theme.background.page,
         ...(showBorder && {
           borderWidth: 2,
-          borderColor: theme.border,
+          borderColor: theme.border.default,
           borderRadius: 8,
         }),
       }}
@@ -48,7 +46,11 @@ export function TopicCard({
     >
       <View className="w-6 h-6">
         {practiced ? (
-          <CircleCheck size={24} color={theme.success} strokeWidth={2} />
+          <CircleCheck
+            size={24}
+            color={theme.success.default}
+            strokeWidth={2}
+          />
         ) : (
           <MessageSquareMore size={24} color={iconColor} strokeWidth={2} />
         )}
@@ -56,11 +58,14 @@ export function TopicCard({
       <View className="flex-1 gap-[5px]">
         <Text
           className="text-lg font-bold font-heading"
-          style={{ color: theme.textDefault }}
+          style={{ color: theme.text.primary }}
         >
           {title}
         </Text>
-        <Text className="text-xs font-body" style={{ color: theme.textMuted }}>
+        <Text
+          className="text-xs font-body"
+          style={{ color: theme.text.secondary }}
+        >
           {subtitle}
         </Text>
       </View>

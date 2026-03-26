@@ -28,14 +28,14 @@ function MissionItem({
     <View className="flex-row items-center justify-between">
       <View className="flex-row items-center gap-4">
         <Text
-          className="font-heading text-[32px] text-muted-foreground"
-          style={{ lineHeight: 40 }}
+          className="font-heading text-[32px]"
+          style={{ color: theme.text.primary, lineHeight: 40 }}
         >
           {index + 1}
         </Text>
         <Text
-          className="font-body text-base text-muted-foreground"
-          style={{ width: 235 }}
+          className="font-body text-base"
+          style={{ color: theme.text.secondary, width: 235 }}
         >
           {mission.titleVi}
         </Text>
@@ -46,10 +46,12 @@ function MissionItem({
         style={{
           width: 40,
           height: 40,
-          backgroundColor: isCompleted ? theme.success : theme.border,
+          backgroundColor: isCompleted
+            ? theme.success.default
+            : theme.border.default,
         }}
       >
-        <Check size={24} color="white" strokeWidth={2.5} />
+        <Check size={24} color={theme.icon.onBrand} strokeWidth={2.5} />
       </View>
     </View>
   );
@@ -83,21 +85,27 @@ export function MissionsModal({ visible, onClose }: MissionsModalProps) {
 
         {/* Panel */}
         <View
-          className="bg-white rounded-t-3xl"
-          style={{ paddingBottom: Math.max(insets.bottom, 16) + 8 }}
+          className="rounded-t-3xl"
+          style={{
+            backgroundColor: theme.background.surface,
+            paddingBottom: Math.max(insets.bottom, 16) + 8,
+          }}
         >
           <View className="px-7 pt-4 gap-2">
             {/* Header row */}
             <View className="flex-row items-center justify-between">
-              <Text className="font-heading text-2xl text-[#1f2937]">
+              <Text
+                className="font-heading text-2xl"
+                style={{ color: theme.text.primary }}
+              >
                 Nhiệm vụ
               </Text>
 
               <View
                 className="flex-row items-center gap-2 rounded-lg px-2 py-2"
-                style={{ backgroundColor: "#f3f4f6" }}
+                style={{ backgroundColor: theme.border.subtle }}
               >
-                <List size={16} color="#475569" />
+                <List size={16} color={theme.text.secondary} />
                 <Text
                   className="font-body text-sm text-muted-foreground"
                   style={{ fontWeight: "600" }}
@@ -109,8 +117,8 @@ export function MissionsModal({ visible, onClose }: MissionsModalProps) {
 
             {/* Description */}
             <Text
-              className="font-body text-sm text-[#6b7280]"
-              style={{ lineHeight: 20 }}
+              className="font-body text-sm"
+              style={{ color: theme.text.secondary, lineHeight: 20 }}
             >
               Hoàn thành các mục tiêu sau để hoàn thành thành công cuộc hội
               thoại nhập vai này

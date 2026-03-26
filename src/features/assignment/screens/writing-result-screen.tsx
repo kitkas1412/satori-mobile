@@ -10,7 +10,7 @@ import { StatusBar } from "expo-status-bar";
 
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { LoadingOverlay, ScreenHeader } from "@/components/ui";
+import { LoadingOverlay, PrimaryButton, ScreenHeader } from "@/components/ui";
 import { useWritingResult } from "../hooks";
 import { StatusBanner } from "../components";
 
@@ -32,7 +32,7 @@ export function WritingResultScreen() {
   return (
     <View
       className="flex-1"
-      style={{ paddingTop: insets.top, backgroundColor: theme.background }}
+      style={{ paddingTop: insets.top, backgroundColor: theme.background.page }}
     >
       <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
       <LoadingOverlay visible={isCancelling} title="Đang hủy nộp bài..." />
@@ -43,7 +43,7 @@ export function WritingResultScreen() {
         showDivider
         leftAction={
           <Pressable onPress={handleGoHome} hitSlop={8}>
-            <ChevronLeft size={24} color={theme.textDefault} strokeWidth={2} />
+            <ChevronLeft size={24} color={theme.text.primary} strokeWidth={2} />
           </Pressable>
         }
         rightAction={<View style={{ width: 24 }} />}
@@ -80,19 +80,19 @@ export function WritingResultScreen() {
             {/* Màu xanh lá khi đã chấm, màu xanh dương khi chờ chấm */}
             <CheckCircle2
               size={80}
-              color={isGraded ? theme.success : theme.primary}
+              color={isGraded ? theme.success.default : theme.brand.primary}
               strokeWidth={1.5}
             />
           </View>
           <Text
             className="font-heading text-xl"
-            style={{ color: theme.textMuted }}
+            style={{ color: theme.text.primary }}
           >
             {isGraded ? "Bài tập đã được chấm điểm" : "Đã nộp bài thành công!"}
           </Text>
           <Text
             className="font-body text-sm text-center"
-            style={{ color: theme.textMuted, opacity: 0.7 }}
+            style={{ color: theme.text.secondary, opacity: 0.7 }}
           >
             {isGraded
               ? "Hãy xem nhận xét của giáo viên"
@@ -111,10 +111,14 @@ export function WritingResultScreen() {
                 className="flex-row items-center gap-2"
                 style={{ opacity: 0.8 }}
               >
-                <Clock size={14} color={theme.primary} strokeWidth={1.5} />
+                <Clock
+                  size={14}
+                  color={theme.brand.primary}
+                  strokeWidth={1.5}
+                />
                 <Text
                   className="font-body text-xs"
-                  style={{ color: theme.primary }}
+                  style={{ color: theme.brand.primary }}
                 >
                   Thời gian chấm bài thường từ 1-3 ngày
                 </Text>
@@ -133,20 +137,20 @@ export function WritingResultScreen() {
                 <View className="flex-row items-center justify-between">
                   <Text
                     className="font-body text-sm"
-                    style={{ color: theme.textMuted }}
+                    style={{ color: theme.text.primary }}
                   >
                     Điểm số:
                   </Text>
                   <Text
                     className="font-heading text-2xl"
-                    style={{ color: theme.success }}
+                    style={{ color: theme.success.default }}
                   >
                     {Math.round(score)}/100
                   </Text>
                 </View>
                 <View
                   style={{
-                    backgroundColor: theme.white,
+                    backgroundColor: theme.background.surface,
                     borderRadius: 10,
                     padding: 12,
                   }}
@@ -154,14 +158,14 @@ export function WritingResultScreen() {
                   {writingResult?.feedback ? (
                     <Text
                       className="font-body text-xs"
-                      style={{ color: theme.textMuted, lineHeight: 19 }}
+                      style={{ color: theme.text.secondary, lineHeight: 19 }}
                     >
                       {writingResult.feedback}
                     </Text>
                   ) : (
                     <Text
                       className="font-body text-xs text-center"
-                      style={{ color: theme.textMuted, opacity: 0.5 }}
+                      style={{ color: theme.text.secondary, opacity: 0.5 }}
                     >
                       Giáo viên chưa để lại nhận xét
                     </Text>
@@ -175,10 +179,10 @@ export function WritingResultScreen() {
         {/* Thẻ ảnh bài làm đã nộp */}
         <View
           style={{
-            backgroundColor: theme.cardBackground,
+            backgroundColor: theme.background.surface,
             borderRadius: 14,
             borderWidth: 1,
-            borderColor: "rgba(0,0,0,0.1)",
+            borderColor: theme.border.subtle,
             padding: 16,
             gap: 12,
           }}
@@ -186,14 +190,14 @@ export function WritingResultScreen() {
           <View className="flex-row items-center justify-between">
             <Text
               className="font-heading text-sm"
-              style={{ color: theme.textMuted }}
+              style={{ color: theme.text.primary }}
             >
               Hình ảnh đã nộp ({imageUrls.length})
             </Text>
             {imageUrls.length > 0 && (
               <Text
                 className="font-body text-xs"
-                style={{ color: theme.primary }}
+                style={{ color: theme.brand.primary }}
               >
                 Nhấn để phóng to
               </Text>
@@ -211,7 +215,7 @@ export function WritingResultScreen() {
                         height: 103,
                         borderRadius: 10,
                         borderWidth: 1,
-                        borderColor: theme.border,
+                        borderColor: theme.border.subtle,
                       }}
                       resizeMode="cover"
                     />
@@ -250,21 +254,21 @@ export function WritingResultScreen() {
                 style={{
                   width: 64,
                   height: 64,
-                  backgroundColor: theme.border,
+                  backgroundColor: theme.border.subtle,
                   opacity: 0.6,
                 }}
               >
-                <X size={28} color={theme.textMuted} strokeWidth={1.5} />
+                <X size={28} color={theme.text.primary} strokeWidth={1.5} />
               </View>
               <Text
                 className="font-heading text-sm"
-                style={{ color: theme.textMuted }}
+                style={{ color: theme.text.primary }}
               >
                 Chưa có hình ảnh
               </Text>
               <Text
                 className="font-body text-xs text-center"
-                style={{ color: theme.textMuted, opacity: 0.6 }}
+                style={{ color: theme.text.secondary, opacity: 0.6 }}
               >
                 Bài nộp này không có hình ảnh đính kèm
               </Text>
@@ -292,45 +296,25 @@ export function WritingResultScreen() {
           paddingHorizontal: 16,
           paddingTop: 16,
           paddingBottom: insets.bottom + 8,
-          backgroundColor: theme.background,
-          borderTopWidth: 1,
-          borderTopColor: theme.border,
+          backgroundColor: theme.background.page,
         }}
       >
         <View className="flex-row gap-3">
-          <Pressable
+          <PrimaryButton
+            text="Quay về"
             onPress={handleGoHome}
-            className="flex-1 items-center justify-center rounded-xl"
-            style={{ height: 48, backgroundColor: theme.primary }}
-          >
-            <Text
-              className="font-heading text-sm"
-              style={{ color: theme.white }}
-            >
-              Quay về
-            </Text>
-          </Pressable>
+            style={{ flex: 1 }}
+          />
 
           {!isGraded && (
-            <Pressable
+            <PrimaryButton
+              text="Hủy nộp bài"
               onPress={handleCancelSubmission}
               disabled={isCancelling}
-              className="flex-1 items-center justify-center rounded-xl"
-              style={{
-                height: 48,
-                backgroundColor: theme.background,
-                borderWidth: 2,
-                borderColor: theme.error,
-                opacity: isCancelling ? 0.5 : 1,
-              }}
-            >
-              <Text
-                className="font-heading text-sm"
-                style={{ color: theme.error }}
-              >
-                {isCancelling ? "Đang hủy..." : "Hủy nộp bài"}
-              </Text>
-            </Pressable>
+              loading={isCancelling}
+              variant="danger"
+              style={{ flex: 1 }}
+            />
           )}
         </View>
       </View>

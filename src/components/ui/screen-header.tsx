@@ -37,7 +37,7 @@ export function ScreenHeader({
         {leftAction}
         <Text
           className={titleClass}
-          style={{ color: theme.textDefault }}
+          style={{ color: theme.text.primary }}
           numberOfLines={1}
         >
           {title}
@@ -45,7 +45,13 @@ export function ScreenHeader({
         {rightAction}
       </View>
       {showDivider && (
-        <View style={{ height: 1, backgroundColor: theme.border, opacity: 0.5 }} />
+        <View
+          style={{
+            height: 1,
+            backgroundColor: theme.border.subtle,
+            opacity: 0.5,
+          }}
+        />
       )}
     </>
   );

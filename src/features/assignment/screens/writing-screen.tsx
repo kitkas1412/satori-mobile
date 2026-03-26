@@ -74,7 +74,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
   return (
     <View
       className="flex-1"
-      style={{ paddingTop: insets.top, backgroundColor: theme.background }}
+      style={{ paddingTop: insets.top, backgroundColor: theme.background.page }}
     >
       <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
       <LoadingOverlay visible={isPending} title="Đang tải bài tập..." />
@@ -87,7 +87,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
         showDivider
         leftAction={
           <Pressable onPress={handleExit} hitSlop={8}>
-            <X size={24} color={theme.textDefault} strokeWidth={2} />
+            <X size={24} color={theme.icon.primary} strokeWidth={2} />
           </Pressable>
         }
         rightAction={<View style={{ width: 24 }} />}
@@ -107,17 +107,17 @@ export function WritingScreen({ id }: WritingScreenProps) {
             {/* Thẻ thông tin bài tập: tiêu đề, hạn nộp, yêu cầu đề bài */}
             <View
               style={{
-                backgroundColor: theme.cardBackground,
+                backgroundColor: theme.background.surface,
                 borderRadius: 14,
                 borderWidth: 1,
-                borderColor: "rgba(0,0,0,0.1)",
+                borderColor: theme.border.subtle,
                 padding: 16,
                 gap: 8,
               }}
             >
               <Text
                 className="font-heading text-lg"
-                style={{ color: theme.textDefault }}
+                style={{ color: theme.text.primary }}
               >
                 {data?.title}
               </Text>
@@ -126,12 +126,12 @@ export function WritingScreen({ id }: WritingScreenProps) {
                 <View className="flex-row items-center gap-1.5">
                   <CalendarDays
                     size={14}
-                    color={theme.textMuted}
+                    color={theme.icon.secondary}
                     strokeWidth={1.5}
                   />
                   <Text
                     className="font-body text-xs"
-                    style={{ color: theme.textDefault, opacity: 0.7 }}
+                    style={{ color: theme.text.secondary }}
                   >
                     Hạn: {dueDate}
                   </Text>
@@ -141,13 +141,13 @@ export function WritingScreen({ id }: WritingScreenProps) {
               {data?.writingContent?.prompt ? (
                 <View
                   style={{
-                    backgroundColor: theme.background,
+                    backgroundColor: theme.brand.primarySubtle,
                     borderRadius: 10,
                     padding: 12,
                     marginTop: 4,
                   }}
                 >
-                  <MarkdownText fontSize={14} color={theme.textDefault}>
+                  <MarkdownText fontSize={14} color={theme.text.primary}>
                     {`Đề bài: ${data.writingContent?.prompt}`}
                   </MarkdownText>
                 </View>
@@ -157,10 +157,10 @@ export function WritingScreen({ id }: WritingScreenProps) {
             {/* Thẻ bài làm: chọn/chụp ảnh và xem trước danh sách ảnh đã chọn */}
             <View
               style={{
-                backgroundColor: theme.cardBackground,
+                backgroundColor: theme.background.surface,
                 borderRadius: 14,
                 borderWidth: 1,
-                borderColor: "rgba(0,0,0,0.1)",
+                borderColor: theme.border.subtle,
                 padding: 16,
                 gap: 12,
               }}
@@ -169,13 +169,13 @@ export function WritingScreen({ id }: WritingScreenProps) {
               <View className="flex-row items-center justify-between">
                 <Text
                   className="font-heading text-lg"
-                  style={{ color: theme.textDefault }}
+                  style={{ color: theme.text.primary }}
                 >
                   Bài làm của bạn
                 </Text>
                 <Text
                   className="font-body text-xs"
-                  style={{ color: theme.textDefault, opacity: 0.7 }}
+                  style={{ color: theme.text.secondary }}
                 >
                   {images.length} hình ảnh
                 </Text>
@@ -186,12 +186,16 @@ export function WritingScreen({ id }: WritingScreenProps) {
                 <Pressable
                   onPress={handlePickImage}
                   className="flex-1 flex-row items-center justify-center gap-2 rounded-xl"
-                  style={{ height: 48, backgroundColor: theme.primary }}
+                  style={{ height: 48, backgroundColor: theme.brand.primary }}
                 >
-                  <ImageIcon size={20} color={theme.white} strokeWidth={2} />
+                  <ImageIcon
+                    size={20}
+                    color={theme.brand.onPrimary}
+                    strokeWidth={2}
+                  />
                   <Text
                     className="font-heading text-sm"
-                    style={{ color: theme.white }}
+                    style={{ color: theme.text.onBrand }}
                   >
                     Chọn ảnh
                   </Text>
@@ -202,15 +206,19 @@ export function WritingScreen({ id }: WritingScreenProps) {
                   className="flex-1 flex-row items-center justify-center gap-2 rounded-xl"
                   style={{
                     height: 48,
-                    backgroundColor: theme.cardBackground,
+                    backgroundColor: theme.background.surface,
                     borderWidth: 2,
-                    borderColor: theme.primary,
+                    borderColor: theme.border.brand,
                   }}
                 >
-                  <CameraIcon size={20} color={theme.primary} strokeWidth={2} />
+                  <CameraIcon
+                    size={20}
+                    color={theme.brand.primary}
+                    strokeWidth={2}
+                  />
                   <Text
                     className="font-heading text-sm"
-                    style={{ color: theme.primary }}
+                    style={{ color: theme.brand.primary }}
                   >
                     Chụp ảnh
                   </Text>
@@ -224,22 +232,26 @@ export function WritingScreen({ id }: WritingScreenProps) {
                   style={{
                     height: 200,
                     borderWidth: 2,
-                    borderColor: "#D1D5DC",
+                    borderColor: theme.border.default,
                     borderStyle: "dashed",
                     borderRadius: 10,
                     gap: 8,
                   }}
                 >
-                  <ImageIcon size={48} color={theme.border} strokeWidth={1} />
+                  <ImageIcon
+                    size={48}
+                    color={theme.icon.disabled}
+                    strokeWidth={1}
+                  />
                   <Text
                     className="font-body text-sm"
-                    style={{ color: theme.textDefault, opacity: 0.7 }}
+                    style={{ color: theme.text.primary }}
                   >
                     Chưa có hình ảnh nào
                   </Text>
                   <Text
                     className="font-body text-xs"
-                    style={{ color: theme.textDefault, opacity: 0.5 }}
+                    style={{ color: theme.text.secondary }}
                   >
                     Nhấn nút bên trên để thêm ảnh
                   </Text>
@@ -276,7 +288,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
 
               <Text
                 className="font-body text-xs"
-                style={{ color: theme.textDefault, opacity: 0.6 }}
+                style={{ color: theme.text.secondary }}
               >
                 Bạn có thể tải lên nhiều hình ảnh bài viết của mình
               </Text>
@@ -285,10 +297,10 @@ export function WritingScreen({ id }: WritingScreenProps) {
             {/* Card nhận xét AI — luôn hiển thị */}
             <View
               style={{
-                backgroundColor: theme.cardBackground,
+                backgroundColor: theme.background.surface,
                 borderRadius: 14,
                 borderWidth: 1,
-                borderColor: "rgba(0,0,0,0.1)",
+                borderColor: theme.border.subtle,
                 padding: 16,
                 gap: 12,
               }}
@@ -296,10 +308,14 @@ export function WritingScreen({ id }: WritingScreenProps) {
               {/* Header: icon + tiêu đề, nút Đánh giá lại khi đã có feedback */}
               <View className="flex-row items-center justify-between">
                 <View className="flex-row items-center gap-2">
-                  <Sparkles size={18} color={theme.primary} strokeWidth={2} />
+                  <Sparkles
+                    size={18}
+                    color={theme.icon.primary}
+                    strokeWidth={2}
+                  />
                   <Text
                     className="font-heading text-base"
-                    style={{ color: theme.textDefault }}
+                    style={{ color: theme.text.primary }}
                   >
                     Nhận xét từ AI
                   </Text>
@@ -312,21 +328,12 @@ export function WritingScreen({ id }: WritingScreenProps) {
                   >
                     <Sparkles
                       size={14}
-                      color={
-                        isEvaluating || isSubmitting
-                          ? theme.textMuted
-                          : theme.primary
-                      }
+                      color={theme.icon.primary}
                       strokeWidth={2}
                     />
                     <Text
                       className="font-body text-xs"
-                      style={{
-                        color:
-                          isEvaluating || isSubmitting
-                            ? theme.textMuted
-                            : theme.primary,
-                      }}
+                      style={{ color: theme.text.primary }}
                     >
                       Đánh giá lại
                     </Text>
@@ -339,7 +346,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
                 <>
                   <Text
                     className="font-body text-sm"
-                    style={{ color: theme.textDefault, opacity: 0.7 }}
+                    style={{ color: theme.text.secondary, opacity: 0.7 }}
                   >
                     Nhờ AI đánh giá bài viết của bạn trước khi nộp để nhận góp ý
                     chi tiết.
@@ -352,15 +359,16 @@ export function WritingScreen({ id }: WritingScreenProps) {
                     className="flex-row items-center justify-center gap-2 rounded-xl"
                     style={{
                       height: 48,
-                      borderWidth: 2,
-                      borderColor:
-                        images.length === 0 ? theme.border : theme.primary,
+                      borderWidth: 1,
+                      borderColor: theme.border.default,
                     }}
                   >
                     <Sparkles
                       size={18}
                       color={
-                        images.length === 0 ? theme.textMuted : theme.primary
+                        images.length === 0
+                          ? theme.icon.disabled
+                          : theme.icon.primary
                       }
                       strokeWidth={2}
                     />
@@ -368,7 +376,9 @@ export function WritingScreen({ id }: WritingScreenProps) {
                       className="font-heading text-sm"
                       style={{
                         color:
-                          images.length === 0 ? theme.textMuted : theme.primary,
+                          images.length === 0
+                            ? theme.text.disabled
+                            : theme.text.primary,
                       }}
                     >
                       AI Đánh giá
@@ -377,7 +387,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
                 </>
               ) : (
                 /* Đã có feedback: hiển thị nội dung */
-                <MarkdownText fontSize={14} color={theme.textDefault}>
+                <MarkdownText fontSize={14} color={theme.text.secondary}>
                   {evaluateFeedback}
                 </MarkdownText>
               )}
@@ -397,10 +407,6 @@ export function WritingScreen({ id }: WritingScreenProps) {
               onPress={handleSubmit}
               disabled={images.length === 0 || isSubmitting || isEvaluating}
               loading={isSubmitting}
-              style={{
-                backgroundColor:
-                  images.length === 0 ? theme.border : theme.primary,
-              }}
             />
           </View>
         </>

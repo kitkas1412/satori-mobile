@@ -80,7 +80,6 @@ export default function ProfileTab() {
             icon={<LogOut size={20} color="white" />}
             variant="danger"
             loading={isPending}
-            style={{ backgroundColor: theme.error }}
           />
         </View>
       </View>
