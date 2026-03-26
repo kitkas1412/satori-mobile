@@ -1,3 +1,4 @@
+import { Colors } from "@/constants/theme";
 import React, { useEffect, useRef, useState } from "react";
 import { TextInput, View } from "react-native";
 
@@ -7,6 +8,7 @@ interface OTPInputProps {
   value?: string;
   onChangeText?: (otp: string) => void;
   autoFocus?: boolean;
+  theme: typeof Colors["light"];
 }
 
 export const OTPInput: React.FC<OTPInputProps> = ({
@@ -15,6 +17,7 @@ export const OTPInput: React.FC<OTPInputProps> = ({
   value = "",
   onChangeText,
   autoFocus = false,
+  theme,
 }) => {
   const [otp, setOtp] = useState<string[]>(
     value.split("").concat(Array(length - value.length).fill("")),
@@ -91,13 +94,11 @@ export const OTPInput: React.FC<OTPInputProps> = ({
           return (
             <View
               key={index}
-              className={`w-12 h-14 bg-white border-[1.85px] ${
-                isActive
-                  ? "border-[hsl(228,78%,71%)]"
-                  : hasValue
-                    ? "border-[hsl(228,78%,71%)]"
-                    : "border-[hsl(220,13%,91%)]"
-              } rounded-lg items-center justify-center`}
+              className="w-12 h-14 border-[1.85px] rounded-lg items-center justify-center"
+              style={{
+                backgroundColor: theme.background.surface,
+                borderColor: isActive || hasValue ? theme.border.brand : theme.border.subtle,
+              }}
             >
               <TextInput
                 ref={(ref) => {
@@ -110,7 +111,7 @@ export const OTPInput: React.FC<OTPInputProps> = ({
               />
               {/* Show cursor indicator for active box */}
               {isActive && !hasValue && (
-                <View className="absolute w-[2px] h-6 bg-[hsl(228,78%,71%)]" />
+                <View className="absolute w-[2px] h-6" style={{ backgroundColor: theme.brand.primary }} />
               )}
             </View>
           );

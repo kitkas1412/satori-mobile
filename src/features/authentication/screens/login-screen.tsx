@@ -1,10 +1,12 @@
 import { IconButton, LoadingOverlay, PrimaryButton } from "@/components/ui";
+import { Colors } from "@/constants/theme";
 import { useLoginForm } from "@/features/authentication/hooks";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useRouter } from "expo-router";
+import { ArrowLeft } from "lucide-react-native";
 import React from "react";
 import { KeyboardAvoidingView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ArrowLeft } from "lucide-react-native";
 import {
   EmailInput,
   ForgotPasswordLink,
@@ -14,6 +16,8 @@ import {
 
 export function LoginScreen() {
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme];
   const {
     email,
     password,
@@ -33,12 +37,13 @@ export function LoginScreen() {
     <>
       <KeyboardAvoidingView
         behavior="padding"
-        className="flex-1 bg-background-default"
+        className="flex-1"
+        style={{ backgroundColor: theme.background.page }}
         keyboardVerticalOffset={0}
       >
         <SafeAreaView className="flex-1">
           <View className="flex-col px-4">
-            <IconButton icon={<ArrowLeft size={24} color="hsla(0, 0%, 0%, 0.6)" />} onPress={() => router.back()} />
+            <IconButton icon={<ArrowLeft size={24} color={theme.icon.primary} />} onPress={() => router.back()} />
 
             <View className="mt-8">
               <SectionHeader
