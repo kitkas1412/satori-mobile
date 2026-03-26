@@ -19,18 +19,22 @@ export function ThemeSelector() {
   return (
     <View
       className="mx-4 mb-4 px-6 py-4 rounded-2xl flex-row justify-between items-center"
-      style={{ backgroundColor: theme.cardBackground }}
+      style={{
+        backgroundColor: theme.background.surface,
+        borderColor: theme.border.subtle,
+        borderWidth: 1,
+      }}
     >
       <View>
         <Text
           className="text-sm font-heading mb-1"
-          style={{ color: theme.textMuted }}
+          style={{ color: theme.text.secondary }}
         >
           Giao diện
         </Text>
         <Text
           className="text-base font-body"
-          style={{ color: theme.textDefault }}
+          style={{ color: theme.text.primary }}
         >
           {THEME_LABELS[selectedTheme]}
         </Text>
@@ -43,7 +47,7 @@ export function ThemeSelector() {
       >
         <Text
           className="text-base font-heading"
-          style={{ color: theme.primary }}
+          style={{ color: theme.brand.primary }}
         >
           Thay đổi
         </Text>
