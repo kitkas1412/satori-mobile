@@ -1,3 +1,4 @@
+import { setAudioModeAsync } from "expo-audio";
 import {
   ExpoSpeechRecognitionModule,
   useSpeechRecognitionEvent,
@@ -33,6 +34,7 @@ export function useRecorder() {
       audioUri: audioUriRef.current,
     });
     resolveRef.current = null;
+    setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true });
     isCleaningUpRef.current = false;
   }
 
@@ -109,6 +111,7 @@ export function useRecorder() {
             audioUri: audioUriRef.current,
           });
           resolveRef.current = null;
+          setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true });
           isCleaningUpRef.current = false;
         }
       }, 8000);
