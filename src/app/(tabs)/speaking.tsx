@@ -3,10 +3,10 @@
 // Tự động highlight section đầu tiên còn topic chưa được luyện.
 
 import { Bell } from "lucide-react-native";
-import { useRef, useCallback } from "react";
+import { useRef, useCallback, useState } from "react";
 import { ScrollView, Text, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
 import { LoadingOverlay, ScreenHeader } from "@/components/ui";
@@ -33,7 +33,7 @@ export default function SpeakingScreen() {
   const theme = Colors[colorScheme ?? "light"];
   const { data: sections, isLoading, isError } = useTopics();
 
-  const { firstUnpracticedSectionId, handleHasUnpracticed } =
+  const { firstUnpracticedSectionId, handleHasUnpracticed, reset } =
     useFirstUnpracticedSection();
   const { handleConversationPress } = useConversationNavigation();
 
@@ -41,6 +41,15 @@ export default function SpeakingScreen() {
   const sectionYMap = useRef<Record<string, number>>({});
   const hasScrolledRef = useRef(false);
   const { height: screenHeight } = useWindowDimensions();
+  const [focusTrigger, setFocusTrigger] = useState(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      hasScrolledRef.current = false;
+      reset();
+      setFocusTrigger((prev) => prev + 1);
+    }, [reset]),
+  );
 
   const handleScrollToCard = useCallback(
     (sectionId: string, cardY: number, cardHeight: number) => {
@@ -143,6 +152,7 @@ export default function SpeakingScreen() {
                   onScrollToCard={(cardY, cardHeight) =>
                     handleScrollToCard(section.id, cardY, cardHeight)
                   }
+                  focusTrigger={focusTrigger}
                 />
               </View>
             ))}
