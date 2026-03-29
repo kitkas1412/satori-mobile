@@ -86,6 +86,8 @@ export function useRecorder() {
       lang: "ja-JP",
       interimResults: true,
       continuous: false,
+      addsPunctuation: true,
+      requiresOnDeviceRecognition: true,
       recordingOptions: {
         persist: true,
       },
