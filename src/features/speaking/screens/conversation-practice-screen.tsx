@@ -59,6 +59,9 @@ export function ConversationPracticeScreen({
 
   const messages = useConversationStore((s) => s.messages);
   const feedback = useConversationStore((s) => s.feedback);
+  const hasUserSpoken = useConversationStore((s) =>
+    s.messages.some((m) => m.role === "USER"),
+  );
 
   const {
     turnState,
@@ -188,21 +191,23 @@ export function ConversationPracticeScreen({
           ) : (
             /* Session đang diễn ra — hiển thị nút Kết thúc (trái) và nút Mic (giữa) */
             <View className="flex-row items-center">
-              {/* Kết thúc button - left */}
+              {/* Kết thúc button - left (chỉ hiện sau khi người dùng đã nói và AI đã phản hồi) */}
               <View className="flex-1 justify-center">
-                <TouchableOpacity
-                  onPress={handleCompleteSession}
-                  disabled={isCompleting}
-                  hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-                >
-                  {isCompleting ? (
-                    <ActivityIndicator size="small" color={theme.brand.primary} />
-                  ) : (
-                    <Text className="font-heading text-lg" style={{ color: theme.brand.primary }}>
-                      Kết thúc
-                    </Text>
-                  )}
-                </TouchableOpacity>
+                {hasUserSpoken && turnState === "USER_TURN" && (
+                  <TouchableOpacity
+                    onPress={handleCompleteSession}
+                    disabled={isCompleting}
+                    hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                  >
+                    {isCompleting ? (
+                      <ActivityIndicator size="small" color={theme.brand.primary} />
+                    ) : (
+                      <Text className="font-heading text-lg" style={{ color: theme.brand.primary }}>
+                        Kết thúc
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                )}
               </View>
 
               {/* Mic button - center */}
