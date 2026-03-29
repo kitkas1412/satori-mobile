@@ -1,4 +1,6 @@
 import { BaseInput } from "@/components/ui/base-input";
+import { Colors } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { forwardRef } from "react";
 import { ReturnKeyTypeOptions, TextInput } from "react-native";
@@ -28,6 +30,8 @@ export const EmailInput = forwardRef<TextInput, EmailInputProps>(
     },
     ref,
   ) => {
+    const colorScheme = useColorScheme();
+    const theme = Colors[colorScheme];
     const hasError = Boolean(error || hasLoginError);
     const displayError = error || (hasLoginError ? true : undefined);
 
@@ -43,7 +47,7 @@ export const EmailInput = forwardRef<TextInput, EmailInputProps>(
           <MaterialIcons
             name="mail-outline"
             size={24}
-            color={hasError ? "hsl(0, 84%, 60%)" : "hsla(0, 0%, 0%, 0.6)"}
+            color={hasError ? theme.icon.error : theme.icon.primary}
           />
         }
         keyboardType="email-address"

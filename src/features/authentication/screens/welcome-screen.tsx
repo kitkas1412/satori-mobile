@@ -8,17 +8,21 @@ import {
   Text,
   TouchableOpacity,
   View,
+  useColorScheme,
 } from "react-native";
+import { Colors } from "@/constants/theme";
 
 export function WelcomeScreen() {
   const router = useRouter();
+  const scheme = useColorScheme() ?? "light";
+  const theme = Colors[scheme];
 
   const handleContinue = () => {
     router.push("/(auth)/login");
   };
 
   return (
-    <View className="flex-1 bg-[hsl(220,20%,97%)]">
+    <View className="flex-1" style={{ backgroundColor: theme.background.page }}>
       <StatusBar barStyle="dark-content" />
 
       <View className="w-full h-[452px]">
@@ -29,14 +33,15 @@ export function WelcomeScreen() {
         />
       </View>
 
-      <Text className="text-center text-black font-bold text-2xl mt-[120px]">
+      <Text className="text-center font-bold text-2xl mt-[120px]" style={{ color: theme.text.primary }}>
         Đăng nhập để bắt đầu
       </Text>
 
       <View className="items-center mt-[54px]">
         <TouchableOpacity
           onPress={handleContinue}
-          className="bg-primary-default rounded-full w-[100px] h-[100px] items-center justify-center"
+          className="rounded-full w-[100px] h-[100px] items-center justify-center"
+          style={{ backgroundColor: theme.brand.primary }}
         >
           <ArrowRight size={44} color="white" strokeWidth={2} />
         </TouchableOpacity>
@@ -44,7 +49,7 @@ export function WelcomeScreen() {
 
       {Platform.OS === "ios" && (
         <View className="absolute bottom-2 left-0 right-0 items-center">
-          <View className="w-[134px] h-[5px] bg-[hsl(0,0%,46%)] rounded-full" />
+          <View className="w-[134px] h-[5px] rounded-full" style={{ backgroundColor: theme.text.primary }} />
         </View>
       )}
     </View>

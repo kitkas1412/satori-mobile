@@ -1,3 +1,5 @@
+import { Colors } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import React, { forwardRef, ReactNode } from "react";
 import {
   KeyboardTypeOptions,
@@ -53,19 +55,22 @@ export const BaseInput = forwardRef<TextInput, BaseInputProps>(
     },
     ref,
   ) => {
+    const colorScheme = useColorScheme();
+    const theme = Colors[colorScheme];
     const hasError = Boolean(error);
     const errorMessage = typeof error === "string" ? error : undefined;
 
     return (
       <>
         {label && (
-          <Text className="mt-6 font-heading text-lg text-black">{label}</Text>
+          <Text className="mt-6 font-heading text-lg" style={{ color: theme.text.primary }}>{label}</Text>
         )}
 
         <TouchableOpacity
           activeOpacity={1}
           onPress={() => (ref as any)?.current?.focus()}
-          className={`${label ? "mt-2" : "mt-5"} rounded-[8px] border ${hasError ? "border-error-default" : "border-[hsla(0,0%,0%,0.38)]"} px-[14px] py-[16.5px] flex-row items-center gap-[16px] bg-white ${containerClassName}`}
+          className={`${label ? "mt-2" : "mt-5"} rounded-[8px] border px-[14px] py-[16.5px] flex-row items-center gap-[16px] ${containerClassName}`}
+          style={{ borderColor: hasError ? theme.border.error : theme.border.default, backgroundColor: theme.background.surface }}
           hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
         >
           {leftIcon && <View className="flex-shrink-0">{leftIcon}</View>}
@@ -76,8 +81,9 @@ export const BaseInput = forwardRef<TextInput, BaseInputProps>(
             onChangeText={onChangeText}
             onBlur={onBlur}
             placeholder={placeholder}
-            placeholderTextColor="hsla(0, 0%, 0%, 0.6)"
-            className={`flex-1 font-body text-base text-typography-black ${inputClassName}`}
+            placeholderTextColor={theme.text.tertiary}
+            className={`flex-1 font-body text-base ${inputClassName}`}
+            style={{ color: theme.text.primary }}
             secureTextEntry={secureTextEntry}
             keyboardType={keyboardType}
             autoCapitalize={autoCapitalize}

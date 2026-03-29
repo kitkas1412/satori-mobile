@@ -7,6 +7,7 @@
 //   initSession / initFreeTalkSession → sendMessage (nhiều lần) → completeSession
 //   hoặc abandonSession (bỏ dở bất kỳ lúc nào)
 
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import { Alert } from "react-native";
@@ -20,6 +21,7 @@ import {
 import { useConversationStore } from "@/stores";
 import type { TurnState } from "../api";
 import { playAssistantMessage } from "./use-audio-player";
+import { speakingQueryKeys } from "./use-topics";
 
 /** Hàm tiện ích tạo độ trễ (ms) để phát tin nhắn AI tuần tự, không bị đổ xuất hiện cùng lúc */
 const delay = (ms: number) =>
@@ -27,6 +29,7 @@ const delay = (ms: number) =>
 
 export function useConversationSession() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [turnState, setTurnState] = useState<TurnState>("AI_TURN");
   const [isInitializing, setIsInitializing] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
@@ -184,6 +187,8 @@ export function useConversationSession() {
     try {
       const feedback = await completeSessionApi(sessionId);
       setFeedback(feedback);
+      queryClient.invalidateQueries({ queryKey: ["speaking", "conversations"] });
+      queryClient.invalidateQueries({ queryKey: speakingQueryKeys.topics });
     } catch {
       Alert.alert("Lỗi", "Không thể hoàn thành buổi học. Vui lòng thử lại.");
     } finally {

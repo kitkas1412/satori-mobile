@@ -1,15 +1,12 @@
 import { IconButton, PrimaryButton } from "@/components/ui";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
+import { Colors } from "@/constants/theme";
 import { useChangePasswordForm } from "@/features/authentication/hooks";
 import { getPasswordValidationStatus } from "@/features/authentication/utils/password-validation";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useRouter } from "expo-router";
 import React from "react";
-import {
-  KeyboardAvoidingView,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
+import { KeyboardAvoidingView, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ArrowLeft } from "lucide-react-native";
 import { PasswordInput, PasswordValidation } from "../components";
@@ -17,6 +14,8 @@ import { PasswordInput, PasswordValidation } from "../components";
 export function ChangePasswordScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme];
   const {
     currentPassword,
     newPassword,
@@ -37,7 +36,8 @@ export function ChangePasswordScreen() {
   return (
     <KeyboardAvoidingView
       behavior="padding"
-      className="flex-1 bg-background-default"
+      className="flex-1"
+      style={{ backgroundColor: theme.background.page }}
       keyboardVerticalOffset={0}
     >
       <ScrollView
@@ -46,7 +46,10 @@ export function ChangePasswordScreen() {
         keyboardShouldPersistTaps="always"
       >
         <View className="flex-col px-4 pb-4" style={{ paddingTop: insets.top }}>
-          <IconButton icon={<ArrowLeft size={24} color="hsla(0, 0%, 0%, 0.6)" />} onPress={() => router.back()} />
+          <IconButton
+            icon={<ArrowLeft size={24} color={theme.icon.primary} />}
+            onPress={() => router.back()}
+          />
 
           <PasswordInput
             value={currentPassword}
