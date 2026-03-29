@@ -80,12 +80,14 @@ export function TopicSection({
     }
   }, [hasUnpracticed, section.id, section.orderIndex, onHasUnpracticed, focusTrigger]);
 
-  // Tự động expand nếu đây là section chứa card cần scroll đến
+  // Tự động expand nếu đây là section chứa card cần scroll đến.
+  // Không đưa isExpanded vào deps để user vẫn có thể tự collapse sau khi auto-expand.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (isTargetSection && hasUnpracticed && !isExpanded) {
       setIsExpanded(true);
     }
-  }, [isTargetSection, hasUnpracticed, isExpanded]);
+  }, [isTargetSection, hasUnpracticed]);
 
   // Scroll đến card đầu tiên chưa practiced khi section này trở thành target.
   // Dùng stored positions thay vì onLayout để hoạt động cả khi cards đã mounted rồi.
