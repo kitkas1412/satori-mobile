@@ -65,7 +65,7 @@ export default function PracticeTab() {
       >
         {/* Tiêu đề màn hình */}
         <ScreenHeader
-          title="Ôn tập"
+          title="Luyện tập"
           rightAction={bellAction}
           paddingTop={insets.top + 16}
         />
@@ -106,7 +106,7 @@ export default function PracticeTab() {
                     : theme.text.primary,
               }}
             >
-              Bài tập GV
+              Bài tập
             </Text>
           </Pressable>
           <Pressable
@@ -132,7 +132,7 @@ export default function PracticeTab() {
                   activeTab === "ai" ? theme.icon.onBrand : theme.icon.primary,
               }}
             >
-              Ôn luyện AI
+              Luyện tập AI
             </Text>
           </Pressable>
         </View>

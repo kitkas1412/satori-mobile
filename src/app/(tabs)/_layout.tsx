@@ -42,7 +42,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="practice"
         options={{
-          title: "Ôn tập",
+          title: "Luyện tập",
           tabBarIcon: ({ color, focused }) => (
             <Dumbbell size={24} color={color} />
           ),
