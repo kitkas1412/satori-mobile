@@ -1,5 +1,5 @@
 import { AlignJustify, Send } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   FlatList,
   Keyboard,
@@ -12,7 +12,9 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "@/constants/theme";
+import { useProfile } from "@/hooks/api/use-profile";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useCreateChatSession, useSendMessage } from "@/features/chatbot/hooks";
 import { ChatbotMessageBubble } from "./chatbot-message-bubble";
 
 interface Message {
@@ -22,38 +24,7 @@ interface Message {
   role: "ai" | "user";
 }
 
-const PLACEHOLDER_MESSAGES: Message[] = [
-  {
-    id: "1",
-    text: "Xin chào! Tôi là trợ lý AI của bạn. Tôi có thể giúp bạn học tiếng Nhật, trả lời câu hỏi hoặc trò chuyện với bạn. Bạn cần giúp gì không?",
-    timestamp: "12:58",
-    role: "ai",
-  },
-  {
-    id: "2",
-    text: "Thuyết với Đức ai đẹp trai hơn???",
-    timestamp: "13:09",
-    role: "user",
-  },
-  {
-    id: "3",
-    text: "Tôi hiểu rồi! Bạn muốn biết thêm về chủ đề này à? Tôi có thể giúp bạn giải thích chi tiết hơn.",
-    timestamp: "13:09",
-    role: "ai",
-  },
-  {
-    id: "4",
-    text: "Yes",
-    timestamp: "13:09",
-    role: "user",
-  },
-  {
-    id: "5",
-    text: "Có vẻ như bạn đang gặp khó khăn. Đừng lo, chúng ta sẽ cùng nhau giải quyết!",
-    timestamp: "13:09",
-    role: "ai",
-  },
-];
+const LOADING_BUBBLE_ID = "__loading__";
 
 interface ChatbotPanelProps {
   onClose: () => void;
@@ -61,12 +32,36 @@ interface ChatbotPanelProps {
   keyboardOffset?: number;
 }
 
-export function ChatbotPanel({ onClose, onOpenHistory, keyboardOffset }: ChatbotPanelProps) {
+export function ChatbotPanel({
+  onClose,
+  onOpenHistory,
+  keyboardOffset,
+}: ChatbotPanelProps) {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
   const [message, setMessage] = useState("");
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isAiLoading, setIsAiLoading] = useState(false);
+  const listRef = useRef<FlatList<Message>>(null);
+
+  const { data: profile } = useProfile();
+  const { mutate: createSession } = useCreateChatSession();
+  const { mutateAsync: sendMessage } = useSendMessage();
+
+  useEffect(() => {
+    const courseId = profile?.enrolledClasses[0]?.courseId;
+    const jlptLevel = profile?.learningPreferences?.targetJlptLevel;
+    if (courseId && jlptLevel) {
+      createSession(
+        { courseId, jlptLevel },
+        { onSuccess: (data) => setSessionId(data.sessionId) },
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const show = Keyboard.addListener("keyboardDidShow", () =>
@@ -80,6 +75,50 @@ export function ChatbotPanel({ onClose, onOpenHistory, keyboardOffset }: Chatbot
       hide.remove();
     };
   }, []);
+
+  function formatTimestamp(isoString: string): string {
+    const date = new Date(isoString);
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  }
+
+  async function handleSend() {
+    const text = message.trim();
+    if (!text || !sessionId || isAiLoading) return;
+
+    setMessage("");
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: Date.now().toString(),
+        text,
+        timestamp: formatTimestamp(new Date().toISOString()),
+        role: "user",
+      },
+    ]);
+    setIsAiLoading(true);
+
+    try {
+      const data = await sendMessage({ sessionId, message: text });
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: data.messageId,
+          text: data.content,
+          timestamp: formatTimestamp(data.timestamp),
+          role: "ai",
+        },
+      ]);
+    } finally {
+      setIsAiLoading(false);
+    }
+  }
+
+  const displayMessages: Message[] = isAiLoading
+    ? [
+        ...messages,
+        { id: LOADING_BUBBLE_ID, text: "...", timestamp: "", role: "ai" },
+      ]
+    : messages;
 
   return (
     <KeyboardAvoidingView
@@ -108,11 +147,15 @@ export function ChatbotPanel({ onClose, onOpenHistory, keyboardOffset }: Chatbot
 
       {/* Message list */}
       <FlatList
-        data={PLACEHOLDER_MESSAGES}
+        ref={listRef}
+        data={displayMessages}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ padding: 16, gap: 12 }}
         showsVerticalScrollIndicator={false}
         style={{ flex: 1 }}
+        onContentSizeChange={() =>
+          listRef.current?.scrollToEnd({ animated: true })
+        }
         renderItem={({ item }) => (
           <ChatbotMessageBubble
             text={item.text}
@@ -149,13 +192,19 @@ export function ChatbotPanel({ onClose, onOpenHistory, keyboardOffset }: Chatbot
             className="font-body text-sm"
             style={{ color: theme.text.primary }}
             returnKeyType="send"
-            onSubmitEditing={() => setMessage("")}
+            onSubmitEditing={handleSend}
+            editable={!isAiLoading}
           />
         </View>
         <Pressable
-          onPress={() => setMessage("")}
+          onPress={handleSend}
+          disabled={isAiLoading}
           className="w-11 h-11 rounded-full items-center justify-center"
-          style={{ backgroundColor: theme.brand.primary }}
+          style={{
+            backgroundColor: isAiLoading
+              ? theme.brand.primary
+              : theme.brand.primary,
+          }}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
           <Send size={18} color={theme.icon.onBrand} />
