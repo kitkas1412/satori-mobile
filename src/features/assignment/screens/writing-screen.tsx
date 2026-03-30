@@ -18,6 +18,7 @@ import { StatusBar } from "expo-status-bar";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import {
+  ImageViewerModal,
   LoadingOverlay,
   MarkdownText,
   PrimaryButton,
@@ -63,6 +64,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
   const { handleExit } = useExitAssignment(() => router.back());
 
   const [evaluateFeedback, setEvaluateFeedback] = useState("");
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
   const { handleEvaluate, isPending: isEvaluating } = useWritingEvaluate({
     assignmentId: id,
@@ -91,6 +93,13 @@ export function WritingScreen({ id }: WritingScreenProps) {
           </Pressable>
         }
         rightAction={<View style={{ width: 24 }} />}
+      />
+
+      <ImageViewerModal
+        visible={previewIndex !== null}
+        images={images.map((img) => img.uri)}
+        initialIndex={previewIndex ?? 0}
+        onClose={() => setPreviewIndex(null)}
       />
 
       <ScreenAsyncView
@@ -190,7 +199,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
                 >
                   <ImageIcon
                     size={20}
-                    color={theme.brand.onPrimary}
+                    color={theme.icon.onBrand}
                     strokeWidth={2}
                   />
                   <Text
@@ -261,10 +270,12 @@ export function WritingScreen({ id }: WritingScreenProps) {
                   <View className="flex-row gap-2">
                     {images.map((img, index) => (
                       <View key={index} style={{ position: "relative" }}>
-                        <Image
-                          source={{ uri: img.uri }}
-                          style={{ width: 100, height: 100, borderRadius: 8 }}
-                        />
+                        <Pressable onPress={() => setPreviewIndex(index)}>
+                          <Image
+                            source={{ uri: img.uri }}
+                            style={{ width: 100, height: 100, borderRadius: 8 }}
+                          />
+                        </Pressable>
                         {/* Nút X để xóa ảnh khỏi danh sách */}
                         <Pressable
                           onPress={() => handleRemoveImage(index)}
