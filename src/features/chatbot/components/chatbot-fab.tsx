@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useState } from "react";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { ChatHistoryDrawer } from "./chatbot-history-drawer";
 import { ChatbotPanel } from "./chatbot-panel";
 
 const FAB_SIZE = 56;
@@ -31,6 +32,7 @@ export function ChatbotFab() {
 
   const progress = useSharedValue(0);
   const [panelVisible, setPanelVisible] = useState(false);
+  const [historyVisible, setHistoryVisible] = useState(false);
 
   const handleOpen = () => {
     setPanelVisible(true);
@@ -144,7 +146,11 @@ export function ChatbotFab() {
             panelAnimatedStyle,
           ]}
         >
-          <ChatbotPanel onClose={handleClose} keyboardOffset={OPEN_Y + FAB_SIZE + 8} />
+          <ChatbotPanel
+            onClose={handleClose}
+            onOpenHistory={() => setHistoryVisible(true)}
+            keyboardOffset={OPEN_Y + FAB_SIZE + 8}
+          />
         </Animated.View>
 
         {/* FAB bên trong modal */}
@@ -153,6 +159,13 @@ export function ChatbotFab() {
             <MessageCircle size={24} color={theme.icon.onBrand} />
           </Pressable>
         </Animated.View>
+
+        {/* History drawer */}
+        <ChatHistoryDrawer
+          visible={historyVisible}
+          onClose={() => setHistoryVisible(false)}
+          topOffset={OPEN_Y + FAB_SIZE + 8}
+        />
       </Modal>
     </>
   );

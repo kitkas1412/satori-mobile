@@ -57,10 +57,11 @@ const PLACEHOLDER_MESSAGES: Message[] = [
 
 interface ChatbotPanelProps {
   onClose: () => void;
+  onOpenHistory: () => void;
   keyboardOffset?: number;
 }
 
-export function ChatbotPanel({ onClose, keyboardOffset }: ChatbotPanelProps) {
+export function ChatbotPanel({ onClose, onOpenHistory, keyboardOffset }: ChatbotPanelProps) {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
@@ -92,7 +93,7 @@ export function ChatbotPanel({ onClose, keyboardOffset }: ChatbotPanelProps) {
         style={{ borderBottomWidth: 1, borderBottomColor: theme.border.subtle }}
       >
         <Pressable
-          onPress={onClose}
+          onPress={onOpenHistory}
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
         >
           <AlignJustify size={24} color={theme.icon.primary} />
