@@ -24,7 +24,10 @@ import { useColorScheme as useNativeWindColorScheme } from "nativewind";
 
 import { QueryProvider } from "@/components/providers/query-provider";
 import { useTokenValidation } from "@/features/authentication/hooks";
+import { abandonSessionApi } from "@/features/speaking/api";
+import { ACTIVE_SESSION_STORAGE_KEY } from "@/features/speaking/hooks";
 import { useAuthStore } from "@/stores/auth-store";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import "../../global.css";
 
 // Keep splash screen visible while fonts load
@@ -67,6 +70,26 @@ function RootLayoutNav() {
       router.replace("/(tabs)");
     }
   }, [isAuthenticated, isHydrated, isValidating, segments]);
+
+  // Dọn dẹp session tồn đọng sau khi app bị force-quit giữa chừng.
+  // Chạy sau khi token đã sẵn sàng để đảm bảo API call thành công.
+  useEffect(() => {
+    if (!isHydrated || !isAuthenticated) return;
+
+    const cleanupOrphanedSession = async () => {
+      const orphanedSessionId = await AsyncStorage.getItem(ACTIVE_SESSION_STORAGE_KEY);
+      if (!orphanedSessionId) return;
+      try {
+        await abandonSessionApi(orphanedSessionId);
+      } catch {
+        // best-effort
+      } finally {
+        await AsyncStorage.removeItem(ACTIVE_SESSION_STORAGE_KEY);
+      }
+    };
+
+    cleanupOrphanedSession();
+  }, [isHydrated, isAuthenticated]);
 
   return (
     <Stack>
