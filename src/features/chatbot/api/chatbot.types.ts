@@ -23,6 +23,26 @@ export interface ChatSessionResponse {
   lastMessageAt: string | null;
 }
 
+// GET: /learner/curriculum-chat/sessions
+/** Danh sách phiên chat trả về dạng phân trang */
+export interface ChatSessionListResponse {
+  content: ChatSessionResponse[];
+  totalElements: number;
+  totalPages: number;
+  last: boolean;
+  first: boolean;
+  empty: boolean;
+}
+
+// GET: /learner/curriculum-chat/sessions/{sessionId}/messages
+/** Một tin nhắn trong lịch sử phiên chat */
+export interface ChatSessionMessage {
+  messageId: string;
+  role: "USER" | "ASSISTANT";
+  content: string;
+  createdAt: string;
+}
+
 // POST: /learner/curriculum-chat/sessions/{sessionId}/messages
 /** Tham số gửi tin nhắn trong phiên chat */
 export interface SendMessageRequest {

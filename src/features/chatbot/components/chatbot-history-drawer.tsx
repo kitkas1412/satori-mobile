@@ -1,6 +1,6 @@
 import { ChevronLeft, Clock, Plus } from "lucide-react-native";
 import { useEffect } from "react";
-import { FlatList, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, Pressable, Text, View } from "react-native";
 import Animated, {
   Easing,
   interpolate,
@@ -10,60 +10,29 @@ import Animated, {
 } from "react-native-reanimated";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useChatSessions } from "@/features/chatbot/hooks";
 
 const DRAWER_WIDTH = 293;
 const TIMING_CONFIG = { duration: 280, easing: Easing.out(Easing.cubic) };
 
-interface ConversationItem {
-  id: string;
-  title: string;
-  preview: string;
-  date: string;
-}
-
-const PLACEHOLDER_CONVERSATIONS: ConversationItem[] = [
-  {
-    id: "1",
-    title: "Học từ vựng Unit 5",
-    preview: "Bạn có thể giải thích nghĩa của...",
-    date: "Hôm nay",
-  },
-  {
-    id: "2",
-    title: "Luyện ngữ pháp N3",
-    preview: "て form được dùng khi nào?",
-    date: "Hôm nay",
-  },
-  {
-    id: "3",
-    title: "Hội thoại mua sắm",
-    preview: "Cách nói giá tiền trong tiếng Nhật",
-    date: "Hôm nay",
-  },
-  {
-    id: "4",
-    title: "Kanji thường gặp",
-    preview: "Ý nghĩa của kanji 大 là gì?",
-    date: "Hôm nay",
-  },
-  {
-    id: "5",
-    title: "Luyện nghe JLPT",
-    preview: "Bài nghe N4 phần 3 mục 2...",
-    date: "Hôm nay",
-  },
-];
-
 interface ChatHistoryDrawerProps {
   visible: boolean;
   onClose: () => void;
+  onSelectSession: (sessionId: string) => void;
   topOffset?: number;
 }
 
-export function ChatHistoryDrawer({ visible, onClose, topOffset = 0 }: ChatHistoryDrawerProps) {
+function formatDate(isoString: string): string {
+  const date = new Date(isoString);
+  return date.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" });
+}
+
+export function ChatHistoryDrawer({ visible, onClose, onSelectSession, topOffset = 0 }: ChatHistoryDrawerProps) {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const progress = useSharedValue(0);
+
+  const { data, isLoading } = useChatSessions(visible);
 
   useEffect(() => {
     progress.value = withTiming(visible ? 1 : 0, TIMING_CONFIG);
@@ -82,7 +51,6 @@ export function ChatHistoryDrawer({ visible, onClose, topOffset = 0 }: ChatHisto
       pointerEvents={visible ? "box-none" : "none"}
       style={{ position: "absolute", top: topOffset, left: 0, right: 0, bottom: 0 }}
     >
-
       {/* Drawer panel */}
       <Animated.View
         style={[
@@ -166,50 +134,72 @@ export function ChatHistoryDrawer({ visible, onClose, topOffset = 0 }: ChatHisto
           Gần đây
         </Text>
 
+        {/* Loading state */}
+        {isLoading && (
+          <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+            <ActivityIndicator color={theme.brand.primary} />
+          </View>
+        )}
+
         {/* Conversation list */}
-        <FlatList
-          data={PLACEHOLDER_CONVERSATIONS}
-          keyExtractor={(item) => item.id}
-          showsVerticalScrollIndicator={false}
-          renderItem={({ item }) => (
-            <Pressable
-              style={{
-                flexDirection: "row",
-                gap: 12,
-                paddingHorizontal: 12,
-                paddingTop: 12,
-                paddingBottom: 12,
-                borderRadius: 14,
-              }}
-            >
-              <View style={{ paddingTop: 4 }}>
-                <Clock size={12} color={theme.icon.secondary} />
-              </View>
-              <View style={{ flex: 1, gap: 3 }}>
-                <Text
-                  className="font-heading text-sm"
-                  style={{ color: theme.text.primary }}
-                  numberOfLines={1}
-                >
-                  {item.title}
-                </Text>
-                <Text
-                  className="font-body text-xs"
-                  style={{ color: theme.text.secondary }}
-                  numberOfLines={1}
-                >
-                  {item.preview}
-                </Text>
-                <Text
-                  className="font-body"
-                  style={{ color: theme.info.default, fontSize: 10 }}
-                >
-                  {item.date}
-                </Text>
-              </View>
-            </Pressable>
-          )}
-        />
+        {!isLoading && (
+          <FlatList
+            data={data?.content ?? []}
+            keyExtractor={(item) => item.sessionId}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              <Text
+                className="font-body text-sm"
+                style={{
+                  color: theme.text.tertiary,
+                  textAlign: "center",
+                  paddingTop: 24,
+                }}
+              >
+                Chưa có cuộc trò chuyện nào
+              </Text>
+            }
+            renderItem={({ item }) => (
+              <Pressable
+                onPress={() => onSelectSession(item.sessionId)}
+                style={{
+                  flexDirection: "row",
+                  gap: 12,
+                  paddingHorizontal: 12,
+                  paddingTop: 12,
+                  paddingBottom: 12,
+                  borderRadius: 14,
+                }}
+              >
+                <View style={{ paddingTop: 4 }}>
+                  <Clock size={12} color={theme.icon.secondary} />
+                </View>
+                <View style={{ flex: 1, gap: 3 }}>
+                  <Text
+                    className="font-heading text-sm"
+                    style={{ color: theme.text.primary }}
+                    numberOfLines={1}
+                  >
+                    {`Phiên chat ${item.jlptLevel}`}
+                  </Text>
+                  <Text
+                    className="font-body text-xs"
+                    style={{ color: theme.text.secondary }}
+                    numberOfLines={1}
+                  >
+                    {`${item.messageCount} tin nhắn`}
+                  </Text>
+                  <Text
+                    className="font-body"
+                    style={{ color: theme.info.default, fontSize: 10 }}
+                  >
+                    {formatDate(item.lastMessageAt ?? item.createdAt)}
+                  </Text>
+                </View>
+              </Pressable>
+            )}
+          />
+        )}
       </Animated.View>
     </View>
   );

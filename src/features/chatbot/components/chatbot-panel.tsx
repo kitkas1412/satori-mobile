@@ -26,15 +26,22 @@ interface Message {
 
 const LOADING_BUBBLE_ID = "__loading__";
 
+interface LoadedSession {
+  sessionId: string;
+  messages: Message[];
+}
+
 interface ChatbotPanelProps {
   onClose: () => void;
   onOpenHistory: () => void;
+  loadedSession?: LoadedSession;
   keyboardOffset?: number;
 }
 
 export function ChatbotPanel({
   onClose,
   onOpenHistory,
+  loadedSession,
   keyboardOffset,
 }: ChatbotPanelProps) {
   const colorScheme = useColorScheme();
@@ -52,6 +59,7 @@ export function ChatbotPanel({
   const { mutateAsync: sendMessage } = useSendMessage();
 
   useEffect(() => {
+    if (loadedSession) return;
     const courseId = profile?.enrolledClasses[0]?.courseId;
     const jlptLevel = profile?.learningPreferences?.targetJlptLevel;
     if (courseId && jlptLevel) {
@@ -62,6 +70,12 @@ export function ChatbotPanel({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!loadedSession) return;
+    setSessionId(loadedSession.sessionId);
+    setMessages(loadedSession.messages);
+  }, [loadedSession]);
 
   useEffect(() => {
     const show = Keyboard.addListener("keyboardDidShow", () =>

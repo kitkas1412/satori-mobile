@@ -13,8 +13,19 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useState } from "react";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { getSessionMessagesApi, reopenChatSessionApi } from "@/features/chatbot/api";
 import { ChatHistoryDrawer } from "./chatbot-history-drawer";
 import { ChatbotPanel } from "./chatbot-panel";
+
+interface LoadedSession {
+  sessionId: string;
+  messages: { id: string; text: string; timestamp: string; role: "ai" | "user" }[];
+}
+
+function formatTimestamp(isoString: string): string {
+  const date = new Date(isoString);
+  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
 
 const FAB_SIZE = 56;
 const FAB_RIGHT = 16;
@@ -33,10 +44,28 @@ export function ChatbotFab() {
   const progress = useSharedValue(0);
   const [panelVisible, setPanelVisible] = useState(false);
   const [historyVisible, setHistoryVisible] = useState(false);
+  const [loadedSession, setLoadedSession] = useState<LoadedSession | undefined>();
 
   const handleOpen = () => {
     setPanelVisible(true);
     progress.value = withTiming(1, TIMING_CONFIG);
+  };
+
+  const handleSelectSession = async (sessionId: string) => {
+    setHistoryVisible(false);
+    const [, apiMessages] = await Promise.all([
+      reopenChatSessionApi(sessionId),
+      getSessionMessagesApi(sessionId),
+    ]);
+    setLoadedSession({
+      sessionId,
+      messages: apiMessages.map((m) => ({
+        id: m.messageId,
+        text: m.content,
+        timestamp: formatTimestamp(m.createdAt),
+        role: m.role === "USER" ? "user" : "ai",
+      })),
+    });
   };
 
   const handleClose = () => {
@@ -149,6 +178,7 @@ export function ChatbotFab() {
           <ChatbotPanel
             onClose={handleClose}
             onOpenHistory={() => setHistoryVisible(true)}
+            loadedSession={loadedSession}
             keyboardOffset={OPEN_Y + FAB_SIZE + 8}
           />
         </Animated.View>
@@ -164,6 +194,7 @@ export function ChatbotFab() {
         <ChatHistoryDrawer
           visible={historyVisible}
           onClose={() => setHistoryVisible(false)}
+          onSelectSession={handleSelectSession}
           topOffset={OPEN_Y + FAB_SIZE + 8}
         />
       </Modal>
