@@ -51,6 +51,14 @@ export function ChatHistoryDrawer({ visible, onClose, onSelectSession, topOffset
       pointerEvents={visible ? "box-none" : "none"}
       style={{ position: "absolute", top: topOffset, left: 0, right: 0, bottom: 0 }}
     >
+      {/* Backdrop - close drawer when tapped outside */}
+      {visible && (
+        <Pressable
+          style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
+          onPress={onClose}
+        />
+      )}
+
       {/* Drawer panel */}
       <Animated.View
         style={[
@@ -180,7 +188,7 @@ export function ChatHistoryDrawer({ visible, onClose, onSelectSession, topOffset
                     style={{ color: theme.text.primary }}
                     numberOfLines={1}
                   >
-                    {`Phiên chat ${item.jlptLevel}`}
+                    {item.title}
                   </Text>
                   <Text
                     className="font-body text-xs"

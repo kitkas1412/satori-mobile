@@ -55,21 +55,8 @@ export function ChatbotPanel({
   const listRef = useRef<FlatList<Message>>(null);
 
   const { data: profile } = useProfile();
-  const { mutate: createSession } = useCreateChatSession();
+  const { mutateAsync: createSession } = useCreateChatSession();
   const { mutateAsync: sendMessage } = useSendMessage();
-
-  useEffect(() => {
-    if (loadedSession) return;
-    const courseId = profile?.enrolledClasses[0]?.courseId;
-    const jlptLevel = profile?.learningPreferences?.targetJlptLevel;
-    if (courseId && jlptLevel) {
-      createSession(
-        { courseId, jlptLevel },
-        { onSuccess: (data) => setSessionId(data.sessionId) },
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useEffect(() => {
     if (!loadedSession) return;
@@ -97,7 +84,18 @@ export function ChatbotPanel({
 
   async function handleSend() {
     const text = message.trim();
-    if (!text || !sessionId || isAiLoading) return;
+    if (!text || isAiLoading) return;
+
+    let activeSessionId = sessionId;
+
+    if (!activeSessionId) {
+      const courseId = profile?.enrolledClasses[0]?.courseId;
+      const jlptLevel = profile?.learningPreferences?.targetJlptLevel;
+      if (!courseId || !jlptLevel) return;
+      const session = await createSession({ courseId, jlptLevel });
+      activeSessionId = session.sessionId;
+      setSessionId(activeSessionId);
+    }
 
     setMessage("");
     setMessages((prev) => [
@@ -112,7 +110,7 @@ export function ChatbotPanel({
     setIsAiLoading(true);
 
     try {
-      const data = await sendMessage({ sessionId, message: text });
+      const data = await sendMessage({ sessionId: activeSessionId, message: text });
       setMessages((prev) => [
         ...prev,
         {

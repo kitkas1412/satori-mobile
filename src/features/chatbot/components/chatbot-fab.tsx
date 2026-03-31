@@ -158,6 +158,18 @@ export function ChatbotFab() {
           pointerEvents="none"
         />
 
+        {/* Tap-to-close area above the panel */}
+        <Pressable
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: OPEN_Y + FAB_SIZE + 8,
+          }}
+          onPress={handleClose}
+        />
+
         {/* Chat panel */}
         <Animated.View
           style={[
