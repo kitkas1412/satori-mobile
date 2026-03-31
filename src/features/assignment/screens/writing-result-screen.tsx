@@ -4,13 +4,19 @@
 // - Đã chấm (GRADED): điểm số, nhận xét giáo viên + ảnh bài làm
 
 import { CheckCircle2, ChevronLeft, Clock, X } from "lucide-react-native";
+import { useState } from "react";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { LoadingOverlay, PrimaryButton, ScreenHeader } from "@/components/ui";
+import {
+  ImageViewerModal,
+  LoadingOverlay,
+  PrimaryButton,
+  ScreenHeader,
+} from "@/components/ui";
 import { useWritingResult } from "../hooks";
 import { StatusBanner } from "../components";
 
@@ -28,6 +34,8 @@ export function WritingResultScreen() {
     handleGoHome,
     handleCancelSubmission,
   } = useWritingResult();
+
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
   return (
     <View
@@ -47,6 +55,13 @@ export function WritingResultScreen() {
           </Pressable>
         }
         rightAction={<View style={{ width: 24 }} />}
+      />
+
+      <ImageViewerModal
+        visible={previewIndex !== null}
+        images={imageUrls}
+        initialIndex={previewIndex ?? 0}
+        onClose={() => setPreviewIndex(null)}
       />
 
       <ScrollView
@@ -208,17 +223,19 @@ export function WritingResultScreen() {
               <View className="flex-row gap-3">
                 {imageUrls.map((url, index) => (
                   <View key={index}>
-                    <Image
-                      source={{ uri: url }}
-                      style={{
-                        width: 103,
-                        height: 103,
-                        borderRadius: 10,
-                        borderWidth: 1,
-                        borderColor: theme.border.subtle,
-                      }}
-                      resizeMode="cover"
-                    />
+                    <Pressable onPress={() => setPreviewIndex(index)}>
+                      <Image
+                        source={{ uri: url }}
+                        style={{
+                          width: 103,
+                          height: 103,
+                          borderRadius: 10,
+                          borderWidth: 1,
+                          borderColor: theme.border.subtle,
+                        }}
+                        resizeMode="cover"
+                      />
+                    </Pressable>
                     {/* Số thứ tự ảnh */}
                     <View
                       style={{

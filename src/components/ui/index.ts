@@ -1,3 +1,4 @@
+export { Backdrop } from "./backdrop";
 export { BaseInput } from "./base-input";
 export { IconButton } from "./icon-button";
 export { MarkdownText } from "./markdown-text";
@@ -10,3 +11,4 @@ export { ScoreCircle } from "./score-circle";
 export { ScoreRing } from "./score-ring";
 export { TextLink } from "./text-link";
 export { ScreenAsyncView } from "./screen-async-view";
+export { ImageViewerModal } from "./image-viewer-modal";
