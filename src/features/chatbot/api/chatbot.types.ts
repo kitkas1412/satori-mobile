@@ -14,6 +14,7 @@ export type ChatSessionStatus = "ACTIVE" | "COMPLETED" | "ABANDONED";
 /** Dữ liệu phiên chat trả về khi khởi tạo thành công */
 export interface ChatSessionResponse {
   sessionId: string;
+  title: string;
   status: ChatSessionStatus;
   courseId: string;
   lessonId: string | null;
@@ -24,13 +25,36 @@ export interface ChatSessionResponse {
 }
 
 // GET: /learner/curriculum-chat/sessions
+/** Thông tin phân trang */
+export interface Pageable {
+  pageNumber: number;
+  pageSize: number;
+  sort: {
+    empty: boolean;
+    unsorted: boolean;
+    sorted: boolean;
+  };
+  offset: number;
+  unpaged: boolean;
+  paged: boolean;
+}
+
 /** Danh sách phiên chat trả về dạng phân trang */
 export interface ChatSessionListResponse {
   content: ChatSessionResponse[];
+  pageable: Pageable;
+  last: boolean;
   totalElements: number;
   totalPages: number;
-  last: boolean;
   first: boolean;
+  size: number;
+  number: number;
+  sort: {
+    empty: boolean;
+    unsorted: boolean;
+    sorted: boolean;
+  };
+  numberOfElements: number;
   empty: boolean;
 }
 

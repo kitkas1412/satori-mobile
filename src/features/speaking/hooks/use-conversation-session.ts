@@ -7,10 +7,11 @@
 //   initSession / initFreeTalkSession → sendMessage (nhiều lần) → completeSession
 //   hoặc abandonSession (bỏ dở bất kỳ lúc nào)
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { useCallback, useState } from "react";
-import { Alert } from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Alert, AppState, type AppStateStatus } from "react-native";
 import {
   abandonSessionApi,
   completeSessionApi,
@@ -20,8 +21,10 @@ import {
 } from "../api";
 import { useConversationStore } from "@/stores";
 import type { TurnState } from "../api";
-import { playAssistantMessage } from "./use-audio-player";
+import { playAssistantMessage, stopAssistantAudio } from "./use-audio-player";
 import { speakingQueryKeys } from "./use-topics";
+
+export const ACTIVE_SESSION_STORAGE_KEY = "speaking_active_session_id";
 
 /** Hàm tiện ích tạo độ trễ (ms) để phát tin nhắn AI tuần tự, không bị đổ xuất hiện cùng lúc */
 const delay = (ms: number) =>
@@ -33,6 +36,8 @@ export function useConversationSession() {
   const [turnState, setTurnState] = useState<TurnState>("AI_TURN");
   const [isInitializing, setIsInitializing] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
+  const cancelledRef = useRef(false);
+  const backgroundedAtRef = useRef<number | null>(null);
 
   const {
     setSession,
@@ -57,15 +62,19 @@ export function useConversationSession() {
     async (
       starter: () => Promise<import("../api").RoleplaySessionResponse>,
     ) => {
+      cancelledRef.current = false;
       setIsInitializing(true);
       try {
         const session = await starter();
         setSession(session.id, [], session.missions);
+        await AsyncStorage.setItem(ACTIVE_SESSION_STORAGE_KEY, session.id);
         setTurnState("AI_TURN");
         // Tắt overlay trước khi phát audio để người dùng thấy tin nhắn xuất hiện
         setIsInitializing(false);
         for (const msg of session.messages) {
+          if (cancelledRef.current) break;
           await delay(600); // Độ trễ tự nhiên giữa các tin nhắn
+          if (cancelledRef.current) break;
           addMessages([msg]);
           if (msg.role === "ASSISTANT") {
             // Đợi audio phát xong trước khi hiển thị tin nhắn tiếp theo
@@ -74,7 +83,7 @@ export function useConversationSession() {
             );
           }
         }
-        setTurnState("USER_TURN");
+        if (!cancelledRef.current) setTurnState("USER_TURN");
       } catch {
         Alert.alert("Lỗi", "Không thể bắt đầu buổi học. Vui lòng thử lại.");
         router.back();
@@ -120,6 +129,7 @@ export function useConversationSession() {
         return;
       }
 
+      cancelledRef.current = false;
       // Optimistic UI: hiển thị tin nhắn ngay trước khi API phản hồi
       const optimisticId = `optimistic-${Date.now()}`;
       const optimisticUserMessage = {
@@ -164,11 +174,13 @@ export function useConversationSession() {
 
         // Phát tuần tự từng tin nhắn AI
         for (const msg of assistantMessages) {
+          if (cancelledRef.current) break;
           await delay(600); // Độ trễ tự nhiên trước mỗi tin nhắn
+          if (cancelledRef.current) break;
           addMessages([msg]);
           await playAssistantMessage(msg.content, msg.audioUrl).catch(() => {});
         }
-        setTurnState("USER_TURN");
+        if (!cancelledRef.current) setTurnState("USER_TURN");
       } catch {
         Alert.alert("Lỗi", "Không thể gửi tin nhắn. Vui lòng thử lại.");
         setTurnState("USER_TURN");
@@ -192,6 +204,7 @@ export function useConversationSession() {
     } catch {
       Alert.alert("Lỗi", "Không thể hoàn thành buổi học. Vui lòng thử lại.");
     } finally {
+      await AsyncStorage.removeItem(ACTIVE_SESSION_STORAGE_KEY);
       setIsCompleting(false);
     }
   }, [sessionId, setFeedback]);
@@ -203,14 +216,51 @@ export function useConversationSession() {
    */
   const abandonSession = useCallback(async () => {
     if (!sessionId) return;
+    cancelledRef.current = true;
+    stopAssistantAudio();
     try {
       await abandonSessionApi(sessionId);
     } catch {
       // Bỏ qua lỗi — abandon là best-effort, không cần báo lỗi cho người dùng
     } finally {
+      await AsyncStorage.removeItem(ACTIVE_SESSION_STORAGE_KEY);
       clearSession();
       router.replace("/(tabs)/speaking");
     }
+  }, [sessionId, clearSession, router]);
+
+  // Tự động abandon session nếu app ở background quá 5 phút.
+  // Listener chỉ active khi đang có session (sessionId != null).
+  useEffect(() => {
+    if (!sessionId) return;
+
+    const GRACE_PERIOD_MS = 5 * 60 * 1000;
+
+    const handleAppStateChange = async (nextState: AppStateStatus) => {
+      if (nextState === "background") {
+        backgroundedAtRef.current = Date.now();
+      } else if (nextState === "active") {
+        const backgroundedAt = backgroundedAtRef.current;
+        backgroundedAtRef.current = null;
+        if (backgroundedAt !== null && Date.now() - backgroundedAt > GRACE_PERIOD_MS) {
+          cancelledRef.current = true;
+          stopAssistantAudio();
+          try {
+            await abandonSessionApi(sessionId);
+          } catch {
+            // best-effort
+          } finally {
+            await AsyncStorage.removeItem(ACTIVE_SESSION_STORAGE_KEY);
+            clearSession();
+            router.replace("/(tabs)/speaking");
+            Alert.alert("Buổi học đã kết thúc", "Buổi học đã kết thúc do không hoạt động.");
+          }
+        }
+      }
+    };
+
+    const subscription = AppState.addEventListener("change", handleAppStateChange);
+    return () => subscription.remove();
   }, [sessionId, clearSession, router]);
 
   return {
