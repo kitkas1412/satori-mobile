@@ -1,6 +1,12 @@
 import { ChevronLeft, Clock, Plus } from "lucide-react-native";
 import { useEffect } from "react";
-import { ActivityIndicator, FlatList, Pressable, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  Text,
+  View,
+} from "react-native";
 import Animated, {
   Easing,
   interpolate,
@@ -27,7 +33,12 @@ function formatDate(isoString: string): string {
   return date.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" });
 }
 
-export function ChatHistoryDrawer({ visible, onClose, onSelectSession, topOffset = 0 }: ChatHistoryDrawerProps) {
+export function ChatHistoryDrawer({
+  visible,
+  onClose,
+  onSelectSession,
+  topOffset = 0,
+}: ChatHistoryDrawerProps) {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const progress = useSharedValue(0);
@@ -49,7 +60,13 @@ export function ChatHistoryDrawer({ visible, onClose, onSelectSession, topOffset
   return (
     <View
       pointerEvents={visible ? "box-none" : "none"}
-      style={{ position: "absolute", top: topOffset, left: 0, right: 0, bottom: 0 }}
+      style={{
+        position: "absolute",
+        top: topOffset,
+        left: 0,
+        right: 0,
+        bottom: 0,
+      }}
     >
       {/* Backdrop - close drawer when tapped outside */}
       {visible && (
@@ -105,7 +122,7 @@ export function ChatHistoryDrawer({ visible, onClose, onSelectSession, topOffset
           </Pressable>
         </View>
 
-        {/* New conversation button */}
+        {/* New chat button */}
         <View style={{ paddingHorizontal: 12, paddingTop: 12 }}>
           <Pressable
             style={{
@@ -144,7 +161,9 @@ export function ChatHistoryDrawer({ visible, onClose, onSelectSession, topOffset
 
         {/* Loading state */}
         {isLoading && (
-          <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+          <View
+            style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+          >
             <ActivityIndicator color={theme.brand.primary} />
           </View>
         )}
