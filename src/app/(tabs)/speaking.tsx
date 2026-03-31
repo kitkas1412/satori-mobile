@@ -4,7 +4,13 @@
 
 import { Bell } from "lucide-react-native";
 import { useRef, useCallback, useState } from "react";
-import { ScrollView, Text, View, useWindowDimensions } from "react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  Text,
+  View,
+  useWindowDimensions,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter, useFocusEffect } from "expo-router";
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -22,6 +28,7 @@ import {
   useFirstUnpracticedSection,
   useConversationNavigation,
 } from "@/features/speaking/hooks";
+import type { Topic } from "@/features/speaking/api";
 import { useProfile } from "@/hooks/api/use-profile";
 
 export default function SpeakingScreen() {
@@ -32,13 +39,21 @@ export default function SpeakingScreen() {
   const { data: profile } = useProfile();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
-  const { data: sections, isLoading, isError } = useTopics();
+  const {
+    data,
+    isLoading,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useTopics();
+  const sections = data?.pages.flatMap((p) => p.content) ?? [];
 
   const { firstUnpracticedSectionId, handleHasUnpracticed, reset } =
     useFirstUnpracticedSection();
   const { handleConversationPress } = useConversationNavigation();
 
-  const scrollViewRef = useRef<ScrollView>(null);
+  const scrollViewRef = useRef<FlatList<Topic>>(null);
   const sectionYMap = useRef<Record<string, number>>({});
   const hasScrolledRef = useRef(false);
   const { height: screenHeight } = useWindowDimensions();
@@ -58,8 +73,8 @@ export default function SpeakingScreen() {
       const sectionY = sectionYMap.current[sectionId] ?? 0;
       const totalY = sectionY + cardY;
       const centeredY = totalY - screenHeight / 2 + cardHeight / 2;
-      scrollViewRef.current?.scrollTo({
-        y: Math.max(0, centeredY),
+      scrollViewRef.current?.scrollToOffset({
+        offset: Math.max(0, centeredY),
         animated: true,
       });
       hasScrolledRef.current = true;
@@ -100,39 +115,41 @@ export default function SpeakingScreen() {
             </Text>
           </View>
         ) : (
-          <ScrollView
+          <FlatList<Topic>
             ref={scrollViewRef}
             className="flex-1"
-            contentContainerClassName="px-4 pb-8 gap-4"
+            contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32, gap: 16 }}
             showsVerticalScrollIndicator={false}
-          >
-            {/*
-             * Banner free-talk: lấy targetJlptLevel từ profile để truyền vào session.
-             * Nếu chưa cài đặt mục tiêu JLPT thì không điều hướng.
-             */}
-            <ConversationBanner
-              onPress={() => {
-                const jlptLevel = profile?.learningPreferences?.targetJlptLevel;
-                if (!jlptLevel) return;
-                router.push({
-                  pathname: "/conversation-practice",
-                  params: { jlptLevel, language, title: "Nói chuyện với AI" },
-                });
-              }}
-            />
-
-            {isError && (
-              <Text
-                className="text-sm font-body text-center mt-4"
-                style={{ color: theme.text.secondary }}
-              >
-                Không thể tải dữ liệu. Vui lòng thử lại sau.
-              </Text>
-            )}
-
-            {sections?.map((section, index) => (
+            data={sections}
+            keyExtractor={(item) => item.id}
+            ListHeaderComponent={
+              <>
+                {/*
+                 * Banner free-talk: lấy targetJlptLevel từ profile để truyền vào session.
+                 * Nếu chưa cài đặt mục tiêu JLPT thì không điều hướng.
+                 */}
+                <ConversationBanner
+                  onPress={() => {
+                    const jlptLevel = profile?.learningPreferences?.targetJlptLevel;
+                    if (!jlptLevel) return;
+                    router.push({
+                      pathname: "/conversation-practice",
+                      params: { jlptLevel, language, title: "Nói chuyện với AI" },
+                    });
+                  }}
+                />
+                {isError && (
+                  <Text
+                    className="text-sm font-body text-center mt-4"
+                    style={{ color: theme.text.secondary }}
+                  >
+                    Không thể tải dữ liệu. Vui lòng thử lại sau.
+                  </Text>
+                )}
+              </>
+            }
+            renderItem={({ item: section, index }) => (
               <View
-                key={section.id}
                 onLayout={(e) => {
                   sectionYMap.current[section.id] = e.nativeEvent.layout.y;
                 }}
@@ -156,8 +173,23 @@ export default function SpeakingScreen() {
                   focusTrigger={focusTrigger}
                 />
               </View>
-            ))}
-          </ScrollView>
+            )}
+            ListFooterComponent={
+              isFetchingNextPage ? (
+                <ActivityIndicator
+                  size="small"
+                  color={theme.brand.primary}
+                  style={{ marginVertical: 16 }}
+                />
+              ) : null
+            }
+            onEndReached={() => {
+              if (hasNextPage && !isFetchingNextPage) {
+                fetchNextPage();
+              }
+            }}
+            onEndReachedThreshold={0.3}
+          />
         )}
       </View>
       <LoadingOverlay visible={isLoading} title="Đang tải..." />
