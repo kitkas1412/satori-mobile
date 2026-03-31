@@ -1,9 +1,11 @@
 // API Response types
 
 export interface ApiResponse<T = any> {
-  data: T;
-  message?: string;
   success: boolean;
+  code: string;
+  message: string;
+  data: T;
+  timestamp: string;
 }
 
 export interface ApiError {
@@ -45,6 +47,18 @@ export interface LearningPreferences {
   strongPoints: { item: string; type: string }[];
 }
 
+export interface EnrolledClass {
+  classId: string;
+  className: string;
+  classCode: string | null;
+  courseId: string;
+  courseName: string;
+  startDate: string | null;
+  endDate: string | null;
+  status: string;
+  role: string | null;
+}
+
 export interface UserProfile {
   id: string;
   email: string;
@@ -64,5 +78,5 @@ export interface UserProfile {
   updatedAt: string;
   lastLoginAt: string | null;
   learningPreferences: LearningPreferences | null;
-  enrolledClasses: unknown[];
+  enrolledClasses: EnrolledClass[];
 }
