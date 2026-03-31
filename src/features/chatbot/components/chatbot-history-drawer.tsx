@@ -14,6 +14,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { Backdrop } from "@/components/ui";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useChatSessions } from "@/features/chatbot/hooks";
@@ -25,6 +26,7 @@ interface ChatHistoryDrawerProps {
   visible: boolean;
   onClose: () => void;
   onSelectSession: (sessionId: string) => void;
+  onNewChat: () => void;
   topOffset?: number;
 }
 
@@ -37,6 +39,7 @@ export function ChatHistoryDrawer({
   visible,
   onClose,
   onSelectSession,
+  onNewChat,
   topOffset = 0,
 }: ChatHistoryDrawerProps) {
   const colorScheme = useColorScheme();
@@ -69,12 +72,7 @@ export function ChatHistoryDrawer({
       }}
     >
       {/* Backdrop - close drawer when tapped outside */}
-      {visible && (
-        <Pressable
-          style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
-          onPress={onClose}
-        />
-      )}
+      <Backdrop visible={visible} onPress={onClose} />
 
       {/* Drawer panel */}
       <Animated.View
@@ -125,6 +123,7 @@ export function ChatHistoryDrawer({
         {/* New chat button */}
         <View style={{ paddingHorizontal: 12, paddingTop: 12 }}>
           <Pressable
+            onPress={onNewChat}
             style={{
               flexDirection: "row",
               alignItems: "center",
