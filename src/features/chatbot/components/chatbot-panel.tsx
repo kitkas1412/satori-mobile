@@ -55,21 +55,8 @@ export function ChatbotPanel({
   const listRef = useRef<FlatList<Message>>(null);
 
   const { data: profile } = useProfile();
-  const { mutate: createSession } = useCreateChatSession();
+  const { mutateAsync: createSession } = useCreateChatSession();
   const { mutateAsync: sendMessage } = useSendMessage();
-
-  useEffect(() => {
-    if (loadedSession) return;
-    const courseId = profile?.enrolledClasses[0]?.courseId;
-    const jlptLevel = profile?.learningPreferences?.targetJlptLevel;
-    if (courseId && jlptLevel) {
-      createSession(
-        { courseId, jlptLevel },
-        { onSuccess: (data) => setSessionId(data.sessionId) },
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useEffect(() => {
     if (!loadedSession) return;
@@ -97,7 +84,18 @@ export function ChatbotPanel({
 
   async function handleSend() {
     const text = message.trim();
-    if (!text || !sessionId || isAiLoading) return;
+    if (!text || isAiLoading) return;
+
+    let activeSessionId = sessionId;
+
+    if (!activeSessionId) {
+      const courseId = profile?.enrolledClasses[0]?.courseId;
+      const jlptLevel = profile?.learningPreferences?.targetJlptLevel;
+      if (!courseId || !jlptLevel) return;
+      const session = await createSession({ courseId, jlptLevel });
+      activeSessionId = session.sessionId;
+      setSessionId(activeSessionId);
+    }
 
     setMessage("");
     setMessages((prev) => [
@@ -112,7 +110,10 @@ export function ChatbotPanel({
     setIsAiLoading(true);
 
     try {
-      const data = await sendMessage({ sessionId, message: text });
+      const data = await sendMessage({
+        sessionId: activeSessionId,
+        message: text,
+      });
       setMessages((prev) => [
         ...prev,
         {
@@ -164,11 +165,28 @@ export function ChatbotPanel({
         ref={listRef}
         data={displayMessages}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ padding: 16, gap: 12 }}
+        contentContainerStyle={{ padding: 16, gap: 12, flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
         style={{ flex: 1 }}
         onContentSizeChange={() =>
           listRef.current?.scrollToEnd({ animated: true })
+        }
+        ListEmptyComponent={
+          <View className="flex-1 items-center justify-center gap-2 px-6">
+            <Text
+              className="font-heading text-lg text-center"
+              style={{ color: theme.text.primary }}
+            >
+              Xin chào! Tôi là Trợ lý AI của Satori.
+            </Text>
+            <Text
+              className="font-body text-sm text-center"
+              style={{ color: theme.text.secondary }}
+            >
+              Hãy đặt câu hỏi về tiếng Nhật, ngữ pháp, từ vựng hoặc luyện tập
+              hội thoại — tôi luôn sẵn sàng giúp bạn!
+            </Text>
+          </View>
         }
         renderItem={({ item }) => (
           <ChatbotMessageBubble
@@ -187,13 +205,13 @@ export function ChatbotPanel({
           paddingTop: 12,
           borderTopWidth: 1,
           borderTopColor: theme.border.subtle,
-          backgroundColor: theme.background.surface,
+          backgroundColor: theme.background.page,
         }}
       >
         <View
           className="flex-1 rounded-2xl px-4 py-3"
           style={{
-            backgroundColor: theme.background.page,
+            backgroundColor: theme.background.surface,
             borderWidth: 1,
             borderColor: theme.border.subtle,
           }}

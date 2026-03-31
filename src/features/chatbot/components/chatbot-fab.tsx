@@ -11,15 +11,24 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useState } from "react";
+import { Backdrop } from "@/components/ui";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { getSessionMessagesApi, reopenChatSessionApi } from "@/features/chatbot/api";
+import {
+  getSessionMessagesApi,
+  reopenChatSessionApi,
+} from "@/features/chatbot/api";
 import { ChatHistoryDrawer } from "./chatbot-history-drawer";
 import { ChatbotPanel } from "./chatbot-panel";
 
 interface LoadedSession {
   sessionId: string;
-  messages: { id: string; text: string; timestamp: string; role: "ai" | "user" }[];
+  messages: {
+    id: string;
+    text: string;
+    timestamp: string;
+    role: "ai" | "user";
+  }[];
 }
 
 function formatTimestamp(isoString: string): string {
@@ -43,11 +52,16 @@ export function ChatbotFab() {
 
   const progress = useSharedValue(0);
   const [panelVisible, setPanelVisible] = useState(false);
+  const [backdropVisible, setBackdropVisible] = useState(false);
   const [historyVisible, setHistoryVisible] = useState(false);
-  const [loadedSession, setLoadedSession] = useState<LoadedSession | undefined>();
+  const [loadedSession, setLoadedSession] = useState<
+    LoadedSession | undefined
+  >();
+  const [chatKey, setChatKey] = useState(0);
 
   const handleOpen = () => {
     setPanelVisible(true);
+    setBackdropVisible(true);
     progress.value = withTiming(1, TIMING_CONFIG);
   };
 
@@ -68,7 +82,14 @@ export function ChatbotFab() {
     });
   };
 
+  const handleNewChat = () => {
+    setLoadedSession(undefined);
+    setHistoryVisible(false);
+    setChatKey((k) => k + 1);
+  };
+
   const handleClose = () => {
+    setBackdropVisible(false);
     progress.value = withTiming(0, TIMING_CONFIG, (finished) => {
       if (finished) runOnJS(setPanelVisible)(false);
     });
@@ -77,11 +98,7 @@ export function ChatbotFab() {
   const fabAnimatedStyle = useAnimatedStyle(() => ({
     transform: [
       {
-        translateY: interpolate(
-          progress.value,
-          [0, 1],
-          [CLOSED_Y, OPEN_Y],
-        ),
+        translateY: interpolate(progress.value, [0, 1], [CLOSED_Y, OPEN_Y]),
       },
     ],
   }));
@@ -90,17 +107,9 @@ export function ChatbotFab() {
     opacity: progress.value,
     transform: [
       {
-        translateY: interpolate(
-          progress.value,
-          [0, 1],
-          [screenHeight, 0],
-        ),
+        translateY: interpolate(progress.value, [0, 1], [screenHeight, 0]),
       },
     ],
-  }));
-
-  const overlayAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(progress.value, [0, 1], [0, 0.5]),
   }));
 
   const fabButtonStyle = {
@@ -143,19 +152,18 @@ export function ChatbotFab() {
         statusBarTranslucent
       >
         {/* Backdrop overlay */}
-        <Animated.View
-          style={[
-            {
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: "#000",
-            },
-            overlayAnimatedStyle,
-          ]}
-          pointerEvents="none"
+        <Backdrop visible={backdropVisible} pointerEvents="none" />
+
+        {/* Tap-to-close area above the panel */}
+        <Pressable
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: OPEN_Y + FAB_SIZE + 8,
+          }}
+          onPress={handleClose}
         />
 
         {/* Chat panel */}
@@ -167,7 +175,7 @@ export function ChatbotFab() {
               left: 0,
               right: 0,
               bottom: 0,
-              backgroundColor: theme.background.surface,
+              backgroundColor: theme.background.page,
               borderTopLeftRadius: 16,
               borderTopRightRadius: 16,
               overflow: "hidden",
@@ -176,6 +184,7 @@ export function ChatbotFab() {
           ]}
         >
           <ChatbotPanel
+            key={chatKey}
             onClose={handleClose}
             onOpenHistory={() => setHistoryVisible(true)}
             loadedSession={loadedSession}
@@ -195,6 +204,7 @@ export function ChatbotFab() {
           visible={historyVisible}
           onClose={() => setHistoryVisible(false)}
           onSelectSession={handleSelectSession}
+          onNewChat={handleNewChat}
           topOffset={OPEN_Y + FAB_SIZE + 8}
         />
       </Modal>
