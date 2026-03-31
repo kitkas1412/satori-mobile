@@ -13,6 +13,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 
+import { ChatbotFab } from "@/features/chatbot/components";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useAuthStore } from "@/stores/auth-store";
@@ -225,6 +226,7 @@ export default function PracticeTab() {
         visible={isLoadingSubmission}
         title="Đang tải kết quả..."
       />
+      <ChatbotFab />
     </View>
   );
 }
