@@ -15,6 +15,7 @@ import {
   ConversationBanner,
   TopicSection,
 } from "@/features/speaking/components";
+import { ChatbotFab } from "@/features/chatbot/components";
 import { useAppStore, useAuthStore } from "@/stores";
 import {
   useTopics,
@@ -160,6 +161,7 @@ export default function SpeakingScreen() {
         )}
       </View>
       <LoadingOverlay visible={isLoading} title="Đang tải..." />
+      <ChatbotFab />
     </>
   );
 }

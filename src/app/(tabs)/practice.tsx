@@ -3,7 +3,13 @@
 
 import { Bell, BookOpen, Sparkles } from "lucide-react-native";
 import { useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  Text,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 
@@ -20,6 +26,7 @@ import {
   useAssignments,
   useAssignmentNavigation,
 } from "@/features/assignment/hooks";
+import type { Content } from "@/features/assignment/api";
 
 type ActiveTab = "teacher" | "ai";
 
@@ -29,9 +36,18 @@ export default function PracticeTab() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
-  const { data, isLoading, isError } = useAssignments();
+  const {
+    data,
+    isLoading,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useAssignments();
   const { handleAssignmentPress, isLoadingSubmission } =
     useAssignmentNavigation();
+
+  const assignments = data?.pages.flatMap((p) => p.content) ?? [];
 
   if (user?.status === "INACTIVE") {
     return (
@@ -44,7 +60,7 @@ export default function PracticeTab() {
     );
   }
 
-  // Biểu tượng chuông thông báo với chấm đỏ báo có thông báo mới
+  // Biểu tượng chuông thông báo
   const bellAction = (
     <View className="relative">
       <View
@@ -56,128 +72,153 @@ export default function PracticeTab() {
     </View>
   );
 
+  const listHeader = (
+    <>
+      {/* Tiêu đề màn hình */}
+      <ScreenHeader
+        title="Luyện tập"
+        rightAction={bellAction}
+        paddingTop={insets.top + 16}
+      />
+
+      {/* Thanh chuyển đổi tab GV / AI */}
+      <View
+        className="border mx-4 flex-row rounded-2xl p-1 mb-3"
+        style={{
+          backgroundColor: theme.background.surface,
+          borderWidth: 1,
+          borderColor: theme.border.subtle,
+        }}
+      >
+        <Pressable
+          onPress={() => setActiveTab("teacher")}
+          className="flex-1 flex-row items-center justify-center gap-2 py-3 rounded-xl"
+          style={
+            activeTab === "teacher"
+              ? { backgroundColor: theme.brand.primary }
+              : { backgroundColor: theme.background.surface }
+          }
+        >
+          <BookOpen
+            size={20}
+            color={
+              activeTab === "teacher" ? theme.icon.onBrand : theme.icon.primary
+            }
+            strokeWidth={2}
+          />
+          <Text
+            className="font-heading text-base"
+            style={{
+              color:
+                activeTab === "teacher"
+                  ? theme.text.onBrand
+                  : theme.text.primary,
+            }}
+          >
+            Bài tập
+          </Text>
+        </Pressable>
+        <Pressable
+          onPress={() => setActiveTab("ai")}
+          className="flex-1 flex-row items-center justify-center gap-2 py-3 rounded-xl"
+          style={
+            activeTab === "ai"
+              ? { backgroundColor: theme.brand.primary }
+              : { backgroundColor: theme.background.surface }
+          }
+        >
+          <Sparkles
+            size={20}
+            color={activeTab === "ai" ? theme.icon.onBrand : theme.icon.primary}
+            strokeWidth={2}
+          />
+          <Text
+            className="font-heading text-base"
+            style={{
+              color:
+                activeTab === "ai" ? theme.icon.onBrand : theme.icon.primary,
+            }}
+          >
+            Luyện tập AI
+          </Text>
+        </Pressable>
+      </View>
+
+      {activeTab === "teacher" ? (
+        <View className="px-4 mb-1">
+          <SectionHeader
+            title="Bài tập từ giáo viên"
+            subtitle="Hoàn thành các bài tập được giao bởi giáo viên"
+            size="lg"
+          />
+        </View>
+      ) : (
+        <View className="px-4">
+          <AiBanner />
+        </View>
+      )}
+    </>
+  );
+
+  const listFooter =
+    activeTab === "teacher" && isFetchingNextPage ? (
+      <ActivityIndicator
+        size="small"
+        color={theme.brand.primary}
+        style={{ marginVertical: 16 }}
+      />
+    ) : null;
+
+  const listEmpty =
+    activeTab === "teacher" ? (
+      <View className="px-4">
+        {isError ? (
+          <Text
+            className="font-body text-sm text-center"
+            style={{ color: theme.text.secondary }}
+          >
+            Không thể tải bài tập. Vui lòng thử lại.
+          </Text>
+        ) : (
+          <Text
+            className="font-body text-sm text-center"
+            style={{ color: theme.text.secondary }}
+          >
+            Chưa có bài tập nào.
+          </Text>
+        )}
+      </View>
+    ) : null;
+
   return (
     <View className="flex-1" style={{ backgroundColor: theme.background.page }}>
       <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 24 }}
-      >
-        {/* Tiêu đề màn hình */}
-        <ScreenHeader
-          title="Ôn tập"
-          rightAction={bellAction}
-          paddingTop={insets.top + 16}
-        />
 
-        {/* Thanh chuyển đổi tab GV / AI */}
-        <View
-          className="border mx-4 flex-row rounded-2xl p-1 mb-3"
-          style={{
-            backgroundColor: theme.background.surface,
-            borderWidth: 1,
-            borderColor: theme.border.subtle,
-          }}
-        >
-          <Pressable
-            onPress={() => setActiveTab("teacher")}
-            className="flex-1 flex-row items-center justify-center gap-2 py-3 rounded-xl"
-            style={
-              activeTab === "teacher"
-                ? { backgroundColor: theme.brand.primary }
-                : { backgroundColor: theme.background.surface }
-            }
-          >
-            <BookOpen
-              size={20}
-              color={
-                activeTab === "teacher"
-                  ? theme.icon.onBrand
-                  : theme.icon.primary
-              }
-              strokeWidth={2}
+      <FlatList<Content>
+        data={activeTab === "teacher" ? assignments : []}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <View className="px-4 mb-3">
+            <AssignmentCard
+              {...mapAssignmentToCardProps(item)}
+              onPress={() => handleAssignmentPress(item)}
             />
-            <Text
-              className="font-heading text-base"
-              style={{
-                color:
-                  activeTab === "teacher"
-                    ? theme.text.onBrand
-                    : theme.text.primary,
-              }}
-            >
-              Bài tập GV
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={() => setActiveTab("ai")}
-            className="flex-1 flex-row items-center justify-center gap-2 py-3 rounded-xl"
-            style={
-              activeTab === "ai"
-                ? { backgroundColor: theme.brand.primary }
-                : { backgroundColor: theme.background.surface }
-            }
-          >
-            <Sparkles
-              size={20}
-              color={
-                activeTab === "ai" ? theme.icon.onBrand : theme.icon.primary
-              }
-              strokeWidth={2}
-            />
-            <Text
-              className="font-heading text-base"
-              style={{
-                color:
-                  activeTab === "ai" ? theme.icon.onBrand : theme.icon.primary,
-              }}
-            >
-              Ôn luyện AI
-            </Text>
-          </Pressable>
-        </View>
-
-        {activeTab === "teacher" ? (
-          <View className="px-4 gap-3">
-            <SectionHeader
-              title="Bài tập từ giáo viên"
-              subtitle="Hoàn thành các bài tập được giao bởi giáo viên"
-              size="lg"
-            />
-
-            {/* Hiển thị lỗi, danh sách rỗng, hoặc danh sách bài tập */}
-            {isError ? (
-              <Text
-                className="font-body text-sm text-center"
-                style={{ color: theme.text.secondary }}
-              >
-                Không thể tải bài tập. Vui lòng thử lại.
-              </Text>
-            ) : !data?.content.length ? (
-              <Text
-                className="font-body text-sm text-center"
-                style={{ color: theme.text.secondary }}
-              >
-                Chưa có bài tập nào.
-              </Text>
-            ) : (
-              data.content.map((item) => (
-                <AssignmentCard
-                  key={item.id}
-                  {...mapAssignmentToCardProps(item)}
-                  onPress={() => handleAssignmentPress(item)}
-                />
-              ))
-            )}
-          </View>
-        ) : (
-          <View className="px-4">
-            <AiBanner />
           </View>
         )}
-      </ScrollView>
+        ListHeaderComponent={listHeader}
+        ListFooterComponent={listFooter}
+        ListEmptyComponent={listEmpty}
+        onEndReached={() => {
+          if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+          }
+        }}
+        onEndReachedThreshold={0.3}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 24 }}
+      />
 
-      {/* Overlay loading khi đang tải danh sách bài tập */}
+      {/* Overlay loading khi đang tải lần đầu */}
       <LoadingOverlay visible={isLoading} title="Đang tải bài tập..." />
       {/* Overlay loading khi đang tải kết quả bài đã nộp */}
       <LoadingOverlay

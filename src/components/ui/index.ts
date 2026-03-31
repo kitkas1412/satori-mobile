@@ -10,3 +10,4 @@ export { ScoreCircle } from "./score-circle";
 export { ScoreRing } from "./score-ring";
 export { TextLink } from "./text-link";
 export { ScreenAsyncView } from "./screen-async-view";
+export { ImageViewerModal } from "./image-viewer-modal";
