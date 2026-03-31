@@ -9,7 +9,7 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Alert } from "react-native";
 import {
   abandonSessionApi,
@@ -20,7 +20,7 @@ import {
 } from "../api";
 import { useConversationStore } from "@/stores";
 import type { TurnState } from "../api";
-import { playAssistantMessage } from "./use-audio-player";
+import { playAssistantMessage, stopAssistantAudio } from "./use-audio-player";
 import { speakingQueryKeys } from "./use-topics";
 
 /** Hàm tiện ích tạo độ trễ (ms) để phát tin nhắn AI tuần tự, không bị đổ xuất hiện cùng lúc */
@@ -33,6 +33,7 @@ export function useConversationSession() {
   const [turnState, setTurnState] = useState<TurnState>("AI_TURN");
   const [isInitializing, setIsInitializing] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
+  const cancelledRef = useRef(false);
 
   const {
     setSession,
@@ -57,6 +58,7 @@ export function useConversationSession() {
     async (
       starter: () => Promise<import("../api").RoleplaySessionResponse>,
     ) => {
+      cancelledRef.current = false;
       setIsInitializing(true);
       try {
         const session = await starter();
@@ -65,7 +67,9 @@ export function useConversationSession() {
         // Tắt overlay trước khi phát audio để người dùng thấy tin nhắn xuất hiện
         setIsInitializing(false);
         for (const msg of session.messages) {
+          if (cancelledRef.current) break;
           await delay(600); // Độ trễ tự nhiên giữa các tin nhắn
+          if (cancelledRef.current) break;
           addMessages([msg]);
           if (msg.role === "ASSISTANT") {
             // Đợi audio phát xong trước khi hiển thị tin nhắn tiếp theo
@@ -74,7 +78,7 @@ export function useConversationSession() {
             );
           }
         }
-        setTurnState("USER_TURN");
+        if (!cancelledRef.current) setTurnState("USER_TURN");
       } catch {
         Alert.alert("Lỗi", "Không thể bắt đầu buổi học. Vui lòng thử lại.");
         router.back();
@@ -120,6 +124,7 @@ export function useConversationSession() {
         return;
       }
 
+      cancelledRef.current = false;
       // Optimistic UI: hiển thị tin nhắn ngay trước khi API phản hồi
       const optimisticId = `optimistic-${Date.now()}`;
       const optimisticUserMessage = {
@@ -164,11 +169,13 @@ export function useConversationSession() {
 
         // Phát tuần tự từng tin nhắn AI
         for (const msg of assistantMessages) {
+          if (cancelledRef.current) break;
           await delay(600); // Độ trễ tự nhiên trước mỗi tin nhắn
+          if (cancelledRef.current) break;
           addMessages([msg]);
           await playAssistantMessage(msg.content, msg.audioUrl).catch(() => {});
         }
-        setTurnState("USER_TURN");
+        if (!cancelledRef.current) setTurnState("USER_TURN");
       } catch {
         Alert.alert("Lỗi", "Không thể gửi tin nhắn. Vui lòng thử lại.");
         setTurnState("USER_TURN");
@@ -203,6 +210,8 @@ export function useConversationSession() {
    */
   const abandonSession = useCallback(async () => {
     if (!sessionId) return;
+    cancelledRef.current = true;
+    stopAssistantAudio();
     try {
       await abandonSessionApi(sessionId);
     } catch {
