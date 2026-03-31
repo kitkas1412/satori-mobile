@@ -1,6 +1,6 @@
 // Hook và query keys cho dữ liệu topics (chủ đề hội thoại) trong feature Speaking.
 
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { getTopicsApi } from "../api";
 
 /**
@@ -22,8 +22,11 @@ export const speakingQueryKeys = {
  * Kết quả được cache bởi React Query, tự động refetch khi stale.
  */
 export function useTopics() {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: speakingQueryKeys.topics,
-    queryFn: getTopicsApi,
+    queryFn: ({ pageParam }) => getTopicsApi(pageParam),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) =>
+      lastPage.last ? undefined : lastPage.pageNumber + 1,
   });
 }
