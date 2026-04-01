@@ -3,6 +3,7 @@ export type {
   AssignmentsResponse,
   AssignmentType,
   AssignmentDetailResponse,
+  AssignmentStatusFilter,
   LearnerSubmissionStatus,
   Option,
   Question,
