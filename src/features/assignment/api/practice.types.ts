@@ -13,6 +13,9 @@ export type LearnerSubmissionStatus =
   | "OVERDUE"      // Quá hạn
   | "SUBMITTED";   // Đã nộp, chờ chấm
 
+// undefined = "Tất cả" (không gửi param status lên API)
+export type AssignmentStatusFilter = LearnerSubmissionStatus | undefined;
+
 // Response danh sách bài tập (có phân trang)
 export interface AssignmentsResponse {
   content: Content[];
