@@ -27,13 +27,13 @@ import {
   useAssignments,
   useAssignmentNavigation,
 } from "@/features/assignment/hooks";
-import { LessonCard } from "@/features/practice-with-ai/components";
+import { LessonCard, SessionConfigSheet } from "@/features/practice-with-ai/components";
 import { useLessons } from "@/features/practice-with-ai/hooks";
 import type {
   AssignmentStatusFilter,
   Content,
 } from "@/features/assignment/api";
-import type { Lesson } from "@/features/practice-with-ai/api";
+import type { Lesson, SessionConfig } from "@/features/practice-with-ai/api";
 
 type ActiveTab = "teacher" | "ai";
 
@@ -51,6 +51,7 @@ export default function PracticeTab() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("teacher");
   const [activeStatus, setActiveStatus] =
     useState<AssignmentStatusFilter>(undefined);
+  const [sheetLesson, setSheetLesson] = useState<Lesson | null>(null);
   const flatListRef = useRef<FlatList<Content | Lesson>>(null);
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
@@ -290,6 +291,7 @@ export default function PracticeTab() {
                 title={(item as Lesson).title}
                 vocabularyCount={(item as Lesson).vocabularyCount}
                 grammarPointCount={(item as Lesson).grammarPointCount}
+                onPress={() => setSheetLesson(item as Lesson)}
               />
             )}
           </View>
@@ -318,6 +320,16 @@ export default function PracticeTab() {
       <LoadingOverlay
         visible={activeTab === "ai" && isLoadingLessons}
         title="Đang tải bài học..."
+      />
+      <SessionConfigSheet
+        visible={sheetLesson !== null}
+        lesson={sheetLesson}
+        onClose={() => setSheetLesson(null)}
+        onStart={(config: SessionConfig) => {
+          setSheetLesson(null);
+          // TODO: navigate to lesson session screen
+          console.log("Start session", config);
+        }}
       />
       <ChatbotFab />
     </View>

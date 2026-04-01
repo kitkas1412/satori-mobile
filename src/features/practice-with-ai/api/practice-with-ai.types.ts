@@ -1,5 +1,26 @@
 // Types cho tính năng Luyện tập AI.
 
+export type SessionType =
+  | "vocabulary"
+  | "grammar"
+  | "combined"
+  | "kanji"
+  | "sentence";
+
+export type ExerciseType =
+  | "multiple_choice"
+  | "fill_blank"
+  | "translation"
+  | "ordering"
+  | "matching"
+  | "true_false";
+
+export interface SessionConfig {
+  sessionType: SessionType;
+  questionCount: number;
+  exerciseTypes: ExerciseType[];
+}
+
 export interface Lesson {
   id: string;
   courseId: string;
