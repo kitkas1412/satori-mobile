@@ -63,6 +63,7 @@ export function TopicSection({
       subtitle: difficultyLabel(topic.difficultyScore),
       status: "active" as const,
       practiced: topic.practiced,
+      practiceStatus: topic.practiceStatus,
     })) ?? [];
 
   /** true nếu section còn ít nhất một topic chưa được luyện tập */
@@ -181,7 +182,7 @@ export function TopicSection({
                   title={conversation.title}
                   subtitle={conversation.subtitle}
                   status={conversation.status}
-                  practiced={conversation.practiced}
+                  practiceStatus={conversation.practiceStatus}
                   showBorder={showFirstUnpracticedBorder && isFirstUnpracticed}
                   accentColor={accentColor}
                   onPress={() => onConversationPress(conversation.id)}
