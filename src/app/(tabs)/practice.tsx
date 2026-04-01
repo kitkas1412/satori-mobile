@@ -20,7 +20,6 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useAuthStore } from "@/stores/auth-store";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { ScreenHeader } from "@/components/ui/screen-header";
-import { SectionHeader } from "@/components/ui/section-header";
 import { AiBanner } from "@/features/assignment/components/ai-banner";
 import { AssignmentCard } from "@/features/assignment/components/assignment-card";
 import { mapAssignmentToCardProps } from "@/features/assignment/utils";
@@ -28,7 +27,10 @@ import {
   useAssignments,
   useAssignmentNavigation,
 } from "@/features/assignment/hooks";
-import type { AssignmentStatusFilter, Content } from "@/features/assignment/api";
+import type {
+  AssignmentStatusFilter,
+  Content,
+} from "@/features/assignment/api";
 
 type ActiveTab = "teacher" | "ai";
 
@@ -44,7 +46,8 @@ const STATUS_FILTERS: { label: string; value: AssignmentStatusFilter }[] = [
 export default function PracticeTab() {
   const user = useAuthStore((state) => state.user);
   const [activeTab, setActiveTab] = useState<ActiveTab>("teacher");
-  const [activeStatus, setActiveStatus] = useState<AssignmentStatusFilter>(undefined);
+  const [activeStatus, setActiveStatus] =
+    useState<AssignmentStatusFilter>(undefined);
   const flatListRef = useRef<FlatList<Content>>(null);
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
@@ -132,7 +135,10 @@ export default function PracticeTab() {
           </Text>
         </Pressable>
         <Pressable
-          onPress={() => { setActiveTab("ai"); setActiveStatus(undefined); }}
+          onPress={() => {
+            setActiveTab("ai");
+            setActiveStatus(undefined);
+          }}
           className="flex-1 flex-row items-center justify-center gap-2 py-3 rounded-xl"
           style={
             activeTab === "ai"
@@ -171,7 +177,10 @@ export default function PracticeTab() {
                 key={filter.label}
                 onPress={() => {
                   setActiveStatus(filter.value);
-                  flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
+                  flatListRef.current?.scrollToOffset({
+                    offset: 0,
+                    animated: false,
+                  });
                 }}
                 style={{
                   paddingHorizontal: 16,
@@ -200,15 +209,7 @@ export default function PracticeTab() {
         </ScrollView>
       )}
 
-      {activeTab === "teacher" ? (
-        <View className="px-4 mb-1">
-          <SectionHeader
-            title="Bài tập từ giáo viên"
-            subtitle="Hoàn thành các bài tập được giao bởi giáo viên"
-            size="lg"
-          />
-        </View>
-      ) : (
+      {activeTab === "ai" && (
         <View className="px-4">
           <AiBanner />
         </View>
