@@ -17,7 +17,14 @@ import {
   Zap,
 } from "lucide-react-native";
 import { useRef, useState, useEffect } from "react";
-import { Modal, PanResponder, Pressable, ScrollView, Text, View } from "react-native";
+import {
+  Modal,
+  PanResponder,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import Animated, {
   Easing,
   runOnJS,
@@ -30,7 +37,12 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Backdrop, PrimaryButton } from "@/components/ui";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import type { ExerciseType, Lesson, SessionConfig, SessionType } from "@/features/practice-with-ai/api";
+import type {
+  ExerciseType,
+  LessonResponse,
+  SessionConfig,
+  SessionType,
+} from "@/features/practice-with-ai/api";
 
 const TIMING_CONFIG = { duration: 320, easing: Easing.out(Easing.cubic) };
 
@@ -44,31 +56,31 @@ const SESSION_TYPES: {
   icon: React.ReactNode;
 }[] = [
   {
-    value: "vocabulary",
+    value: "VOCABULARY",
     label: "Luyện từ vựng",
     subtitle: "Ghi nhớ & kiểm tra",
     icon: null,
   },
   {
-    value: "grammar",
+    value: "GRAMMAR",
     label: "Luyện ngữ pháp",
     subtitle: "Cấu trúc câu",
     icon: null,
   },
   {
-    value: "combined",
+    value: "COMBINED",
     label: "Bài tổng hợp",
     subtitle: "Tất cả kỹ năng",
     icon: null,
   },
   {
-    value: "kanji",
+    value: "KANJI",
     label: "Đọc Kanji",
     subtitle: "Âm & nghĩa chữ Hán",
     icon: null,
   },
   {
-    value: "sentence",
+    value: "SENTENCE",
     label: "Xây dựng câu",
     subtitle: "Lắp ghép câu hoàn chỉnh",
     icon: null,
@@ -80,7 +92,7 @@ const EXERCISE_TYPES: {
   label: string;
   icon: React.ReactNode;
 }[] = [
-  { value: "multiple_choice", label: "Trắc nghiệm", icon: null },
+  { value: "MULTIPLE_CHOICE", label: "Trắc nghiệm", icon: null },
   { value: "fill_blank", label: "Điền vào chỗ trống", icon: null },
   { value: "translation", label: "Dịch thuật", icon: null },
   { value: "ordering", label: "Sắp xếp câu", icon: null },
@@ -91,7 +103,7 @@ const EXERCISE_TYPES: {
 export interface SessionConfigSheetProps {
   visible: boolean;
   onClose: () => void;
-  lesson: Lesson | null;
+  lesson: LessonResponse | null;
   onStart: (config: SessionConfig) => void;
 }
 
@@ -104,15 +116,15 @@ function SessionTypeIcon({
 }) {
   const props = { size: 20, color, strokeWidth: 2 };
   switch (type) {
-    case "vocabulary":
+    case "VOCABULARY":
       return <BookOpen {...props} />;
-    case "grammar":
+    case "GRAMMAR":
       return <Pencil {...props} />;
-    case "combined":
+    case "COMBINED":
       return <Layers {...props} />;
-    case "kanji":
+    case "KANJI":
       return <Eye {...props} />;
-    case "sentence":
+    case "SENTENCE":
       return <Type {...props} />;
   }
 }
@@ -126,7 +138,7 @@ function ExerciseTypeIcon({
 }) {
   const props = { size: 15, color, strokeWidth: 2 };
   switch (type) {
-    case "multiple_choice":
+    case "MULTIPLE_CHOICE":
       return <CheckSquare {...props} />;
     case "fill_blank":
       return <PenLine {...props} />;
@@ -151,10 +163,10 @@ export function SessionConfigSheet({
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
-  const [sessionType, setSessionType] = useState<SessionType>("vocabulary");
+  const [sessionType, setSessionType] = useState<SessionType>("VOCABULARY");
   const [questionCount, setQuestionCount] = useState(5);
   const [exerciseTypes, setExerciseTypes] = useState<ExerciseType[]>([
-    "multiple_choice",
+    "MULTIPLE_CHOICE",
   ]);
 
   const [internalVisible, setInternalVisible] = useState(visible);
@@ -200,7 +212,7 @@ export function SessionConfigSheet({
       onPanResponderTerminate: () => {
         translateY.value = withTiming(0, TIMING_CONFIG);
       },
-    })
+    }),
   ).current;
 
   function toggleExerciseType(type: ExerciseType) {
@@ -252,10 +264,7 @@ export function SessionConfigSheet({
               />
             </View>
 
-            <View
-              className="flex-row items-center px-5"
-              style={{ height: 65 }}
-            >
+            <View className="flex-row items-center px-5" style={{ height: 65 }}>
               <View className="flex-1 gap-0.5">
                 <Text
                   className="font-heading text-lg"
@@ -297,7 +306,10 @@ export function SessionConfigSheet({
                 </Text>
               </View>
 
-              <View className="flex-row flex-wrap gap-y-[10px]" style={{ gap: 10 }}>
+              <View
+                className="flex-row flex-wrap gap-y-[10px]"
+                style={{ gap: 10 }}
+              >
                 {SESSION_TYPES.map((item) => {
                   const isSelected = sessionType === item.value;
                   return (
@@ -409,7 +421,11 @@ export function SessionConfigSheet({
                 <View className="items-center gap-0.5">
                   <Text
                     className="font-heading"
-                    style={{ fontSize: 32, color: theme.text.primary, lineHeight: 36 }}
+                    style={{
+                      fontSize: 32,
+                      color: theme.text.primary,
+                      lineHeight: 36,
+                    }}
                   >
                     {questionCount}
                   </Text>
@@ -478,9 +494,7 @@ export function SessionConfigSheet({
                       <ExerciseTypeIcon
                         type={item.value}
                         color={
-                          isSelected
-                            ? theme.text.primary
-                            : theme.text.disabled
+                          isSelected ? theme.text.primary : theme.text.disabled
                         }
                       />
                       <Text
@@ -504,10 +518,7 @@ export function SessionConfigSheet({
 
           {/* CTA */}
           <View className="px-5 pt-3">
-            <PrimaryButton
-              text="Bắt đầu luyện tập"
-              onPress={handleStart}
-            />
+            <PrimaryButton text="Bắt đầu luyện tập" onPress={handleStart} />
           </View>
         </Animated.View>
       </View>

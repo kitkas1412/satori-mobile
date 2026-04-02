@@ -2,10 +2,12 @@
 
 import { api } from "@/lib/axios";
 import type { ApiResponse } from "@/types/api";
-import type { Lesson } from "./practice-with-ai.types";
+import type { LessonResponse } from "./practice-with-ai.types";
 
-export async function getLessonsApi(courseId: string): Promise<Lesson[]> {
-  const response = await api.get<ApiResponse<Lesson[]>>(
+export async function getLessonsApi(
+  courseId: string,
+): Promise<LessonResponse[]> {
+  const response = await api.get<ApiResponse<LessonResponse[]>>(
     `/courses/${courseId}/lessons`,
   );
   return response.data.data;

@@ -1,7 +1,8 @@
 export { getLessonsApi } from "./get-lessons";
+export { getPracticesApi } from "./get-practices";
 export { generateMockQuestions } from "./mock-questions";
 export type {
-  Lesson,
+  LessonResponse,
   SessionConfig,
   SessionType,
   ExerciseType,
