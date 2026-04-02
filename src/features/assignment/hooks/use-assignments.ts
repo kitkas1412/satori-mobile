@@ -3,17 +3,19 @@
 
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { getAssignmentsApi } from "../api";
+import type { LearnerSubmissionStatus } from "../api/practice.types";
 
 // Query keys dùng chung cho tính năng Practice.
 // Tập trung ở đây để tránh hard-code string nhiều chỗ và dễ invalidate theo nhóm.
 export const practiceQueryKeys = {
-  assignments: ["practice", "assignments"] as const,
+  assignments: (status?: LearnerSubmissionStatus) =>
+    ["practice", "assignments", status ?? "all"] as const,
 };
 
-export function useAssignments() {
+export function useAssignments(status?: LearnerSubmissionStatus) {
   return useInfiniteQuery({
-    queryKey: practiceQueryKeys.assignments,
-    queryFn: ({ pageParam }) => getAssignmentsApi(pageParam),
+    queryKey: practiceQueryKeys.assignments(status),
+    queryFn: ({ pageParam }) => getAssignmentsApi(pageParam, status),
     initialPageParam: 1,
     getNextPageParam: (lastPage) =>
       lastPage.last ? undefined : lastPage.pageNumber + 1,

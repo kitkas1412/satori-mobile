@@ -2,6 +2,7 @@ import { CircleCheck, MessageSquareMore } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
+import type { PracticeStatus } from "@/features/speaking/api/speaking.types";
 
 type ConversationStatus = "completed" | "active" | "locked";
 
@@ -9,7 +10,7 @@ interface ConversationCardProps {
   title: string;
   subtitle: string;
   status: ConversationStatus;
-  practiced?: boolean;
+  practiceStatus: PracticeStatus;
   showBorder?: boolean;
   accentColor?: string;
   onPress?: () => void;
@@ -19,7 +20,7 @@ export function ConversationCard({
   title,
   subtitle,
   status,
-  practiced,
+  practiceStatus,
   showBorder,
   accentColor,
   onPress,
@@ -45,7 +46,7 @@ export function ConversationCard({
       disabled={status === "locked"}
     >
       <View className="w-6 h-6">
-        {practiced ? (
+        {practiceStatus === "COMPLETED" ? (
           <CircleCheck
             size={24}
             color={theme.success.default}

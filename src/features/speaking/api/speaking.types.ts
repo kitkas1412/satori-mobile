@@ -14,6 +14,9 @@ export type TurnState = "AI_TURN" | "USER_TURN" | "LOADING";
 /** Trạng thái hoàn thành của một nhiệm vụ (mission) */
 export type MissionStatus = "PENDING" | "IN_PROGRESS" | "COMPLETED";
 
+/** Trạng thái luyện tập của một conversation */
+export type PracticeStatus = "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED";
+
 /** Trạng thái của một session hội thoại */
 export type SessionStatus = "ACTIVE" | "COMPLETED" | "ABANDONED";
 
@@ -62,6 +65,7 @@ export interface ConversationResponse {
   orderIndex: number;
   practiceCount: number;
   lastPracticedAt: string | null;
+  practiceStatus: PracticeStatus;
   /** Người dùng đã luyện tập topic này chưa */
   practiced: boolean;
 }

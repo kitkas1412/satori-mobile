@@ -2,11 +2,13 @@
 // Hiển thị hai tab: "Bài tập GV" (danh sách bài tập từ giáo viên) và "Ôn luyện AI" (banner AI).
 
 import { Bell, BookOpen, Sparkles } from "lucide-react-native";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useRouter } from "expo-router";
 import {
   ActivityIndicator,
   FlatList,
   Pressable,
+  ScrollView,
   Text,
   View,
 } from "react-native";
@@ -16,24 +18,43 @@ import { StatusBar } from "expo-status-bar";
 import { ChatbotFab } from "@/features/chatbot/components";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useProfile } from "@/hooks/api/use-profile";
 import { useAuthStore } from "@/stores/auth-store";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { ScreenHeader } from "@/components/ui/screen-header";
-import { SectionHeader } from "@/components/ui/section-header";
-import { AiBanner } from "@/features/assignment/components/ai-banner";
 import { AssignmentCard } from "@/features/assignment/components/assignment-card";
 import { mapAssignmentToCardProps } from "@/features/assignment/utils";
 import {
   useAssignments,
   useAssignmentNavigation,
 } from "@/features/assignment/hooks";
-import type { Content } from "@/features/assignment/api";
+import { LessonCard, SessionConfigSheet } from "@/features/practice-with-ai/components";
+import { useLessons } from "@/features/practice-with-ai/hooks";
+import type {
+  AssignmentStatusFilter,
+  Content,
+} from "@/features/assignment/api";
+import type { Lesson, SessionConfig } from "@/features/practice-with-ai/api";
 
 type ActiveTab = "teacher" | "ai";
 
+const STATUS_FILTERS: { label: string; value: AssignmentStatusFilter }[] = [
+  { label: "Tất cả", value: undefined },
+  { label: "Chưa làm", value: "NOT_STARTED" },
+  { label: "Đang làm", value: "IN_PROGRESS" },
+  { label: "Đã nộp", value: "SUBMITTED" },
+  { label: "Đã chấm", value: "GRADED" },
+  { label: "Quá hạn", value: "OVERDUE" },
+];
+
 export default function PracticeTab() {
+  const router = useRouter();
   const user = useAuthStore((state) => state.user);
   const [activeTab, setActiveTab] = useState<ActiveTab>("teacher");
+  const [activeStatus, setActiveStatus] =
+    useState<AssignmentStatusFilter>(undefined);
+  const [sheetLesson, setSheetLesson] = useState<Lesson | null>(null);
+  const flatListRef = useRef<FlatList<Content | Lesson>>(null);
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
@@ -44,9 +65,16 @@ export default function PracticeTab() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useAssignments();
+  } = useAssignments(activeStatus);
   const { handleAssignmentPress, isLoadingSubmission } =
     useAssignmentNavigation();
+  const { data: profile } = useProfile();
+  const courseId = profile?.enrolledClasses[0]?.courseId;
+  const {
+    data: lessons,
+    isLoading: isLoadingLessons,
+    isError: isErrorLessons,
+  } = useLessons(courseId);
 
   const assignments = data?.pages.flatMap((p) => p.content) ?? [];
 
@@ -120,7 +148,10 @@ export default function PracticeTab() {
           </Text>
         </Pressable>
         <Pressable
-          onPress={() => setActiveTab("ai")}
+          onPress={() => {
+            setActiveTab("ai");
+            setActiveStatus(undefined);
+          }}
           className="flex-1 flex-row items-center justify-center gap-2 py-3 rounded-xl"
           style={
             activeTab === "ai"
@@ -145,19 +176,52 @@ export default function PracticeTab() {
         </Pressable>
       </View>
 
-      {activeTab === "teacher" ? (
-        <View className="px-4 mb-1">
-          <SectionHeader
-            title="Bài tập từ giáo viên"
-            subtitle="Hoàn thành các bài tập được giao bởi giáo viên"
-            size="lg"
-          />
-        </View>
-      ) : (
-        <View className="px-4">
-          <AiBanner />
-        </View>
+      {activeTab === "teacher" && (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}
+          style={{ marginBottom: 12 }}
+        >
+          {STATUS_FILTERS.map((filter) => {
+            const isActive = activeStatus === filter.value;
+            return (
+              <Pressable
+                key={filter.label}
+                onPress={() => {
+                  setActiveStatus(filter.value);
+                  flatListRef.current?.scrollToOffset({
+                    offset: 0,
+                    animated: false,
+                  });
+                }}
+                style={{
+                  paddingHorizontal: 16,
+                  paddingVertical: 8,
+                  borderRadius: 20,
+                  backgroundColor: isActive
+                    ? theme.brand.primary
+                    : theme.background.surface,
+                  borderWidth: 1,
+                  borderColor: isActive
+                    ? theme.brand.primary
+                    : theme.border.subtle,
+                }}
+              >
+                <Text
+                  className="font-body text-sm"
+                  style={{
+                    color: isActive ? theme.text.onBrand : theme.text.secondary,
+                  }}
+                >
+                  {filter.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
       )}
+
     </>
   );
 
@@ -189,21 +253,49 @@ export default function PracticeTab() {
           </Text>
         )}
       </View>
+    ) : activeTab === "ai" && !isLoadingLessons ? (
+      <View className="px-4">
+        {isErrorLessons ? (
+          <Text
+            className="font-body text-sm text-center"
+            style={{ color: theme.text.secondary }}
+          >
+            Không thể tải bài học. Vui lòng thử lại.
+          </Text>
+        ) : (
+          <Text
+            className="font-body text-sm text-center"
+            style={{ color: theme.text.secondary }}
+          >
+            Chưa có bài học nào.
+          </Text>
+        )}
+      </View>
     ) : null;
 
   return (
     <View className="flex-1" style={{ backgroundColor: theme.background.page }}>
       <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
 
-      <FlatList<Content>
-        data={activeTab === "teacher" ? assignments : []}
+      <FlatList<Content | Lesson>
+        ref={flatListRef}
+        data={activeTab === "teacher" ? assignments : (lessons ?? [])}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View className="px-4 mb-3">
-            <AssignmentCard
-              {...mapAssignmentToCardProps(item)}
-              onPress={() => handleAssignmentPress(item)}
-            />
+            {activeTab === "teacher" ? (
+              <AssignmentCard
+                {...mapAssignmentToCardProps(item as Content)}
+                onPress={() => handleAssignmentPress(item as Content)}
+              />
+            ) : (
+              <LessonCard
+                title={(item as Lesson).title}
+                vocabularyCount={(item as Lesson).vocabularyCount}
+                grammarPointCount={(item as Lesson).grammarPointCount}
+                onPress={() => setSheetLesson(item as Lesson)}
+              />
+            )}
           </View>
         )}
         ListHeaderComponent={listHeader}
@@ -225,6 +317,28 @@ export default function PracticeTab() {
       <LoadingOverlay
         visible={isLoadingSubmission}
         title="Đang tải kết quả..."
+      />
+      {/* Overlay loading khi đang tải danh sách bài học AI */}
+      <LoadingOverlay
+        visible={activeTab === "ai" && isLoadingLessons}
+        title="Đang tải bài học..."
+      />
+      <SessionConfigSheet
+        visible={sheetLesson !== null}
+        lesson={sheetLesson}
+        onClose={() => setSheetLesson(null)}
+        onStart={(config: SessionConfig) => {
+          const lesson = sheetLesson;
+          setSheetLesson(null);
+          router.push({
+            pathname: "/practice-session",
+            params: {
+              lessonId: lesson!.id,
+              sessionType: config.sessionType,
+              questionCount: String(config.questionCount),
+            },
+          });
+        }}
       />
       <ChatbotFab />
     </View>

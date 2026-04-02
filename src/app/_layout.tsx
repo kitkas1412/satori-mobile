@@ -154,6 +154,10 @@ function RootLayoutNav() {
         options={{ headerShown: false, gestureEnabled: false }}
       />
       <Stack.Screen
+        name="practice-session"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
         name="theme-selector"
         options={{ headerShown: false, gestureEnabled: false }}
       />
