@@ -1,6 +1,6 @@
 // Màn hình phiên luyện tập AI — hiển thị câu hỏi trắc nghiệm từng câu.
 
-import { Flame, Lightbulb, X, Zap } from "lucide-react-native";
+import { CircleCheck, CircleX, Flame, Lightbulb, X, Zap } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -13,8 +13,8 @@ import { IconButton } from "@/components/ui/icon-button";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { PrimaryButton } from "@/components/ui/button";
-import { usePracticeSession } from "@/features/practice-with-ai/hooks";
-import type { ItemType, SessionType } from "@/features/practice-with-ai/api";
+import { usePracticeSession, useSubmitAnswer } from "@/features/practice-with-ai/hooks";
+import type { AnswerResponse, ItemType, SessionType } from "@/features/practice-with-ai/api";
 
 const SESSION_TYPE_LABELS: Record<SessionType, string> = {
   VOCAB_DRILL: "Từ vựng",
@@ -30,7 +30,6 @@ interface DisplayOption {
   id: string;
   label: (typeof OPTION_LABELS)[number];
   text: string;
-  isCorrect?: boolean; // reserved for future submit endpoint
 }
 
 interface DisplayQuestion {
@@ -63,6 +62,10 @@ export function PracticeSessionScreen() {
   const itemType = (rawItemType ?? "MULTIPLE_CHOICE") as ItemType;
 
   const { mutate, data, isPending, isError, reset } = usePracticeSession();
+  const {
+    mutate: submitAnswer,
+    isPending: isSubmitting,
+  } = useSubmitAnswer();
 
   useEffect(() => {
     mutate({
@@ -87,6 +90,8 @@ export function PracticeSessionScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState(false);
+  const [answerResult, setAnswerResult] = useState<AnswerResponse | null>(null);
+  const [hintVisible, setHintVisible] = useState(false);
   const [score, setScore] = useState(0);
 
   // Reset question state when new data arrives
@@ -94,11 +99,14 @@ export function PracticeSessionScreen() {
     setCurrentIndex(0);
     setSelectedOptionId(null);
     setConfirmed(false);
+    setAnswerResult(null);
+    setHintVisible(false);
     setScore(0);
   }, [data]);
 
   const total = questions.length;
   const question = questions[currentIndex];
+  const sessionId = data?.session.sessionId ?? "";
 
   function handleSelectOption(optionId: string) {
     if (confirmed) return;
@@ -106,24 +114,42 @@ export function PracticeSessionScreen() {
   }
 
   function handleConfirm() {
-    if (!selectedOptionId || confirmed) return;
+    if (!selectedOptionId || confirmed || isSubmitting) return;
 
-    const isCorrect =
-      question.options.find((o) => o.id === selectedOptionId)?.isCorrect ??
-      false;
+    const selectedOption = question.options.find((o) => o.id === selectedOptionId);
+    if (!selectedOption) return;
 
     setConfirmed(true);
-    if (isCorrect) setScore((s) => s + 1);
 
-    setTimeout(() => {
-      if (currentIndex + 1 >= total) {
-        router.back();
-      } else {
-        setCurrentIndex((i) => i + 1);
-        setSelectedOptionId(null);
-        setConfirmed(false);
-      }
-    }, 900);
+    submitAnswer(
+      {
+        sessionId,
+        itemId: question.id,
+        userAnswer: selectedOption.text,
+      },
+      {
+        onSuccess: (result) => {
+          setAnswerResult(result);
+          if (result.correct) setScore((s) => s + 1);
+        },
+        onError: () => {
+          setConfirmed(false);
+        },
+      },
+    );
+  }
+
+  function handleNext() {
+    const isLast = !answerResult || answerResult.sessionCompleted || currentIndex + 1 >= total;
+    if (isLast) {
+      router.back();
+    } else {
+      setCurrentIndex((i) => i + 1);
+      setSelectedOptionId(null);
+      setConfirmed(false);
+      setAnswerResult(null);
+      setHintVisible(false);
+    }
   }
 
   function getOptionColors(opt: DisplayOption): {
@@ -133,8 +159,11 @@ export function PracticeSessionScreen() {
     labelBorder: string;
     labelText: string;
     text: string;
+    showCheck: boolean;
   } {
     const isSelected = opt.id === selectedOptionId;
+    const isCorrectAnswer = confirmed && answerResult?.correctAnswer === opt.text;
+    const isWrongSelected = confirmed && isSelected && answerResult !== null && !answerResult.correct;
 
     if (!confirmed) {
       if (isSelected) {
@@ -145,6 +174,7 @@ export function PracticeSessionScreen() {
           labelBorder: theme.icon.onBrand,
           labelText: theme.icon.onBrand,
           text: theme.text.onBrand,
+          showCheck: false,
         };
       }
       return {
@@ -154,30 +184,30 @@ export function PracticeSessionScreen() {
         labelBorder: theme.border.default,
         labelText: theme.text.disabled,
         text: theme.text.disabled,
+        showCheck: false,
       };
     }
 
-    // Trạng thái sau khi xác nhận — option B: chỉ giữ màu cho lựa chọn đã chọn,
-    // chờ submit endpoint để hiển thị đúng/sai.
-    if (opt.isCorrect) {
+    if (isCorrectAnswer) {
       return {
-        bg: theme.success.bold,
-        border: theme.success.bold,
-        labelBg: theme.success.bold,
-        labelBorder: theme.icon.onBrand,
+        bg: theme.success.subtle,
+        border: theme.success.default,
+        labelBg: theme.success.default,
+        labelBorder: theme.success.default,
         labelText: theme.icon.onBrand,
-        text: theme.text.onBrand,
+        text: theme.text.primary,
+        showCheck: true,
       };
     }
-    if (isSelected && !opt.isCorrect) {
-      // Khi chưa có isCorrect từ server: giữ màu brand (đã chọn), không đánh dấu sai
+    if (isWrongSelected) {
       return {
-        bg: theme.brand.primary,
-        border: theme.brand.primary,
-        labelBg: theme.brand.primary,
-        labelBorder: theme.icon.onBrand,
+        bg: theme.error.subtle,
+        border: theme.error.default,
+        labelBg: theme.error.default,
+        labelBorder: theme.error.default,
         labelText: theme.icon.onBrand,
-        text: theme.text.onBrand,
+        text: theme.error.default,
+        showCheck: false,
       };
     }
     return {
@@ -187,6 +217,7 @@ export function PracticeSessionScreen() {
       labelBorder: theme.border.default,
       labelText: theme.text.disabled,
       text: theme.text.disabled,
+      showCheck: false,
     };
   }
 
@@ -358,21 +389,47 @@ export function PracticeSessionScreen() {
             {question.question}
           </Text>
 
-          {/* Hint button */}
+          {/* Hint section */}
           {question.hint && (
-            <Pressable className="flex-row items-center gap-[6px]">
-              <Lightbulb
-                size={14}
-                color={theme.text.secondary}
-                strokeWidth={2}
-              />
-              <Text
-                className="font-body text-xs"
-                style={{ color: theme.text.secondary }}
+            <View className="gap-[10px]">
+              <Pressable
+                className="flex-row items-center gap-[6px]"
+                onPress={() => setHintVisible((v) => !v)}
               >
-                Xem gợi ý
-              </Text>
-            </Pressable>
+                <Lightbulb
+                  size={14}
+                  color={Colors.primitive.amber[300]}
+                  strokeWidth={2}
+                />
+                <Text
+                  className="font-body text-xs"
+                  style={{ color: Colors.primitive.amber[300] }}
+                >
+                  {hintVisible ? "Ẩn gợi ý" : "Xem gợi ý"}
+                </Text>
+              </Pressable>
+              {hintVisible && (
+                <View
+                  className="rounded-xl px-3 py-2"
+                  style={{
+                    backgroundColor: theme.background.surface,
+                    borderWidth: 0.5,
+                    borderColor: Colors.primitive.amber[300],
+                  }}
+                >
+                  <Text
+                    className="font-body"
+                    style={{
+                      fontSize: 13,
+                      lineHeight: 19,
+                      color: Colors.primitive.amber[300],
+                    }}
+                  >
+                    {question.hint}
+                  </Text>
+                </View>
+              )}
+            </View>
           )}
         </View>
 
@@ -421,10 +478,87 @@ export function PracticeSessionScreen() {
                 >
                   {opt.text}
                 </Text>
+
+                {/* Checkmark icon for correct answer */}
+                {colors.showCheck && (
+                  <CircleCheck
+                    size={16}
+                    color={theme.success.default}
+                    strokeWidth={2}
+                  />
+                )}
               </Pressable>
             );
           })}
         </View>
+
+        {/* Feedback panel */}
+        {confirmed && answerResult && (
+          <View
+            className="rounded-[20px] overflow-hidden"
+            style={{
+              backgroundColor: answerResult.correct ? theme.success.subtle : theme.error.subtle,
+              borderWidth: 1,
+              borderColor: answerResult.correct ? theme.success.default : theme.error.default,
+            }}
+          >
+            {/* Header row */}
+            <View
+              className="flex-row items-center gap-[10px] px-4"
+              style={{ height: 60 }}
+            >
+              {answerResult.correct ? (
+                <CircleCheck size={24} color={theme.success.default} strokeWidth={2} />
+              ) : (
+                <CircleX size={24} color={theme.error.default} strokeWidth={2} />
+              )}
+              <View className="flex-1 gap-[1px]">
+                <Text
+                  className="font-heading"
+                  style={{
+                    fontSize: 14,
+                    lineHeight: 19,
+                    color: answerResult.correct ? theme.success.default : theme.error.default,
+                  }}
+                >
+                  {answerResult.correct ? "Đúng rồi!" : "Sai rồi!"}
+                </Text>
+                {!answerResult.correct && (
+                  <View className="flex-row items-center gap-1">
+                    <Text
+                      className="font-body"
+                      style={{ fontSize: 12, lineHeight: 16, color: theme.text.secondary }}
+                    >
+                      Đáp án đúng:
+                    </Text>
+                    <Text
+                      className="font-body"
+                      style={{ fontSize: 12, lineHeight: 16, color: theme.success.default }}
+                    >
+                      {answerResult.correctAnswer}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            </View>
+
+            {/* Explanation */}
+            {answerResult.explanation ? (
+              <View className="px-4 pb-4">
+                <Text
+                  className="font-body"
+                  style={{
+                    fontSize: 12,
+                    lineHeight: 18,
+                    color: theme.text.secondary,
+                  }}
+                >
+                  {answerResult.explanation}
+                </Text>
+              </View>
+            ) : null}
+          </View>
+        )}
       </ScrollView>
 
       {/* Bottom CTA */}
@@ -433,9 +567,9 @@ export function PracticeSessionScreen() {
         style={{ paddingBottom: Math.max(insets.bottom, 16) + 4 }}
       >
         <PrimaryButton
-          text="Xác nhận"
-          onPress={handleConfirm}
-          disabled={!selectedOptionId || confirmed}
+          text={confirmed ? "Câu tiếp theo" : "Xác nhận"}
+          onPress={confirmed ? handleNext : handleConfirm}
+          disabled={!confirmed ? (!selectedOptionId || isSubmitting) : false}
         />
       </View>
     </View>

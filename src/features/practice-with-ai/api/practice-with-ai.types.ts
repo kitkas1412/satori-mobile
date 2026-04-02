@@ -105,3 +105,19 @@ export interface Items {
 export interface Options {
   text: string;
 }
+
+// POST: /api/v1/learner/practice/sessions/{{sessionId}}/items/{{itemId}}/answer
+/** Request body gửi câu trả lời */
+export interface AnswerRequest {
+  userAnswer: string;
+}
+
+/** Response sau khi submit câu trả lời */
+export interface AnswerResponse {
+  score: number;
+  feedback: string;
+  correctAnswer: string;
+  explanation: string;
+  sessionCompleted: boolean;
+  correct: boolean;
+}
