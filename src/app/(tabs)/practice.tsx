@@ -3,6 +3,7 @@
 
 import { Bell, BookOpen, Sparkles } from "lucide-react-native";
 import { useRef, useState } from "react";
+import { useRouter } from "expo-router";
 import {
   ActivityIndicator,
   FlatList,
@@ -47,6 +48,7 @@ const STATUS_FILTERS: { label: string; value: AssignmentStatusFilter }[] = [
 ];
 
 export default function PracticeTab() {
+  const router = useRouter();
   const user = useAuthStore((state) => state.user);
   const [activeTab, setActiveTab] = useState<ActiveTab>("teacher");
   const [activeStatus, setActiveStatus] =
@@ -326,9 +328,16 @@ export default function PracticeTab() {
         lesson={sheetLesson}
         onClose={() => setSheetLesson(null)}
         onStart={(config: SessionConfig) => {
+          const lesson = sheetLesson;
           setSheetLesson(null);
-          // TODO: navigate to lesson session screen
-          console.log("Start session", config);
+          router.push({
+            pathname: "/practice-session",
+            params: {
+              lessonId: lesson!.id,
+              sessionType: config.sessionType,
+              questionCount: String(config.questionCount),
+            },
+          });
         }}
       />
       <ChatbotFab />

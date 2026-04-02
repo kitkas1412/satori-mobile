@@ -21,6 +21,21 @@ export interface SessionConfig {
   exerciseTypes: ExerciseType[];
 }
 
+export interface QuestionOption {
+  id: string;
+  label: "A" | "B" | "C" | "D";
+  text: string;
+  isCorrect: boolean;
+}
+
+export interface PracticeQuestion {
+  id: string;
+  type: "multiple_choice";
+  text: string;
+  hint?: string;
+  options: QuestionOption[];
+}
+
 export interface Lesson {
   id: string;
   courseId: string;
