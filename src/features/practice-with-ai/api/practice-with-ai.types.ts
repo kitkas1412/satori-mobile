@@ -121,3 +121,26 @@ export interface AnswerResponse {
   sessionCompleted: boolean;
   correct: boolean;
 }
+
+// GET: /api/v1/learner/practice/sessions/{{practiceSessionId}}/summary
+/** Chi tiết kết quả cho từng câu trong phiên luyện tập */
+export interface PracticeSessionSummaryItem {
+  itemIndex: number;
+  question: string;
+  userAnswer: string;
+  correctAnswer: string;
+  isCorrect: boolean;
+  score: number;
+  explanation: string;
+  aiFeedback: string;
+}
+
+/** Tổng kết toàn phiên luyện tập */
+export interface PracticeSessionSummaryResponse {
+  sessionId: string;
+  score: number;
+  correctItems: number;
+  totalItems: number;
+  aiFeedback: string;
+  items: PracticeSessionSummaryItem[];
+}

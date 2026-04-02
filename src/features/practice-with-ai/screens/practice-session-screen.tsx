@@ -1,20 +1,34 @@
 // Màn hình phiên luyện tập AI — hiển thị câu hỏi trắc nghiệm từng câu.
 
-import { CircleCheck, CircleX, Flame, Lightbulb, X, Zap } from "lucide-react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import {
+  CircleCheck,
+  CircleX,
+  Flame,
+  Lightbulb,
+  X,
+  Zap,
+} from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { StatusBar } from "expo-status-bar";
-import { useLocalSearchParams, useRouter } from "expo-router";
 
-import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { PrimaryButton } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { ProgressBar } from "@/components/ui/progress-bar";
-import { PrimaryButton } from "@/components/ui/button";
-import { usePracticeSession, useSubmitAnswer } from "@/features/practice-with-ai/hooks";
-import type { AnswerResponse, ItemType, SessionType } from "@/features/practice-with-ai/api";
+import { Colors } from "@/constants/theme";
+import type {
+  AnswerResponse,
+  ItemType,
+  SessionType,
+} from "@/features/practice-with-ai/api";
+import {
+  usePracticeSession,
+  useSubmitAnswer,
+} from "@/features/practice-with-ai/hooks";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 
 const SESSION_TYPE_LABELS: Record<SessionType, string> = {
   VOCAB_DRILL: "Từ vựng",
@@ -62,10 +76,7 @@ export function PracticeSessionScreen() {
   const itemType = (rawItemType ?? "MULTIPLE_CHOICE") as ItemType;
 
   const { mutate, data, isPending, isError, reset } = usePracticeSession();
-  const {
-    mutate: submitAnswer,
-    isPending: isSubmitting,
-  } = useSubmitAnswer();
+  const { mutate: submitAnswer, isPending: isSubmitting } = useSubmitAnswer();
 
   useEffect(() => {
     mutate({
@@ -93,6 +104,7 @@ export function PracticeSessionScreen() {
   const [answerResult, setAnswerResult] = useState<AnswerResponse | null>(null);
   const [hintVisible, setHintVisible] = useState(false);
   const [score, setScore] = useState(0);
+  const [isNavigatingToResult, setIsNavigatingToResult] = useState(false);
 
   // Reset question state when new data arrives
   useEffect(() => {
@@ -102,11 +114,15 @@ export function PracticeSessionScreen() {
     setAnswerResult(null);
     setHintVisible(false);
     setScore(0);
+    setIsNavigatingToResult(false);
   }, [data]);
 
   const total = questions.length;
   const question = questions[currentIndex];
   const sessionId = data?.session.sessionId ?? "";
+  const isSessionCompleted =
+    !!answerResult &&
+    (answerResult.sessionCompleted || currentIndex + 1 >= total);
 
   function handleSelectOption(optionId: string) {
     if (confirmed) return;
@@ -116,7 +132,9 @@ export function PracticeSessionScreen() {
   function handleConfirm() {
     if (!selectedOptionId || confirmed || isSubmitting) return;
 
-    const selectedOption = question.options.find((o) => o.id === selectedOptionId);
+    const selectedOption = question.options.find(
+      (o) => o.id === selectedOptionId,
+    );
     if (!selectedOption) return;
 
     setConfirmed(true);
@@ -140,9 +158,18 @@ export function PracticeSessionScreen() {
   }
 
   function handleNext() {
-    const isLast = !answerResult || answerResult.sessionCompleted || currentIndex + 1 >= total;
-    if (isLast) {
-      router.back();
+    if (isSessionCompleted) {
+      if (isNavigatingToResult) return;
+      if (!sessionId) {
+        router.back();
+        return;
+      }
+
+      setIsNavigatingToResult(true);
+      router.push({
+        pathname: "/practice-result",
+        params: { practiceSessionId: sessionId },
+      });
     } else {
       setCurrentIndex((i) => i + 1);
       setSelectedOptionId(null);
@@ -162,8 +189,10 @@ export function PracticeSessionScreen() {
     showCheck: boolean;
   } {
     const isSelected = opt.id === selectedOptionId;
-    const isCorrectAnswer = confirmed && answerResult?.correctAnswer === opt.text;
-    const isWrongSelected = confirmed && isSelected && answerResult !== null && !answerResult.correct;
+    const isCorrectAnswer =
+      confirmed && answerResult?.correctAnswer === opt.text;
+    const isWrongSelected =
+      confirmed && isSelected && answerResult !== null && !answerResult.correct;
 
     if (!confirmed) {
       if (isSelected) {
@@ -497,9 +526,13 @@ export function PracticeSessionScreen() {
           <View
             className="rounded-[20px] overflow-hidden"
             style={{
-              backgroundColor: answerResult.correct ? theme.success.subtle : theme.error.subtle,
+              backgroundColor: answerResult.correct
+                ? theme.success.subtle
+                : theme.error.subtle,
               borderWidth: 1,
-              borderColor: answerResult.correct ? theme.success.default : theme.error.default,
+              borderColor: answerResult.correct
+                ? theme.success.default
+                : theme.error.default,
             }}
           >
             {/* Header row */}
@@ -508,9 +541,17 @@ export function PracticeSessionScreen() {
               style={{ height: 60 }}
             >
               {answerResult.correct ? (
-                <CircleCheck size={24} color={theme.success.default} strokeWidth={2} />
+                <CircleCheck
+                  size={24}
+                  color={theme.success.default}
+                  strokeWidth={2}
+                />
               ) : (
-                <CircleX size={24} color={theme.error.default} strokeWidth={2} />
+                <CircleX
+                  size={24}
+                  color={theme.error.default}
+                  strokeWidth={2}
+                />
               )}
               <View className="flex-1 gap-[1px]">
                 <Text
@@ -518,7 +559,9 @@ export function PracticeSessionScreen() {
                   style={{
                     fontSize: 14,
                     lineHeight: 19,
-                    color: answerResult.correct ? theme.success.default : theme.error.default,
+                    color: answerResult.correct
+                      ? theme.success.default
+                      : theme.error.default,
                   }}
                 >
                   {answerResult.correct ? "Đúng rồi!" : "Sai rồi!"}
@@ -527,13 +570,21 @@ export function PracticeSessionScreen() {
                   <View className="flex-row items-center gap-1">
                     <Text
                       className="font-body"
-                      style={{ fontSize: 12, lineHeight: 16, color: theme.text.secondary }}
+                      style={{
+                        fontSize: 12,
+                        lineHeight: 16,
+                        color: theme.text.secondary,
+                      }}
                     >
                       Đáp án đúng:
                     </Text>
                     <Text
                       className="font-body"
-                      style={{ fontSize: 12, lineHeight: 16, color: theme.success.default }}
+                      style={{
+                        fontSize: 12,
+                        lineHeight: 16,
+                        color: theme.success.default,
+                      }}
                     >
                       {answerResult.correctAnswer}
                     </Text>
@@ -567,9 +618,19 @@ export function PracticeSessionScreen() {
         style={{ paddingBottom: Math.max(insets.bottom, 16) + 4 }}
       >
         <PrimaryButton
-          text={confirmed ? "Câu tiếp theo" : "Xác nhận"}
+          text={
+            confirmed
+              ? isSessionCompleted
+                ? "Tiếp tục"
+                : "Câu tiếp theo"
+              : "Xác nhận"
+          }
           onPress={confirmed ? handleNext : handleConfirm}
-          disabled={!confirmed ? (!selectedOptionId || isSubmitting) : false}
+          disabled={
+            !confirmed
+              ? !selectedOptionId || isSubmitting
+              : isNavigatingToResult || isSubmitting
+          }
         />
       </View>
     </View>

@@ -77,7 +77,9 @@ function RootLayoutNav() {
     if (!isHydrated || !isAuthenticated) return;
 
     const cleanupOrphanedSession = async () => {
-      const orphanedSessionId = await AsyncStorage.getItem(ACTIVE_SESSION_STORAGE_KEY);
+      const orphanedSessionId = await AsyncStorage.getItem(
+        ACTIVE_SESSION_STORAGE_KEY,
+      );
       if (!orphanedSessionId) return;
       try {
         await abandonSessionApi(orphanedSessionId);
@@ -155,6 +157,10 @@ function RootLayoutNav() {
       />
       <Stack.Screen
         name="practice-session"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="practice-result"
         options={{ headerShown: false, gestureEnabled: false }}
       />
       <Stack.Screen
