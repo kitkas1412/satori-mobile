@@ -56,31 +56,31 @@ const SESSION_TYPES: {
   icon: React.ReactNode;
 }[] = [
   {
-    value: "VOCABULARY",
+    value: "VOCAB_DRILL",
     label: "Luyện từ vựng",
     subtitle: "Ghi nhớ & kiểm tra",
     icon: null,
   },
   {
-    value: "GRAMMAR",
+    value: "GRAMMAR_DRILL",
     label: "Luyện ngữ pháp",
     subtitle: "Cấu trúc câu",
     icon: null,
   },
   {
-    value: "COMBINED",
+    value: "MIXED_LESSON",
     label: "Bài tổng hợp",
     subtitle: "Tất cả kỹ năng",
     icon: null,
   },
   {
-    value: "KANJI",
+    value: "KANJI_READING",
     label: "Đọc Kanji",
     subtitle: "Âm & nghĩa chữ Hán",
     icon: null,
   },
   {
-    value: "SENTENCE",
+    value: "SENTENCE_BUILD",
     label: "Xây dựng câu",
     subtitle: "Lắp ghép câu hoàn chỉnh",
     icon: null,
@@ -93,11 +93,11 @@ const EXERCISE_TYPES: {
   icon: React.ReactNode;
 }[] = [
   { value: "MULTIPLE_CHOICE", label: "Trắc nghiệm", icon: null },
-  { value: "fill_blank", label: "Điền vào chỗ trống", icon: null },
-  { value: "translation", label: "Dịch thuật", icon: null },
-  { value: "ordering", label: "Sắp xếp câu", icon: null },
-  { value: "matching", label: "Ghép đôi", icon: null },
-  { value: "true_false", label: "Đúng / Sai", icon: null },
+  { value: "FILL_BLANK", label: "Điền vào chỗ trống", icon: null },
+  { value: "TRANSLATION", label: "Dịch thuật", icon: null },
+  { value: "ORDERING", label: "Sắp xếp câu", icon: null },
+  { value: "MATCHING", label: "Ghép đôi", icon: null },
+  { value: "TRUE_FALSE", label: "Đúng / Sai", icon: null },
 ];
 
 export interface SessionConfigSheetProps {
@@ -116,15 +116,15 @@ function SessionTypeIcon({
 }) {
   const props = { size: 20, color, strokeWidth: 2 };
   switch (type) {
-    case "VOCABULARY":
+    case "VOCAB_DRILL":
       return <BookOpen {...props} />;
-    case "GRAMMAR":
+    case "GRAMMAR_DRILL":
       return <Pencil {...props} />;
-    case "COMBINED":
+    case "MIXED_LESSON":
       return <Layers {...props} />;
-    case "KANJI":
+    case "KANJI_READING":
       return <Eye {...props} />;
-    case "SENTENCE":
+    case "SENTENCE_BUILD":
       return <Type {...props} />;
   }
 }
@@ -140,15 +140,15 @@ function ExerciseTypeIcon({
   switch (type) {
     case "MULTIPLE_CHOICE":
       return <CheckSquare {...props} />;
-    case "fill_blank":
+    case "FILL_BLANK":
       return <PenLine {...props} />;
-    case "translation":
+    case "TRANSLATION":
       return <Languages {...props} />;
-    case "ordering":
+    case "ORDERING":
       return <ArrowUpDown {...props} />;
-    case "matching":
+    case "MATCHING":
       return <Link2 {...props} />;
-    case "true_false":
+    case "TRUE_FALSE":
       return <ToggleLeft {...props} />;
   }
 }
@@ -163,7 +163,7 @@ export function SessionConfigSheet({
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
-  const [sessionType, setSessionType] = useState<SessionType>("VOCABULARY");
+  const [sessionType, setSessionType] = useState<SessionType>("VOCAB_DRILL");
   const [questionCount, setQuestionCount] = useState(5);
   const [exerciseTypes, setExerciseTypes] = useState<ExerciseType[]>([
     "MULTIPLE_CHOICE",

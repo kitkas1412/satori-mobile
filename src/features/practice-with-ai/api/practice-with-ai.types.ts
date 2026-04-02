@@ -1,11 +1,11 @@
 // Types cho tính năng Luyện tập AI.
 
 export type SessionType =
-  | "VOCABULARY"
-  | "GRAMMAR"
-  | "COMBINED"
-  | "KANJI"
-  | "SENTENCE";
+  | "VOCAB_DRILL"
+  | "GRAMMAR_DRILL"
+  | "MIXED_LESSON"
+  | "KANJI_READING"
+  | "SENTENCE_BUILD";
 
 export type SessionStatus = "IN_PROGRESS";
 
@@ -19,11 +19,11 @@ export type ItemType =
 
 export type ExerciseType =
   | "MULTIPLE_CHOICE"
-  | "fill_blank"
-  | "translation"
-  | "ordering"
-  | "matching"
-  | "true_false";
+  | "FILL_BLANK"
+  | "TRANSLATION"
+  | "ORDERING"
+  | "MATCHING"
+  | "TRUE_FALSE";
 
 export interface SessionConfig {
   sessionType: SessionType;
@@ -98,7 +98,7 @@ export interface Items {
   itemType: ItemType;
   question: string;
   hint: string;
-  options: Options;
+  options: Options[];
 }
 
 /** Đáp án của câu hỏi */

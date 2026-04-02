@@ -336,6 +336,7 @@ export default function PracticeTab() {
               lessonId: lesson!.id,
               sessionType: config.sessionType,
               questionCount: String(config.questionCount),
+              itemType: config.exerciseTypes[0],
             },
           });
         }}

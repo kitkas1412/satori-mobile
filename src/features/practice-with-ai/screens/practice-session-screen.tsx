@@ -1,13 +1,8 @@
 // Màn hình phiên luyện tập AI — hiển thị câu hỏi trắc nghiệm từng câu.
 
 import { Flame, Lightbulb, X, Zap } from "lucide-react-native";
-import { useState } from "react";
-import {
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
+import { useEffect, useState } from "react";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -15,22 +10,35 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { IconButton } from "@/components/ui/icon-button";
+import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { PrimaryButton } from "@/components/ui/button";
-import {
-  generateMockQuestions,
-  type PracticeQuestion,
-  type QuestionOption,
-  type SessionType,
-} from "@/features/practice-with-ai/api";
+import { usePracticeSession } from "@/features/practice-with-ai/hooks";
+import type { ItemType, SessionType } from "@/features/practice-with-ai/api";
 
 const SESSION_TYPE_LABELS: Record<SessionType, string> = {
-  vocabulary: "Từ vựng",
-  grammar: "Ngữ pháp",
-  kanji: "Kanji",
-  combined: "Tổng hợp",
-  sentence: "Xây dựng câu",
+  VOCAB_DRILL: "Từ vựng",
+  GRAMMAR_DRILL: "Ngữ pháp",
+  KANJI_READING: "Kanji",
+  MIXED_LESSON: "Tổng hợp",
+  SENTENCE_BUILD: "Xây dựng câu",
 };
+
+const OPTION_LABELS = ["A", "B", "C", "D"] as const;
+
+interface DisplayOption {
+  id: string;
+  label: (typeof OPTION_LABELS)[number];
+  text: string;
+  isCorrect?: boolean; // reserved for future submit endpoint
+}
+
+interface DisplayQuestion {
+  id: string;
+  question: string;
+  hint?: string;
+  options: DisplayOption[];
+}
 
 export function PracticeSessionScreen() {
   const router = useRouter();
@@ -38,21 +46,56 @@ export function PracticeSessionScreen() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
-  const { sessionType: rawSessionType, questionCount: rawCount } =
-    useLocalSearchParams<{ lessonId: string; sessionType: string; questionCount: string }>();
+  const {
+    lessonId,
+    sessionType: rawSessionType,
+    questionCount: rawCount,
+    itemType: rawItemType,
+  } = useLocalSearchParams<{
+    lessonId: string;
+    sessionType: string;
+    questionCount: string;
+    itemType: string;
+  }>();
 
-  const sessionType = (rawSessionType ?? "vocabulary") as SessionType;
-  const questionCount = Math.max(1, parseInt(rawCount ?? "5", 10));
+  const sessionType = (rawSessionType ?? "VOCAB_DRILL") as SessionType;
+  const itemCount = Math.max(1, parseInt(rawCount ?? "5", 10));
+  const itemType = (rawItemType ?? "MULTIPLE_CHOICE") as ItemType;
 
-  // Sinh câu hỏi một lần khi mount (useMemo không cần thiết — React Compiler xử lý)
-  const [questions] = useState<PracticeQuestion[]>(() =>
-    generateMockQuestions(sessionType, questionCount),
-  );
+  const { mutate, data, isPending, isError, reset } = usePracticeSession();
+
+  useEffect(() => {
+    mutate({
+      lessonId: lessonId ?? "",
+      sessionType,
+      itemCount,
+      itemTypes: [itemType],
+    });
+  }, []);
+
+  const questions: DisplayQuestion[] = (data?.items ?? []).map((item) => ({
+    id: item.id,
+    question: item.question,
+    hint: item.hint || undefined,
+    options: item.options.map((opt, idx) => ({
+      id: `${item.id}-${idx}`,
+      label: OPTION_LABELS[idx] ?? "A",
+      text: opt.text,
+    })),
+  }));
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState(false);
   const [score, setScore] = useState(0);
+
+  // Reset question state when new data arrives
+  useEffect(() => {
+    setCurrentIndex(0);
+    setSelectedOptionId(null);
+    setConfirmed(false);
+    setScore(0);
+  }, [data]);
 
   const total = questions.length;
   const question = questions[currentIndex];
@@ -66,7 +109,8 @@ export function PracticeSessionScreen() {
     if (!selectedOptionId || confirmed) return;
 
     const isCorrect =
-      question.options.find((o) => o.id === selectedOptionId)?.isCorrect ?? false;
+      question.options.find((o) => o.id === selectedOptionId)?.isCorrect ??
+      false;
 
     setConfirmed(true);
     if (isCorrect) setScore((s) => s + 1);
@@ -82,7 +126,7 @@ export function PracticeSessionScreen() {
     }, 900);
   }
 
-  function getOptionColors(opt: QuestionOption): {
+  function getOptionColors(opt: DisplayOption): {
     bg: string;
     border: string;
     labelBg: string;
@@ -113,7 +157,8 @@ export function PracticeSessionScreen() {
       };
     }
 
-    // Trạng thái sau khi xác nhận
+    // Trạng thái sau khi xác nhận — option B: chỉ giữ màu cho lựa chọn đã chọn,
+    // chờ submit endpoint để hiển thị đúng/sai.
     if (opt.isCorrect) {
       return {
         bg: theme.success.bold,
@@ -125,10 +170,11 @@ export function PracticeSessionScreen() {
       };
     }
     if (isSelected && !opt.isCorrect) {
+      // Khi chưa có isCorrect từ server: giữ màu brand (đã chọn), không đánh dấu sai
       return {
-        bg: theme.error.bold,
-        border: theme.error.bold,
-        labelBg: theme.error.bold,
+        bg: theme.brand.primary,
+        border: theme.brand.primary,
+        labelBg: theme.brand.primary,
         labelBorder: theme.icon.onBrand,
         labelText: theme.icon.onBrand,
         text: theme.text.onBrand,
@@ -144,17 +190,71 @@ export function PracticeSessionScreen() {
     };
   }
 
+  // --- Error state ---
+  if (isError) {
+    return (
+      <View
+        className="flex-1 items-center justify-center px-8 gap-4"
+        style={{ backgroundColor: theme.background.page }}
+      >
+        <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+        <Text
+          className="font-heading text-base text-center"
+          style={{ color: theme.text.primary }}
+        >
+          Không thể tải bài luyện tập
+        </Text>
+        <Text
+          className="font-body text-sm text-center"
+          style={{ color: theme.text.secondary }}
+        >
+          Vui lòng kiểm tra kết nối và thử lại.
+        </Text>
+        <Pressable
+          onPress={() => {
+            reset();
+            mutate({
+              lessonId: lessonId ?? "",
+              sessionType,
+              itemCount,
+              itemTypes: [itemType],
+            });
+          }}
+          className="px-6 py-3 rounded-2xl"
+          style={{ backgroundColor: theme.brand.primary }}
+        >
+          <Text
+            className="font-heading text-sm"
+            style={{ color: theme.text.onBrand }}
+          >
+            Thử lại
+          </Text>
+        </Pressable>
+        <Pressable onPress={() => router.back()}>
+          <Text
+            className="font-body text-sm"
+            style={{ color: theme.text.secondary }}
+          >
+            Quay lại
+          </Text>
+        </Pressable>
+      </View>
+    );
+  }
+
   if (!question) return null;
 
   return (
     <View className="flex-1" style={{ backgroundColor: theme.background.page }}>
       <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+      <LoadingOverlay
+        visible={isPending}
+        title="Đang tải bài luyện tập"
+        message="Vui lòng đợi trong giây lát"
+      />
 
       {/* Header */}
-      <View
-        className="px-4 gap-4"
-        style={{ paddingTop: insets.top + 16 }}
-      >
+      <View className="px-4 gap-4" style={{ paddingTop: insets.top + 16 }}>
         {/* Row: X | badge + counter | flame + score */}
         <View className="flex-row items-center">
           <IconButton
@@ -181,7 +281,10 @@ export function PracticeSessionScreen() {
               </Text>
             </View>
             {/* Số câu */}
-            <Text className="font-body text-xs" style={{ color: theme.text.secondary }}>
+            <Text
+              className="font-body text-xs"
+              style={{ color: theme.text.secondary }}
+            >
               Câu {currentIndex + 1} / {total}
             </Text>
           </View>
@@ -204,7 +307,10 @@ export function PracticeSessionScreen() {
         </View>
 
         {/* Progress bar */}
-        <ProgressBar progress={(currentIndex + (confirmed ? 1 : 0)) / total} height={6} />
+        <ProgressBar
+          progress={(currentIndex + (confirmed ? 1 : 0)) / total}
+          height={6}
+        />
       </View>
 
       {/* Body */}
@@ -249,14 +355,21 @@ export function PracticeSessionScreen() {
             className="font-heading"
             style={{ fontSize: 18, lineHeight: 26, color: theme.text.primary }}
           >
-            {question.text}
+            {question.question}
           </Text>
 
           {/* Hint button */}
           {question.hint && (
             <Pressable className="flex-row items-center gap-[6px]">
-              <Lightbulb size={14} color={theme.text.secondary} strokeWidth={2} />
-              <Text className="font-body text-xs" style={{ color: theme.text.secondary }}>
+              <Lightbulb
+                size={14}
+                color={theme.text.secondary}
+                strokeWidth={2}
+              />
+              <Text
+                className="font-body text-xs"
+                style={{ color: theme.text.secondary }}
+              >
                 Xem gợi ý
               </Text>
             </Pressable>

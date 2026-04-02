@@ -6,6 +6,11 @@ export type {
   SessionConfig,
   SessionType,
   ExerciseType,
+  ItemType,
   PracticeQuestion,
   QuestionOption,
+  PracticeSessionRequest,
+  PracticeSessionResponse,
+  Session,
+  Items,
 } from "./practice-with-ai.types";
