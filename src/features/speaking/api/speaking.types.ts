@@ -48,11 +48,11 @@ export interface Topic {
   conversationCount: number;
 }
 
-// GET: /learner/conversation/themes/{{theme_id}}/topics
+// GET: /learner/conversation/topics/{{topicId}}/conversations
 /** Một conversation hội thoại trong danh sách của một topic */
 export interface ConversationResponse {
   id: string;
-  themeId: string;
+  topicId: string;
   title: string;
   titleJapanese: string;
   descriptionVi: string;
