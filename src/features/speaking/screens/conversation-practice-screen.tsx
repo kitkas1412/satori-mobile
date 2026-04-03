@@ -1,6 +1,6 @@
 // Màn hình luyện hội thoại với AI — trung tâm của feature Speaking.
 // Hỗ trợ 2 chế độ:
-//   - Guided (có topicId): luyện theo topic với danh sách nhiệm vụ
+//   - Guided (có conversationId): luyện theo conversation với danh sách nhiệm vụ
 //   - Free-talk (có jlptLevel + language): hội thoại tự do không theo topic
 //
 // Luồng: khởi tạo session → người dùng nói (mic) → AI phản hồi → lặp lại
@@ -37,14 +37,14 @@ import {
 import { useConversationStore } from "@/stores";
 
 interface ConversationPracticeScreenProps {
-  topicId?: string;
+  conversationId?: string;
   jlptLevel?: string;
   language?: string;
   title: string;
 }
 
 export function ConversationPracticeScreen({
-  topicId,
+  conversationId,
   jlptLevel,
   language,
   title,
@@ -86,15 +86,15 @@ export function ConversationPracticeScreen({
     });
 
   // Khởi tạo session khi màn hình mount:
-  // - Nếu có topicId → guided session theo topic
+  // - Nếu có conversationId → guided session theo conversation
   // - Nếu có jlptLevel + language → free-talk session
   useEffect(() => {
-    if (topicId) {
-      initSession(topicId);
+    if (conversationId) {
+      initSession(conversationId);
     } else if (jlptLevel && language) {
       initFreeTalkSession(jlptLevel, language);
     }
-  }, [topicId, jlptLevel, language]);
+  }, [conversationId, jlptLevel, language]);
 
   /** Hiển thị hộp thoại xác nhận trước khi bỏ dở session (tiến độ sẽ không được lưu) */
   function handleAbandonSession() {
@@ -121,7 +121,10 @@ export function ConversationPracticeScreen({
     <>
       <View
         className="flex-1"
-        style={{ paddingTop: insets.top, backgroundColor: theme.background.page }}
+        style={{
+          paddingTop: insets.top,
+          backgroundColor: theme.background.page,
+        }}
       >
         {/* Header */}
         <ScreenHeader
@@ -135,7 +138,7 @@ export function ConversationPracticeScreen({
             </TouchableOpacity>
           }
           rightAction={
-            topicId ? (
+            conversationId ? (
               <TouchableOpacity
                 onPress={() => setIsMissionsVisible(true)}
                 hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
@@ -147,7 +150,10 @@ export function ConversationPracticeScreen({
         />
 
         {/* Divider */}
-        <View className="h-px" style={{ backgroundColor: theme.border.subtle }} />
+        <View
+          className="h-px"
+          style={{ backgroundColor: theme.border.subtle }}
+        />
 
         {/* Messages */}
         <ScrollView
@@ -200,9 +206,15 @@ export function ConversationPracticeScreen({
                     hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
                   >
                     {isCompleting ? (
-                      <ActivityIndicator size="small" color={theme.brand.primary} />
+                      <ActivityIndicator
+                        size="small"
+                        color={theme.brand.primary}
+                      />
                     ) : (
-                      <Text className="font-heading text-lg" style={{ color: theme.brand.primary }}>
+                      <Text
+                        className="font-heading text-lg"
+                        style={{ color: theme.brand.primary }}
+                      >
                         Kết thúc
                       </Text>
                     )}
@@ -230,7 +242,7 @@ export function ConversationPracticeScreen({
         title="Đang khởi tạo..."
         message="Vui lòng đợi trong giây lát"
       />
-      {topicId && (
+      {conversationId && (
         <MissionsModal
           visible={isMissionsVisible}
           onClose={() => setIsMissionsVisible(false)}
