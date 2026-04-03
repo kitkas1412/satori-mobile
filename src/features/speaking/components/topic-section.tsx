@@ -50,7 +50,9 @@ export function TopicSection({
   const theme = Colors[colorScheme ?? "light"];
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const { data: topics } = useConversations(section.id);
-  const cardPositions = useRef<Record<string, { y: number; height: number }>>({});
+  const cardPositions = useRef<Record<string, { y: number; height: number }>>(
+    {},
+  );
 
   const accentColor =
     section.orderIndex % 2 === 0 ? theme.purple.default : theme.brand.primary;
@@ -67,10 +69,11 @@ export function TopicSection({
     })) ?? [];
 
   /** true nếu section còn ít nhất một topic chưa được luyện tập */
-  const hasUnpracticed = topics?.some((t) => !t.practiced) ?? false;
+  const hasUnpracticed =
+    topics?.some((t) => t.practiceStatus !== "COMPLETED") ?? false;
 
   const firstUnpracticedIndex = showFirstUnpracticedBorder
-    ? conversations.findIndex((c) => !c.practiced)
+    ? conversations.findIndex((c) => c.practiceStatus !== "COMPLETED")
     : -1;
 
   // Báo lên parent mỗi khi trạng thái "có chưa luyện" thay đổi.
@@ -79,7 +82,13 @@ export function TopicSection({
     if (hasUnpracticed) {
       onHasUnpracticed(section.id, section.orderIndex);
     }
-  }, [hasUnpracticed, section.id, section.orderIndex, onHasUnpracticed, focusTrigger]);
+  }, [
+    hasUnpracticed,
+    section.id,
+    section.orderIndex,
+    onHasUnpracticed,
+    focusTrigger,
+  ]);
 
   // Tự động expand nếu đây là section chứa card cần scroll đến.
   // Không đưa isExpanded vào deps để user vẫn có thể tự collapse sau khi auto-expand.
