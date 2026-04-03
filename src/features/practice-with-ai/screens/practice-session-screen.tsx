@@ -63,17 +63,19 @@ export function PracticeSessionScreen() {
     lessonId,
     sessionType: rawSessionType,
     questionCount: rawCount,
-    itemType: rawItemType,
+    itemTypes: rawItemTypes,
   } = useLocalSearchParams<{
     lessonId: string;
     sessionType: string;
     questionCount: string;
-    itemType: string;
+    itemTypes: string;
   }>();
 
   const sessionType = (rawSessionType ?? "VOCAB_DRILL") as SessionType;
   const itemCount = Math.max(1, parseInt(rawCount ?? "5", 10));
-  const itemType = (rawItemType ?? "MULTIPLE_CHOICE") as ItemType;
+  const itemTypes = JSON.parse(
+    rawItemTypes ?? '["MULTIPLE_CHOICE"]',
+  ) as ItemType[];
 
   const { mutate, data, isPending, isError, reset } = usePracticeSession();
   const { mutate: submitAnswer, isPending: isSubmitting } = useSubmitAnswer();
@@ -83,7 +85,7 @@ export function PracticeSessionScreen() {
       lessonId: lessonId ?? "",
       sessionType,
       itemCount,
-      itemTypes: [itemType],
+      itemTypes,
     });
   }, []);
 
@@ -118,8 +120,10 @@ export function PracticeSessionScreen() {
   }, [data]);
 
   const total = questions.length;
-  const question = questions[currentIndex];
+  const question = questions[currentIndex]!;
   const sessionId = data?.session.sessionId ?? "";
+
+  console.log("[PracticeSession] isPending:", isPending, "question:", question);
   const isSessionCompleted =
     !!answerResult &&
     (answerResult.sessionCompleted || currentIndex + 1 >= total);
@@ -277,7 +281,7 @@ export function PracticeSessionScreen() {
               lessonId: lessonId ?? "",
               sessionType,
               itemCount,
-              itemTypes: [itemType],
+              itemTypes,
             });
           }}
           className="px-6 py-3 rounded-2xl"
@@ -301,8 +305,6 @@ export function PracticeSessionScreen() {
       </View>
     );
   }
-
-  if (!question) return null;
 
   return (
     <View className="flex-1" style={{ backgroundColor: theme.background.page }}>

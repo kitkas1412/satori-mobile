@@ -38,7 +38,7 @@ import { Backdrop, PrimaryButton } from "@/components/ui";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import type {
-  ExerciseType,
+  ItemType,
   LessonResponse,
   SessionConfig,
   SessionType,
@@ -88,14 +88,14 @@ const SESSION_TYPES: {
 ];
 
 const EXERCISE_TYPES: {
-  value: ExerciseType;
+  value: ItemType;
   label: string;
   icon: React.ReactNode;
 }[] = [
   { value: "MULTIPLE_CHOICE", label: "Trắc nghiệm", icon: null },
   { value: "FILL_BLANK", label: "Điền vào chỗ trống", icon: null },
   { value: "TRANSLATION", label: "Dịch thuật", icon: null },
-  { value: "ORDERING", label: "Sắp xếp câu", icon: null },
+  { value: "SENTENCE_ORDER", label: "Sắp xếp câu", icon: null },
   { value: "MATCHING", label: "Ghép đôi", icon: null },
   { value: "TRUE_FALSE", label: "Đúng / Sai", icon: null },
 ];
@@ -129,13 +129,7 @@ function SessionTypeIcon({
   }
 }
 
-function ExerciseTypeIcon({
-  type,
-  color,
-}: {
-  type: ExerciseType;
-  color: string;
-}) {
+function ItemTypeIcon({ type, color }: { type: ItemType; color: string }) {
   const props = { size: 15, color, strokeWidth: 2 };
   switch (type) {
     case "MULTIPLE_CHOICE":
@@ -144,7 +138,7 @@ function ExerciseTypeIcon({
       return <PenLine {...props} />;
     case "TRANSLATION":
       return <Languages {...props} />;
-    case "ORDERING":
+    case "SENTENCE_ORDER":
       return <ArrowUpDown {...props} />;
     case "MATCHING":
       return <Link2 {...props} />;
@@ -164,10 +158,8 @@ export function SessionConfigSheet({
   const theme = Colors[colorScheme ?? "light"];
 
   const [sessionType, setSessionType] = useState<SessionType>("VOCAB_DRILL");
-  const [questionCount, setQuestionCount] = useState(5);
-  const [exerciseTypes, setExerciseTypes] = useState<ExerciseType[]>([
-    "MULTIPLE_CHOICE",
-  ]);
+  const [itemCount, setItemCount] = useState(5);
+  const [itemTypes, setItemTypes] = useState<ItemType[]>(["MULTIPLE_CHOICE"]);
 
   const [internalVisible, setInternalVisible] = useState(visible);
   const translateY = useSharedValue(600);
@@ -215,8 +207,8 @@ export function SessionConfigSheet({
     }),
   ).current;
 
-  function toggleExerciseType(type: ExerciseType) {
-    setExerciseTypes((prev) => {
+  function toggleExerciseType(type: ItemType) {
+    setItemTypes((prev) => {
       if (prev.includes(type)) {
         if (prev.length === 1) return prev;
         return prev.filter((t) => t !== type);
@@ -226,7 +218,11 @@ export function SessionConfigSheet({
   }
 
   function handleStart() {
-    onStart({ sessionType, questionCount, exerciseTypes });
+    onStart({
+      sessionType,
+      itemCount,
+      itemTypes,
+    });
   }
 
   return (
@@ -406,7 +402,7 @@ export function SessionConfigSheet({
               >
                 <Pressable
                   onPress={() =>
-                    setQuestionCount((c) => Math.max(MIN_QUESTIONS, c - 1))
+                    setItemCount((c) => Math.max(MIN_QUESTIONS, c - 1))
                   }
                   className="rounded-xl items-center justify-center"
                   style={{
@@ -427,7 +423,7 @@ export function SessionConfigSheet({
                       lineHeight: 36,
                     }}
                   >
-                    {questionCount}
+                    {itemCount}
                   </Text>
                   <Text
                     className="font-body text-[11px]"
@@ -439,7 +435,7 @@ export function SessionConfigSheet({
 
                 <Pressable
                   onPress={() =>
-                    setQuestionCount((c) => Math.min(MAX_QUESTIONS, c + 1))
+                    setItemCount((c) => Math.min(MAX_QUESTIONS, c + 1))
                   }
                   className="rounded-xl items-center justify-center"
                   style={{
@@ -475,7 +471,7 @@ export function SessionConfigSheet({
 
               <View className="flex-row flex-wrap" style={{ gap: 10 }}>
                 {EXERCISE_TYPES.map((item) => {
-                  const isSelected = exerciseTypes.includes(item.value);
+                  const isSelected = itemTypes.includes(item.value);
                   return (
                     <Pressable
                       key={item.value}
@@ -491,7 +487,7 @@ export function SessionConfigSheet({
                           : theme.border.subtle,
                       }}
                     >
-                      <ExerciseTypeIcon
+                      <ItemTypeIcon
                         type={item.value}
                         color={
                           isSelected ? theme.text.primary : theme.text.disabled

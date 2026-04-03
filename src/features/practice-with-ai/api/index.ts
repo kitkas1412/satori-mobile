@@ -1,11 +1,9 @@
 export { getLessonsApi } from "./get-lessons";
 export { getPracticeSessionSummaryApi } from "./get-practice-session-summary";
 export { getPracticesApi } from "./get-practices";
-export { generateMockQuestions } from "./mock-questions";
 export type {
   AnswerRequest,
   AnswerResponse,
-  ExerciseType,
   ItemType,
   Items,
   LessonResponse,

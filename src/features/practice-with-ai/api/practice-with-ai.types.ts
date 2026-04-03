@@ -13,22 +13,14 @@ export type ItemType =
   | "MULTIPLE_CHOICE"
   | "FILL_BLANK"
   | "TRANSLATION"
-  | "ORDERING"
-  | "MATCHING"
-  | "TRUE_FALSE";
-
-export type ExerciseType =
-  | "MULTIPLE_CHOICE"
-  | "FILL_BLANK"
-  | "TRANSLATION"
-  | "ORDERING"
+  | "SENTENCE_ORDER"
   | "MATCHING"
   | "TRUE_FALSE";
 
 export interface SessionConfig {
   sessionType: SessionType;
-  questionCount: number;
-  exerciseTypes: ExerciseType[];
+  itemCount: number;
+  itemTypes: ItemType[];
 }
 
 export interface QuestionOption {
@@ -67,7 +59,7 @@ export interface PracticeSessionRequest {
   lessonId: string;
   sessionType: SessionType;
   itemCount: number;
-  itemTypes: [ItemType];
+  itemTypes: ItemType[];
 }
 
 /** Dữ liệu session trả về khi khởi tạo thành công */
