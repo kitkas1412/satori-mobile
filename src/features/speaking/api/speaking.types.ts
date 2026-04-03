@@ -20,7 +20,7 @@ export type PracticeStatus = "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED";
 /** Trạng thái của một session hội thoại */
 export type SessionStatus = "ACTIVE" | "COMPLETED" | "ABANDONED";
 
-// GET: /learner/conversation/themes?page=0&size=10
+// GET: /learner/conversation/topics?page=0&size=10
 /** Cấu trúc phân trang dùng chung cho các danh sách trả về từ API */
 export interface TopicListResponse<T> {
   content: T[];
@@ -45,7 +45,7 @@ export interface Topic {
   /** Thứ tự hiển thị trên màn hình */
   orderIndex: number;
   /** Số lượng topic thuộc chủ đề này */
-  topicCount: number;
+  conversationCount: number;
 }
 
 // GET: /learner/conversation/themes/{{theme_id}}/topics

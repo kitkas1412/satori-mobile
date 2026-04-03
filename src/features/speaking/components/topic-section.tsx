@@ -126,7 +126,7 @@ export function TopicSection({
               className="text-xs font-body"
               style={{ color: theme.text.secondary }}
             >
-              0/{section.topicCount} HỘI THOẠI
+              0/{section.conversationCount} HỘI THOẠI
             </Text>
           </View>
           {isExpanded ? (
