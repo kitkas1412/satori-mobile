@@ -70,12 +70,12 @@ export interface ConversationResponse {
   practiced: boolean;
 }
 
-// GET: /learner/conversation/topics/{{topic_id}}
+// GET: /learner/conversation/conversations/{{conversationId}}
 /** Chi tiết đầy đủ của một conversation, bao gồm gợi ý từ vựng, ngữ pháp và danh sách nhiệm vụ */
 export interface ConversationDetailResponse {
   id: string;
-  themeId: string;
-  themeName: string | null;
+  topicId: string;
+  topicName: string | null;
   courseId: string | null;
   courseName: string | null;
   title: string;
@@ -83,12 +83,17 @@ export interface ConversationDetailResponse {
   description: string;
   descriptionVi: string;
   scenario: string | null;
-  vocabularyHints: string[] | null;
-  grammarPoints: string[] | null;
-  usefulExpressions: string[] | null;
+  /** JSON string chứa mảng từ vựng gợi ý, ví dụ: "[{\"word\":\"名前\",\"meaning\":\"name\",\"reading\":\"なまえ\"}]" */
+  vocabularyHints: string | null;
+  /** JSON string chứa mảng điểm ngữ pháp, ví dụ: "[\"～です\",\"～と申します\"]" */
+  grammarPoints: string | null;
+  /** JSON string chứa mảng biểu đạt hữu ích, ví dụ: "[\"はじめまして\"]" */
+  usefulExpressions: string | null;
   category: string;
   jlptLevel: string;
   difficultyScore: number;
+  aiRole: string | null;
+  learnerRole: string | null;
   roleplayContext: string | null;
   thumbnailUrl: string | null;
   status: string;
