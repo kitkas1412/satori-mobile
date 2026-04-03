@@ -38,7 +38,7 @@ export function ConversationDetailScreen({
   function handleStart() {
     router.replace({
       pathname: "/conversation-practice",
-      params: { topicId: conversationId, title: conversation?.title ?? "" },
+      params: { conversationId, title: conversation?.title ?? "" },
     });
   }
 

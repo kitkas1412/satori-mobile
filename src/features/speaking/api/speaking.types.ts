@@ -119,7 +119,7 @@ export interface FreeTalkSessionRequest {
 export interface RoleplaySessionResponse {
   id: string;
   userId: string;
-  topicId: string;
+  conversationId: string;
   sessionType: string;
   status: SessionStatus;
   messageCount: number;

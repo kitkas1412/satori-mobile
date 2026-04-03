@@ -94,9 +94,9 @@ export function useConversationSession() {
     [router, setSession, addMessages],
   );
 
-  /** Khởi tạo session hội thoại theo topic cụ thể */
+  /** Khởi tạo session hội thoại theo conversation cụ thể */
   const initSession = useCallback(
-    (topicId: string) => _startSession(() => startSessionApi(topicId)),
+    (conversationId: string) => _startSession(() => startSessionApi(conversationId)),
     [_startSession],
   );
 
