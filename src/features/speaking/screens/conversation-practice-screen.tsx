@@ -121,7 +121,10 @@ export function ConversationPracticeScreen({
     <>
       <View
         className="flex-1"
-        style={{ paddingTop: insets.top, backgroundColor: theme.background.page }}
+        style={{
+          paddingTop: insets.top,
+          backgroundColor: theme.background.page,
+        }}
       >
         {/* Header */}
         <ScreenHeader
@@ -147,7 +150,10 @@ export function ConversationPracticeScreen({
         />
 
         {/* Divider */}
-        <View className="h-px" style={{ backgroundColor: theme.border.subtle }} />
+        <View
+          className="h-px"
+          style={{ backgroundColor: theme.border.subtle }}
+        />
 
         {/* Messages */}
         <ScrollView
@@ -200,9 +206,15 @@ export function ConversationPracticeScreen({
                     hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
                   >
                     {isCompleting ? (
-                      <ActivityIndicator size="small" color={theme.brand.primary} />
+                      <ActivityIndicator
+                        size="small"
+                        color={theme.brand.primary}
+                      />
                     ) : (
-                      <Text className="font-heading text-lg" style={{ color: theme.brand.primary }}>
+                      <Text
+                        className="font-heading text-lg"
+                        style={{ color: theme.brand.primary }}
+                      >
                         Kết thúc
                       </Text>
                     )}
@@ -230,7 +242,7 @@ export function ConversationPracticeScreen({
         title="Đang khởi tạo..."
         message="Vui lòng đợi trong giây lát"
       />
-      {topicId && (
+      {conversationId && (
         <MissionsModal
           visible={isMissionsVisible}
           onClose={() => setIsMissionsVisible(false)}
