@@ -163,12 +163,19 @@ export function SessionConfigSheet({
 
   const [internalVisible, setInternalVisible] = useState(visible);
   const translateY = useSharedValue(600);
+  // Khi true, ẩn modal ngay lập tức (không chạy animation đóng)
+  const skipCloseAnimation = useRef(false);
 
   useEffect(() => {
     if (visible) {
+      skipCloseAnimation.current = false;
       setInternalVisible(true);
       translateY.value = withTiming(0, TIMING_CONFIG);
+    } else if (skipCloseAnimation.current) {
+      // Navigate đi màn khác → ẩn ngay, không animation
+      setInternalVisible(false);
     } else {
+      // Kéo xuống hoặc nhấn backdrop → chạy animation đóng
       translateY.value = withTiming(600, TIMING_CONFIG, (finished) => {
         if (finished) runOnJS(setInternalVisible)(false);
       });
@@ -218,6 +225,8 @@ export function SessionConfigSheet({
   }
 
   function handleStart() {
+    // Ẩn modal ngay khi navigate, không cần animation đóng
+    skipCloseAnimation.current = true;
     onStart({
       sessionType,
       itemCount,
