@@ -37,7 +37,7 @@ export function FillBlankSection({
     isCorrect === null
       ? selectedOption
         ? theme.brand.primary
-        : theme.border.default
+        : theme.border.strong
       : isCorrect
         ? theme.success.default
         : theme.error.default;
@@ -158,7 +158,9 @@ export function FillBlankSection({
               chipTextColor = theme.error.default;
             }
           } else if (isSelected) {
+            chipBg = theme.brand.primary;
             chipBorder = theme.brand.primary;
+            chipTextColor = theme.text.onBrand;
           }
 
           return (
