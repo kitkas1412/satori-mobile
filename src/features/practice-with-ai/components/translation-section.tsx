@@ -7,7 +7,6 @@ import { FeedbackPanel } from "./feedback-panel";
 
 type Theme = typeof Colors.light;
 
-const OPTION_LETTERS = ["A", "B", "C", "D"];
 
 export interface TranslationSectionProps {
   currentItem: Items;
@@ -53,7 +52,7 @@ export function TranslationSection({
       </View>
 
       {/* Answer options */}
-      {currentItem.options.map((option, index) => {
+      {currentItem.options.map((option) => {
         const isSelected = selectedOptionId === option.id;
         const isCorrectAnswer =
           answerResult !== null && option.text === answerResult.correctAnswer;
@@ -125,7 +124,7 @@ export function TranslationSection({
                 className="font-heading"
                 style={{ fontSize: 13, color: letterColor }}
               >
-                {OPTION_LETTERS[index] ?? String(index + 1)}
+                {option.id}
               </Text>
             </View>
 

@@ -285,7 +285,7 @@ export function PracticeSessionScreen() {
           }}
         >
           <PrimaryButton
-            text={answerResult !== null ? "Câu tiếp theo" : "Xác nhận"}
+            text={answerResult !== null ? "Tiếp theo" : "Xác nhận"}
             onPress={handleConfirm}
             disabled={
               (selectedOptionId === null && answerResult === null) ||
