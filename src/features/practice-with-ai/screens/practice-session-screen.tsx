@@ -25,6 +25,7 @@ import {
   SentenceOrderSection,
   SessionHeader,
   TranslationSection,
+  TrueFalseSection,
 } from "../components";
 
 const SESSION_TYPE_LABEL: Record<SessionType, string> = {
@@ -336,6 +337,15 @@ export function PracticeSessionScreen() {
                   theme={theme}
                   onSelectLeft={handleSelectLeft}
                   onSelectRight={handleSelectRight}
+                />
+              ) : currentItem.itemType === "TRUE_FALSE" ? (
+                <TrueFalseSection
+                  currentItem={currentItem}
+                  selectedOptionId={selectedOptionId}
+                  answerResult={answerResult}
+                  isSubmitting={isSubmitting}
+                  theme={theme}
+                  onSelectOption={setSelectedOptionId}
                 />
               ) : (
                 <View

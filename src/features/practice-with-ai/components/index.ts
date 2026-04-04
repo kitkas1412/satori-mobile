@@ -18,3 +18,5 @@ export { TranslationSection } from "./translation-section";
 export type { TranslationSectionProps } from "./translation-section";
 export { SentenceOrderSection } from "./sentence-order-section";
 export type { SentenceOrderSectionProps } from "./sentence-order-section";
+export { TrueFalseSection } from "./true-false-section";
+export type { TrueFalseSectionProps } from "./true-false-section";

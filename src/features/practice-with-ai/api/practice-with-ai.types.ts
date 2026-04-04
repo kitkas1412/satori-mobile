@@ -75,7 +75,7 @@ export interface Items {
   itemType: ItemType;
   question: string;
   questionJapanese?: string;
-  hint: string;
+  hint?: string;
   options: Options[];
 }
 
