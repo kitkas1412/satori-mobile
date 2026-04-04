@@ -9,6 +9,7 @@ type Theme = typeof Colors.light;
 const ITEM_TYPE_LABEL: Partial<Record<ItemType, string>> = {
   MULTIPLE_CHOICE: "Trắc nghiệm",
   FILL_BLANK: "Điền vào chỗ trống",
+  TRANSLATION: "Dịch nghĩa",
 };
 
 export interface QuestionCardProps {
@@ -31,7 +32,9 @@ export function QuestionCard({
   const displayQuestion =
     itemType === "FILL_BLANK"
       ? "Điền từ thích hợp vào chỗ trống để hoàn thành câu"
-      : question;
+      : itemType === "TRANSLATION"
+        ? "Chọn nghĩa đúng của câu tiếng Nhật sau:"
+        : question;
 
   return (
     <View

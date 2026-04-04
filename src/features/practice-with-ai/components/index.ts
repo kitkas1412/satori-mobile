@@ -12,3 +12,5 @@ export { SessionConfigSheet } from "./session-config-sheet";
 export type { SessionConfigSheetProps } from "./session-config-sheet";
 export { SessionHeader } from "./session-header";
 export type { SessionHeaderProps } from "./session-header";
+export { TranslationSection } from "./translation-section";
+export type { TranslationSectionProps } from "./translation-section";

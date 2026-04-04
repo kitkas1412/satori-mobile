@@ -22,6 +22,7 @@ import {
   MultipleChoiceSection,
   QuestionCard,
   SessionHeader,
+  TranslationSection,
 } from "../components";
 
 const SESSION_TYPE_LABEL: Record<SessionType, string> = {
@@ -232,6 +233,15 @@ export function PracticeSessionScreen() {
                 />
               ) : currentItem.itemType === "FILL_BLANK" ? (
                 <FillBlankSection
+                  currentItem={currentItem}
+                  selectedOptionId={selectedOptionId}
+                  answerResult={answerResult}
+                  isSubmitting={isSubmitting}
+                  theme={theme}
+                  onSelectOption={setSelectedOptionId}
+                />
+              ) : currentItem.itemType === "TRANSLATION" ? (
+                <TranslationSection
                   currentItem={currentItem}
                   selectedOptionId={selectedOptionId}
                   answerResult={answerResult}
