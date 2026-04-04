@@ -75,7 +75,7 @@ export interface Items {
   itemType: ItemType;
   question: string;
   questionJapanese?: string;
-  hint: string;
+  hint?: string;
   options: Options[];
 }
 
@@ -83,6 +83,7 @@ export interface Items {
 export interface Options {
   id: number;
   text: string;
+  side?: "LEFT" | "RIGHT";
 }
 
 // POST: /api/v1/learner/practice/sessions/{{sessionId}}/items/{{itemId}}/answer

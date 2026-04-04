@@ -8,7 +8,7 @@ import { FeedbackPanel } from "./feedback-panel";
 type Theme = typeof Colors.light;
 
 
-export interface MultipleChoiceSectionProps {
+export interface TranslationSectionProps {
   currentItem: Items;
   selectedOptionId: number | null;
   answerResult: AnswerResponse | null;
@@ -17,16 +17,41 @@ export interface MultipleChoiceSectionProps {
   onSelectOption: (id: number) => void;
 }
 
-export function MultipleChoiceSection({
+export function TranslationSection({
   currentItem,
   selectedOptionId,
   answerResult,
   isSubmitting,
   theme,
   onSelectOption,
-}: MultipleChoiceSectionProps) {
+}: TranslationSectionProps) {
   return (
     <View style={{ gap: 10 }}>
+      {/* Japanese word/sentence card */}
+      <View
+        style={{
+          borderRadius: 16,
+          borderWidth: 0.667,
+          borderColor: theme.border.subtle,
+          backgroundColor: theme.background.surface,
+          paddingVertical: 17,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Text
+          className="font-heading"
+          style={{
+            fontSize: 32,
+            color: theme.text.primary,
+            textAlign: "center",
+          }}
+        >
+          {currentItem.question}
+        </Text>
+      </View>
+
+      {/* Answer options */}
       {currentItem.options.map((option) => {
         const isSelected = selectedOptionId === option.id;
         const isCorrectAnswer =
@@ -34,7 +59,6 @@ export function MultipleChoiceSection({
         const isWrongSelected =
           answerResult !== null && isSelected && !answerResult.correct;
 
-        // Tính màu theo trạng thái
         let borderColor = isSelected ? theme.brand.primary : theme.border.subtle;
         let bgColor = isSelected ? theme.brand.primary : theme.background.surface;
         let circleBg = isSelected ? theme.brand.primary : theme.background.surface;

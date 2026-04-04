@@ -1,6 +1,8 @@
 export { FeedbackPanel } from "./feedback-panel";
 export type { FeedbackPanelProps } from "./feedback-panel";
 export { FillBlankSection } from "./fill-blank-section";
+export { MatchingSection } from "./matching-section";
+export type { MatchingSectionProps } from "./matching-section";
 export { LessonCard } from "./lesson-card";
 export type { LessonCardProps } from "./lesson-card";
 export { MultipleChoiceSection } from "./multiple-choice-section";
@@ -12,3 +14,9 @@ export { SessionConfigSheet } from "./session-config-sheet";
 export type { SessionConfigSheetProps } from "./session-config-sheet";
 export { SessionHeader } from "./session-header";
 export type { SessionHeaderProps } from "./session-header";
+export { TranslationSection } from "./translation-section";
+export type { TranslationSectionProps } from "./translation-section";
+export { SentenceOrderSection } from "./sentence-order-section";
+export type { SentenceOrderSectionProps } from "./sentence-order-section";
+export { TrueFalseSection } from "./true-false-section";
+export type { TrueFalseSectionProps } from "./true-false-section";

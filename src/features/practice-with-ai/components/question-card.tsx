@@ -9,6 +9,10 @@ type Theme = typeof Colors.light;
 const ITEM_TYPE_LABEL: Partial<Record<ItemType, string>> = {
   MULTIPLE_CHOICE: "Trắc nghiệm",
   FILL_BLANK: "Điền vào chỗ trống",
+  TRANSLATION: "Dịch nghĩa",
+  SENTENCE_ORDER: "Sắp xếp câu",
+  MATCHING: "Ghép đôi",
+  TRUE_FALSE: "Đúng / Sai",
 };
 
 export interface QuestionCardProps {
@@ -31,7 +35,13 @@ export function QuestionCard({
   const displayQuestion =
     itemType === "FILL_BLANK"
       ? "Điền từ thích hợp vào chỗ trống để hoàn thành câu"
-      : question;
+      : itemType === "TRANSLATION"
+        ? "Chọn nghĩa đúng của câu tiếng Nhật sau:"
+        : itemType === "SENTENCE_ORDER"
+          ? "Sắp xếp các từ để tạo thành câu đúng"
+          : itemType === "TRUE_FALSE"
+            ? "Nhận định sau đúng hay sai?"
+            : question;
 
   return (
     <View

@@ -19,9 +19,13 @@ import type {
 } from "../api/practice-with-ai.types";
 import {
   FillBlankSection,
+  MatchingSection,
   MultipleChoiceSection,
   QuestionCard,
+  SentenceOrderSection,
   SessionHeader,
+  TranslationSection,
+  TrueFalseSection,
 } from "../components";
 
 const SESSION_TYPE_LABEL: Record<SessionType, string> = {
@@ -48,6 +52,9 @@ export function PracticeSessionScreen() {
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOptionId, setSelectedOptionId] = useState<number | null>(null);
+  const [selectedWordIds, setSelectedWordIds] = useState<number[]>([]);
+  const [matchedPairs, setMatchedPairs] = useState<{ leftId: number; rightId: number }[]>([]);
+  const [selectedLeftId, setSelectedLeftId] = useState<number | null>(null);
   const [streak, setStreak] = useState(0);
   const [showHint, setShowHint] = useState(false);
   const [answerResult, setAnswerResult] = useState<AnswerResponse | null>(null);
@@ -80,6 +87,32 @@ export function PracticeSessionScreen() {
     }
   }, []);
 
+  function handleToggleWord(id: number) {
+    setSelectedWordIds((prev) =>
+      prev.includes(id) ? prev.filter((wid) => wid !== id) : [...prev, id],
+    );
+  }
+
+  function handleSelectLeft(id: number) {
+    const isPaired = matchedPairs.some((p) => p.leftId === id);
+    if (isPaired) {
+      setMatchedPairs((prev) => prev.filter((p) => p.leftId !== id));
+      return;
+    }
+    setSelectedLeftId((prev) => (prev === id ? null : id));
+  }
+
+  function handleSelectRight(id: number) {
+    const isPaired = matchedPairs.some((p) => p.rightId === id);
+    if (isPaired) {
+      setMatchedPairs((prev) => prev.filter((p) => p.rightId !== id));
+      return;
+    }
+    if (selectedLeftId === null) return;
+    setMatchedPairs((prev) => [...prev, { leftId: selectedLeftId, rightId: id }]);
+    setSelectedLeftId(null);
+  }
+
   function handleClose() {
     Alert.alert(
       "Kết thúc buổi học",
@@ -108,6 +141,9 @@ export function PracticeSessionScreen() {
       } else {
         setCurrentIndex((i) => i + 1);
         setSelectedOptionId(null);
+        setSelectedWordIds([]);
+        setMatchedPairs([]);
+        setSelectedLeftId(null);
         setAnswerResult(null);
         setShowHint(false);
       }
@@ -115,6 +151,40 @@ export function PracticeSessionScreen() {
     }
 
     // Phase 1: submit câu trả lời
+    if (currentItem.itemType === "MATCHING") {
+      if (matchedPairs.length === 0) return;
+      const userAnswer = matchedPairs
+        .map(({ leftId, rightId }) => `${leftId}:${rightId}`)
+        .join(",");
+      submitAnswer(
+        { sessionId: sessionData.session.sessionId, itemId: currentItem.id, userAnswer },
+        {
+          onSuccess: (result) => {
+            setStreak((s) => (result.correct ? s + 1 : 0));
+            setAnswerResult(result);
+          },
+        },
+      );
+      return;
+    }
+
+    if (currentItem.itemType === "SENTENCE_ORDER") {
+      if (selectedWordIds.length === 0) return;
+      const userAnswer = selectedWordIds
+        .map((id) => currentItem.options.find((o) => o.id === id)?.text ?? "")
+        .join(" ");
+      submitAnswer(
+        { sessionId: sessionData.session.sessionId, itemId: currentItem.id, userAnswer },
+        {
+          onSuccess: (result) => {
+            setStreak((s) => (result.correct ? s + 1 : 0));
+            setAnswerResult(result);
+          },
+        },
+      );
+      return;
+    }
+
     if (selectedOptionId === null) return;
     const selectedOption = currentItem.options.find(
       (o) => o.id === selectedOptionId,
@@ -239,6 +309,44 @@ export function PracticeSessionScreen() {
                   theme={theme}
                   onSelectOption={setSelectedOptionId}
                 />
+              ) : currentItem.itemType === "TRANSLATION" ? (
+                <TranslationSection
+                  currentItem={currentItem}
+                  selectedOptionId={selectedOptionId}
+                  answerResult={answerResult}
+                  isSubmitting={isSubmitting}
+                  theme={theme}
+                  onSelectOption={setSelectedOptionId}
+                />
+              ) : currentItem.itemType === "SENTENCE_ORDER" ? (
+                <SentenceOrderSection
+                  currentItem={currentItem}
+                  selectedWordIds={selectedWordIds}
+                  answerResult={answerResult}
+                  isSubmitting={isSubmitting}
+                  theme={theme}
+                  onToggleWord={handleToggleWord}
+                />
+              ) : currentItem.itemType === "MATCHING" ? (
+                <MatchingSection
+                  currentItem={currentItem}
+                  matchedPairs={matchedPairs}
+                  selectedLeftId={selectedLeftId}
+                  answerResult={answerResult}
+                  isSubmitting={isSubmitting}
+                  theme={theme}
+                  onSelectLeft={handleSelectLeft}
+                  onSelectRight={handleSelectRight}
+                />
+              ) : currentItem.itemType === "TRUE_FALSE" ? (
+                <TrueFalseSection
+                  currentItem={currentItem}
+                  selectedOptionId={selectedOptionId}
+                  answerResult={answerResult}
+                  isSubmitting={isSubmitting}
+                  theme={theme}
+                  onSelectOption={setSelectedOptionId}
+                />
               ) : (
                 <View
                   className="rounded-2xl p-5 items-center justify-center"
@@ -275,10 +383,13 @@ export function PracticeSessionScreen() {
           }}
         >
           <PrimaryButton
-            text={answerResult !== null ? "Câu tiếp theo" : "Xác nhận"}
+            text={answerResult !== null ? "Tiếp theo" : "Xác nhận"}
             onPress={handleConfirm}
             disabled={
-              (selectedOptionId === null && answerResult === null) ||
+              (selectedOptionId === null &&
+                selectedWordIds.length === 0 &&
+                matchedPairs.length === 0 &&
+                answerResult === null) ||
               !currentItem
             }
             loading={isSubmitting}
