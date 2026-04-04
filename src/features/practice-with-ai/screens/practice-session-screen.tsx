@@ -2,14 +2,6 @@
 // Luồng: khởi tạo session → người dùng chọn đáp án → xác nhận → câu tiếp theo
 //        → hoàn thành → chuyển sang màn hình kết quả
 
-import {
-  CheckCircle,
-  Flame,
-  Lightbulb,
-  X,
-  XCircle,
-  Zap,
-} from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -17,20 +9,20 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 
 import { LoadingOverlay, PrimaryButton, ProgressBar } from "@/components/ui";
-import { Colors, Primitive } from "@/constants/theme";
+import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { usePracticeSession, useSubmitAnswer } from "../hooks";
 import type {
   AnswerResponse,
-  ItemType,
   Items,
   SessionType,
 } from "../api/practice-with-ai.types";
-
-const ITEM_TYPE_LABEL: Partial<Record<ItemType, string>> = {
-  MULTIPLE_CHOICE: "Trắc nghiệm",
-  FILL_BLANK: "Điền vào chỗ trống",
-};
+import {
+  FillBlankSection,
+  MultipleChoiceSection,
+  QuestionCard,
+  SessionHeader,
+} from "../components";
 
 const SESSION_TYPE_LABEL: Record<SessionType, string> = {
   VOCAB_DRILL: "Từ vựng",
@@ -39,275 +31,6 @@ const SESSION_TYPE_LABEL: Record<SessionType, string> = {
   KANJI_READING: "Kanji",
   SENTENCE_BUILD: "Câu",
 };
-
-const OPTION_LETTERS = ["A", "B", "C", "D"];
-
-type Theme = typeof Colors.light;
-
-interface FillBlankSectionProps {
-  currentItem: Items;
-  selectedOptionId: number | null;
-  answerResult: AnswerResponse | null;
-  isSubmitting: boolean;
-  theme: Theme;
-  onSelectOption: (id: number) => void;
-}
-
-function FillBlankSection({
-  currentItem,
-  selectedOptionId,
-  answerResult,
-  isSubmitting,
-  theme,
-  onSelectOption,
-}: FillBlankSectionProps) {
-  const parts = currentItem.question.split("___");
-  const before = parts[0] ?? "";
-  const after = parts[1] ?? "";
-
-  const selectedOption = currentItem.options.find(
-    (o) => o.id === selectedOptionId,
-  );
-
-  // Xác định trạng thái blank slot sau khi submit
-  const isCorrect = answerResult?.correct ?? null;
-  const blankBorderColor =
-    isCorrect === null
-      ? selectedOption
-        ? theme.brand.primary
-        : theme.border.default
-      : isCorrect
-        ? theme.success.default
-        : theme.error.default;
-  const blankBg =
-    isCorrect === null
-      ? "transparent"
-      : isCorrect
-        ? theme.success.subtle
-        : theme.error.subtle;
-  const blankTextColor =
-    isCorrect === null
-      ? selectedOption
-        ? theme.brand.primary
-        : theme.text.disabled
-      : isCorrect
-        ? theme.success.default
-        : theme.error.default;
-
-  return (
-    <View style={{ gap: 12 }}>
-      {/* Sentence card with inline blank slot */}
-      <View
-        style={{
-          backgroundColor: theme.background.surface,
-          borderWidth: 1,
-          borderColor: theme.border.subtle,
-          borderRadius: 16,
-          paddingHorizontal: 20,
-          paddingVertical: 16,
-        }}
-      >
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "flex-end",
-            flexWrap: "wrap",
-            gap: 4,
-          }}
-        >
-          {before.length > 0 && (
-            <Text
-              className="font-heading"
-              style={{
-                fontSize: 17,
-                lineHeight: 28,
-                color: theme.text.primary,
-              }}
-            >
-              {before}
-            </Text>
-          )}
-
-          {/* Blank slot */}
-          <View
-            style={{
-              minWidth: 64,
-              paddingHorizontal: 12,
-              paddingTop: 2,
-              paddingBottom: 3,
-              borderBottomWidth: 2,
-              borderBottomColor: blankBorderColor,
-              borderTopLeftRadius: 10,
-              borderTopRightRadius: 10,
-              backgroundColor: blankBg,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text
-              className="font-heading"
-              style={{
-                fontSize: 17,
-                lineHeight: 26,
-                color: blankTextColor,
-                minHeight: 26,
-              }}
-            >
-              {selectedOption?.text ?? ""}
-            </Text>
-          </View>
-
-          {after.length > 0 && (
-            <Text
-              className="font-heading"
-              style={{
-                fontSize: 17,
-                lineHeight: 28,
-                color: theme.text.primary,
-              }}
-            >
-              {after}
-            </Text>
-          )}
-        </View>
-      </View>
-
-      {/* Word chips */}
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
-        {currentItem.options.map((option) => {
-          const isSelected = selectedOptionId === option.id;
-          const isCorrectAnswer =
-            answerResult !== null && option.text === answerResult.correctAnswer;
-          const isWrongSelected =
-            answerResult !== null && isSelected && !answerResult.correct;
-
-          let chipBg = theme.background.surface;
-          let chipBorder = theme.border.subtle;
-          let chipTextColor = theme.text.primary;
-
-          if (answerResult !== null) {
-            if (isCorrectAnswer) {
-              chipBg = theme.success.subtle;
-              chipBorder = theme.success.default;
-              chipTextColor = theme.success.default;
-            } else if (isWrongSelected) {
-              chipBg = theme.error.subtle;
-              chipBorder = theme.error.default;
-              chipTextColor = theme.error.default;
-            }
-          } else if (isSelected) {
-            chipBorder = theme.brand.primary;
-          }
-
-          return (
-            <TouchableOpacity
-              key={option.id}
-              onPress={() => onSelectOption(option.id)}
-              disabled={isSubmitting || answerResult !== null}
-              style={{
-                paddingHorizontal: 20,
-                paddingVertical: 12,
-                borderRadius: 14,
-                borderWidth: 1,
-                borderColor: chipBorder,
-                backgroundColor: chipBg,
-              }}
-            >
-              <Text
-                className="font-heading"
-                style={{ fontSize: 16, lineHeight: 24, color: chipTextColor }}
-              >
-                {option.text}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-
-      {/* Feedback panel */}
-      {answerResult !== null && (
-        <View
-          style={{
-            borderRadius: 20,
-            borderWidth: 1,
-            borderColor: answerResult.correct
-              ? theme.success.default
-              : theme.error.default,
-            backgroundColor: answerResult.correct
-              ? theme.success.subtle
-              : theme.error.subtle,
-            overflow: "hidden",
-          }}
-        >
-          {/* Title row */}
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 10,
-              paddingHorizontal: 16,
-              paddingTop: 16,
-              paddingBottom: answerResult.correct ? 16 : 8,
-            }}
-          >
-            {answerResult.correct ? (
-              <CheckCircle size={24} color={theme.success.default} />
-            ) : (
-              <XCircle size={24} color={theme.error.default} />
-            )}
-            <View style={{ flex: 1, gap: 2 }}>
-              <Text
-                className="font-heading"
-                style={{
-                  fontSize: 14,
-                  color: answerResult.correct
-                    ? theme.success.default
-                    : theme.error.default,
-                }}
-              >
-                {answerResult.correct ? "Chính xác!" : "Sai rồi!"}
-              </Text>
-              {!answerResult.correct && (
-                <View
-                  style={{ flexDirection: "row", gap: 4, alignItems: "center" }}
-                >
-                  <Text
-                    className="font-body"
-                    style={{ fontSize: 12, color: theme.text.secondary }}
-                  >
-                    Đáp án đúng:
-                  </Text>
-                  <Text
-                    className="font-heading"
-                    style={{ fontSize: 13, color: theme.success.default }}
-                  >
-                    {answerResult.correctAnswer}
-                  </Text>
-                </View>
-              )}
-            </View>
-          </View>
-
-          {/* Explanation */}
-          {answerResult.explanation ? (
-            <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
-              <Text
-                className="font-body"
-                style={{
-                  fontSize: 13,
-                  lineHeight: 19,
-                  color: theme.text.secondary,
-                }}
-              >
-                {answerResult.explanation}
-              </Text>
-            </View>
-          ) : null}
-        </View>
-      )}
-    </View>
-  );
-}
 
 export function PracticeSessionScreen() {
   const insets = useSafeAreaInsets();
@@ -472,59 +195,14 @@ export function PracticeSessionScreen() {
           }}
         >
           {/* Header row: X | badge + câu số | streak */}
-          <View className="flex-row items-center gap-3">
-            <TouchableOpacity
-              onPress={handleClose}
-              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-            >
-              <X size={24} color={theme.icon.primary} strokeWidth={2} />
-            </TouchableOpacity>
-
-            <View className="flex-1 items-center gap-[3px]">
-              <View
-                className="flex-row items-center gap-[5px] rounded-full"
-                style={{
-                  paddingHorizontal: 10.5,
-                  paddingVertical: 1,
-                  backgroundColor: theme.border.subtle,
-                  borderWidth: 0.5,
-                  borderColor: theme.brand.primary,
-                }}
-              >
-                <Zap
-                  size={10}
-                  color={theme.brand.primary}
-                  fill={theme.brand.primary}
-                />
-                <Text
-                  className="font-heading"
-                  style={{ fontSize: 11, color: theme.brand.primary }}
-                >
-                  {sessionTypeLabel}
-                </Text>
-              </View>
-              <Text
-                className="font-body text-xs"
-                style={{ color: theme.text.secondary }}
-              >
-                Câu {currentIndex + 1} / {totalItems}
-              </Text>
-            </View>
-
-            <View className="flex-row items-center gap-[3px]">
-              <Flame
-                size={14}
-                color={Primitive.amber[300]}
-                fill={Primitive.amber[300]}
-              />
-              <Text
-                className="font-heading"
-                style={{ fontSize: 16, color: Primitive.amber[300] }}
-              >
-                {streak}
-              </Text>
-            </View>
-          </View>
+          <SessionHeader
+            sessionTypeLabel={sessionTypeLabel}
+            currentIndex={currentIndex}
+            totalItems={totalItems}
+            streak={streak}
+            theme={theme}
+            onClose={handleClose}
+          />
 
           {/* Progress bar */}
           <ProgressBar progress={progress} height={6} />
@@ -533,314 +211,25 @@ export function PracticeSessionScreen() {
           {currentItem && (
             <>
               {/* Question card */}
-              <View
-                style={{
-                  borderRadius: 20,
-                  paddingHorizontal: 20,
-                  paddingVertical: 21,
-                  gap: 14,
-                  backgroundColor: theme.background.surface,
-                  borderWidth: 1,
-                  borderColor: theme.border.subtle,
-                }}
-              >
-                {/* Item type label */}
-                <View className="flex-row items-center gap-1.5">
-                  <View
-                    style={{
-                      width: 6,
-                      height: 6,
-                      borderRadius: 3,
-                      backgroundColor: theme.brand.primary,
-                    }}
-                  />
-                  <Text
-                    className="font-body"
-                    style={{
-                      fontSize: 11,
-                      letterSpacing: 0.55,
-                      color: theme.text.secondary,
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    {ITEM_TYPE_LABEL[currentItem.itemType] ??
-                      currentItem.itemType}
-                  </Text>
-                </View>
-
-                {/* Question text */}
-                <Text
-                  className="font-heading"
-                  style={{
-                    fontSize: 18,
-                    lineHeight: 26,
-                    color: theme.text.primary,
-                  }}
-                >
-                  {currentItem.itemType === "FILL_BLANK"
-                    ? "Điền từ thích hợp vào chỗ trống để hoàn thành câu"
-                    : currentItem.question}
-                </Text>
-
-                {/* Hint */}
-                <View style={{ gap: 10 }}>
-                  <TouchableOpacity
-                    onPress={() => setShowHint((v) => !v)}
-                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      gap: 6,
-                    }}
-                  >
-                    <Lightbulb size={14} color={Primitive.amber[300]} />
-                    <Text
-                      className="font-body text-xs"
-                      style={{ color: Primitive.amber[300] }}
-                    >
-                      {showHint ? "Ẩn gợi ý" : "Xem gợi ý"}
-                    </Text>
-                  </TouchableOpacity>
-                  {showHint && currentItem.hint ? (
-                    <View
-                      style={{
-                        borderWidth: 0.5,
-                        borderColor: Primitive.amber[300],
-                        borderRadius: 12,
-                        paddingHorizontal: 12,
-                        paddingVertical: 8,
-                        backgroundColor: theme.background.surface,
-                      }}
-                    >
-                      <Text
-                        className="font-body"
-                        style={{
-                          fontSize: 13,
-                          lineHeight: 19,
-                          color: Primitive.amber[300],
-                        }}
-                      >
-                        {currentItem.hint}
-                      </Text>
-                    </View>
-                  ) : null}
-                </View>
-              </View>
+              <QuestionCard
+                itemType={currentItem.itemType}
+                question={currentItem.question}
+                hint={currentItem.hint}
+                showHint={showHint}
+                onToggleHint={() => setShowHint((v) => !v)}
+                theme={theme}
+              />
 
               {/* Answer options */}
               {currentItem.itemType === "MULTIPLE_CHOICE" ? (
-                <View style={{ gap: 10 }}>
-                  {currentItem.options.map((option, index) => {
-                    const isSelected = selectedOptionId === option.id;
-                    const isCorrectAnswer =
-                      answerResult !== null &&
-                      option.text === answerResult.correctAnswer;
-                    const isWrongSelected =
-                      answerResult !== null &&
-                      isSelected &&
-                      !answerResult.correct;
-
-                    // Tính màu theo trạng thái
-                    let borderColor = isSelected
-                      ? theme.brand.primary
-                      : theme.border.subtle;
-                    let bgColor = isSelected
-                      ? theme.brand.primary
-                      : theme.background.surface;
-                    let circleBg = isSelected
-                      ? theme.brand.primary
-                      : theme.background.surface;
-                    let circleBorder = isSelected
-                      ? theme.icon.onBrand
-                      : theme.border.default;
-                    let letterColor = isSelected
-                      ? theme.icon.onBrand
-                      : theme.icon.disabled;
-                    let textColor = isSelected
-                      ? theme.text.onBrand
-                      : theme.text.disabled;
-
-                    if (answerResult !== null) {
-                      if (isCorrectAnswer) {
-                        borderColor = theme.success.default;
-                        bgColor = theme.success.subtle;
-                        circleBg = theme.success.default;
-                        circleBorder = theme.success.default;
-                        letterColor = theme.icon.onBrand;
-                        textColor = theme.success.default;
-                      } else if (isWrongSelected) {
-                        borderColor = theme.error.default;
-                        bgColor = theme.error.subtle;
-                        circleBg = theme.error.default;
-                        circleBorder = theme.error.default;
-                        letterColor = theme.icon.onBrand;
-                        textColor = theme.error.default;
-                      } else {
-                        borderColor = theme.border.subtle;
-                        bgColor = theme.background.surface;
-                        circleBg = theme.background.surface;
-                        circleBorder = theme.border.default;
-                        letterColor = theme.icon.disabled;
-                        textColor = theme.text.disabled;
-                      }
-                    }
-
-                    return (
-                      <TouchableOpacity
-                        key={option.id}
-                        onPress={() => setSelectedOptionId(option.id)}
-                        disabled={isSubmitting || answerResult !== null}
-                        style={{
-                          height: 62,
-                          borderRadius: 16,
-                          borderWidth: 1.23,
-                          borderColor,
-                          backgroundColor: bgColor,
-                          flexDirection: "row",
-                          alignItems: "center",
-                          paddingHorizontal: 17,
-                          gap: 14,
-                        }}
-                      >
-                        <View
-                          style={{
-                            width: 30,
-                            height: 30,
-                            borderRadius: 15,
-                            borderWidth: 1,
-                            borderColor: circleBorder,
-                            backgroundColor: circleBg,
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
-                        >
-                          <Text
-                            className="font-heading"
-                            style={{ fontSize: 13, color: letterColor }}
-                          >
-                            {OPTION_LETTERS[index] ?? String(index + 1)}
-                          </Text>
-                        </View>
-
-                        <Text
-                          className="font-heading flex-1"
-                          style={{
-                            fontSize: 15,
-                            lineHeight: 22,
-                            color: textColor,
-                          }}
-                        >
-                          {option.text}
-                        </Text>
-
-                        {isCorrectAnswer && (
-                          <CheckCircle
-                            size={16}
-                            color={theme.success.default}
-                          />
-                        )}
-                        {isWrongSelected && (
-                          <XCircle size={16} color={theme.error.default} />
-                        )}
-                      </TouchableOpacity>
-                    );
-                  })}
-
-                  {/* Feedback panel */}
-                  {answerResult !== null && (
-                    <View
-                      style={{
-                        borderRadius: 20,
-                        borderWidth: 1,
-                        borderColor: answerResult.correct
-                          ? theme.success.default
-                          : theme.error.default,
-                        backgroundColor: answerResult.correct
-                          ? theme.success.subtle
-                          : theme.error.subtle,
-                        overflow: "hidden",
-                        marginTop: 6,
-                      }}
-                    >
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          gap: 10,
-                          paddingHorizontal: 16,
-                          paddingTop: 16,
-                          paddingBottom: answerResult.correct ? 16 : 8,
-                        }}
-                      >
-                        {answerResult.correct ? (
-                          <CheckCircle
-                            size={24}
-                            color={theme.success.default}
-                          />
-                        ) : (
-                          <XCircle size={24} color={theme.error.default} />
-                        )}
-                        <View style={{ flex: 1, gap: 2 }}>
-                          <Text
-                            className="font-heading"
-                            style={{
-                              fontSize: 14,
-                              color: answerResult.correct
-                                ? theme.success.default
-                                : theme.error.default,
-                            }}
-                          >
-                            {answerResult.correct ? "Chính xác!" : "Sai rồi!"}
-                          </Text>
-                          {!answerResult.correct && (
-                            <View
-                              style={{
-                                flexDirection: "row",
-                                gap: 4,
-                                alignItems: "center",
-                              }}
-                            >
-                              <Text
-                                className="font-body"
-                                style={{
-                                  fontSize: 12,
-                                  color: theme.text.secondary,
-                                }}
-                              >
-                                Đáp án đúng:
-                              </Text>
-                              <Text
-                                className="font-heading"
-                                style={{
-                                  fontSize: 13,
-                                  color: theme.success.default,
-                                }}
-                              >
-                                {answerResult.correctAnswer}
-                              </Text>
-                            </View>
-                          )}
-                        </View>
-                      </View>
-                      {answerResult.explanation ? (
-                        <View
-                          style={{ paddingHorizontal: 16, paddingBottom: 16 }}
-                        >
-                          <Text
-                            className="font-body"
-                            style={{
-                              fontSize: 12,
-                              lineHeight: 18,
-                              color: theme.text.secondary,
-                            }}
-                          >
-                            {answerResult.explanation}
-                          </Text>
-                        </View>
-                      ) : null}
-                    </View>
-                  )}
-                </View>
+                <MultipleChoiceSection
+                  currentItem={currentItem}
+                  selectedOptionId={selectedOptionId}
+                  answerResult={answerResult}
+                  isSubmitting={isSubmitting}
+                  theme={theme}
+                  onSelectOption={setSelectedOptionId}
+                />
               ) : currentItem.itemType === "FILL_BLANK" ? (
                 <FillBlankSection
                   currentItem={currentItem}
