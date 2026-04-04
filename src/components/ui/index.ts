@@ -1,4 +1,5 @@
 export { Backdrop } from "./backdrop";
+export { BellButton } from "./bell-button";
 export { BaseInput } from "./base-input";
 export { IconButton } from "./icon-button";
 export { MarkdownText } from "./markdown-text";

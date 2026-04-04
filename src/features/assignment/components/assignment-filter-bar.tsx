@@ -137,7 +137,7 @@ export function AssignmentFilterBar({
         gap: 8,
         alignItems: "center",
       }}
-      style={{ marginBottom: 12 }}
+      style={{ marginBottom: 12, height: 38 }}
     >
       {/* Status pill button */}
       <Pressable

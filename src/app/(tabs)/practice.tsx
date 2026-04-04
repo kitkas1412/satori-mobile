@@ -1,7 +1,7 @@
 // Màn hình chính của tính năng Ôn tập.
 // Hiển thị hai tab: "Bài tập GV" (danh sách bài tập từ giáo viên) và "Ôn luyện AI" (banner AI).
 
-import { Bell, BookOpen, Sparkles } from "lucide-react-native";
+import { BookOpen, Sparkles } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "expo-router";
 import {
@@ -19,8 +19,7 @@ import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useProfile } from "@/hooks/api/use-profile";
 import { useAuthStore } from "@/stores/auth-store";
-import { LoadingOverlay } from "@/components/ui/loading-overlay";
-import { ScreenHeader } from "@/components/ui/screen-header";
+import { BellButton, LoadingOverlay, ScreenHeader } from "@/components/ui";
 import { AssignmentCard } from "@/features/assignment/components/assignment-card";
 import { AssignmentFilterBar } from "@/features/assignment/components/assignment-filter-bar";
 import { mapAssignmentToCardProps } from "@/features/assignment/utils";
@@ -99,27 +98,8 @@ export default function PracticeTab() {
     );
   }
 
-  // Biểu tượng chuông thông báo
-  const bellAction = (
-    <View className="relative">
-      <View
-        className="w-9 h-9 rounded-full items-center justify-center"
-        style={{ backgroundColor: theme.icon.disabled }}
-      >
-        <Bell size={20} color={theme.icon.onBrand} strokeWidth={2} />
-      </View>
-    </View>
-  );
-
   const listHeader = (
     <>
-      {/* Tiêu đề màn hình */}
-      <ScreenHeader
-        title="Luyện tập"
-        rightAction={bellAction}
-        paddingTop={insets.top + 16}
-      />
-
       {/* Thanh chuyển đổi tab GV / AI */}
       <View
         className="border mx-4 flex-row rounded-2xl p-1 mb-3"
@@ -255,6 +235,13 @@ export default function PracticeTab() {
   return (
     <View className="flex-1" style={{ backgroundColor: theme.background.page }}>
       <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+
+      {/* Tiêu đề màn hình — nằm ngoài FlatList để không scroll */}
+      <ScreenHeader
+        title="Luyện tập"
+        rightAction={<BellButton />}
+        paddingTop={insets.top + 16}
+      />
 
       <FlatList<Content | LessonResponse>
         ref={flatListRef}
