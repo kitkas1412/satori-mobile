@@ -91,8 +91,8 @@ function FillBlankSection({
         ? theme.brand.primary
         : theme.text.disabled
       : isCorrect
-        ? theme.success.text
-        : theme.error.text;
+        ? theme.success.default
+        : theme.error.default;
 
   return (
     <View style={{ gap: 12 }}>
@@ -189,11 +189,11 @@ function FillBlankSection({
             if (isCorrectAnswer) {
               chipBg = theme.success.subtle;
               chipBorder = theme.success.default;
-              chipTextColor = theme.success.text;
+              chipTextColor = theme.success.default;
             } else if (isWrongSelected) {
               chipBg = theme.error.subtle;
               chipBorder = theme.error.default;
-              chipTextColor = theme.error.text;
+              chipTextColor = theme.error.default;
             }
           } else if (isSelected) {
             chipBorder = theme.brand.primary;
@@ -261,8 +261,8 @@ function FillBlankSection({
                 style={{
                   fontSize: 14,
                   color: answerResult.correct
-                    ? theme.success.text
-                    : theme.error.text,
+                    ? theme.success.default
+                    : theme.error.default,
                 }}
               >
                 {answerResult.correct ? "Chính xác!" : "Sai rồi!"}
@@ -279,7 +279,7 @@ function FillBlankSection({
                   </Text>
                   <Text
                     className="font-heading"
-                    style={{ fontSize: 13, color: theme.success.text }}
+                    style={{ fontSize: 13, color: theme.success.default }}
                   >
                     {answerResult.correctAnswer}
                   </Text>
@@ -587,7 +587,11 @@ export function PracticeSessionScreen() {
                   <TouchableOpacity
                     onPress={() => setShowHint((v) => !v)}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                    style={{ flexDirection: "row", alignItems: "center", gap: 6 }}
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 6,
+                    }}
                   >
                     <Lightbulb size={14} color={Primitive.amber[300]} />
                     <Text
@@ -610,7 +614,11 @@ export function PracticeSessionScreen() {
                     >
                       <Text
                         className="font-body"
-                        style={{ fontSize: 13, lineHeight: 19, color: Primitive.amber[300] }}
+                        style={{
+                          fontSize: 13,
+                          lineHeight: 19,
+                          color: Primitive.amber[300],
+                        }}
                       >
                         {currentItem.hint}
                       </Text>
@@ -628,7 +636,9 @@ export function PracticeSessionScreen() {
                       answerResult !== null &&
                       option.text === answerResult.correctAnswer;
                     const isWrongSelected =
-                      answerResult !== null && isSelected && !answerResult.correct;
+                      answerResult !== null &&
+                      isSelected &&
+                      !answerResult.correct;
 
                     // Tính màu theo trạng thái
                     let borderColor = isSelected
@@ -714,13 +724,20 @@ export function PracticeSessionScreen() {
 
                         <Text
                           className="font-heading flex-1"
-                          style={{ fontSize: 15, lineHeight: 22, color: textColor }}
+                          style={{
+                            fontSize: 15,
+                            lineHeight: 22,
+                            color: textColor,
+                          }}
                         >
                           {option.text}
                         </Text>
 
                         {isCorrectAnswer && (
-                          <CheckCircle size={16} color={theme.success.default} />
+                          <CheckCircle
+                            size={16}
+                            color={theme.success.default}
+                          />
                         )}
                         {isWrongSelected && (
                           <XCircle size={16} color={theme.error.default} />
@@ -756,7 +773,10 @@ export function PracticeSessionScreen() {
                         }}
                       >
                         {answerResult.correct ? (
-                          <CheckCircle size={24} color={theme.success.default} />
+                          <CheckCircle
+                            size={24}
+                            color={theme.success.default}
+                          />
                         ) : (
                           <XCircle size={24} color={theme.error.default} />
                         )}
@@ -766,23 +786,35 @@ export function PracticeSessionScreen() {
                             style={{
                               fontSize: 14,
                               color: answerResult.correct
-                                ? theme.success.text
-                                : theme.error.text,
+                                ? theme.success.default
+                                : theme.error.default,
                             }}
                           >
                             {answerResult.correct ? "Chính xác!" : "Sai rồi!"}
                           </Text>
                           {!answerResult.correct && (
-                            <View style={{ flexDirection: "row", gap: 4, alignItems: "center" }}>
+                            <View
+                              style={{
+                                flexDirection: "row",
+                                gap: 4,
+                                alignItems: "center",
+                              }}
+                            >
                               <Text
                                 className="font-body"
-                                style={{ fontSize: 12, color: theme.text.secondary }}
+                                style={{
+                                  fontSize: 12,
+                                  color: theme.text.secondary,
+                                }}
                               >
                                 Đáp án đúng:
                               </Text>
                               <Text
                                 className="font-heading"
-                                style={{ fontSize: 13, color: theme.success.text }}
+                                style={{
+                                  fontSize: 13,
+                                  color: theme.success.default,
+                                }}
                               >
                                 {answerResult.correctAnswer}
                               </Text>
@@ -791,10 +823,16 @@ export function PracticeSessionScreen() {
                         </View>
                       </View>
                       {answerResult.explanation ? (
-                        <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
+                        <View
+                          style={{ paddingHorizontal: 16, paddingBottom: 16 }}
+                        >
                           <Text
                             className="font-body"
-                            style={{ fontSize: 12, lineHeight: 18, color: theme.text.secondary }}
+                            style={{
+                              fontSize: 12,
+                              lineHeight: 18,
+                              color: theme.text.secondary,
+                            }}
                           >
                             {answerResult.explanation}
                           </Text>
