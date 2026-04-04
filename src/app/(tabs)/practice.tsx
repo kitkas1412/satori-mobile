@@ -1,14 +1,13 @@
 // Màn hình chính của tính năng Ôn tập.
 // Hiển thị hai tab: "Bài tập GV" (danh sách bài tập từ giáo viên) và "Ôn luyện AI" (banner AI).
 
-import { Bell, BookOpen, Sparkles } from "lucide-react-native";
-import { useRef, useState } from "react";
+import { BookOpen, Sparkles } from "lucide-react-native";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "expo-router";
 import {
   ActivityIndicator,
   FlatList,
   Pressable,
-  ScrollView,
   Text,
   View,
 } from "react-native";
@@ -20,13 +19,14 @@ import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useProfile } from "@/hooks/api/use-profile";
 import { useAuthStore } from "@/stores/auth-store";
-import { LoadingOverlay } from "@/components/ui/loading-overlay";
-import { ScreenHeader } from "@/components/ui/screen-header";
+import { BellButton, LoadingOverlay, ScreenHeader } from "@/components/ui";
 import { AssignmentCard } from "@/features/assignment/components/assignment-card";
+import { AssignmentFilterBar } from "@/features/assignment/components/assignment-filter-bar";
 import { mapAssignmentToCardProps } from "@/features/assignment/utils";
 import {
   useAssignments,
   useAssignmentNavigation,
+  useClasses,
 } from "@/features/assignment/hooks";
 import {
   LessonCard,
@@ -44,15 +44,6 @@ import type {
 
 type ActiveTab = "teacher" | "ai";
 
-const STATUS_FILTERS: { label: string; value: AssignmentStatusFilter }[] = [
-  { label: "Tất cả", value: undefined },
-  { label: "Chưa làm", value: "NOT_STARTED" },
-  { label: "Đang làm", value: "IN_PROGRESS" },
-  { label: "Đã nộp", value: "SUBMITTED" },
-  { label: "Đã chấm", value: "GRADED" },
-  { label: "Quá hạn", value: "OVERDUE" },
-];
-
 export default function PracticeTab() {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
@@ -64,6 +55,22 @@ export default function PracticeTab() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
+  const [activeClassId, setActiveClassId] = useState<string | undefined>(
+    undefined,
+  );
+  const { handleAssignmentPress, isLoadingSubmission } =
+    useAssignmentNavigation();
+  const { data: profile } = useProfile();
+  const { data: classes } = useClasses();
+  const courseId = profile?.enrolledClasses[0]?.courseId;
+
+  // Set default class từ API khi data load xong lần đầu
+  useEffect(() => {
+    if (classes?.[0]?.id && activeClassId === undefined) {
+      setActiveClassId(classes[0].id);
+    }
+  }, [classes]);
+
   const {
     data,
     isLoading,
@@ -71,11 +78,7 @@ export default function PracticeTab() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useAssignments(activeStatus);
-  const { handleAssignmentPress, isLoadingSubmission } =
-    useAssignmentNavigation();
-  const { data: profile } = useProfile();
-  const courseId = profile?.enrolledClasses[0]?.courseId;
+  } = useAssignments(activeStatus, activeClassId);
   const {
     data: lessons,
     isLoading: isLoadingLessons,
@@ -95,27 +98,8 @@ export default function PracticeTab() {
     );
   }
 
-  // Biểu tượng chuông thông báo
-  const bellAction = (
-    <View className="relative">
-      <View
-        className="w-9 h-9 rounded-full items-center justify-center"
-        style={{ backgroundColor: theme.icon.disabled }}
-      >
-        <Bell size={20} color={theme.icon.onBrand} strokeWidth={2} />
-      </View>
-    </View>
-  );
-
   const listHeader = (
     <>
-      {/* Tiêu đề màn hình */}
-      <ScreenHeader
-        title="Luyện tập"
-        rightAction={bellAction}
-        paddingTop={insets.top + 16}
-      />
-
       {/* Thanh chuyển đổi tab GV / AI */}
       <View
         className="border mx-4 flex-row rounded-2xl p-1 mb-3"
@@ -183,49 +167,19 @@ export default function PracticeTab() {
       </View>
 
       {activeTab === "teacher" && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}
-          style={{ marginBottom: 12 }}
-        >
-          {STATUS_FILTERS.map((filter) => {
-            const isActive = activeStatus === filter.value;
-            return (
-              <Pressable
-                key={filter.label}
-                onPress={() => {
-                  setActiveStatus(filter.value);
-                  flatListRef.current?.scrollToOffset({
-                    offset: 0,
-                    animated: false,
-                  });
-                }}
-                style={{
-                  paddingHorizontal: 16,
-                  paddingVertical: 8,
-                  borderRadius: 20,
-                  backgroundColor: isActive
-                    ? theme.brand.primary
-                    : theme.background.surface,
-                  borderWidth: 1,
-                  borderColor: isActive
-                    ? theme.brand.primary
-                    : theme.border.subtle,
-                }}
-              >
-                <Text
-                  className="font-body text-sm"
-                  style={{
-                    color: isActive ? theme.text.onBrand : theme.text.secondary,
-                  }}
-                >
-                  {filter.label}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
+        <AssignmentFilterBar
+          status={activeStatus}
+          onStatusChange={(s) => {
+            setActiveStatus(s);
+            flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
+          }}
+          classId={activeClassId}
+          onClassChange={(id) => {
+            setActiveClassId(id);
+            flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
+          }}
+          classes={classes ?? []}
+        />
       )}
     </>
   );
@@ -281,6 +235,13 @@ export default function PracticeTab() {
   return (
     <View className="flex-1" style={{ backgroundColor: theme.background.page }}>
       <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+
+      {/* Tiêu đề màn hình — nằm ngoài FlatList để không scroll */}
+      <ScreenHeader
+        title="Luyện tập"
+        rightAction={<BellButton />}
+        paddingTop={insets.top + 16}
+      />
 
       <FlatList<Content | LessonResponse>
         ref={flatListRef}
