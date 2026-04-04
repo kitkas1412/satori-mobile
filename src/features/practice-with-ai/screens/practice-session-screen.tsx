@@ -1,330 +1,401 @@
-// Màn hình phiên luyện tập AI — hiển thị câu hỏi trắc nghiệm từng câu.
+// Màn hình luyện tập với AI — hiển thị từng câu hỏi trắc nghiệm.
+// Luồng: khởi tạo session → người dùng chọn đáp án → xác nhận → câu tiếp theo
+//        → hoàn thành → chuyển sang màn hình kết quả
 
-import { Flame, Lightbulb, X, Zap } from "lucide-react-native";
-import { useState } from "react";
-import {
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
+import { useEffect, useState } from "react";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { StatusBar } from "expo-status-bar";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 
+import { LoadingOverlay, PrimaryButton, ProgressBar } from "@/components/ui";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { IconButton } from "@/components/ui/icon-button";
-import { ProgressBar } from "@/components/ui/progress-bar";
-import { PrimaryButton } from "@/components/ui/button";
+import { usePracticeSession, useSubmitAnswer } from "../hooks";
+import type {
+  AnswerResponse,
+  Items,
+  SessionType,
+} from "../api/practice-with-ai.types";
 import {
-  generateMockQuestions,
-  type PracticeQuestion,
-  type QuestionOption,
-  type SessionType,
-} from "@/features/practice-with-ai/api";
+  FillBlankSection,
+  MatchingSection,
+  MultipleChoiceSection,
+  QuestionCard,
+  SentenceOrderSection,
+  SessionHeader,
+  TranslationSection,
+  TrueFalseSection,
+} from "../components";
 
-const SESSION_TYPE_LABELS: Record<SessionType, string> = {
-  vocabulary: "Từ vựng",
-  grammar: "Ngữ pháp",
-  kanji: "Kanji",
-  combined: "Tổng hợp",
-  sentence: "Xây dựng câu",
+const SESSION_TYPE_LABEL: Record<SessionType, string> = {
+  VOCAB_DRILL: "Từ vựng",
+  GRAMMAR_DRILL: "Ngữ pháp",
+  MIXED_LESSON: "Hỗn hợp",
+  KANJI_READING: "Kanji",
+  SENTENCE_BUILD: "Câu",
 };
 
 export function PracticeSessionScreen() {
-  const router = useRouter();
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
+  const router = useRouter();
 
-  const { sessionType: rawSessionType, questionCount: rawCount } =
-    useLocalSearchParams<{ lessonId: string; sessionType: string; questionCount: string }>();
-
-  const sessionType = (rawSessionType ?? "vocabulary") as SessionType;
-  const questionCount = Math.max(1, parseInt(rawCount ?? "5", 10));
-
-  // Sinh câu hỏi một lần khi mount (useMemo không cần thiết — React Compiler xử lý)
-  const [questions] = useState<PracticeQuestion[]>(() =>
-    generateMockQuestions(sessionType, questionCount),
-  );
+  const { lessonId, sessionType, questionCount, itemTypes } =
+    useLocalSearchParams<{
+      lessonId: string;
+      sessionType: string;
+      questionCount: string;
+      itemTypes: string;
+    }>();
 
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
-  const [confirmed, setConfirmed] = useState(false);
-  const [score, setScore] = useState(0);
+  const [selectedOptionId, setSelectedOptionId] = useState<number | null>(null);
+  const [selectedWordIds, setSelectedWordIds] = useState<number[]>([]);
+  const [matchedPairs, setMatchedPairs] = useState<{ leftId: number; rightId: number }[]>([]);
+  const [selectedLeftId, setSelectedLeftId] = useState<number | null>(null);
+  const [streak, setStreak] = useState(0);
+  const [showHint, setShowHint] = useState(false);
+  const [answerResult, setAnswerResult] = useState<AnswerResponse | null>(null);
 
-  const total = questions.length;
-  const question = questions[currentIndex];
+  const {
+    mutate: startSession,
+    data: sessionData,
+    isPending: isInitializing,
+    isError: isInitError,
+  } = usePracticeSession();
 
-  function handleSelectOption(optionId: string) {
-    if (confirmed) return;
-    setSelectedOptionId(optionId);
+  const { mutate: submitAnswer, isPending: isSubmitting } = useSubmitAnswer();
+
+  useEffect(() => {
+    console.log("[PracticeSession] isInitializing:", isInitializing);
+  }, [isInitializing]);
+
+  useEffect(() => {
+    console.log("[PracticeSession] isSubmitting:", isSubmitting);
+  }, [isSubmitting]);
+
+  useEffect(() => {
+    if (lessonId && sessionType && questionCount && itemTypes) {
+      startSession({
+        lessonId,
+        sessionType: sessionType as SessionType,
+        itemCount: parseInt(questionCount, 10),
+        itemTypes: JSON.parse(itemTypes),
+      });
+    }
+  }, []);
+
+  function handleToggleWord(id: number) {
+    setSelectedWordIds((prev) =>
+      prev.includes(id) ? prev.filter((wid) => wid !== id) : [...prev, id],
+    );
+  }
+
+  function handleSelectLeft(id: number) {
+    const isPaired = matchedPairs.some((p) => p.leftId === id);
+    if (isPaired) {
+      setMatchedPairs((prev) => prev.filter((p) => p.leftId !== id));
+      return;
+    }
+    setSelectedLeftId((prev) => (prev === id ? null : id));
+  }
+
+  function handleSelectRight(id: number) {
+    const isPaired = matchedPairs.some((p) => p.rightId === id);
+    if (isPaired) {
+      setMatchedPairs((prev) => prev.filter((p) => p.rightId !== id));
+      return;
+    }
+    if (selectedLeftId === null) return;
+    setMatchedPairs((prev) => [...prev, { leftId: selectedLeftId, rightId: id }]);
+    setSelectedLeftId(null);
+  }
+
+  function handleClose() {
+    Alert.alert(
+      "Kết thúc buổi học",
+      "Tiến độ sẽ không được lưu. Bạn chắc chắn chứ?",
+      [
+        { text: "Huỷ", style: "cancel" },
+        {
+          text: "Kết thúc",
+          style: "destructive",
+          onPress: () => router.replace("/(tabs)/practice"),
+        },
+      ],
+    );
   }
 
   function handleConfirm() {
-    if (!selectedOptionId || confirmed) return;
+    if (!sessionData || !currentItem) return;
 
-    const isCorrect =
-      question.options.find((o) => o.id === selectedOptionId)?.isCorrect ?? false;
-
-    setConfirmed(true);
-    if (isCorrect) setScore((s) => s + 1);
-
-    setTimeout(() => {
-      if (currentIndex + 1 >= total) {
-        router.back();
+    // Phase 2: feedback đã hiển thị → chuyển câu tiếp
+    if (answerResult !== null) {
+      if (answerResult.sessionCompleted) {
+        router.replace({
+          pathname: "/practice-result",
+          params: { practiceSessionId: sessionData.session.sessionId },
+        });
       } else {
         setCurrentIndex((i) => i + 1);
         setSelectedOptionId(null);
-        setConfirmed(false);
+        setSelectedWordIds([]);
+        setMatchedPairs([]);
+        setSelectedLeftId(null);
+        setAnswerResult(null);
+        setShowHint(false);
       }
-    }, 900);
+      return;
+    }
+
+    // Phase 1: submit câu trả lời
+    if (currentItem.itemType === "MATCHING") {
+      if (matchedPairs.length === 0) return;
+      const userAnswer = matchedPairs
+        .map(({ leftId, rightId }) => `${leftId}:${rightId}`)
+        .join(",");
+      submitAnswer(
+        { sessionId: sessionData.session.sessionId, itemId: currentItem.id, userAnswer },
+        {
+          onSuccess: (result) => {
+            setStreak((s) => (result.correct ? s + 1 : 0));
+            setAnswerResult(result);
+          },
+        },
+      );
+      return;
+    }
+
+    if (currentItem.itemType === "SENTENCE_ORDER") {
+      if (selectedWordIds.length === 0) return;
+      const userAnswer = selectedWordIds
+        .map((id) => currentItem.options.find((o) => o.id === id)?.text ?? "")
+        .join(" ");
+      submitAnswer(
+        { sessionId: sessionData.session.sessionId, itemId: currentItem.id, userAnswer },
+        {
+          onSuccess: (result) => {
+            setStreak((s) => (result.correct ? s + 1 : 0));
+            setAnswerResult(result);
+          },
+        },
+      );
+      return;
+    }
+
+    if (selectedOptionId === null) return;
+    const selectedOption = currentItem.options.find(
+      (o) => o.id === selectedOptionId,
+    );
+    if (!selectedOption) return;
+
+    submitAnswer(
+      {
+        sessionId: sessionData.session.sessionId,
+        itemId: currentItem.id,
+        userAnswer: selectedOption.text,
+      },
+      {
+        onSuccess: (result) => {
+          setStreak((s) => (result.correct ? s + 1 : 0));
+          setAnswerResult(result);
+        },
+      },
+    );
   }
 
-  function getOptionColors(opt: QuestionOption): {
-    bg: string;
-    border: string;
-    labelBg: string;
-    labelBorder: string;
-    labelText: string;
-    text: string;
-  } {
-    const isSelected = opt.id === selectedOptionId;
-
-    if (!confirmed) {
-      if (isSelected) {
-        return {
-          bg: theme.brand.primary,
-          border: theme.brand.primary,
-          labelBg: theme.brand.primary,
-          labelBorder: theme.icon.onBrand,
-          labelText: theme.icon.onBrand,
-          text: theme.text.onBrand,
-        };
-      }
-      return {
-        bg: theme.background.surface,
-        border: theme.border.subtle,
-        labelBg: theme.background.surface,
-        labelBorder: theme.border.default,
-        labelText: theme.text.disabled,
-        text: theme.text.disabled,
-      };
-    }
-
-    // Trạng thái sau khi xác nhận
-    if (opt.isCorrect) {
-      return {
-        bg: theme.success.bold,
-        border: theme.success.bold,
-        labelBg: theme.success.bold,
-        labelBorder: theme.icon.onBrand,
-        labelText: theme.icon.onBrand,
-        text: theme.text.onBrand,
-      };
-    }
-    if (isSelected && !opt.isCorrect) {
-      return {
-        bg: theme.error.bold,
-        border: theme.error.bold,
-        labelBg: theme.error.bold,
-        labelBorder: theme.icon.onBrand,
-        labelText: theme.icon.onBrand,
-        text: theme.text.onBrand,
-      };
-    }
-    return {
-      bg: theme.background.surface,
-      border: theme.border.subtle,
-      labelBg: theme.background.surface,
-      labelBorder: theme.border.default,
-      labelText: theme.text.disabled,
-      text: theme.text.disabled,
-    };
+  if (isInitError) {
+    return (
+      <View
+        className="flex-1 items-center justify-center px-8 gap-4"
+        style={{
+          paddingTop: insets.top,
+          backgroundColor: theme.background.page,
+        }}
+      >
+        <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+        <Text
+          className="font-heading text-base text-center"
+          style={{ color: theme.text.primary }}
+        >
+          Không thể khởi tạo phiên luyện tập
+        </Text>
+        <PrimaryButton
+          text="Về trang luyện tập"
+          onPress={() => router.replace("/(tabs)/practice")}
+        />
+      </View>
+    );
   }
 
-  if (!question) return null;
+  const items = sessionData?.items ?? [];
+  const session = sessionData?.session;
+  const currentItem: Items | undefined = items[currentIndex];
+  const totalItems = session?.totalItems ?? parseInt(questionCount ?? "0", 10);
+  const progress = totalItems > 0 ? currentIndex / totalItems : 0;
+  const sessionTypeLabel =
+    SESSION_TYPE_LABEL[sessionType as SessionType] ?? sessionType;
 
   return (
-    <View className="flex-1" style={{ backgroundColor: theme.background.page }}>
-      <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
-
-      {/* Header */}
+    <>
       <View
-        className="px-4 gap-4"
-        style={{ paddingTop: insets.top + 16 }}
+        className="flex-1"
+        style={{
+          paddingTop: insets.top,
+          backgroundColor: theme.background.page,
+        }}
       >
-        {/* Row: X | badge + counter | flame + score */}
-        <View className="flex-row items-center">
-          <IconButton
-            icon={<X size={24} color={theme.icon.primary} strokeWidth={2} />}
-            onPress={() => router.back()}
-          />
+        <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
 
-          {/* Center */}
-          <View className="flex-1 items-center gap-[3px]">
-            {/* Badge loại session */}
-            <View
-              className="flex-row items-center gap-[5px] px-[10px] py-[2px] rounded-full border"
-              style={{
-                backgroundColor: theme.border.subtle,
-                borderColor: theme.brand.primary,
-              }}
-            >
-              <Zap size={10} color={theme.brand.primary} strokeWidth={2.5} />
-              <Text
-                className="font-heading"
-                style={{ fontSize: 11, color: theme.brand.primary }}
-              >
-                {SESSION_TYPE_LABELS[sessionType]}
-              </Text>
-            </View>
-            {/* Số câu */}
-            <Text className="font-body text-xs" style={{ color: theme.text.secondary }}>
-              Câu {currentIndex + 1} / {total}
-            </Text>
-          </View>
+        <LoadingOverlay
+          visible={isInitializing || isSubmitting}
+          title="Đang xử lý..."
+          message="Vui lòng đợi trong giây lát"
+        />
 
-          {/* Score */}
-          <View className="flex-row items-center gap-1">
-            <Flame
-              size={18}
-              color={Colors.primitive.amber[300]}
-              strokeWidth={2}
-              fill={Colors.primitive.amber[300]}
-            />
-            <Text
-              className="font-heading"
-              style={{ fontSize: 16, color: Colors.primitive.amber[300] }}
-            >
-              {score}
-            </Text>
-          </View>
-        </View>
-
-        {/* Progress bar */}
-        <ProgressBar progress={(currentIndex + (confirmed ? 1 : 0)) / total} height={6} />
-      </View>
-
-      {/* Body */}
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ padding: 16, gap: 16 }}
-      >
-        {/* Question card */}
-        <View
-          className="rounded-[20px] px-5 py-[21px] gap-3.5"
-          style={{
-            backgroundColor: theme.background.surface,
-            borderWidth: 1,
-            borderColor: theme.border.subtle,
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{
+            paddingHorizontal: 16,
+            paddingTop: 16,
+            paddingBottom: Math.max(insets.bottom, 16) + 92,
+            gap: 16,
           }}
         >
-          {/* Type label */}
-          <View className="flex-row items-center gap-[6px]">
-            <View
-              className="rounded-full"
-              style={{
-                width: 6,
-                height: 6,
-                backgroundColor: theme.brand.primary,
-              }}
-            />
-            <Text
-              className="font-body"
-              style={{
-                fontSize: 11,
-                color: theme.text.secondary,
-                letterSpacing: 0.55,
-                textTransform: "uppercase",
-              }}
-            >
-              Trắc nghiệm
-            </Text>
-          </View>
+          {/* Header row: X | badge + câu số | streak */}
+          <SessionHeader
+            sessionTypeLabel={sessionTypeLabel}
+            currentIndex={currentIndex}
+            totalItems={totalItems}
+            streak={streak}
+            theme={theme}
+            onClose={handleClose}
+          />
 
-          {/* Question text */}
-          <Text
-            className="font-heading"
-            style={{ fontSize: 18, lineHeight: 26, color: theme.text.primary }}
-          >
-            {question.text}
-          </Text>
+          {/* Progress bar */}
+          <ProgressBar progress={progress} height={6} />
 
-          {/* Hint button */}
-          {question.hint && (
-            <Pressable className="flex-row items-center gap-[6px]">
-              <Lightbulb size={14} color={theme.text.secondary} strokeWidth={2} />
-              <Text className="font-body text-xs" style={{ color: theme.text.secondary }}>
-                Xem gợi ý
-              </Text>
-            </Pressable>
-          )}
-        </View>
+          {/* Question card + options */}
+          {currentItem && (
+            <>
+              {/* Question card */}
+              <QuestionCard
+                itemType={currentItem.itemType}
+                question={currentItem.question}
+                hint={currentItem.hint}
+                showHint={showHint}
+                onToggleHint={() => setShowHint((v) => !v)}
+                theme={theme}
+              />
 
-        {/* Options */}
-        <View style={{ gap: 10 }}>
-          {question.options.map((opt) => {
-            const colors = getOptionColors(opt);
-            return (
-              <Pressable
-                key={opt.id}
-                onPress={() => handleSelectOption(opt.id)}
-                className="flex-row items-center rounded-[16px]"
-                style={{
-                  height: 62,
-                  paddingHorizontal: 17,
-                  gap: 14,
-                  backgroundColor: colors.bg,
-                  borderWidth: 1.23,
-                  borderColor: colors.border,
-                }}
-              >
-                {/* Label circle */}
+              {/* Answer options */}
+              {currentItem.itemType === "MULTIPLE_CHOICE" ? (
+                <MultipleChoiceSection
+                  currentItem={currentItem}
+                  selectedOptionId={selectedOptionId}
+                  answerResult={answerResult}
+                  isSubmitting={isSubmitting}
+                  theme={theme}
+                  onSelectOption={setSelectedOptionId}
+                />
+              ) : currentItem.itemType === "FILL_BLANK" ? (
+                <FillBlankSection
+                  currentItem={currentItem}
+                  selectedOptionId={selectedOptionId}
+                  answerResult={answerResult}
+                  isSubmitting={isSubmitting}
+                  theme={theme}
+                  onSelectOption={setSelectedOptionId}
+                />
+              ) : currentItem.itemType === "TRANSLATION" ? (
+                <TranslationSection
+                  currentItem={currentItem}
+                  selectedOptionId={selectedOptionId}
+                  answerResult={answerResult}
+                  isSubmitting={isSubmitting}
+                  theme={theme}
+                  onSelectOption={setSelectedOptionId}
+                />
+              ) : currentItem.itemType === "SENTENCE_ORDER" ? (
+                <SentenceOrderSection
+                  currentItem={currentItem}
+                  selectedWordIds={selectedWordIds}
+                  answerResult={answerResult}
+                  isSubmitting={isSubmitting}
+                  theme={theme}
+                  onToggleWord={handleToggleWord}
+                />
+              ) : currentItem.itemType === "MATCHING" ? (
+                <MatchingSection
+                  currentItem={currentItem}
+                  matchedPairs={matchedPairs}
+                  selectedLeftId={selectedLeftId}
+                  answerResult={answerResult}
+                  isSubmitting={isSubmitting}
+                  theme={theme}
+                  onSelectLeft={handleSelectLeft}
+                  onSelectRight={handleSelectRight}
+                />
+              ) : currentItem.itemType === "TRUE_FALSE" ? (
+                <TrueFalseSection
+                  currentItem={currentItem}
+                  selectedOptionId={selectedOptionId}
+                  answerResult={answerResult}
+                  isSubmitting={isSubmitting}
+                  theme={theme}
+                  onSelectOption={setSelectedOptionId}
+                />
+              ) : (
                 <View
-                  className="rounded-full items-center justify-center"
+                  className="rounded-2xl p-5 items-center justify-center"
                   style={{
-                    width: 30,
-                    height: 30,
-                    backgroundColor: colors.labelBg,
+                    backgroundColor: theme.background.surface,
                     borderWidth: 1,
-                    borderColor: colors.labelBorder,
+                    borderColor: theme.border.subtle,
+                    minHeight: 80,
                   }}
                 >
                   <Text
-                    className="font-heading"
-                    style={{ fontSize: 13, color: colors.labelText }}
+                    className="font-body text-sm text-center"
+                    style={{ color: theme.text.secondary }}
                   >
-                    {opt.label}
+                    Loại câu hỏi này chưa được hỗ trợ
                   </Text>
                 </View>
+              )}
+            </>
+          )}
+        </ScrollView>
 
-                {/* Option text */}
-                <Text
-                  className="font-heading flex-1"
-                  style={{ fontSize: 15, lineHeight: 22, color: colors.text }}
-                  numberOfLines={2}
-                >
-                  {opt.text}
-                </Text>
-              </Pressable>
-            );
-          })}
+        {/* Bottom sticky confirm button */}
+        <View
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            paddingHorizontal: 16,
+            paddingTop: 4,
+            paddingBottom: Math.max(insets.bottom, 16) + 8,
+            backgroundColor: theme.background.page,
+          }}
+        >
+          <PrimaryButton
+            text={answerResult !== null ? "Tiếp theo" : "Xác nhận"}
+            onPress={handleConfirm}
+            disabled={
+              (selectedOptionId === null &&
+                selectedWordIds.length === 0 &&
+                matchedPairs.length === 0 &&
+                answerResult === null) ||
+              !currentItem
+            }
+            loading={isSubmitting}
+          />
         </View>
-      </ScrollView>
-
-      {/* Bottom CTA */}
-      <View
-        className="px-4 pt-1"
-        style={{ paddingBottom: Math.max(insets.bottom, 16) + 4 }}
-      >
-        <PrimaryButton
-          text="Xác nhận"
-          onPress={handleConfirm}
-          disabled={!selectedOptionId || confirmed}
-        />
       </View>
-    </View>
+    </>
   );
 }

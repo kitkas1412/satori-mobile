@@ -17,7 +17,14 @@ import {
   Zap,
 } from "lucide-react-native";
 import { useRef, useState, useEffect } from "react";
-import { Modal, PanResponder, Pressable, ScrollView, Text, View } from "react-native";
+import {
+  Modal,
+  PanResponder,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import Animated, {
   Easing,
   runOnJS,
@@ -30,7 +37,12 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Backdrop, PrimaryButton } from "@/components/ui";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import type { ExerciseType, Lesson, SessionConfig, SessionType } from "@/features/practice-with-ai/api";
+import type {
+  ItemType,
+  LessonResponse,
+  SessionConfig,
+  SessionType,
+} from "@/features/practice-with-ai/api";
 
 const TIMING_CONFIG = { duration: 320, easing: Easing.out(Easing.cubic) };
 
@@ -44,31 +56,31 @@ const SESSION_TYPES: {
   icon: React.ReactNode;
 }[] = [
   {
-    value: "vocabulary",
+    value: "VOCAB_DRILL",
     label: "Luyện từ vựng",
     subtitle: "Ghi nhớ & kiểm tra",
     icon: null,
   },
   {
-    value: "grammar",
+    value: "GRAMMAR_DRILL",
     label: "Luyện ngữ pháp",
     subtitle: "Cấu trúc câu",
     icon: null,
   },
   {
-    value: "combined",
+    value: "MIXED_LESSON",
     label: "Bài tổng hợp",
     subtitle: "Tất cả kỹ năng",
     icon: null,
   },
   {
-    value: "kanji",
+    value: "KANJI_READING",
     label: "Đọc Kanji",
     subtitle: "Âm & nghĩa chữ Hán",
     icon: null,
   },
   {
-    value: "sentence",
+    value: "SENTENCE_BUILD",
     label: "Xây dựng câu",
     subtitle: "Lắp ghép câu hoàn chỉnh",
     icon: null,
@@ -76,22 +88,22 @@ const SESSION_TYPES: {
 ];
 
 const EXERCISE_TYPES: {
-  value: ExerciseType;
+  value: ItemType;
   label: string;
   icon: React.ReactNode;
 }[] = [
-  { value: "multiple_choice", label: "Trắc nghiệm", icon: null },
-  { value: "fill_blank", label: "Điền vào chỗ trống", icon: null },
-  { value: "translation", label: "Dịch thuật", icon: null },
-  { value: "ordering", label: "Sắp xếp câu", icon: null },
-  { value: "matching", label: "Ghép đôi", icon: null },
-  { value: "true_false", label: "Đúng / Sai", icon: null },
+  { value: "MULTIPLE_CHOICE", label: "Trắc nghiệm", icon: null },
+  { value: "FILL_BLANK", label: "Điền vào chỗ trống", icon: null },
+  { value: "TRANSLATION", label: "Dịch thuật", icon: null },
+  { value: "SENTENCE_ORDER", label: "Sắp xếp câu", icon: null },
+  { value: "MATCHING", label: "Ghép đôi", icon: null },
+  { value: "TRUE_FALSE", label: "Đúng / Sai", icon: null },
 ];
 
 export interface SessionConfigSheetProps {
   visible: boolean;
   onClose: () => void;
-  lesson: Lesson | null;
+  lesson: LessonResponse | null;
   onStart: (config: SessionConfig) => void;
 }
 
@@ -104,39 +116,33 @@ function SessionTypeIcon({
 }) {
   const props = { size: 20, color, strokeWidth: 2 };
   switch (type) {
-    case "vocabulary":
+    case "VOCAB_DRILL":
       return <BookOpen {...props} />;
-    case "grammar":
+    case "GRAMMAR_DRILL":
       return <Pencil {...props} />;
-    case "combined":
+    case "MIXED_LESSON":
       return <Layers {...props} />;
-    case "kanji":
+    case "KANJI_READING":
       return <Eye {...props} />;
-    case "sentence":
+    case "SENTENCE_BUILD":
       return <Type {...props} />;
   }
 }
 
-function ExerciseTypeIcon({
-  type,
-  color,
-}: {
-  type: ExerciseType;
-  color: string;
-}) {
+function ItemTypeIcon({ type, color }: { type: ItemType; color: string }) {
   const props = { size: 15, color, strokeWidth: 2 };
   switch (type) {
-    case "multiple_choice":
+    case "MULTIPLE_CHOICE":
       return <CheckSquare {...props} />;
-    case "fill_blank":
+    case "FILL_BLANK":
       return <PenLine {...props} />;
-    case "translation":
+    case "TRANSLATION":
       return <Languages {...props} />;
-    case "ordering":
+    case "SENTENCE_ORDER":
       return <ArrowUpDown {...props} />;
-    case "matching":
+    case "MATCHING":
       return <Link2 {...props} />;
-    case "true_false":
+    case "TRUE_FALSE":
       return <ToggleLeft {...props} />;
   }
 }
@@ -151,20 +157,25 @@ export function SessionConfigSheet({
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
-  const [sessionType, setSessionType] = useState<SessionType>("vocabulary");
-  const [questionCount, setQuestionCount] = useState(5);
-  const [exerciseTypes, setExerciseTypes] = useState<ExerciseType[]>([
-    "multiple_choice",
-  ]);
+  const [sessionType, setSessionType] = useState<SessionType>("VOCAB_DRILL");
+  const [itemCount, setItemCount] = useState(5);
+  const [itemTypes, setItemTypes] = useState<ItemType[]>(["MULTIPLE_CHOICE"]);
 
   const [internalVisible, setInternalVisible] = useState(visible);
   const translateY = useSharedValue(600);
+  // Khi true, ẩn modal ngay lập tức (không chạy animation đóng)
+  const skipCloseAnimation = useRef(false);
 
   useEffect(() => {
     if (visible) {
+      skipCloseAnimation.current = false;
       setInternalVisible(true);
       translateY.value = withTiming(0, TIMING_CONFIG);
+    } else if (skipCloseAnimation.current) {
+      // Navigate đi màn khác → ẩn ngay, không animation
+      setInternalVisible(false);
     } else {
+      // Kéo xuống hoặc nhấn backdrop → chạy animation đóng
       translateY.value = withTiming(600, TIMING_CONFIG, (finished) => {
         if (finished) runOnJS(setInternalVisible)(false);
       });
@@ -200,11 +211,11 @@ export function SessionConfigSheet({
       onPanResponderTerminate: () => {
         translateY.value = withTiming(0, TIMING_CONFIG);
       },
-    })
+    }),
   ).current;
 
-  function toggleExerciseType(type: ExerciseType) {
-    setExerciseTypes((prev) => {
+  function toggleExerciseType(type: ItemType) {
+    setItemTypes((prev) => {
       if (prev.includes(type)) {
         if (prev.length === 1) return prev;
         return prev.filter((t) => t !== type);
@@ -214,7 +225,13 @@ export function SessionConfigSheet({
   }
 
   function handleStart() {
-    onStart({ sessionType, questionCount, exerciseTypes });
+    // Ẩn modal ngay khi navigate, không cần animation đóng
+    skipCloseAnimation.current = true;
+    onStart({
+      sessionType,
+      itemCount,
+      itemTypes,
+    });
   }
 
   return (
@@ -252,10 +269,7 @@ export function SessionConfigSheet({
               />
             </View>
 
-            <View
-              className="flex-row items-center px-5"
-              style={{ height: 65 }}
-            >
+            <View className="flex-row items-center px-5" style={{ height: 65 }}>
               <View className="flex-1 gap-0.5">
                 <Text
                   className="font-heading text-lg"
@@ -297,7 +311,10 @@ export function SessionConfigSheet({
                 </Text>
               </View>
 
-              <View className="flex-row flex-wrap gap-y-[10px]" style={{ gap: 10 }}>
+              <View
+                className="flex-row flex-wrap gap-y-[10px]"
+                style={{ gap: 10 }}
+              >
                 {SESSION_TYPES.map((item) => {
                   const isSelected = sessionType === item.value;
                   return (
@@ -394,7 +411,7 @@ export function SessionConfigSheet({
               >
                 <Pressable
                   onPress={() =>
-                    setQuestionCount((c) => Math.max(MIN_QUESTIONS, c - 1))
+                    setItemCount((c) => Math.max(MIN_QUESTIONS, c - 1))
                   }
                   className="rounded-xl items-center justify-center"
                   style={{
@@ -409,9 +426,13 @@ export function SessionConfigSheet({
                 <View className="items-center gap-0.5">
                   <Text
                     className="font-heading"
-                    style={{ fontSize: 32, color: theme.text.primary, lineHeight: 36 }}
+                    style={{
+                      fontSize: 32,
+                      color: theme.text.primary,
+                      lineHeight: 36,
+                    }}
                   >
-                    {questionCount}
+                    {itemCount}
                   </Text>
                   <Text
                     className="font-body text-[11px]"
@@ -423,7 +444,7 @@ export function SessionConfigSheet({
 
                 <Pressable
                   onPress={() =>
-                    setQuestionCount((c) => Math.min(MAX_QUESTIONS, c + 1))
+                    setItemCount((c) => Math.min(MAX_QUESTIONS, c + 1))
                   }
                   className="rounded-xl items-center justify-center"
                   style={{
@@ -459,7 +480,7 @@ export function SessionConfigSheet({
 
               <View className="flex-row flex-wrap" style={{ gap: 10 }}>
                 {EXERCISE_TYPES.map((item) => {
-                  const isSelected = exerciseTypes.includes(item.value);
+                  const isSelected = itemTypes.includes(item.value);
                   return (
                     <Pressable
                       key={item.value}
@@ -475,12 +496,10 @@ export function SessionConfigSheet({
                           : theme.border.subtle,
                       }}
                     >
-                      <ExerciseTypeIcon
+                      <ItemTypeIcon
                         type={item.value}
                         color={
-                          isSelected
-                            ? theme.text.primary
-                            : theme.text.disabled
+                          isSelected ? theme.text.primary : theme.text.disabled
                         }
                       />
                       <Text
@@ -504,10 +523,7 @@ export function SessionConfigSheet({
 
           {/* CTA */}
           <View className="px-5 pt-3">
-            <PrimaryButton
-              text="Bắt đầu luyện tập"
-              onPress={handleStart}
-            />
+            <PrimaryButton text="Bắt đầu luyện tập" onPress={handleStart} />
           </View>
         </Animated.View>
       </View>

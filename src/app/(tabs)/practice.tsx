@@ -28,13 +28,19 @@ import {
   useAssignments,
   useAssignmentNavigation,
 } from "@/features/assignment/hooks";
-import { LessonCard, SessionConfigSheet } from "@/features/practice-with-ai/components";
+import {
+  LessonCard,
+  SessionConfigSheet,
+} from "@/features/practice-with-ai/components";
 import { useLessons } from "@/features/practice-with-ai/hooks";
 import type {
   AssignmentStatusFilter,
   Content,
 } from "@/features/assignment/api";
-import type { Lesson, SessionConfig } from "@/features/practice-with-ai/api";
+import type {
+  LessonResponse,
+  SessionConfig,
+} from "@/features/practice-with-ai/api";
 
 type ActiveTab = "teacher" | "ai";
 
@@ -53,8 +59,8 @@ export default function PracticeTab() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("teacher");
   const [activeStatus, setActiveStatus] =
     useState<AssignmentStatusFilter>(undefined);
-  const [sheetLesson, setSheetLesson] = useState<Lesson | null>(null);
-  const flatListRef = useRef<FlatList<Content | Lesson>>(null);
+  const [sheetLesson, setSheetLesson] = useState<LessonResponse | null>(null);
+  const flatListRef = useRef<FlatList<Content | LessonResponse>>(null);
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
@@ -221,7 +227,6 @@ export default function PracticeTab() {
           })}
         </ScrollView>
       )}
-
     </>
   );
 
@@ -277,7 +282,7 @@ export default function PracticeTab() {
     <View className="flex-1" style={{ backgroundColor: theme.background.page }}>
       <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
 
-      <FlatList<Content | Lesson>
+      <FlatList<Content | LessonResponse>
         ref={flatListRef}
         data={activeTab === "teacher" ? assignments : (lessons ?? [])}
         keyExtractor={(item) => item.id}
@@ -290,10 +295,10 @@ export default function PracticeTab() {
               />
             ) : (
               <LessonCard
-                title={(item as Lesson).title}
-                vocabularyCount={(item as Lesson).vocabularyCount}
-                grammarPointCount={(item as Lesson).grammarPointCount}
-                onPress={() => setSheetLesson(item as Lesson)}
+                title={(item as LessonResponse).title}
+                vocabularyCount={(item as LessonResponse).vocabularyCount}
+                grammarPointCount={(item as LessonResponse).grammarPointCount}
+                onPress={() => setSheetLesson(item as LessonResponse)}
               />
             )}
           </View>
@@ -330,14 +335,17 @@ export default function PracticeTab() {
         onStart={(config: SessionConfig) => {
           const lesson = sheetLesson;
           setSheetLesson(null);
-          router.push({
-            pathname: "/practice-session",
-            params: {
-              lessonId: lesson!.id,
-              sessionType: config.sessionType,
-              questionCount: String(config.questionCount),
-            },
-          });
+          setTimeout(() => {
+            router.push({
+              pathname: "/practice-session",
+              params: {
+                lessonId: lesson!.id,
+                sessionType: config.sessionType,
+                questionCount: String(config.itemCount),
+                itemTypes: JSON.stringify(config.itemTypes),
+              },
+            });
+          }, 350);
         }}
       />
       <ChatbotFab />

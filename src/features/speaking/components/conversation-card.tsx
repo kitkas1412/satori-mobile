@@ -52,6 +52,8 @@ export function ConversationCard({
             color={theme.success.default}
             strokeWidth={2}
           />
+        ) : practiceStatus === "NOT_STARTED" ? (
+          <MessageSquareMore size={24} color={iconColor} strokeWidth={2} />
         ) : (
           <MessageSquareMore size={24} color={iconColor} strokeWidth={2} />
         )}
