@@ -335,15 +335,17 @@ export default function PracticeTab() {
         onStart={(config: SessionConfig) => {
           const lesson = sheetLesson;
           setSheetLesson(null);
-          router.push({
-            pathname: "/practice-session",
-            params: {
-              lessonId: lesson!.id,
-              sessionType: config.sessionType,
-              questionCount: String(config.itemCount),
-              itemTypes: JSON.stringify(config.itemTypes),
-            },
-          });
+          setTimeout(() => {
+            router.push({
+              pathname: "/practice-session",
+              params: {
+                lessonId: lesson!.id,
+                sessionType: config.sessionType,
+                questionCount: String(config.itemCount),
+                itemTypes: JSON.stringify(config.itemTypes),
+              },
+            });
+          }, 350);
         }}
       />
       <ChatbotFab />

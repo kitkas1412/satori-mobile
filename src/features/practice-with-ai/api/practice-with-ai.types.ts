@@ -23,21 +23,6 @@ export interface SessionConfig {
   itemTypes: ItemType[];
 }
 
-export interface QuestionOption {
-  id: string;
-  label: "A" | "B" | "C" | "D";
-  text: string;
-  isCorrect: boolean;
-}
-
-export interface PracticeQuestion {
-  id: string;
-  type: "multiple_choice";
-  text: string;
-  hint?: string;
-  options: QuestionOption[];
-}
-
 // GET: /api/v1/courses/{{courseId}}/lessons
 /** Một bài học trong sách */
 export interface LessonResponse {
@@ -89,12 +74,14 @@ export interface Items {
   itemIndex: number;
   itemType: ItemType;
   question: string;
+  questionJapanese?: string;
   hint: string;
   options: Options[];
 }
 
 /** Đáp án của câu hỏi */
 export interface Options {
+  id: number;
   text: string;
 }
 
