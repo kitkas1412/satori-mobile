@@ -8,7 +8,6 @@ import { useRouter } from "expo-router";
 import { usePracticeStore } from "@/stores";
 import type { Question } from "../api";
 import { useSubmitAssignment } from "./use-submit-assignment";
-import { practiceQueryKeys } from "./use-assignments";
 
 interface UseQuizSubmitParams {
   assignmentId: string;
@@ -54,7 +53,7 @@ export function useQuizSubmit({
           // Lưu kết quả vào store để màn hình kết quả đọc mà không cần gọi API lại
           setQuizResult(assignmentId, result);
           // Làm mới danh sách bài tập để cập nhật trạng thái bài vừa nộp
-          queryClient.invalidateQueries({ queryKey: practiceQueryKeys.assignments });
+          queryClient.invalidateQueries({ queryKey: ["practice", "assignments"] });
           router.push("/assignment-result");
         },
         onError: () => {

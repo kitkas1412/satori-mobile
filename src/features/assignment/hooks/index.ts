@@ -1,4 +1,5 @@
 export { useAssignments, practiceQueryKeys } from "./use-assignments";
+export { useClasses } from "./use-classes";
 export { useStartAssignment } from "./use-start-assignment";
 export { useSubmitAssignment } from "./use-submit-assignment";
 export { useQuizNavigation } from "./use-quiz-navigation";
