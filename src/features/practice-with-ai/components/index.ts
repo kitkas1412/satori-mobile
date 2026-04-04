@@ -14,3 +14,5 @@ export { SessionHeader } from "./session-header";
 export type { SessionHeaderProps } from "./session-header";
 export { TranslationSection } from "./translation-section";
 export type { TranslationSectionProps } from "./translation-section";
+export { SentenceOrderSection } from "./sentence-order-section";
+export type { SentenceOrderSectionProps } from "./sentence-order-section";

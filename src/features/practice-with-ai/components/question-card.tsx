@@ -10,6 +10,7 @@ const ITEM_TYPE_LABEL: Partial<Record<ItemType, string>> = {
   MULTIPLE_CHOICE: "Trắc nghiệm",
   FILL_BLANK: "Điền vào chỗ trống",
   TRANSLATION: "Dịch nghĩa",
+  SENTENCE_ORDER: "Sắp xếp câu",
 };
 
 export interface QuestionCardProps {
@@ -34,7 +35,9 @@ export function QuestionCard({
       ? "Điền từ thích hợp vào chỗ trống để hoàn thành câu"
       : itemType === "TRANSLATION"
         ? "Chọn nghĩa đúng của câu tiếng Nhật sau:"
-        : question;
+        : itemType === "SENTENCE_ORDER"
+          ? "Sắp xếp các từ để tạo thành câu đúng"
+          : question;
 
   return (
     <View

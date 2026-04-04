@@ -21,6 +21,7 @@ import {
   FillBlankSection,
   MultipleChoiceSection,
   QuestionCard,
+  SentenceOrderSection,
   SessionHeader,
   TranslationSection,
 } from "../components";
@@ -49,6 +50,7 @@ export function PracticeSessionScreen() {
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOptionId, setSelectedOptionId] = useState<number | null>(null);
+  const [selectedWordIds, setSelectedWordIds] = useState<number[]>([]);
   const [streak, setStreak] = useState(0);
   const [showHint, setShowHint] = useState(false);
   const [answerResult, setAnswerResult] = useState<AnswerResponse | null>(null);
@@ -81,6 +83,12 @@ export function PracticeSessionScreen() {
     }
   }, []);
 
+  function handleToggleWord(id: number) {
+    setSelectedWordIds((prev) =>
+      prev.includes(id) ? prev.filter((wid) => wid !== id) : [...prev, id],
+    );
+  }
+
   function handleClose() {
     Alert.alert(
       "Kết thúc buổi học",
@@ -109,6 +117,7 @@ export function PracticeSessionScreen() {
       } else {
         setCurrentIndex((i) => i + 1);
         setSelectedOptionId(null);
+        setSelectedWordIds([]);
         setAnswerResult(null);
         setShowHint(false);
       }
@@ -116,6 +125,23 @@ export function PracticeSessionScreen() {
     }
 
     // Phase 1: submit câu trả lời
+    if (currentItem.itemType === "SENTENCE_ORDER") {
+      if (selectedWordIds.length === 0) return;
+      const userAnswer = selectedWordIds
+        .map((id) => currentItem.options.find((o) => o.id === id)?.text ?? "")
+        .join(" ");
+      submitAnswer(
+        { sessionId: sessionData.session.sessionId, itemId: currentItem.id, userAnswer },
+        {
+          onSuccess: (result) => {
+            setStreak((s) => (result.correct ? s + 1 : 0));
+            setAnswerResult(result);
+          },
+        },
+      );
+      return;
+    }
+
     if (selectedOptionId === null) return;
     const selectedOption = currentItem.options.find(
       (o) => o.id === selectedOptionId,
@@ -249,6 +275,15 @@ export function PracticeSessionScreen() {
                   theme={theme}
                   onSelectOption={setSelectedOptionId}
                 />
+              ) : currentItem.itemType === "SENTENCE_ORDER" ? (
+                <SentenceOrderSection
+                  currentItem={currentItem}
+                  selectedWordIds={selectedWordIds}
+                  answerResult={answerResult}
+                  isSubmitting={isSubmitting}
+                  theme={theme}
+                  onToggleWord={handleToggleWord}
+                />
               ) : (
                 <View
                   className="rounded-2xl p-5 items-center justify-center"
@@ -288,7 +323,9 @@ export function PracticeSessionScreen() {
             text={answerResult !== null ? "Tiếp theo" : "Xác nhận"}
             onPress={handleConfirm}
             disabled={
-              (selectedOptionId === null && answerResult === null) ||
+              (selectedOptionId === null &&
+                selectedWordIds.length === 0 &&
+                answerResult === null) ||
               !currentItem
             }
             loading={isSubmitting}
