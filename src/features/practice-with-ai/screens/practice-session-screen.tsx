@@ -19,6 +19,7 @@ import type {
 } from "../api/practice-with-ai.types";
 import {
   FillBlankSection,
+  MatchingSection,
   MultipleChoiceSection,
   QuestionCard,
   SentenceOrderSection,
@@ -51,6 +52,8 @@ export function PracticeSessionScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOptionId, setSelectedOptionId] = useState<number | null>(null);
   const [selectedWordIds, setSelectedWordIds] = useState<number[]>([]);
+  const [matchedPairs, setMatchedPairs] = useState<{ leftId: number; rightId: number }[]>([]);
+  const [selectedLeftId, setSelectedLeftId] = useState<number | null>(null);
   const [streak, setStreak] = useState(0);
   const [showHint, setShowHint] = useState(false);
   const [answerResult, setAnswerResult] = useState<AnswerResponse | null>(null);
@@ -89,6 +92,26 @@ export function PracticeSessionScreen() {
     );
   }
 
+  function handleSelectLeft(id: number) {
+    const isPaired = matchedPairs.some((p) => p.leftId === id);
+    if (isPaired) {
+      setMatchedPairs((prev) => prev.filter((p) => p.leftId !== id));
+      return;
+    }
+    setSelectedLeftId((prev) => (prev === id ? null : id));
+  }
+
+  function handleSelectRight(id: number) {
+    const isPaired = matchedPairs.some((p) => p.rightId === id);
+    if (isPaired) {
+      setMatchedPairs((prev) => prev.filter((p) => p.rightId !== id));
+      return;
+    }
+    if (selectedLeftId === null) return;
+    setMatchedPairs((prev) => [...prev, { leftId: selectedLeftId, rightId: id }]);
+    setSelectedLeftId(null);
+  }
+
   function handleClose() {
     Alert.alert(
       "Kết thúc buổi học",
@@ -118,6 +141,8 @@ export function PracticeSessionScreen() {
         setCurrentIndex((i) => i + 1);
         setSelectedOptionId(null);
         setSelectedWordIds([]);
+        setMatchedPairs([]);
+        setSelectedLeftId(null);
         setAnswerResult(null);
         setShowHint(false);
       }
@@ -125,6 +150,23 @@ export function PracticeSessionScreen() {
     }
 
     // Phase 1: submit câu trả lời
+    if (currentItem.itemType === "MATCHING") {
+      if (matchedPairs.length === 0) return;
+      const userAnswer = matchedPairs
+        .map(({ leftId, rightId }) => `${leftId}:${rightId}`)
+        .join(",");
+      submitAnswer(
+        { sessionId: sessionData.session.sessionId, itemId: currentItem.id, userAnswer },
+        {
+          onSuccess: (result) => {
+            setStreak((s) => (result.correct ? s + 1 : 0));
+            setAnswerResult(result);
+          },
+        },
+      );
+      return;
+    }
+
     if (currentItem.itemType === "SENTENCE_ORDER") {
       if (selectedWordIds.length === 0) return;
       const userAnswer = selectedWordIds
@@ -284,6 +326,17 @@ export function PracticeSessionScreen() {
                   theme={theme}
                   onToggleWord={handleToggleWord}
                 />
+              ) : currentItem.itemType === "MATCHING" ? (
+                <MatchingSection
+                  currentItem={currentItem}
+                  matchedPairs={matchedPairs}
+                  selectedLeftId={selectedLeftId}
+                  answerResult={answerResult}
+                  isSubmitting={isSubmitting}
+                  theme={theme}
+                  onSelectLeft={handleSelectLeft}
+                  onSelectRight={handleSelectRight}
+                />
               ) : (
                 <View
                   className="rounded-2xl p-5 items-center justify-center"
@@ -325,6 +378,7 @@ export function PracticeSessionScreen() {
             disabled={
               (selectedOptionId === null &&
                 selectedWordIds.length === 0 &&
+                matchedPairs.length === 0 &&
                 answerResult === null) ||
               !currentItem
             }

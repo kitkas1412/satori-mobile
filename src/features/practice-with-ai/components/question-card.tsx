@@ -11,6 +11,7 @@ const ITEM_TYPE_LABEL: Partial<Record<ItemType, string>> = {
   FILL_BLANK: "Điền vào chỗ trống",
   TRANSLATION: "Dịch nghĩa",
   SENTENCE_ORDER: "Sắp xếp câu",
+  MATCHING: "Ghép đôi",
 };
 
 export interface QuestionCardProps {

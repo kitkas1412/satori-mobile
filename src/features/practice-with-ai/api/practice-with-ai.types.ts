@@ -83,6 +83,7 @@ export interface Items {
 export interface Options {
   id: number;
   text: string;
+  side?: "LEFT" | "RIGHT";
 }
 
 // POST: /api/v1/learner/practice/sessions/{{sessionId}}/items/{{itemId}}/answer

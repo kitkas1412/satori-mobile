@@ -1,6 +1,8 @@
 export { FeedbackPanel } from "./feedback-panel";
 export type { FeedbackPanelProps } from "./feedback-panel";
 export { FillBlankSection } from "./fill-blank-section";
+export { MatchingSection } from "./matching-section";
+export type { MatchingSectionProps } from "./matching-section";
 export { LessonCard } from "./lesson-card";
 export type { LessonCardProps } from "./lesson-card";
 export { MultipleChoiceSection } from "./multiple-choice-section";
