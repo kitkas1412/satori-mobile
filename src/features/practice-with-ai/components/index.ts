@@ -5,6 +5,7 @@ export { LessonCard } from "./lesson-card";
 export type { LessonCardProps } from "./lesson-card";
 export { MultipleChoiceSection } from "./multiple-choice-section";
 export type { MultipleChoiceSectionProps } from "./multiple-choice-section";
+export { PracticeAnswerItem } from "./practice-answer-item";
 export { QuestionCard } from "./question-card";
 export type { QuestionCardProps } from "./question-card";
 export { SessionConfigSheet } from "./session-config-sheet";
