@@ -2,7 +2,14 @@
 // Luồng: khởi tạo session → người dùng chọn đáp án → xác nhận → câu tiếp theo
 //        → hoàn thành → chuyển sang màn hình kết quả
 
-import { Flame, Lightbulb, X, Zap } from "lucide-react-native";
+import {
+  CheckCircle,
+  Flame,
+  Lightbulb,
+  X,
+  XCircle,
+  Zap,
+} from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -13,7 +20,17 @@ import { LoadingOverlay, PrimaryButton, ProgressBar } from "@/components/ui";
 import { Colors, Primitive } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { usePracticeSession, useSubmitAnswer } from "../hooks";
-import type { Items, SessionType } from "../api/practice-with-ai.types";
+import type {
+  AnswerResponse,
+  ItemType,
+  Items,
+  SessionType,
+} from "../api/practice-with-ai.types";
+
+const ITEM_TYPE_LABEL: Partial<Record<ItemType, string>> = {
+  MULTIPLE_CHOICE: "Trắc nghiệm",
+  FILL_BLANK: "Điền vào chỗ trống",
+};
 
 const SESSION_TYPE_LABEL: Record<SessionType, string> = {
   VOCAB_DRILL: "Từ vựng",
@@ -24,6 +41,273 @@ const SESSION_TYPE_LABEL: Record<SessionType, string> = {
 };
 
 const OPTION_LETTERS = ["A", "B", "C", "D"];
+
+type Theme = typeof Colors.light;
+
+interface FillBlankSectionProps {
+  currentItem: Items;
+  selectedOptionId: number | null;
+  answerResult: AnswerResponse | null;
+  isSubmitting: boolean;
+  theme: Theme;
+  onSelectOption: (id: number) => void;
+}
+
+function FillBlankSection({
+  currentItem,
+  selectedOptionId,
+  answerResult,
+  isSubmitting,
+  theme,
+  onSelectOption,
+}: FillBlankSectionProps) {
+  const parts = currentItem.question.split("___");
+  const before = parts[0] ?? "";
+  const after = parts[1] ?? "";
+
+  const selectedOption = currentItem.options.find(
+    (o) => o.id === selectedOptionId,
+  );
+
+  // Xác định trạng thái blank slot sau khi submit
+  const isCorrect = answerResult?.correct ?? null;
+  const blankBorderColor =
+    isCorrect === null
+      ? selectedOption
+        ? theme.brand.primary
+        : theme.border.default
+      : isCorrect
+        ? theme.success.default
+        : theme.error.default;
+  const blankBg =
+    isCorrect === null
+      ? "transparent"
+      : isCorrect
+        ? theme.success.subtle
+        : theme.error.subtle;
+  const blankTextColor =
+    isCorrect === null
+      ? selectedOption
+        ? theme.brand.primary
+        : theme.text.disabled
+      : isCorrect
+        ? theme.success.text
+        : theme.error.text;
+
+  return (
+    <View style={{ gap: 12 }}>
+      {/* Sentence card with inline blank slot */}
+      <View
+        style={{
+          backgroundColor: theme.background.surface,
+          borderWidth: 1,
+          borderColor: theme.border.subtle,
+          borderRadius: 16,
+          paddingHorizontal: 20,
+          paddingVertical: 16,
+        }}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "flex-end",
+            flexWrap: "wrap",
+            gap: 4,
+          }}
+        >
+          {before.length > 0 && (
+            <Text
+              className="font-heading"
+              style={{
+                fontSize: 17,
+                lineHeight: 28,
+                color: theme.text.primary,
+              }}
+            >
+              {before}
+            </Text>
+          )}
+
+          {/* Blank slot */}
+          <View
+            style={{
+              minWidth: 64,
+              paddingHorizontal: 12,
+              paddingTop: 2,
+              paddingBottom: 3,
+              borderBottomWidth: 2,
+              borderBottomColor: blankBorderColor,
+              borderTopLeftRadius: 10,
+              borderTopRightRadius: 10,
+              backgroundColor: blankBg,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Text
+              className="font-heading"
+              style={{
+                fontSize: 17,
+                lineHeight: 26,
+                color: blankTextColor,
+                minHeight: 26,
+              }}
+            >
+              {selectedOption?.text ?? ""}
+            </Text>
+          </View>
+
+          {after.length > 0 && (
+            <Text
+              className="font-heading"
+              style={{
+                fontSize: 17,
+                lineHeight: 28,
+                color: theme.text.primary,
+              }}
+            >
+              {after}
+            </Text>
+          )}
+        </View>
+      </View>
+
+      {/* Word chips */}
+      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+        {currentItem.options.map((option) => {
+          const isSelected = selectedOptionId === option.id;
+          const isCorrectAnswer =
+            answerResult !== null && option.text === answerResult.correctAnswer;
+          const isWrongSelected =
+            answerResult !== null && isSelected && !answerResult.correct;
+
+          let chipBg = theme.background.surface;
+          let chipBorder = theme.border.subtle;
+          let chipTextColor = theme.text.primary;
+
+          if (answerResult !== null) {
+            if (isCorrectAnswer) {
+              chipBg = theme.success.subtle;
+              chipBorder = theme.success.default;
+              chipTextColor = theme.success.text;
+            } else if (isWrongSelected) {
+              chipBg = theme.error.subtle;
+              chipBorder = theme.error.default;
+              chipTextColor = theme.error.text;
+            }
+          } else if (isSelected) {
+            chipBorder = theme.brand.primary;
+          }
+
+          return (
+            <TouchableOpacity
+              key={option.id}
+              onPress={() => onSelectOption(option.id)}
+              disabled={isSubmitting || answerResult !== null}
+              style={{
+                paddingHorizontal: 20,
+                paddingVertical: 12,
+                borderRadius: 14,
+                borderWidth: 1,
+                borderColor: chipBorder,
+                backgroundColor: chipBg,
+              }}
+            >
+              <Text
+                className="font-heading"
+                style={{ fontSize: 16, lineHeight: 24, color: chipTextColor }}
+              >
+                {option.text}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+
+      {/* Feedback panel */}
+      {answerResult !== null && (
+        <View
+          style={{
+            borderRadius: 20,
+            borderWidth: 1,
+            borderColor: answerResult.correct
+              ? theme.success.default
+              : theme.error.default,
+            backgroundColor: answerResult.correct
+              ? theme.success.subtle
+              : theme.error.subtle,
+            overflow: "hidden",
+          }}
+        >
+          {/* Title row */}
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 10,
+              paddingHorizontal: 16,
+              paddingTop: 16,
+              paddingBottom: answerResult.correct ? 16 : 8,
+            }}
+          >
+            {answerResult.correct ? (
+              <CheckCircle size={24} color={theme.success.default} />
+            ) : (
+              <XCircle size={24} color={theme.error.default} />
+            )}
+            <View style={{ flex: 1, gap: 2 }}>
+              <Text
+                className="font-heading"
+                style={{
+                  fontSize: 14,
+                  color: answerResult.correct
+                    ? theme.success.text
+                    : theme.error.text,
+                }}
+              >
+                {answerResult.correct ? "Chính xác!" : "Sai rồi!"}
+              </Text>
+              {!answerResult.correct && (
+                <View
+                  style={{ flexDirection: "row", gap: 4, alignItems: "center" }}
+                >
+                  <Text
+                    className="font-body"
+                    style={{ fontSize: 12, color: theme.text.secondary }}
+                  >
+                    Đáp án đúng:
+                  </Text>
+                  <Text
+                    className="font-heading"
+                    style={{ fontSize: 13, color: theme.success.text }}
+                  >
+                    {answerResult.correctAnswer}
+                  </Text>
+                </View>
+              )}
+            </View>
+          </View>
+
+          {/* Explanation */}
+          {answerResult.explanation ? (
+            <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
+              <Text
+                className="font-body"
+                style={{
+                  fontSize: 13,
+                  lineHeight: 19,
+                  color: theme.text.secondary,
+                }}
+              >
+                {answerResult.explanation}
+              </Text>
+            </View>
+          ) : null}
+        </View>
+      )}
+    </View>
+  );
+}
 
 export function PracticeSessionScreen() {
   const insets = useSafeAreaInsets();
@@ -43,6 +327,7 @@ export function PracticeSessionScreen() {
   const [selectedOptionId, setSelectedOptionId] = useState<number | null>(null);
   const [streak, setStreak] = useState(0);
   const [showHint, setShowHint] = useState(false);
+  const [answerResult, setAnswerResult] = useState<AnswerResponse | null>(null);
 
   const {
     mutate: startSession,
@@ -88,9 +373,26 @@ export function PracticeSessionScreen() {
   }
 
   function handleConfirm() {
-    if (!sessionData || selectedOptionId === null) return;
+    if (!sessionData || !currentItem) return;
 
-    const currentItem: Items = sessionData.items[currentIndex];
+    // Phase 2: feedback đã hiển thị → chuyển câu tiếp
+    if (answerResult !== null) {
+      if (answerResult.sessionCompleted) {
+        router.replace({
+          pathname: "/practice-result",
+          params: { practiceSessionId: sessionData.session.sessionId },
+        });
+      } else {
+        setCurrentIndex((i) => i + 1);
+        setSelectedOptionId(null);
+        setAnswerResult(null);
+        setShowHint(false);
+      }
+      return;
+    }
+
+    // Phase 1: submit câu trả lời
+    if (selectedOptionId === null) return;
     const selectedOption = currentItem.options.find(
       (o) => o.id === selectedOptionId,
     );
@@ -105,17 +407,7 @@ export function PracticeSessionScreen() {
       {
         onSuccess: (result) => {
           setStreak((s) => (result.correct ? s + 1 : 0));
-
-          if (result.sessionCompleted) {
-            router.replace({
-              pathname: "/practice-result",
-              params: { practiceSessionId: sessionData.session.sessionId },
-            });
-          } else {
-            setCurrentIndex((i) => i + 1);
-            setSelectedOptionId(null);
-            setShowHint(false);
-          }
+          setAnswerResult(result);
         },
       },
     );
@@ -252,7 +544,7 @@ export function PracticeSessionScreen() {
                   borderColor: theme.border.subtle,
                 }}
               >
-                {/* "TRẮC NGHIỆM" label */}
+                {/* Item type label */}
                 <View className="flex-row items-center gap-1.5">
                   <View
                     style={{
@@ -271,7 +563,8 @@ export function PracticeSessionScreen() {
                       textTransform: "uppercase",
                     }}
                   >
-                    Trắc nghiệm
+                    {ITEM_TYPE_LABEL[currentItem.itemType] ??
+                      currentItem.itemType}
                   </Text>
                 </View>
 
@@ -284,33 +577,46 @@ export function PracticeSessionScreen() {
                     color: theme.text.primary,
                   }}
                 >
-                  {currentItem.question}
+                  {currentItem.itemType === "FILL_BLANK"
+                    ? "Điền từ thích hợp vào chỗ trống để hoàn thành câu"
+                    : currentItem.question}
                 </Text>
 
                 {/* Hint */}
-                <TouchableOpacity
-                  onPress={() => setShowHint((v) => !v)}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                  className="gap-1"
-                >
-                  <View className="flex-row items-center gap-1.5">
-                    <Lightbulb size={14} color={theme.text.secondary} />
+                <View style={{ gap: 10 }}>
+                  <TouchableOpacity
+                    onPress={() => setShowHint((v) => !v)}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    style={{ flexDirection: "row", alignItems: "center", gap: 6 }}
+                  >
+                    <Lightbulb size={14} color={Primitive.amber[300]} />
                     <Text
                       className="font-body text-xs"
-                      style={{ color: theme.text.secondary }}
+                      style={{ color: Primitive.amber[300] }}
                     >
-                      Xem gợi ý
+                      {showHint ? "Ẩn gợi ý" : "Xem gợi ý"}
                     </Text>
-                  </View>
+                  </TouchableOpacity>
                   {showHint && currentItem.hint ? (
-                    <Text
-                      className="font-body text-sm"
-                      style={{ color: theme.text.secondary, marginTop: 4 }}
+                    <View
+                      style={{
+                        borderWidth: 0.5,
+                        borderColor: Primitive.amber[300],
+                        borderRadius: 12,
+                        paddingHorizontal: 12,
+                        paddingVertical: 8,
+                        backgroundColor: theme.background.surface,
+                      }}
                     >
-                      {currentItem.hint}
-                    </Text>
+                      <Text
+                        className="font-body"
+                        style={{ fontSize: 13, lineHeight: 19, color: Primitive.amber[300] }}
+                      >
+                        {currentItem.hint}
+                      </Text>
+                    </View>
                   ) : null}
-                </TouchableOpacity>
+                </View>
               </View>
 
               {/* Answer options */}
@@ -318,21 +624,68 @@ export function PracticeSessionScreen() {
                 <View style={{ gap: 10 }}>
                   {currentItem.options.map((option, index) => {
                     const isSelected = selectedOptionId === option.id;
+                    const isCorrectAnswer =
+                      answerResult !== null &&
+                      option.text === answerResult.correctAnswer;
+                    const isWrongSelected =
+                      answerResult !== null && isSelected && !answerResult.correct;
+
+                    // Tính màu theo trạng thái
+                    let borderColor = isSelected
+                      ? theme.brand.primary
+                      : theme.border.subtle;
+                    let bgColor = isSelected
+                      ? theme.brand.primary
+                      : theme.background.surface;
+                    let circleBg = isSelected
+                      ? theme.brand.primary
+                      : theme.background.surface;
+                    let circleBorder = isSelected
+                      ? theme.icon.onBrand
+                      : theme.border.default;
+                    let letterColor = isSelected
+                      ? theme.icon.onBrand
+                      : theme.icon.disabled;
+                    let textColor = isSelected
+                      ? theme.text.onBrand
+                      : theme.text.disabled;
+
+                    if (answerResult !== null) {
+                      if (isCorrectAnswer) {
+                        borderColor = theme.success.default;
+                        bgColor = theme.success.subtle;
+                        circleBg = theme.success.default;
+                        circleBorder = theme.success.default;
+                        letterColor = theme.icon.onBrand;
+                        textColor = theme.success.default;
+                      } else if (isWrongSelected) {
+                        borderColor = theme.error.default;
+                        bgColor = theme.error.subtle;
+                        circleBg = theme.error.default;
+                        circleBorder = theme.error.default;
+                        letterColor = theme.icon.onBrand;
+                        textColor = theme.error.default;
+                      } else {
+                        borderColor = theme.border.subtle;
+                        bgColor = theme.background.surface;
+                        circleBg = theme.background.surface;
+                        circleBorder = theme.border.default;
+                        letterColor = theme.icon.disabled;
+                        textColor = theme.text.disabled;
+                      }
+                    }
+
                     return (
                       <TouchableOpacity
                         key={option.id}
                         onPress={() => setSelectedOptionId(option.id)}
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || answerResult !== null}
                         style={{
                           height: 62,
                           borderRadius: 16,
                           borderWidth: 1.23,
-                          borderColor: isSelected
-                            ? theme.brand.primary
-                            : theme.border.subtle,
-                          backgroundColor: isSelected
-                            ? theme.brand.primary
-                            : theme.background.surface,
+                          borderColor,
+                          backgroundColor: bgColor,
                           flexDirection: "row",
                           alignItems: "center",
                           paddingHorizontal: 17,
@@ -345,24 +698,15 @@ export function PracticeSessionScreen() {
                             height: 30,
                             borderRadius: 15,
                             borderWidth: 1,
-                            borderColor: isSelected
-                              ? theme.icon.onBrand
-                              : theme.border.default,
-                            backgroundColor: isSelected
-                              ? theme.brand.primary
-                              : theme.background.surface,
+                            borderColor: circleBorder,
+                            backgroundColor: circleBg,
                             alignItems: "center",
                             justifyContent: "center",
                           }}
                         >
                           <Text
                             className="font-heading"
-                            style={{
-                              fontSize: 13,
-                              color: isSelected
-                                ? theme.icon.onBrand
-                                : theme.icon.disabled,
-                            }}
+                            style={{ fontSize: 13, color: letterColor }}
                           >
                             {OPTION_LETTERS[index] ?? String(index + 1)}
                           </Text>
@@ -370,20 +714,104 @@ export function PracticeSessionScreen() {
 
                         <Text
                           className="font-heading flex-1"
-                          style={{
-                            fontSize: 15,
-                            lineHeight: 22,
-                            color: isSelected
-                              ? theme.text.onBrand
-                              : theme.text.disabled,
-                          }}
+                          style={{ fontSize: 15, lineHeight: 22, color: textColor }}
                         >
                           {option.text}
                         </Text>
+
+                        {isCorrectAnswer && (
+                          <CheckCircle size={16} color={theme.success.default} />
+                        )}
+                        {isWrongSelected && (
+                          <XCircle size={16} color={theme.error.default} />
+                        )}
                       </TouchableOpacity>
                     );
                   })}
+
+                  {/* Feedback panel */}
+                  {answerResult !== null && (
+                    <View
+                      style={{
+                        borderRadius: 20,
+                        borderWidth: 1,
+                        borderColor: answerResult.correct
+                          ? theme.success.default
+                          : theme.error.default,
+                        backgroundColor: answerResult.correct
+                          ? theme.success.subtle
+                          : theme.error.subtle,
+                        overflow: "hidden",
+                        marginTop: 6,
+                      }}
+                    >
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          gap: 10,
+                          paddingHorizontal: 16,
+                          paddingTop: 16,
+                          paddingBottom: answerResult.correct ? 16 : 8,
+                        }}
+                      >
+                        {answerResult.correct ? (
+                          <CheckCircle size={24} color={theme.success.default} />
+                        ) : (
+                          <XCircle size={24} color={theme.error.default} />
+                        )}
+                        <View style={{ flex: 1, gap: 2 }}>
+                          <Text
+                            className="font-heading"
+                            style={{
+                              fontSize: 14,
+                              color: answerResult.correct
+                                ? theme.success.text
+                                : theme.error.text,
+                            }}
+                          >
+                            {answerResult.correct ? "Chính xác!" : "Sai rồi!"}
+                          </Text>
+                          {!answerResult.correct && (
+                            <View style={{ flexDirection: "row", gap: 4, alignItems: "center" }}>
+                              <Text
+                                className="font-body"
+                                style={{ fontSize: 12, color: theme.text.secondary }}
+                              >
+                                Đáp án đúng:
+                              </Text>
+                              <Text
+                                className="font-heading"
+                                style={{ fontSize: 13, color: theme.success.text }}
+                              >
+                                {answerResult.correctAnswer}
+                              </Text>
+                            </View>
+                          )}
+                        </View>
+                      </View>
+                      {answerResult.explanation ? (
+                        <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
+                          <Text
+                            className="font-body"
+                            style={{ fontSize: 12, lineHeight: 18, color: theme.text.secondary }}
+                          >
+                            {answerResult.explanation}
+                          </Text>
+                        </View>
+                      ) : null}
+                    </View>
+                  )}
                 </View>
+              ) : currentItem.itemType === "FILL_BLANK" ? (
+                <FillBlankSection
+                  currentItem={currentItem}
+                  selectedOptionId={selectedOptionId}
+                  answerResult={answerResult}
+                  isSubmitting={isSubmitting}
+                  theme={theme}
+                  onSelectOption={setSelectedOptionId}
+                />
               ) : (
                 <View
                   className="rounded-2xl p-5 items-center justify-center"
@@ -420,9 +848,12 @@ export function PracticeSessionScreen() {
           }}
         >
           <PrimaryButton
-            text="Xác nhận"
+            text={answerResult !== null ? "Câu tiếp theo" : "Xác nhận"}
             onPress={handleConfirm}
-            disabled={selectedOptionId === null || !currentItem}
+            disabled={
+              (selectedOptionId === null && answerResult === null) ||
+              !currentItem
+            }
             loading={isSubmitting}
           />
         </View>
