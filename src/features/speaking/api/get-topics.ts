@@ -6,7 +6,7 @@ export async function getTopicsApi(
   pageParam: number = 0,
 ): Promise<TopicListResponse<Topic>> {
   const response = await api.get<ApiResponse<TopicListResponse<Topic>>>(
-    "/learner/conversation/themes",
+    "/learner/conversation/topics",
     { params: { page: pageParam, size: 10 } },
   );
   return response.data.data;

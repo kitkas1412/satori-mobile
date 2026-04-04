@@ -15,7 +15,7 @@ export async function getConversationDetailApi(
   conversationId: string,
 ): Promise<ConversationDetailResponse> {
   const response = await api.get<ApiResponse<ConversationDetailResponse>>(
-    `/learner/conversation/topics/${conversationId}`,
+    `/learner/conversation/conversations/${conversationId}`,
   );
   return response.data.data;
 }

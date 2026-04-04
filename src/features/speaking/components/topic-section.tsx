@@ -50,7 +50,9 @@ export function TopicSection({
   const theme = Colors[colorScheme ?? "light"];
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const { data: topics } = useConversations(section.id);
-  const cardPositions = useRef<Record<string, { y: number; height: number }>>({});
+  const cardPositions = useRef<Record<string, { y: number; height: number }>>(
+    {},
+  );
 
   const accentColor =
     section.orderIndex % 2 === 0 ? theme.purple.default : theme.brand.primary;
@@ -63,13 +65,15 @@ export function TopicSection({
       subtitle: difficultyLabel(topic.difficultyScore),
       status: "active" as const,
       practiced: topic.practiced,
+      practiceStatus: topic.practiceStatus,
     })) ?? [];
 
   /** true nếu section còn ít nhất một topic chưa được luyện tập */
-  const hasUnpracticed = topics?.some((t) => !t.practiced) ?? false;
+  const hasUnpracticed =
+    topics?.some((t) => t.practiceStatus !== "COMPLETED") ?? false;
 
   const firstUnpracticedIndex = showFirstUnpracticedBorder
-    ? conversations.findIndex((c) => !c.practiced)
+    ? conversations.findIndex((c) => c.practiceStatus !== "COMPLETED")
     : -1;
 
   // Báo lên parent mỗi khi trạng thái "có chưa luyện" thay đổi.
@@ -78,7 +82,13 @@ export function TopicSection({
     if (hasUnpracticed) {
       onHasUnpracticed(section.id, section.orderIndex);
     }
-  }, [hasUnpracticed, section.id, section.orderIndex, onHasUnpracticed, focusTrigger]);
+  }, [
+    hasUnpracticed,
+    section.id,
+    section.orderIndex,
+    onHasUnpracticed,
+    focusTrigger,
+  ]);
 
   // Tự động expand nếu đây là section chứa card cần scroll đến.
   // Không đưa isExpanded vào deps để user vẫn có thể tự collapse sau khi auto-expand.
@@ -125,7 +135,7 @@ export function TopicSection({
               className="text-xs font-body"
               style={{ color: theme.text.secondary }}
             >
-              0/{section.topicCount} HỘI THOẠI
+              0/{section.conversationCount} HỘI THOẠI
             </Text>
           </View>
           {isExpanded ? (
@@ -181,7 +191,7 @@ export function TopicSection({
                   title={conversation.title}
                   subtitle={conversation.subtitle}
                   status={conversation.status}
-                  practiced={conversation.practiced}
+                  practiceStatus={conversation.practiceStatus}
                   showBorder={showFirstUnpracticedBorder && isFirstUnpracticed}
                   accentColor={accentColor}
                   onPress={() => onConversationPress(conversation.id)}

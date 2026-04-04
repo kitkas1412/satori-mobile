@@ -3,11 +3,11 @@ import type { ApiResponse } from "@/types/api";
 import type { RoleplaySessionResponse } from "./speaking.types";
 
 export async function startSessionApi(
-  topicId: string,
+  conversationId: string,
 ): Promise<RoleplaySessionResponse> {
   const response = await api.post<ApiResponse<RoleplaySessionResponse>>(
     "/learner/roleplay/sessions",
-    { topicId },
+    { conversationId },
   );
   return response.data.data;
 }
