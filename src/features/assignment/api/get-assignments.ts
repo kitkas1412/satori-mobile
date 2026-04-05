@@ -3,14 +3,16 @@
 
 import { api } from "@/lib/axios";
 import type { ApiResponse } from "@/types/api";
-import type { AssignmentsResponse, LearnerSubmissionStatus } from "./practice.types";
+import type { AssignmentsResponse, LearnerSubmissionStatus } from "./assignment.types";
 
 export async function getAssignmentsApi(
   pageParam: number = 1,
   status?: LearnerSubmissionStatus,
+  classId?: string,
 ): Promise<AssignmentsResponse> {
   const params: Record<string, unknown> = { page: pageParam, size: 10 };
   if (status) params.status = status;
+  if (classId) params.classId = classId;
   const response = await api.get<ApiResponse<AssignmentsResponse>>(
     "/learner/assignments",
     { params },

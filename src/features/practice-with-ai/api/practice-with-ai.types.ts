@@ -4,8 +4,7 @@ export type SessionType =
   | "VOCAB_DRILL"
   | "GRAMMAR_DRILL"
   | "MIXED_LESSON"
-  | "KANJI_READING"
-  | "SENTENCE_BUILD";
+  | "KANJI_READING";
 
 export type SessionStatus = "IN_PROGRESS";
 
@@ -21,21 +20,6 @@ export interface SessionConfig {
   sessionType: SessionType;
   itemCount: number;
   itemTypes: ItemType[];
-}
-
-export interface QuestionOption {
-  id: string;
-  label: "A" | "B" | "C" | "D";
-  text: string;
-  isCorrect: boolean;
-}
-
-export interface PracticeQuestion {
-  id: string;
-  type: "multiple_choice";
-  text: string;
-  hint?: string;
-  options: QuestionOption[];
 }
 
 // GET: /api/v1/courses/{{courseId}}/lessons
@@ -89,13 +73,16 @@ export interface Items {
   itemIndex: number;
   itemType: ItemType;
   question: string;
-  hint: string;
+  questionJapanese?: string;
+  hint?: string;
   options: Options[];
 }
 
 /** Đáp án của câu hỏi */
 export interface Options {
+  id: number;
   text: string;
+  side?: "LEFT" | "RIGHT";
 }
 
 // POST: /api/v1/learner/practice/sessions/{{sessionId}}/items/{{itemId}}/answer

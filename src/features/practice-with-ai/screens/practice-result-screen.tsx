@@ -13,6 +13,7 @@ import {
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { usePracticeSessionSummary } from "../hooks";
+import { PracticeAnswerItem } from "../components";
 
 export function PracticeResultScreen() {
   const colorScheme = useColorScheme();
@@ -33,7 +34,7 @@ export function PracticeResultScreen() {
   } = usePracticeSessionSummary(practiceSessionId);
 
   function handleGoPracticeHome() {
-    router.replace("/(tabs)/practice");
+    router.replace({ pathname: "/(tabs)/practice", params: { tab: "ai" } });
   }
 
   if (!practiceSessionId) {
@@ -233,57 +234,12 @@ export function PracticeResultScreen() {
           </Text>
 
           {summary.items.map((item, index) => (
-            <View
+            <PracticeAnswerItem
               key={`${item.itemIndex}-${index}`}
-              className="rounded-2xl p-4 gap-3"
-              style={{
-                backgroundColor: theme.background.surface,
-                borderWidth: 1.5,
-                borderColor: item.isCorrect
-                  ? theme.success.default
-                  : theme.error.default,
-              }}
-            >
-              <Text
-                className="font-heading text-sm"
-                style={{ color: theme.text.primary }}
-              >
-                {`${index + 1}. ${item.question}`}
-              </Text>
-
-              <View className="gap-1">
-                <Text
-                  className="font-body text-xs"
-                  style={{ color: theme.text.secondary }}
-                >
-                  Bạn trả lời: {item.userAnswer || "-"}
-                </Text>
-                <Text
-                  className="font-body text-xs"
-                  style={{ color: theme.success.default }}
-                >
-                  Đáp án đúng: {item.correctAnswer || "-"}
-                </Text>
-              </View>
-
-              {!!item.explanation && (
-                <Text
-                  className="font-body text-xs"
-                  style={{ color: theme.text.secondary }}
-                >
-                  Giải thích: {item.explanation}
-                </Text>
-              )}
-
-              {!!item.aiFeedback && (
-                <Text
-                  className="font-body text-xs"
-                  style={{ color: theme.text.secondary }}
-                >
-                  AI nhận xét: {item.aiFeedback}
-                </Text>
-              )}
-            </View>
+              item={item}
+              index={index}
+              theme={theme}
+            />
           ))}
         </View>
       </ScrollView>

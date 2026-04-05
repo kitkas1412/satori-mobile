@@ -7,8 +7,7 @@ import { useRouter } from "expo-router";
 import type { ImagePickerAsset } from "expo-image-picker";
 
 import { submitWritingApi } from "../api";
-import { practiceQueryKeys } from "./use-assignments";
-import { usePracticeStore } from "@/stores";
+import { useAssignmentStore } from "@/stores";
 
 interface UseWritingSubmitParams {
   assignmentId: string;
@@ -21,7 +20,7 @@ export function useWritingSubmit({
 }: UseWritingSubmitParams) {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const setWritingResult = usePracticeStore((s) => s.setWritingResult);
+  const setWritingResult = useAssignmentStore((s) => s.setWritingResult);
 
   const mutation = useMutation({
     mutationFn: () =>
@@ -36,7 +35,7 @@ export function useWritingSubmit({
     onSuccess: (data) => {
       // Làm mới danh sách bài tập để phản ánh trạng thái "Đã nộp"
       queryClient.invalidateQueries({
-        queryKey: practiceQueryKeys.assignments,
+        queryKey: ["assignments"],
       });
       // Lưu kết quả vào store để màn hình kết quả đọc mà không cần gọi API lại
       setWritingResult(data);

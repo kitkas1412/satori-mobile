@@ -5,10 +5,9 @@ import { Alert } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 
-import { usePracticeStore } from "@/stores";
+import { useAssignmentStore } from "@/stores";
 import type { Question } from "../api";
 import { useSubmitAssignment } from "./use-submit-assignment";
-import { practiceQueryKeys } from "./use-assignments";
 
 interface UseQuizSubmitParams {
   assignmentId: string;
@@ -26,7 +25,7 @@ export function useQuizSubmit({
   const router = useRouter();
   const queryClient = useQueryClient();
   const submitMutation = useSubmitAssignment();
-  const setQuizResult = usePracticeStore((s) => s.setQuizResult);
+  const setQuizResult = useAssignmentStore((s) => s.setQuizResult);
 
   function handleSubmit() {
     const total = questions.length;
@@ -54,7 +53,7 @@ export function useQuizSubmit({
           // Lưu kết quả vào store để màn hình kết quả đọc mà không cần gọi API lại
           setQuizResult(assignmentId, result);
           // Làm mới danh sách bài tập để cập nhật trạng thái bài vừa nộp
-          queryClient.invalidateQueries({ queryKey: practiceQueryKeys.assignments });
+          queryClient.invalidateQueries({ queryKey: ["assignments"] });
           router.push("/assignment-result");
         },
         onError: () => {

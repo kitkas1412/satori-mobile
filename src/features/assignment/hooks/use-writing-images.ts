@@ -6,7 +6,10 @@ import { Alert, Linking } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import type { ImagePickerAsset } from "expo-image-picker";
 
-import type { AssignmentDetailResponse } from "../api/practice.types";
+import type { AssignmentDetailResponse } from "../api/assignment.types";
+
+const MAX_IMAGES = 3;
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 interface UseWritingImagesParams {
   data: AssignmentDetailResponse | undefined;
@@ -27,6 +30,10 @@ export function useWritingImages({ data }: UseWritingImagesParams) {
   // Mở thư viện ảnh để học viên chọn nhiều ảnh cùng lúc.
   // Nếu chưa cấp quyền, hướng dẫn mở Cài đặt thay vì từ chối im lặng.
   async function handlePickImage() {
+    if (images.length >= MAX_IMAGES) {
+      Alert.alert("Đã đủ ảnh", `Bạn chỉ có thể tải lên tối đa ${MAX_IMAGES} hình ảnh.`);
+      return;
+    }
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
       Alert.alert(
@@ -42,15 +49,29 @@ export function useWritingImages({ data }: UseWritingImagesParams) {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: "images",
       allowsMultipleSelection: true,
+      selectionLimit: MAX_IMAGES - images.length,
       quality: 0.8,
     });
     if (!result.canceled) {
-      setImages((prev) => [...prev, ...result.assets]);
+      const validAssets = result.assets.filter(
+        (asset) => asset.fileSize === undefined || asset.fileSize <= MAX_FILE_SIZE,
+      );
+      if (validAssets.length < result.assets.length) {
+        Alert.alert(
+          "Ảnh quá lớn",
+          "Một số ảnh vượt quá 5MB và đã bị bỏ qua.",
+        );
+      }
+      setImages((prev) => [...prev, ...validAssets]);
     }
   }
 
   // Mở camera để học viên chụp ảnh bài làm trực tiếp.
   async function handleTakePhoto() {
+    if (images.length >= MAX_IMAGES) {
+      Alert.alert("Đã đủ ảnh", `Bạn chỉ có thể tải lên tối đa ${MAX_IMAGES} hình ảnh.`);
+      return;
+    }
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== "granted") {
       Alert.alert(
@@ -68,7 +89,12 @@ export function useWritingImages({ data }: UseWritingImagesParams) {
       quality: 0.8,
     });
     if (!result.canceled) {
-      setImages((prev) => [...prev, ...result.assets]);
+      const asset = result.assets[0];
+      if (asset.fileSize !== undefined && asset.fileSize > MAX_FILE_SIZE) {
+        Alert.alert("Ảnh quá lớn", "Ảnh vượt quá 5MB, vui lòng chụp lại.");
+        return;
+      }
+      setImages((prev) => [...prev, asset]);
     }
   }
 

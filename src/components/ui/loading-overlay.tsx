@@ -65,7 +65,6 @@ interface LoadingOverlayProps {
   visible: boolean;
   title?: string;
   message?: string;
-  spinnerSize?: number;
   transparent?: boolean;
 }
 
@@ -73,7 +72,6 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
   visible,
   title = "Đang xử lý...",
   message = "Vui lòng đợi trong giây lát",
-  spinnerSize = 80,
   transparent = false,
 }) => {
   const theme = useColorScheme() ?? "light";
@@ -88,7 +86,7 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
         }
       >
         <View className="items-center gap-3">
-          <LoadingSpinner size={spinnerSize} />
+          <LoadingSpinner />
           <View className="items-center gap-3">
             {title && (
               <Text
