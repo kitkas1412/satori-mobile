@@ -5,13 +5,13 @@ import { useState } from "react";
 import { Alert } from "react-native";
 import { useRouter } from "expo-router";
 
-import { usePracticeStore } from "@/stores";
+import { useAssignmentStore } from "@/stores";
 import { cancelAssignmentApi } from "../api";
 
 export function useWritingResult() {
   const router = useRouter();
-  const writingResult = usePracticeStore((s) => s.writingResult);
-  const clearWritingResult = usePracticeStore((s) => s.clearWritingResult);
+  const writingResult = useAssignmentStore((s) => s.writingResult);
+  const clearWritingResult = useAssignmentStore((s) => s.clearWritingResult);
   const [isCancelling, setIsCancelling] = useState(false);
 
   const isGraded = writingResult?.status === "GRADED";

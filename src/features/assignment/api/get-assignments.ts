@@ -3,7 +3,7 @@
 
 import { api } from "@/lib/axios";
 import type { ApiResponse } from "@/types/api";
-import type { AssignmentsResponse, LearnerSubmissionStatus } from "./practice.types";
+import type { AssignmentsResponse, LearnerSubmissionStatus } from "./assignment.types";
 
 export async function getAssignmentsApi(
   pageParam: number = 1,
