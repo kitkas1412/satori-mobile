@@ -10,7 +10,7 @@ import {
   ToggleLeft,
   X,
 } from "lucide-react-native";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -29,10 +29,30 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import type { ItemType, SessionType } from "@/features/practice-with-ai/api";
 
 const SESSION_TYPE_ITEM_TYPES: Record<SessionType, ItemType[]> = {
-  VOCAB_DRILL: ["MULTIPLE_CHOICE", "FILL_BLANK", "MATCHING", "TRUE_FALSE", "SENTENCE_ORDER", "TRANSLATION"],
-  GRAMMAR_DRILL: ["MULTIPLE_CHOICE", "FILL_BLANK", "TRUE_FALSE", "SENTENCE_ORDER", "TRANSLATION"],
+  VOCAB_DRILL: [
+    "MULTIPLE_CHOICE",
+    "FILL_BLANK",
+    "MATCHING",
+    "TRUE_FALSE",
+    "SENTENCE_ORDER",
+    "TRANSLATION",
+  ],
+  GRAMMAR_DRILL: [
+    "MULTIPLE_CHOICE",
+    "FILL_BLANK",
+    "TRUE_FALSE",
+    "SENTENCE_ORDER",
+    "TRANSLATION",
+  ],
   KANJI_READING: ["MULTIPLE_CHOICE", "FILL_BLANK", "MATCHING"],
-  MIXED_LESSON: ["MULTIPLE_CHOICE", "FILL_BLANK", "TRANSLATION", "SENTENCE_ORDER", "MATCHING", "TRUE_FALSE"],
+  MIXED_LESSON: [
+    "MULTIPLE_CHOICE",
+    "FILL_BLANK",
+    "TRANSLATION",
+    "SENTENCE_ORDER",
+    "MATCHING",
+    "TRUE_FALSE",
+  ],
 };
 
 const EXERCISE_TYPES: {
@@ -83,19 +103,11 @@ export function SessionConfigScreen() {
     sessionType: SessionType;
   }>();
 
-  const allowedItemTypes = SESSION_TYPE_ITEM_TYPES[sessionType] ?? EXERCISE_TYPES.map((e) => e.value);
-  const [itemTypes, setItemTypes] = useState<ItemType[]>([allowedItemTypes[0]]);
+  const allowedItemTypes =
+    SESSION_TYPE_ITEM_TYPES[sessionType] ?? EXERCISE_TYPES.map((e) => e.value);
+  const [itemType, setItemType] = useState<ItemType>(allowedItemTypes[0]);
   const [questionCount, setQuestionCount] = useState("5");
-
-  function toggleExerciseType(type: ItemType) {
-    setItemTypes((prev) => {
-      if (prev.includes(type)) {
-        if (prev.length === 1) return prev;
-        return prev.filter((t) => t !== type);
-      }
-      return [...prev, type];
-    });
-  }
+  const questionInputRef = useRef<TextInput>(null);
 
   function handleCountChange(text: string) {
     const cleaned = text.replace(/[^0-9]/g, "");
@@ -104,20 +116,19 @@ export function SessionConfigScreen() {
       return;
     }
     const num = parseInt(cleaned, 10);
-    if (num > 10) setQuestionCount("10");
-    else setQuestionCount(cleaned);
+    setQuestionCount(num > 20 ? "20" : cleaned);
   }
 
   function handleStart() {
     const count = parseInt(questionCount || "5", 10);
-    const safeCount = Math.max(1, Math.min(10, count));
+    const safeCount = Math.max(1, Math.min(20, count));
     router.push({
       pathname: "/practice-session",
       params: {
         lessonId,
         sessionType,
         questionCount: String(safeCount),
-        itemTypes: JSON.stringify(itemTypes),
+        itemTypes: JSON.stringify([itemType]),
       },
     });
   }
@@ -130,19 +141,10 @@ export function SessionConfigScreen() {
     >
       <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
 
-      <View
-        className="flex-1"
-        style={{ paddingTop: insets.top + 8 }}
-      >
+      <View className="flex-1" style={{ paddingTop: insets.top + 8 }}>
         {/* Header */}
-        <View
-          className="flex-row items-center px-4"
-          style={{ height: 48 }}
-        >
-          <Pressable
-            onPress={() => router.back()}
-            hitSlop={30}
-          >
+        <View className="flex-row items-center px-4" style={{ height: 48 }}>
+          <Pressable onPress={() => router.back()} hitSlop={30}>
             <X size={24} color={theme.icon.primary} strokeWidth={2} />
           </Pressable>
         </View>
@@ -173,8 +175,10 @@ export function SessionConfigScreen() {
                 gap: 8,
               }}
             >
-              {EXERCISE_TYPES.filter((e) => allowedItemTypes.includes(e.value)).map((item) => {
-                const isSelected = itemTypes.includes(item.value);
+              {EXERCISE_TYPES.filter((e) =>
+                allowedItemTypes.includes(e.value),
+              ).map((item) => {
+                const isSelected = itemType === item.value;
                 const iconColor = isSelected
                   ? theme.text.primary
                   : theme.text.disabled;
@@ -184,7 +188,7 @@ export function SessionConfigScreen() {
                 return (
                   <Pressable
                     key={item.value}
-                    onPress={() => toggleExerciseType(item.value)}
+                    onPress={() => setItemType(item.value)}
                     className="flex-row items-center rounded-2xl"
                     style={{
                       width: "48%",
@@ -215,7 +219,7 @@ export function SessionConfigScreen() {
           {/* Số câu hỏi */}
           <View
             className="flex-row items-center justify-between"
-            style={{ paddingVertical: 3 }}
+            style={{ paddingVertical: 3, paddingHorizontal: 9 }}
           >
             <Text
               className="font-heading"
@@ -224,38 +228,42 @@ export function SessionConfigScreen() {
               Số câu hỏi
             </Text>
 
-            <View
+            <Pressable
               className="rounded-lg items-center justify-center"
+              onPress={() => questionInputRef.current?.focus()}
               style={{
                 width: 80,
                 borderWidth: 1,
                 borderColor: theme.brand.primary,
-                backgroundColor: "#eef1fd",
+                backgroundColor: theme.info.subtle,
                 paddingHorizontal: 14,
                 paddingVertical: 12,
               }}
             >
               <TextInput
+                ref={questionInputRef}
                 value={questionCount}
                 onChangeText={handleCountChange}
                 keyboardType="number-pad"
-                maxLength={2}
                 textAlign="right"
-                className="font-heading w-full"
+                className="font-heading"
                 style={{
                   fontSize: 14,
                   color: theme.brand.primary,
                   padding: 0,
                 }}
               />
-            </View>
+            </Pressable>
           </View>
         </View>
 
         {/* CTA */}
         <View
           className="px-4"
-          style={{ paddingBottom: Math.max(insets.bottom, 16) + 8, paddingTop: 12 }}
+          style={{
+            paddingBottom: Math.max(insets.bottom, 16) + 8,
+            paddingTop: 12,
+          }}
         >
           <PrimaryButton text="Bắt đầu luyện tập" onPress={handleStart} />
         </View>
