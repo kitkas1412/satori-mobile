@@ -28,6 +28,13 @@ import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import type { ItemType, SessionType } from "@/features/practice-with-ai/api";
 
+const SESSION_TYPE_ITEM_TYPES: Record<SessionType, ItemType[]> = {
+  VOCAB_DRILL: ["MULTIPLE_CHOICE", "FILL_BLANK", "MATCHING", "TRUE_FALSE", "SENTENCE_ORDER", "TRANSLATION"],
+  GRAMMAR_DRILL: ["MULTIPLE_CHOICE", "FILL_BLANK", "TRUE_FALSE", "SENTENCE_ORDER", "TRANSLATION"],
+  KANJI_READING: ["MULTIPLE_CHOICE", "FILL_BLANK", "MATCHING"],
+  MIXED_LESSON: ["MULTIPLE_CHOICE", "FILL_BLANK", "TRANSLATION", "SENTENCE_ORDER", "MATCHING", "TRUE_FALSE"],
+};
+
 const EXERCISE_TYPES: {
   value: ItemType;
   label: string;
@@ -76,7 +83,8 @@ export function SessionConfigScreen() {
     sessionType: SessionType;
   }>();
 
-  const [itemTypes, setItemTypes] = useState<ItemType[]>(["MULTIPLE_CHOICE"]);
+  const allowedItemTypes = SESSION_TYPE_ITEM_TYPES[sessionType] ?? EXERCISE_TYPES.map((e) => e.value);
+  const [itemTypes, setItemTypes] = useState<ItemType[]>([allowedItemTypes[0]]);
   const [questionCount, setQuestionCount] = useState("5");
 
   function toggleExerciseType(type: ItemType) {
@@ -165,7 +173,7 @@ export function SessionConfigScreen() {
                 gap: 8,
               }}
             >
-              {EXERCISE_TYPES.map((item) => {
+              {EXERCISE_TYPES.filter((e) => allowedItemTypes.includes(e.value)).map((item) => {
                 const isSelected = itemTypes.includes(item.value);
                 const iconColor = isSelected
                   ? theme.text.primary
