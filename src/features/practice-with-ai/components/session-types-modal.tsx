@@ -17,10 +17,13 @@ import {
 } from "react-native";
 import Animated, {
   Easing,
+  interpolateColor,
   runOnJS,
+  useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
+  type SharedValue,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -73,6 +76,39 @@ const SESSION_TYPES: {
   },
 ];
 
+const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
+
+function DotItem({
+  dotIndex,
+  scrollX,
+  activeColor,
+  inactiveColor,
+}: {
+  dotIndex: number;
+  scrollX: SharedValue<number>;
+  activeColor: string;
+  inactiveColor: string;
+}) {
+  const style = useAnimatedStyle(() => {
+    const scrollIndex = scrollX.value / CARD_STEP;
+    const realScrollIndex = ((scrollIndex % TOTAL) + TOTAL) % TOTAL;
+    const dist = Math.abs(realScrollIndex - dotIndex);
+    const progress = Math.max(0, 1 - Math.min(dist, TOTAL - dist));
+    return {
+      width: 6 + progress * 10,
+      backgroundColor: interpolateColor(
+        progress,
+        [0, 1],
+        [inactiveColor, activeColor],
+      ),
+    };
+  });
+
+  return (
+    <Animated.View className="rounded-full" style={[{ height: 6 }, style]} />
+  );
+}
+
 const TOTAL = SESSION_TYPES.length;
 // Triple the array so we can silently jump between copies for infinite scroll
 const LOOPED_DATA = [...SESSION_TYPES, ...SESSION_TYPES, ...SESSION_TYPES];
@@ -97,8 +133,15 @@ export function SessionTypesModal({
   const [activeIndex, setActiveIndex] = useState(0);
   const [internalVisible, setInternalVisible] = useState(visible);
   const translateY = useSharedValue(600);
+  const scrollX = useSharedValue(TOTAL * CARD_STEP);
   const skipCloseAnimation = useRef(false);
   const flatListRef = useRef<FlatList>(null);
+
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollX.value = event.contentOffset.x;
+    },
+  });
 
   useEffect(() => {
     if (visible) {
@@ -119,10 +162,9 @@ export function SessionTypesModal({
   useEffect(() => {
     if (internalVisible) {
       const timer = setTimeout(() => {
-        flatListRef.current?.scrollToOffset({
-          offset: TOTAL * CARD_STEP,
-          animated: false,
-        });
+        const offset = TOTAL * CARD_STEP;
+        flatListRef.current?.scrollToOffset({ offset, animated: false });
+        scrollX.value = offset;
       }, 0);
       return () => clearTimeout(timer);
     }
@@ -165,15 +207,13 @@ export function SessionTypesModal({
 
     // Silently jump to the corresponding position in the middle copy
     if (scrollIndex < TOTAL) {
-      flatListRef.current?.scrollToOffset({
-        offset: (scrollIndex + TOTAL) * CARD_STEP,
-        animated: false,
-      });
+      const newOffset = (scrollIndex + TOTAL) * CARD_STEP;
+      flatListRef.current?.scrollToOffset({ offset: newOffset, animated: false });
+      scrollX.value = newOffset;
     } else if (scrollIndex >= TOTAL * 2) {
-      flatListRef.current?.scrollToOffset({
-        offset: (scrollIndex - TOTAL) * CARD_STEP,
-        animated: false,
-      });
+      const newOffset = (scrollIndex - TOTAL) * CARD_STEP;
+      flatListRef.current?.scrollToOffset({ offset: newOffset, animated: false });
+      scrollX.value = newOffset;
     }
   }
 
@@ -234,7 +274,7 @@ export function SessionTypesModal({
           </View>
 
           {/* Carousel */}
-          <FlatList
+          <AnimatedFlatList
             ref={flatListRef}
             className="py-36"
             data={LOOPED_DATA}
@@ -244,12 +284,14 @@ export function SessionTypesModal({
             snapToInterval={CARD_STEP}
             decelerationRate="fast"
             disableIntervalMomentum
+            scrollEventThrottle={16}
             contentContainerStyle={{
               paddingHorizontal: SIDE_PADDING,
               gap: CARD_GAP,
             }}
+            onScroll={scrollHandler}
             onMomentumScrollEnd={handleScroll}
-            renderItem={({ item }) => (
+            renderItem={({ item }: { item: (typeof LOOPED_DATA)[number] }) => (
               <View
                 className="rounded-2xl items-center justify-center"
                 style={{
@@ -288,17 +330,12 @@ export function SessionTypesModal({
           {/* Page dots */}
           <View className="flex-row justify-center items-center gap-1.5 mt-5">
             {SESSION_TYPES.map((_, i) => (
-              <View
+              <DotItem
                 key={i}
-                className="rounded-full"
-                style={{
-                  width: i === activeIndex ? 16 : 6,
-                  height: 6,
-                  backgroundColor:
-                    i === activeIndex
-                      ? theme.brand.primary
-                      : theme.border.subtle,
-                }}
+                dotIndex={i}
+                scrollX={scrollX}
+                activeColor={theme.brand.primary}
+                inactiveColor={theme.border.subtle}
               />
             ))}
           </View>
