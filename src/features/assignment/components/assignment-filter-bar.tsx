@@ -13,7 +13,7 @@ import Animated, {
 
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import type { AssignmentStatusFilter, LearnerClass } from "../api/practice.types";
+import type { AssignmentStatusFilter, LearnerClass } from "../api/assignment.types";
 
 const TIMING = { duration: 250, easing: Easing.out(Easing.cubic) };
 // Giá trị maxWidth đủ lớn để chứa tất cả option chips khi expand

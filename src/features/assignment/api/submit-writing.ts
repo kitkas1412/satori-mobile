@@ -3,7 +3,7 @@
 
 import { api } from "@/lib/axios";
 import type { ApiResponse } from "@/types/api";
-import type { SubmitWritingResponse } from "./practice.types";
+import type { SubmitWritingResponse } from "./assignment.types";
 
 export async function submitWritingApi(
   assignmentId: string,

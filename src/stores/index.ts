@@ -1,6 +1,6 @@
 // Export tất cả stores
 export { selectIsOnline, selectTheme, useAppStore } from "./app-store";
-export { usePracticeStore } from "./practice-store";
+export { useAssignmentStore } from "./assignment-store";
 export {
   selectIsAuthenticated,
   selectToken,
