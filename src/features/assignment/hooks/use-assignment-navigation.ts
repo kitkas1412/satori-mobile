@@ -9,14 +9,14 @@ import { useState } from "react";
 import { Alert } from "react-native";
 import { useRouter } from "expo-router";
 
-import { usePracticeStore } from "@/stores";
+import { useAssignmentStore } from "@/stores";
 import type { Content } from "../api";
 import { getQuizSubmissionApi, getWritingSubmissionApi } from "../api";
 
 export function useAssignmentNavigation() {
   const router = useRouter();
-  const setQuizResult = usePracticeStore((s) => s.setQuizResult);
-  const setWritingResult = usePracticeStore((s) => s.setWritingResult);
+  const setQuizResult = useAssignmentStore((s) => s.setQuizResult);
+  const setWritingResult = useAssignmentStore((s) => s.setWritingResult);
   const [isLoadingSubmission, setIsLoadingSubmission] = useState(false);
 
   async function handleAssignmentPress(item: Content) {
