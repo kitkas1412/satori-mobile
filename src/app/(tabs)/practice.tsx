@@ -2,7 +2,8 @@
 // Hiển thị hai tab: "Bài tập GV" (danh sách bài tập từ giáo viên) và "Ôn luyện AI" (banner AI).
 
 import { BookOpen, Sparkles } from "lucide-react-native";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   ActivityIndicator,
@@ -89,6 +90,20 @@ export default function PracticeTab() {
     isError: isErrorLessons,
     refetch: refetchLessons,
   } = useLessons(courseId);
+
+  const [isFocusRefetching, setIsFocusRefetching] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      const refetch = async () => {
+        setIsFocusRefetching(true);
+        if (activeTab === "teacher") await refetchAssignments();
+        else await refetchLessons();
+        setIsFocusRefetching(false);
+      };
+      refetch();
+    }, [activeTab, refetchAssignments, refetchLessons]),
+  );
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -301,6 +316,8 @@ export default function PracticeTab() {
 
       {/* Overlay loading khi đang tải lần đầu */}
       <LoadingOverlay visible={isLoading} title="Đang tải bài tập..." />
+      {/* Overlay loading khi focus lại tab */}
+      <LoadingOverlay visible={isFocusRefetching} title="Đang tải..." />
       {/* Overlay loading khi đang tải kết quả bài đã nộp */}
       <LoadingOverlay
         visible={isLoadingSubmission}
