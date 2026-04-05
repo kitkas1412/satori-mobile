@@ -4,8 +4,7 @@ export type SessionType =
   | "VOCAB_DRILL"
   | "GRAMMAR_DRILL"
   | "MIXED_LESSON"
-  | "KANJI_READING"
-  | "SENTENCE_BUILD";
+  | "KANJI_READING";
 
 export type SessionStatus = "IN_PROGRESS";
 

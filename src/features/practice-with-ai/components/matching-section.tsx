@@ -2,7 +2,6 @@ import { Text, TouchableOpacity, View } from "react-native";
 
 import { Colors } from "@/constants/theme";
 import type { AnswerResponse, Items } from "../api/practice-with-ai.types";
-import { FeedbackPanel } from "./feedback-panel";
 
 type Theme = typeof Colors.light;
 
@@ -145,9 +144,6 @@ export function MatchingSection({
         </View>
       </View>
 
-      {answerResult !== null && (
-        <FeedbackPanel answerResult={answerResult} theme={theme} />
-      )}
     </View>
   );
 }
