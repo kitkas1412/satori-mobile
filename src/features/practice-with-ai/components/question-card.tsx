@@ -91,6 +91,7 @@ export function QuestionCard({
       </Text>
 
       {/* Hint */}
+      {hint && (
       <View style={{ gap: 10 }}>
         <TouchableOpacity
           onPress={onToggleHint}
@@ -109,7 +110,7 @@ export function QuestionCard({
             {showHint ? "Ẩn gợi ý" : "Xem gợi ý"}
           </Text>
         </TouchableOpacity>
-        {showHint && hint ? (
+        {showHint ? (
           <View
             style={{
               borderWidth: 0.5,
@@ -133,6 +134,7 @@ export function QuestionCard({
           </View>
         ) : null}
       </View>
+      )}
     </View>
   );
 }
