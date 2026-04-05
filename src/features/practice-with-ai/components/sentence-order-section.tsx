@@ -2,7 +2,6 @@ import { Text, TouchableOpacity, View } from "react-native";
 
 import { Colors } from "@/constants/theme";
 import type { AnswerResponse, Items } from "../api/practice-with-ai.types";
-import { FeedbackPanel } from "./feedback-panel";
 
 type Theme = typeof Colors.light;
 
@@ -69,7 +68,7 @@ export function SentenceOrderSection({
   );
 
   return (
-    <View style={{ gap: 12 }}>
+    <View style={{ gap: 50 }}>
       {/* Translation card */}
       <View
         style={{
@@ -85,14 +84,18 @@ export function SentenceOrderSection({
       >
         <Text
           className="font-heading"
-          style={{ fontSize: 14, color: theme.text.primary, textAlign: "center" }}
+          style={{
+            fontSize: 14,
+            color: theme.text.primary,
+            textAlign: "center",
+          }}
         >
           {currentItem.question}
         </Text>
       </View>
 
       {/* Answer area */}
-      <View style={{ gap: 40 }}>
+      <View style={{ gap: 4 }}>
         {/* Placed words row */}
         <View
           style={{
@@ -113,7 +116,9 @@ export function SentenceOrderSection({
                 borderRadius: 14,
                 borderWidth: 1,
                 borderColor:
-                  answerResult === null ? theme.border.subtle : getAnswerLineColor(),
+                  answerResult === null
+                    ? theme.border.subtle
+                    : getAnswerLineColor(),
                 backgroundColor:
                   answerResult === null
                     ? theme.background.surface
@@ -124,7 +129,11 @@ export function SentenceOrderSection({
             >
               <Text
                 className="font-heading"
-                style={{ fontSize: 15, lineHeight: 22.5, color: getPlacedWordColor(word.text) }}
+                style={{
+                  fontSize: 15,
+                  lineHeight: 22.5,
+                  color: getPlacedWordColor(word.text),
+                }}
               >
                 {word.text}
               </Text>
@@ -137,13 +146,13 @@ export function SentenceOrderSection({
           <View
             style={{
               borderBottomWidth: 2,
-              borderBottomColor: getAnswerLineColor(),
+              borderBottomColor: theme.border.strong,
             }}
           />
           <View
             style={{
               borderBottomWidth: 2,
-              borderBottomColor: getAnswerLineColor(),
+              borderBottomColor: theme.border.strong,
             }}
           />
         </View>
@@ -185,10 +194,6 @@ export function SentenceOrderSection({
         })}
       </View>
 
-      {/* Feedback panel */}
-      {answerResult !== null && (
-        <FeedbackPanel answerResult={answerResult} theme={theme} />
-      )}
     </View>
   );
 }

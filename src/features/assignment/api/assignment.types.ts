@@ -1,5 +1,12 @@
-// Định nghĩa tất cả TypeScript types dùng trong tính năng Practice (bài tập).
+// Định nghĩa tất cả TypeScript types dùng trong tính năng Assignment (bài tập).
 // Mỗi interface tương ứng với một endpoint hoặc một phần của response từ server.
+
+// GET /learner/classes
+export interface LearnerClass {
+  id: string;
+  name: string;
+  status: "ACTIVE" | "CLOSED";
+}
 
 // GET /learner/assignments
 // Loại bài tập: trắc nghiệm hoặc bài viết

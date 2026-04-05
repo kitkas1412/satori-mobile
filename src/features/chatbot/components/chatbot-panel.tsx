@@ -193,6 +193,7 @@ export function ChatbotPanel({
             text={item.text}
             timestamp={item.timestamp}
             role={item.role}
+            isLoading={item.id === LOADING_BUBBLE_ID}
           />
         )}
       />

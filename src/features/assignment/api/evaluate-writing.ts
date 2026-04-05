@@ -5,7 +5,7 @@
 
 import { api } from "@/lib/axios";
 import type { ApiResponse } from "@/types/api";
-import type { EvaluateWritingResponse } from "./practice.types";
+import type { EvaluateWritingResponse } from "./assignment.types";
 
 export async function evaluateWritingApi(
   assignmentId: string,
