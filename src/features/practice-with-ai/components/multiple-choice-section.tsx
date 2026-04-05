@@ -24,9 +24,11 @@ export function MultipleChoiceSection({
   theme,
   onSelectOption,
 }: MultipleChoiceSectionProps) {
+  const OPTION_LABELS = ['A', 'B', 'C', 'D'] as const;
+
   return (
     <View style={{ gap: 10 }}>
-      {currentItem.options.map((option) => {
+      {currentItem.options.map((option, index) => {
         const isSelected = selectedOptionId === option.id;
         const isCorrectAnswer =
           answerResult !== null && option.text === answerResult.correctAnswer;
@@ -99,7 +101,7 @@ export function MultipleChoiceSection({
                 className="font-heading"
                 style={{ fontSize: 13, color: letterColor }}
               >
-                {option.id}
+                {OPTION_LABELS[index]}
               </Text>
             </View>
 
