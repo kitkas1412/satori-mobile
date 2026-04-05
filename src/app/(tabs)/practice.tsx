@@ -3,7 +3,7 @@
 
 import { BookOpen, Sparkles } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   ActivityIndicator,
   FlatList,
@@ -43,8 +43,13 @@ type ActiveTab = "teacher" | "ai";
 
 export default function PracticeTab() {
   const router = useRouter();
+  const { tab } = useLocalSearchParams<{ tab?: string }>();
   const user = useAuthStore((state) => state.user);
   const [activeTab, setActiveTab] = useState<ActiveTab>("teacher");
+
+  useEffect(() => {
+    if (tab === "ai") setActiveTab("ai");
+  }, [tab]);
   const [activeStatus, setActiveStatus] =
     useState<AssignmentStatusFilter>(undefined);
   const [sheetLesson, setSheetLesson] = useState<LessonResponse | null>(null);
