@@ -30,17 +30,14 @@ import {
 } from "@/features/assignment/hooks";
 import {
   LessonCard,
-  SessionConfigSheet,
+  SessionTypesModal,
 } from "@/features/practice-with-ai/components";
 import { useLessons } from "@/features/practice-with-ai/hooks";
 import type {
   AssignmentStatusFilter,
   Content,
 } from "@/features/assignment/api";
-import type {
-  LessonResponse,
-  SessionConfig,
-} from "@/features/practice-with-ai/api";
+import type { LessonResponse } from "@/features/practice-with-ai/api";
 
 type ActiveTab = "teacher" | "ai";
 
@@ -289,22 +286,17 @@ export default function PracticeTab() {
         visible={activeTab === "ai" && isLoadingLessons}
         title="Đang tải bài học..."
       />
-      <SessionConfigSheet
+      <SessionTypesModal
         visible={sheetLesson !== null}
         lesson={sheetLesson}
         onClose={() => setSheetLesson(null)}
-        onStart={(config: SessionConfig) => {
+        onNext={(sessionType) => {
           const lesson = sheetLesson;
           setSheetLesson(null);
           setTimeout(() => {
             router.push({
-              pathname: "/practice-session",
-              params: {
-                lessonId: lesson!.id,
-                sessionType: config.sessionType,
-                questionCount: String(config.itemCount),
-                itemTypes: JSON.stringify(config.itemTypes),
-              },
+              pathname: "/session-config",
+              params: { lessonId: lesson!.id, sessionType },
             });
           }, 350);
         }}

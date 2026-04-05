@@ -1,0 +1,257 @@
+// Màn hình thiết lập bài luyện tập: chọn dạng bài tập và số câu hỏi.
+// Nhận lessonId + sessionType từ route params, điều hướng sang practice-session khi bắt đầu.
+
+import {
+  ArrowUpDown,
+  CheckSquare,
+  Languages,
+  Link2,
+  PenLine,
+  ToggleLeft,
+  X,
+} from "lucide-react-native";
+import { useState } from "react";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+
+import { PrimaryButton } from "@/components/ui";
+import { Colors } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import type { ItemType, SessionType } from "@/features/practice-with-ai/api";
+
+const EXERCISE_TYPES: {
+  value: ItemType;
+  label: string;
+  icon: (color: string) => React.ReactNode;
+}[] = [
+  {
+    value: "MULTIPLE_CHOICE",
+    label: "Trắc nghiệm",
+    icon: (color) => <CheckSquare size={15} color={color} strokeWidth={2} />,
+  },
+  {
+    value: "FILL_BLANK",
+    label: "Điền vào chỗ trống",
+    icon: (color) => <PenLine size={15} color={color} strokeWidth={2} />,
+  },
+  {
+    value: "TRANSLATION",
+    label: "Dịch thuật",
+    icon: (color) => <Languages size={15} color={color} strokeWidth={2} />,
+  },
+  {
+    value: "SENTENCE_ORDER",
+    label: "Sắp xếp câu",
+    icon: (color) => <ArrowUpDown size={15} color={color} strokeWidth={2} />,
+  },
+  {
+    value: "MATCHING",
+    label: "Ghép đôi",
+    icon: (color) => <Link2 size={15} color={color} strokeWidth={2} />,
+  },
+  {
+    value: "TRUE_FALSE",
+    label: "Đúng / Sai",
+    icon: (color) => <ToggleLeft size={15} color={color} strokeWidth={2} />,
+  },
+];
+
+export function SessionConfigScreen() {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
+
+  const { lessonId, sessionType } = useLocalSearchParams<{
+    lessonId: string;
+    sessionType: SessionType;
+  }>();
+
+  const [itemTypes, setItemTypes] = useState<ItemType[]>(["MULTIPLE_CHOICE"]);
+  const [questionCount, setQuestionCount] = useState("5");
+
+  function toggleExerciseType(type: ItemType) {
+    setItemTypes((prev) => {
+      if (prev.includes(type)) {
+        if (prev.length === 1) return prev;
+        return prev.filter((t) => t !== type);
+      }
+      return [...prev, type];
+    });
+  }
+
+  function handleCountChange(text: string) {
+    const cleaned = text.replace(/[^0-9]/g, "");
+    if (cleaned === "") {
+      setQuestionCount("");
+      return;
+    }
+    const num = parseInt(cleaned, 10);
+    if (num > 10) setQuestionCount("10");
+    else setQuestionCount(cleaned);
+  }
+
+  function handleStart() {
+    const count = parseInt(questionCount || "5", 10);
+    const safeCount = Math.max(1, Math.min(10, count));
+    router.push({
+      pathname: "/practice-session",
+      params: {
+        lessonId,
+        sessionType,
+        questionCount: String(safeCount),
+        itemTypes: JSON.stringify(itemTypes),
+      },
+    });
+  }
+
+  return (
+    <KeyboardAvoidingView
+      className="flex-1"
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{ backgroundColor: theme.background.page }}
+    >
+      <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+
+      <View
+        className="flex-1"
+        style={{ paddingTop: insets.top + 8 }}
+      >
+        {/* Header */}
+        <View
+          className="flex-row items-center px-4"
+          style={{ height: 48 }}
+        >
+          <Pressable
+            onPress={() => router.back()}
+            hitSlop={30}
+          >
+            <X size={24} color={theme.icon.primary} strokeWidth={2} />
+          </Pressable>
+        </View>
+
+        {/* Content */}
+        <View className="flex-1 px-4 gap-4" style={{ marginTop: 8 }}>
+          {/* Title */}
+          <Text
+            className="font-heading"
+            style={{ fontSize: 18, color: theme.text.primary }}
+          >
+            Thiết lập bài luyện tập
+          </Text>
+
+          {/* Dạng bài tập */}
+          <View className="gap-2">
+            <Text
+              className="font-heading"
+              style={{ fontSize: 14, color: theme.text.primary }}
+            >
+              Dạng bài tập
+            </Text>
+
+            <View
+              style={{
+                flexDirection: "row",
+                flexWrap: "wrap",
+                gap: 8,
+              }}
+            >
+              {EXERCISE_TYPES.map((item) => {
+                const isSelected = itemTypes.includes(item.value);
+                const iconColor = isSelected
+                  ? theme.text.primary
+                  : theme.text.disabled;
+                const textColor = isSelected
+                  ? theme.text.primary
+                  : theme.text.disabled;
+                return (
+                  <Pressable
+                    key={item.value}
+                    onPress={() => toggleExerciseType(item.value)}
+                    className="flex-row items-center rounded-2xl"
+                    style={{
+                      width: "48%",
+                      height: 43,
+                      paddingHorizontal: 15,
+                      gap: 8,
+                      backgroundColor: theme.border.subtle,
+                      borderWidth: 1,
+                      borderColor: isSelected
+                        ? theme.brand.primary
+                        : theme.border.subtle,
+                    }}
+                  >
+                    {item.icon(iconColor)}
+                    <Text
+                      className="font-body text-xs flex-1"
+                      style={{ color: textColor }}
+                      numberOfLines={1}
+                    >
+                      {item.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+
+          {/* Số câu hỏi */}
+          <View
+            className="flex-row items-center justify-between"
+            style={{ paddingVertical: 3 }}
+          >
+            <Text
+              className="font-heading"
+              style={{ fontSize: 14, color: theme.text.primary }}
+            >
+              Số câu hỏi
+            </Text>
+
+            <View
+              className="rounded-lg items-center justify-center"
+              style={{
+                width: 80,
+                borderWidth: 1,
+                borderColor: theme.brand.primary,
+                backgroundColor: "#eef1fd",
+                paddingHorizontal: 14,
+                paddingVertical: 12,
+              }}
+            >
+              <TextInput
+                value={questionCount}
+                onChangeText={handleCountChange}
+                keyboardType="number-pad"
+                maxLength={2}
+                textAlign="right"
+                className="font-heading w-full"
+                style={{
+                  fontSize: 14,
+                  color: theme.brand.primary,
+                  padding: 0,
+                }}
+              />
+            </View>
+          </View>
+        </View>
+
+        {/* CTA */}
+        <View
+          className="px-4"
+          style={{ paddingBottom: Math.max(insets.bottom, 16) + 8, paddingTop: 12 }}
+        >
+          <PrimaryButton text="Bắt đầu luyện tập" onPress={handleStart} />
+        </View>
+      </View>
+    </KeyboardAvoidingView>
+  );
+}

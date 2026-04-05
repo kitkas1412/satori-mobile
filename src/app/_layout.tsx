@@ -164,6 +164,10 @@ function RootLayoutNav() {
         options={{ headerShown: false, gestureEnabled: false }}
       />
       <Stack.Screen
+        name="session-config"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
         name="theme-selector"
         options={{ headerShown: false, gestureEnabled: false }}
       />
