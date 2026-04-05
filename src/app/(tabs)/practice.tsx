@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   FlatList,
   Pressable,
+  RefreshControl,
   Text,
   View,
 } from "react-native";
@@ -80,12 +81,23 @@ export default function PracticeTab() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    refetch: refetchAssignments,
   } = useAssignments(activeStatus, activeClassId);
   const {
     data: lessons,
     isLoading: isLoadingLessons,
     isError: isErrorLessons,
+    refetch: refetchLessons,
   } = useLessons(courseId);
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    if (activeTab === "teacher") await refetchAssignments();
+    else await refetchLessons();
+    setRefreshing(false);
+  };
 
   const assignments = data?.pages.flatMap((p) => p.content) ?? [];
 
@@ -276,6 +288,14 @@ export default function PracticeTab() {
         }}
         onEndReachedThreshold={0.3}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[theme.brand.primary]}
+            tintColor={theme.brand.primary}
+          />
+        }
         contentContainerStyle={{ paddingBottom: 24 }}
       />
 
