@@ -77,7 +77,7 @@ export function QuizAnswerItem({ item, index, theme }: QuizAnswerItemProps) {
           {/* Câu sai: hiển thị cả đáp án đã chọn (đỏ) và đáp án đúng (xanh) */}
           {!item.correct && (
             <View className="gap-2 pt-3">
-              <View className="flex-row flex-wrap items-center gap-1">
+              <View className="flex-row flex-wrap items-end gap-1">
                 <Text
                   className="font-body text-xs"
                   style={{ color: theme.text.secondary }}
@@ -88,7 +88,7 @@ export function QuizAnswerItem({ item, index, theme }: QuizAnswerItemProps) {
                   {item.selectedAnswer}
                 </MarkdownText>
               </View>
-              <View className="flex-row flex-wrap items-center gap-1">
+              <View className="flex-row flex-wrap items-end gap-1">
                 <Text
                   className="font-body text-xs"
                   style={{ color: theme.text.secondary }}
@@ -104,7 +104,7 @@ export function QuizAnswerItem({ item, index, theme }: QuizAnswerItemProps) {
           {/* Câu đúng: chỉ hiển thị đáp án đúng để xác nhận */}
           {item.correct && (
             <View className="pt-3">
-              <View className="flex-row flex-wrap items-center gap-1">
+              <View className="flex-row flex-wrap items-end gap-1">
                 <Text
                   className="font-body text-xs"
                   style={{ color: theme.text.secondary }}
