@@ -61,6 +61,7 @@ export default function SpeakingScreen() {
   const { height: screenHeight } = useWindowDimensions();
   const [focusTrigger, setFocusTrigger] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
+  const [isFocusRefetching, setIsFocusRefetching] = useState(false);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -73,7 +74,13 @@ export default function SpeakingScreen() {
       hasScrolledRef.current = false;
       reset();
       setFocusTrigger((prev) => prev + 1);
-    }, [reset]),
+      const doRefetch = async () => {
+        setIsFocusRefetching(true);
+        await refetch();
+        setIsFocusRefetching(false);
+      };
+      doRefetch();
+    }, [reset, refetch]),
   );
 
   const handleScrollToCard = useCallback(
@@ -210,6 +217,7 @@ export default function SpeakingScreen() {
         )}
       </View>
       <LoadingOverlay visible={isLoading} title="Đang tải..." />
+      <LoadingOverlay visible={isFocusRefetching} title="Đang tải..." />
       <ChatbotFab />
     </>
   );
