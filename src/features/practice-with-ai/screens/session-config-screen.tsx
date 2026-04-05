@@ -180,10 +180,10 @@ export function SessionConfigScreen() {
               ).map((item) => {
                 const isSelected = itemType === item.value;
                 const iconColor = isSelected
-                  ? theme.text.primary
+                  ? theme.text.onBrand
                   : theme.text.disabled;
                 const textColor = isSelected
-                  ? theme.text.primary
+                  ? theme.text.onBrand
                   : theme.text.disabled;
                 return (
                   <Pressable
@@ -195,7 +195,9 @@ export function SessionConfigScreen() {
                       height: 43,
                       paddingHorizontal: 15,
                       gap: 8,
-                      backgroundColor: theme.border.subtle,
+                      backgroundColor: isSelected
+                        ? theme.brand.primary
+                        : theme.border.subtle,
                       borderWidth: 1,
                       borderColor: isSelected
                         ? theme.brand.primary
