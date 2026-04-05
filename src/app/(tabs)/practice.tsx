@@ -3,11 +3,12 @@
 
 import { BookOpen, Sparkles } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   ActivityIndicator,
   FlatList,
   Pressable,
+  RefreshControl,
   Text,
   View,
 } from "react-native";
@@ -43,8 +44,13 @@ type ActiveTab = "teacher" | "ai";
 
 export default function PracticeTab() {
   const router = useRouter();
+  const { tab } = useLocalSearchParams<{ tab?: string }>();
   const user = useAuthStore((state) => state.user);
   const [activeTab, setActiveTab] = useState<ActiveTab>("teacher");
+
+  useEffect(() => {
+    if (tab === "ai") setActiveTab("ai");
+  }, [tab]);
   const [activeStatus, setActiveStatus] =
     useState<AssignmentStatusFilter>(undefined);
   const [sheetLesson, setSheetLesson] = useState<LessonResponse | null>(null);
@@ -75,12 +81,23 @@ export default function PracticeTab() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    refetch: refetchAssignments,
   } = useAssignments(activeStatus, activeClassId);
   const {
     data: lessons,
     isLoading: isLoadingLessons,
     isError: isErrorLessons,
+    refetch: refetchLessons,
   } = useLessons(courseId);
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    if (activeTab === "teacher") await refetchAssignments();
+    else await refetchLessons();
+    setRefreshing(false);
+  };
 
   const assignments = data?.pages.flatMap((p) => p.content) ?? [];
 
@@ -271,6 +288,14 @@ export default function PracticeTab() {
         }}
         onEndReachedThreshold={0.3}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[theme.brand.primary]}
+            tintColor={theme.brand.primary}
+          />
+        }
         contentContainerStyle={{ paddingBottom: 24 }}
       />
 

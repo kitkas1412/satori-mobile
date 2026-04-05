@@ -24,6 +24,8 @@ export function TranslationSection({
   theme,
   onSelectOption,
 }: TranslationSectionProps) {
+  const OPTION_LABELS = ['A', 'B', 'C', 'D'] as const;
+
   return (
     <View style={{ gap: 10 }}>
       {/* Japanese word/sentence card */}
@@ -51,7 +53,7 @@ export function TranslationSection({
       </View>
 
       {/* Answer options */}
-      {currentItem.options.map((option) => {
+      {currentItem.options.map((option, index) => {
         const isSelected = selectedOptionId === option.id;
         const isCorrectAnswer =
           answerResult !== null && option.text === answerResult.correctAnswer;
@@ -123,7 +125,7 @@ export function TranslationSection({
                 className="font-heading"
                 style={{ fontSize: 13, color: letterColor }}
               >
-                {option.id}
+                {OPTION_LABELS[index]}
               </Text>
             </View>
 

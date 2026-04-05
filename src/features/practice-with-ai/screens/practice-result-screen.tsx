@@ -34,7 +34,7 @@ export function PracticeResultScreen() {
   } = usePracticeSessionSummary(practiceSessionId);
 
   function handleGoPracticeHome() {
-    router.replace("/(tabs)/practice");
+    router.replace({ pathname: "/(tabs)/practice", params: { tab: "ai" } });
   }
 
   if (!practiceSessionId) {

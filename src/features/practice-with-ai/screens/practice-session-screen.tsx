@@ -138,7 +138,7 @@ export function PracticeSessionScreen() {
 
     // Phase 2: feedback đã hiển thị → chuyển câu tiếp
     if (answerResult !== null) {
-      if (answerResult.sessionCompleted) {
+      if (answerResult.sessionCompleted || currentIndex + 1 >= totalItems) {
         router.replace({
           pathname: "/practice-result",
           params: { practiceSessionId: sessionData.session.sessionId },
@@ -247,7 +247,8 @@ export function PracticeSessionScreen() {
   const session = sessionData?.session;
   const currentItem: Items | undefined = items[currentIndex];
   const totalItems = session?.totalItems ?? parseInt(questionCount ?? "0", 10);
-  const progress = totalItems > 0 ? currentIndex / totalItems : 0;
+  const completedCount = currentIndex + (answerResult !== null ? 1 : 0);
+  const progress = totalItems > 0 ? completedCount / totalItems : 0;
   const sessionTypeLabel =
     SESSION_TYPE_LABEL[sessionType as SessionType] ?? sessionType;
 
