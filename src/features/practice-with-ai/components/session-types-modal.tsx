@@ -27,15 +27,19 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Backdrop, PrimaryButton } from "@/components/ui";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import type { LessonResponse, SessionType } from "@/features/practice-with-ai/api";
+import type {
+  LessonResponse,
+  SessionType,
+} from "@/features/practice-with-ai/api";
 
 const TIMING_CONFIG = { duration: 320, easing: Easing.out(Easing.cubic) };
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const CARD_WIDTH = 175;
-const CARD_GAP = 10;
-// Padding để card đầu/cuối xuất hiện ở giữa, các card kế bên peek ra
+// Gap bằng side padding → card kế tiếp bắt đầu đúng tại cạnh màn hình, chỉ 1 card hiển thị
 const SIDE_PADDING = (SCREEN_WIDTH - CARD_WIDTH) / 2;
+const CARD_GAP = SIDE_PADDING - 16; // trừ 16 → card kề peek vào 16px
+const CARD_STEP = CARD_WIDTH + CARD_GAP;
 
 const SESSION_TYPES: {
   value: SessionType;
@@ -69,6 +73,10 @@ const SESSION_TYPES: {
   },
 ];
 
+const TOTAL = SESSION_TYPES.length;
+// Triple the array so we can silently jump between copies for infinite scroll
+const LOOPED_DATA = [...SESSION_TYPES, ...SESSION_TYPES, ...SESSION_TYPES];
+
 export interface SessionTypesModalProps {
   visible: boolean;
   onClose: () => void;
@@ -90,6 +98,7 @@ export function SessionTypesModal({
   const [internalVisible, setInternalVisible] = useState(visible);
   const translateY = useSharedValue(600);
   const skipCloseAnimation = useRef(false);
+  const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
     if (visible) {
@@ -105,6 +114,19 @@ export function SessionTypesModal({
       });
     }
   }, [visible]);
+
+  // Scroll to first item of the middle copy so both sides are infinite
+  useEffect(() => {
+    if (internalVisible) {
+      const timer = setTimeout(() => {
+        flatListRef.current?.scrollToOffset({
+          offset: TOTAL * CARD_STEP,
+          animated: false,
+        });
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [internalVisible]);
 
   const panelAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }],
@@ -137,8 +159,22 @@ export function SessionTypesModal({
 
   function handleScroll(e: NativeSyntheticEvent<NativeScrollEvent>) {
     const offset = e.nativeEvent.contentOffset.x;
-    const index = Math.round(offset / (CARD_WIDTH + CARD_GAP));
-    setActiveIndex(Math.max(0, Math.min(index, SESSION_TYPES.length - 1)));
+    const scrollIndex = Math.round(offset / CARD_STEP);
+    const realIndex = ((scrollIndex % TOTAL) + TOTAL) % TOTAL;
+    setActiveIndex(realIndex);
+
+    // Silently jump to the corresponding position in the middle copy
+    if (scrollIndex < TOTAL) {
+      flatListRef.current?.scrollToOffset({
+        offset: (scrollIndex + TOTAL) * CARD_STEP,
+        animated: false,
+      });
+    } else if (scrollIndex >= TOTAL * 2) {
+      flatListRef.current?.scrollToOffset({
+        offset: (scrollIndex - TOTAL) * CARD_STEP,
+        animated: false,
+      });
+    }
   }
 
   function handleNext() {
@@ -199,12 +235,15 @@ export function SessionTypesModal({
 
           {/* Carousel */}
           <FlatList
-            data={SESSION_TYPES}
-            keyExtractor={(item) => item.value}
+            ref={flatListRef}
+            className="py-36"
+            data={LOOPED_DATA}
+            keyExtractor={(item, index) => `${item.value}-${index}`}
             horizontal
             showsHorizontalScrollIndicator={false}
-            snapToInterval={CARD_WIDTH + CARD_GAP}
+            snapToInterval={CARD_STEP}
             decelerationRate="fast"
+            disableIntervalMomentum
             contentContainerStyle={{
               paddingHorizontal: SIDE_PADDING,
               gap: CARD_GAP,
