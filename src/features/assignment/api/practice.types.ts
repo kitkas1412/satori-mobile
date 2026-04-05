@@ -1,6 +1,13 @@
 // Định nghĩa tất cả TypeScript types dùng trong tính năng Practice (bài tập).
 // Mỗi interface tương ứng với một endpoint hoặc một phần của response từ server.
 
+// GET /learner/classes
+export interface LearnerClass {
+  id: string;
+  name: string;
+  status: "ACTIVE" | "CLOSED";
+}
+
 // GET /learner/assignments
 // Loại bài tập: trắc nghiệm hoặc bài viết
 export type AssignmentType = "QUIZ" | "WRITING";
@@ -12,6 +19,9 @@ export type LearnerSubmissionStatus =
   | "NOT_STARTED"  // Chưa bắt đầu
   | "OVERDUE"      // Quá hạn
   | "SUBMITTED";   // Đã nộp, chờ chấm
+
+// undefined = "Tất cả" (không gửi param status lên API)
+export type AssignmentStatusFilter = LearnerSubmissionStatus | undefined;
 
 // Response danh sách bài tập (có phân trang)
 export interface AssignmentsResponse {

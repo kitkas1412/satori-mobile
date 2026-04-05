@@ -186,7 +186,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
                   className="font-body text-xs"
                   style={{ color: theme.text.secondary }}
                 >
-                  {images.length} hình ảnh
+                  {images.length}/3 hình ảnh
                 </Text>
               </View>
 
@@ -194,8 +194,9 @@ export function WritingScreen({ id }: WritingScreenProps) {
               <View className="flex-row gap-3">
                 <Pressable
                   onPress={handlePickImage}
+                  disabled={images.length >= 3}
                   className="flex-1 flex-row items-center justify-center gap-2 rounded-xl"
-                  style={{ height: 48, backgroundColor: theme.brand.primary }}
+                  style={{ height: 48, backgroundColor: theme.brand.primary, opacity: images.length >= 3 ? 0.4 : 1 }}
                 >
                   <ImageIcon
                     size={20}
@@ -212,12 +213,14 @@ export function WritingScreen({ id }: WritingScreenProps) {
 
                 <Pressable
                   onPress={handleTakePhoto}
+                  disabled={images.length >= 3}
                   className="flex-1 flex-row items-center justify-center gap-2 rounded-xl"
                   style={{
                     height: 48,
                     backgroundColor: theme.background.surface,
                     borderWidth: 2,
                     borderColor: theme.border.brand,
+                    opacity: images.length >= 3 ? 0.4 : 1,
                   }}
                 >
                   <CameraIcon
@@ -301,7 +304,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
                 className="font-body text-xs"
                 style={{ color: theme.text.secondary }}
               >
-                Bạn có thể tải lên nhiều hình ảnh bài viết của mình
+                Tối đa 3 hình ảnh, mỗi ảnh không quá 5MB
               </Text>
             </View>
 

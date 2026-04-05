@@ -14,10 +14,13 @@ export type TurnState = "AI_TURN" | "USER_TURN" | "LOADING";
 /** Trạng thái hoàn thành của một nhiệm vụ (mission) */
 export type MissionStatus = "PENDING" | "IN_PROGRESS" | "COMPLETED";
 
+/** Trạng thái luyện tập của một conversation */
+export type PracticeStatus = "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED";
+
 /** Trạng thái của một session hội thoại */
 export type SessionStatus = "ACTIVE" | "COMPLETED" | "ABANDONED";
 
-// GET: /learner/conversation/themes?page=0&size=10
+// GET: /learner/conversation/topics?page=0&size=10
 /** Cấu trúc phân trang dùng chung cho các danh sách trả về từ API */
 export interface TopicListResponse<T> {
   content: T[];
@@ -42,14 +45,14 @@ export interface Topic {
   /** Thứ tự hiển thị trên màn hình */
   orderIndex: number;
   /** Số lượng topic thuộc chủ đề này */
-  topicCount: number;
+  conversationCount: number;
 }
 
-// GET: /learner/conversation/themes/{{theme_id}}/topics
+// GET: /learner/conversation/topics/{{topicId}}/conversations
 /** Một conversation hội thoại trong danh sách của một topic */
 export interface ConversationResponse {
   id: string;
-  themeId: string;
+  topicId: string;
   title: string;
   titleJapanese: string;
   descriptionVi: string;
@@ -62,16 +65,17 @@ export interface ConversationResponse {
   orderIndex: number;
   practiceCount: number;
   lastPracticedAt: string | null;
+  practiceStatus: PracticeStatus;
   /** Người dùng đã luyện tập topic này chưa */
   practiced: boolean;
 }
 
-// GET: /learner/conversation/topics/{{topic_id}}
+// GET: /learner/conversation/conversations/{{conversationId}}
 /** Chi tiết đầy đủ của một conversation, bao gồm gợi ý từ vựng, ngữ pháp và danh sách nhiệm vụ */
 export interface ConversationDetailResponse {
   id: string;
-  themeId: string;
-  themeName: string | null;
+  topicId: string;
+  topicName: string | null;
   courseId: string | null;
   courseName: string | null;
   title: string;
@@ -79,12 +83,17 @@ export interface ConversationDetailResponse {
   description: string;
   descriptionVi: string;
   scenario: string | null;
-  vocabularyHints: string[] | null;
-  grammarPoints: string[] | null;
-  usefulExpressions: string[] | null;
+  /** JSON string chứa mảng từ vựng gợi ý, ví dụ: "[{\"word\":\"名前\",\"meaning\":\"name\",\"reading\":\"なまえ\"}]" */
+  vocabularyHints: string | null;
+  /** JSON string chứa mảng điểm ngữ pháp, ví dụ: "[\"～です\",\"～と申します\"]" */
+  grammarPoints: string | null;
+  /** JSON string chứa mảng biểu đạt hữu ích, ví dụ: "[\"はじめまして\"]" */
+  usefulExpressions: string | null;
   category: string;
   jlptLevel: string;
   difficultyScore: number;
+  aiRole: string | null;
+  learnerRole: string | null;
   roleplayContext: string | null;
   thumbnailUrl: string | null;
   status: string;
@@ -110,7 +119,7 @@ export interface FreeTalkSessionRequest {
 export interface RoleplaySessionResponse {
   id: string;
   userId: string;
-  topicId: string;
+  conversationId: string;
   sessionType: string;
   status: SessionStatus;
   messageCount: number;

@@ -7,10 +7,11 @@
 //   initSession / initFreeTalkSession → sendMessage (nhiều lần) → completeSession
 //   hoặc abandonSession (bỏ dở bất kỳ lúc nào)
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { useCallback, useRef, useState } from "react";
-import { Alert } from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Alert, AppState, type AppStateStatus } from "react-native";
 import {
   abandonSessionApi,
   completeSessionApi,
@@ -23,6 +24,8 @@ import type { TurnState } from "../api";
 import { playAssistantMessage, stopAssistantAudio } from "./use-audio-player";
 import { speakingQueryKeys } from "./use-topics";
 
+export const ACTIVE_SESSION_STORAGE_KEY = "speaking_active_session_id";
+
 /** Hàm tiện ích tạo độ trễ (ms) để phát tin nhắn AI tuần tự, không bị đổ xuất hiện cùng lúc */
 const delay = (ms: number) =>
   new Promise<void>((resolve) => setTimeout(resolve, ms));
@@ -34,6 +37,7 @@ export function useConversationSession() {
   const [isInitializing, setIsInitializing] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
   const cancelledRef = useRef(false);
+  const backgroundedAtRef = useRef<number | null>(null);
 
   const {
     setSession,
@@ -63,6 +67,7 @@ export function useConversationSession() {
       try {
         const session = await starter();
         setSession(session.id, [], session.missions);
+        await AsyncStorage.setItem(ACTIVE_SESSION_STORAGE_KEY, session.id);
         setTurnState("AI_TURN");
         // Tắt overlay trước khi phát audio để người dùng thấy tin nhắn xuất hiện
         setIsInitializing(false);
@@ -89,9 +94,9 @@ export function useConversationSession() {
     [router, setSession, addMessages],
   );
 
-  /** Khởi tạo session hội thoại theo topic cụ thể */
+  /** Khởi tạo session hội thoại theo conversation cụ thể */
   const initSession = useCallback(
-    (topicId: string) => _startSession(() => startSessionApi(topicId)),
+    (conversationId: string) => _startSession(() => startSessionApi(conversationId)),
     [_startSession],
   );
 
@@ -199,6 +204,7 @@ export function useConversationSession() {
     } catch {
       Alert.alert("Lỗi", "Không thể hoàn thành buổi học. Vui lòng thử lại.");
     } finally {
+      await AsyncStorage.removeItem(ACTIVE_SESSION_STORAGE_KEY);
       setIsCompleting(false);
     }
   }, [sessionId, setFeedback]);
@@ -217,9 +223,44 @@ export function useConversationSession() {
     } catch {
       // Bỏ qua lỗi — abandon là best-effort, không cần báo lỗi cho người dùng
     } finally {
+      await AsyncStorage.removeItem(ACTIVE_SESSION_STORAGE_KEY);
       clearSession();
       router.replace("/(tabs)/speaking");
     }
+  }, [sessionId, clearSession, router]);
+
+  // Tự động abandon session nếu app ở background quá 5 phút.
+  // Listener chỉ active khi đang có session (sessionId != null).
+  useEffect(() => {
+    if (!sessionId) return;
+
+    const GRACE_PERIOD_MS = 5 * 60 * 1000;
+
+    const handleAppStateChange = async (nextState: AppStateStatus) => {
+      if (nextState === "background") {
+        backgroundedAtRef.current = Date.now();
+      } else if (nextState === "active") {
+        const backgroundedAt = backgroundedAtRef.current;
+        backgroundedAtRef.current = null;
+        if (backgroundedAt !== null && Date.now() - backgroundedAt > GRACE_PERIOD_MS) {
+          cancelledRef.current = true;
+          stopAssistantAudio();
+          try {
+            await abandonSessionApi(sessionId);
+          } catch {
+            // best-effort
+          } finally {
+            await AsyncStorage.removeItem(ACTIVE_SESSION_STORAGE_KEY);
+            clearSession();
+            router.replace("/(tabs)/speaking");
+            Alert.alert("Buổi học đã kết thúc", "Buổi học đã kết thúc do không hoạt động.");
+          }
+        }
+      }
+    };
+
+    const subscription = AppState.addEventListener("change", handleAppStateChange);
+    return () => subscription.remove();
   }, [sessionId, clearSession, router]);
 
   return {

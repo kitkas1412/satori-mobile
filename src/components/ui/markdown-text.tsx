@@ -64,7 +64,7 @@ export function MarkdownText({
     const baseStyle = {
       fontSize,
       fontFamily,
-      color: theme.text.primary,
+      color: color ?? theme.text.primary,
       lineHeight: resolvedLineHeight,
     };
     return (
@@ -101,7 +101,7 @@ export function MarkdownText({
                 style={{
                   fontSize: furiganaSize,
                   fontFamily,
-                  color: theme.text.primary,
+                  color: color ?? theme.text.primary,
                   position: "absolute",
                   bottom: Math.round(fontSize * 1.25),
                   left: -30,
@@ -125,7 +125,7 @@ export function MarkdownText({
         body: {
           fontSize,
           fontFamily,
-          color: theme.text.primary,
+          color: color ?? theme.text.primary,
           lineHeight: resolvedLineHeight,
           margin: 0,
           padding: 0,

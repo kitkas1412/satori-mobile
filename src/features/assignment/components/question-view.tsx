@@ -57,7 +57,7 @@ function OptionButton({
       </View>
       <MarkdownText
         fontSize={16}
-        color={selected ? theme.text.primary : theme.text.disabled}
+        color={selected ? theme.text.onBrand : theme.text.disabled}
         containerStyle={{ flex: 1 }}
       >
         {option.text}
