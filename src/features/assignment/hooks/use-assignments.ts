@@ -8,14 +8,14 @@ import type { LearnerSubmissionStatus } from "../api/practice.types";
 // Query keys dùng chung cho tính năng Practice.
 // Tập trung ở đây để tránh hard-code string nhiều chỗ và dễ invalidate theo nhóm.
 export const practiceQueryKeys = {
-  assignments: (status?: LearnerSubmissionStatus) =>
-    ["practice", "assignments", status ?? "all"] as const,
+  assignments: (status?: LearnerSubmissionStatus, classId?: string) =>
+    ["practice", "assignments", status ?? "all", classId ?? "all"] as const,
 };
 
-export function useAssignments(status?: LearnerSubmissionStatus) {
+export function useAssignments(status?: LearnerSubmissionStatus, classId?: string) {
   return useInfiniteQuery({
-    queryKey: practiceQueryKeys.assignments(status),
-    queryFn: ({ pageParam }) => getAssignmentsApi(pageParam, status),
+    queryKey: practiceQueryKeys.assignments(status, classId),
+    queryFn: ({ pageParam }) => getAssignmentsApi(pageParam, status, classId),
     initialPageParam: 1,
     getNextPageParam: (lastPage) =>
       lastPage.last ? undefined : lastPage.pageNumber + 1,

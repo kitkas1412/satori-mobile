@@ -7,7 +7,6 @@ import { useRouter } from "expo-router";
 import type { ImagePickerAsset } from "expo-image-picker";
 
 import { submitWritingApi } from "../api";
-import { practiceQueryKeys } from "./use-assignments";
 import { usePracticeStore } from "@/stores";
 
 interface UseWritingSubmitParams {
@@ -36,7 +35,7 @@ export function useWritingSubmit({
     onSuccess: (data) => {
       // Làm mới danh sách bài tập để phản ánh trạng thái "Đã nộp"
       queryClient.invalidateQueries({
-        queryKey: practiceQueryKeys.assignments,
+        queryKey: ["practice", "assignments"],
       });
       // Lưu kết quả vào store để màn hình kết quả đọc mà không cần gọi API lại
       setWritingResult(data);

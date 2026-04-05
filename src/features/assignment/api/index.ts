@@ -5,6 +5,7 @@ export type {
   AssignmentDetailResponse,
   AssignmentStatusFilter,
   LearnerSubmissionStatus,
+  LearnerClass,
   Option,
   Question,
   SubmitQuizAnswer,
@@ -17,6 +18,7 @@ export type {
   EvaluateWritingResponse,
 } from "./practice.types";
 export { getAssignmentsApi } from "./get-assignments";
+export { getClassesApi } from "./get-classes";
 export { evaluateWritingApi } from "./evaluate-writing";
 export { startAssignmentApi } from "./start-assignment";
 export { submitAssignmentApi } from "./submit-assignment";
