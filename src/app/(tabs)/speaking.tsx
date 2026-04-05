@@ -7,6 +7,7 @@ import { useRef, useCallback, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  RefreshControl,
   Text,
   View,
   useWindowDimensions,
@@ -43,6 +44,7 @@ export default function SpeakingScreen() {
     data,
     isLoading,
     isError,
+    refetch,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
@@ -58,6 +60,13 @@ export default function SpeakingScreen() {
   const hasScrolledRef = useRef(false);
   const { height: screenHeight } = useWindowDimensions();
   const [focusTrigger, setFocusTrigger] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -189,6 +198,14 @@ export default function SpeakingScreen() {
               }
             }}
             onEndReachedThreshold={0.3}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={[theme.brand.primary]}
+                tintColor={theme.brand.primary}
+              />
+            }
           />
         )}
       </View>
