@@ -1,4 +1,4 @@
-import { Text, View } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
 import { MarkdownText } from "@/components/ui";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -7,17 +7,27 @@ interface ChatbotMessageBubbleProps {
   text: string;
   timestamp: string;
   role: "ai" | "user";
+  isLoading?: boolean;
 }
 
 export function ChatbotMessageBubble({
   text,
   timestamp,
   role,
+  isLoading,
 }: ChatbotMessageBubbleProps) {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
   const isUser = role === "user";
+
+  if (isLoading) {
+    return (
+      <View className="items-start py-2 px-1">
+        <ActivityIndicator size="small" color={theme.brand.primary} />
+      </View>
+    );
+  }
 
   return (
     <View className={`flex-row ${isUser ? "justify-end" : "justify-start"}`}>
