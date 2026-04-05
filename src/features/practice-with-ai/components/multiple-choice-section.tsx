@@ -3,7 +3,6 @@ import { Text, TouchableOpacity, View } from "react-native";
 
 import { Colors } from "@/constants/theme";
 import type { AnswerResponse, Items } from "../api/practice-with-ai.types";
-import { FeedbackPanel } from "./feedback-panel";
 
 type Theme = typeof Colors.light;
 
@@ -125,12 +124,6 @@ export function MultipleChoiceSection({
         );
       })}
 
-      {/* Feedback panel */}
-      {answerResult !== null && (
-        <View style={{ marginTop: 6 }}>
-          <FeedbackPanel answerResult={answerResult} theme={theme} />
-        </View>
-      )}
     </View>
   );
 }

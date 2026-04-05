@@ -3,7 +3,7 @@
 //        → hoàn thành → chuyển sang màn hình kết quả
 
 import { useEffect, useState } from "react";
-import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -18,6 +18,7 @@ import type {
   SessionType,
 } from "../api/practice-with-ai.types";
 import {
+  FeedbackPanel,
   FillBlankSection,
   MatchingSection,
   MultipleChoiceSection,
@@ -33,7 +34,6 @@ const SESSION_TYPE_LABEL: Record<SessionType, string> = {
   GRAMMAR_DRILL: "Ngữ pháp",
   MIXED_LESSON: "Hỗn hợp",
   KANJI_READING: "Kanji",
-  SENTENCE_BUILD: "Câu",
 };
 
 export function PracticeSessionScreen() {
@@ -53,7 +53,9 @@ export function PracticeSessionScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOptionId, setSelectedOptionId] = useState<number | null>(null);
   const [selectedWordIds, setSelectedWordIds] = useState<number[]>([]);
-  const [matchedPairs, setMatchedPairs] = useState<{ leftId: number; rightId: number }[]>([]);
+  const [matchedPairs, setMatchedPairs] = useState<
+    { leftId: number; rightId: number }[]
+  >([]);
   const [selectedLeftId, setSelectedLeftId] = useState<number | null>(null);
   const [streak, setStreak] = useState(0);
   const [showHint, setShowHint] = useState(false);
@@ -109,7 +111,10 @@ export function PracticeSessionScreen() {
       return;
     }
     if (selectedLeftId === null) return;
-    setMatchedPairs((prev) => [...prev, { leftId: selectedLeftId, rightId: id }]);
+    setMatchedPairs((prev) => [
+      ...prev,
+      { leftId: selectedLeftId, rightId: id },
+    ]);
     setSelectedLeftId(null);
   }
 
@@ -157,7 +162,11 @@ export function PracticeSessionScreen() {
         .map(({ leftId, rightId }) => `${leftId}:${rightId}`)
         .join(",");
       submitAnswer(
-        { sessionId: sessionData.session.sessionId, itemId: currentItem.id, userAnswer },
+        {
+          sessionId: sessionData.session.sessionId,
+          itemId: currentItem.id,
+          userAnswer,
+        },
         {
           onSuccess: (result) => {
             setStreak((s) => (result.correct ? s + 1 : 0));
@@ -174,7 +183,11 @@ export function PracticeSessionScreen() {
         .map((id) => currentItem.options.find((o) => o.id === id)?.text ?? "")
         .join(" ");
       submitAnswer(
-        { sessionId: sessionData.session.sessionId, itemId: currentItem.id, userAnswer },
+        {
+          sessionId: sessionData.session.sessionId,
+          itemId: currentItem.id,
+          userAnswer,
+        },
         {
           onSuccess: (result) => {
             setStreak((s) => (result.correct ? s + 1 : 0));
@@ -255,16 +268,14 @@ export function PracticeSessionScreen() {
           message="Vui lòng đợi trong giây lát"
         />
 
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{
+        {/* Fixed top: header + progress + question card */}
+        <View
+          style={{
             paddingHorizontal: 16,
             paddingTop: 16,
-            paddingBottom: Math.max(insets.bottom, 16) + 92,
             gap: 16,
           }}
         >
-          {/* Header row: X | badge + câu số | streak */}
           <SessionHeader
             sessionTypeLabel={sessionTypeLabel}
             currentIndex={currentIndex}
@@ -274,23 +285,30 @@ export function PracticeSessionScreen() {
             onClose={handleClose}
           />
 
-          {/* Progress bar */}
           <ProgressBar progress={progress} height={6} />
 
-          {/* Question card + options */}
+          {currentItem && (
+            <QuestionCard
+              itemType={currentItem.itemType}
+              question={currentItem.question}
+              hint={currentItem.hint}
+              showHint={showHint}
+              onToggleHint={() => setShowHint((v) => !v)}
+              theme={theme}
+            />
+          )}
+        </View>
+
+        {/* Answer area */}
+        <View
+          style={{
+            flex: 1,
+            paddingHorizontal: 16,
+            paddingTop: 16,
+          }}
+        >
           {currentItem && (
             <>
-              {/* Question card */}
-              <QuestionCard
-                itemType={currentItem.itemType}
-                question={currentItem.question}
-                hint={currentItem.hint}
-                showHint={showHint}
-                onToggleHint={() => setShowHint((v) => !v)}
-                theme={theme}
-              />
-
-              {/* Answer options */}
               {currentItem.itemType === "MULTIPLE_CHOICE" ? (
                 <MultipleChoiceSection
                   currentItem={currentItem}
@@ -367,21 +385,21 @@ export function PracticeSessionScreen() {
               )}
             </>
           )}
-        </ScrollView>
+        </View>
 
-        {/* Bottom sticky confirm button */}
+        {/* Bottom: feedback + confirm button */}
         <View
           style={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
             paddingHorizontal: 16,
             paddingTop: 4,
             paddingBottom: Math.max(insets.bottom, 16) + 8,
+            gap: 8,
             backgroundColor: theme.background.page,
           }}
         >
+          {answerResult !== null && (
+            <FeedbackPanel answerResult={answerResult} theme={theme} />
+          )}
           <PrimaryButton
             text={answerResult !== null ? "Tiếp theo" : "Xác nhận"}
             onPress={handleConfirm}
