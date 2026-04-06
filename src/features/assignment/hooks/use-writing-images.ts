@@ -6,7 +6,7 @@ import { Alert, Linking } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import type { ImagePickerAsset } from "expo-image-picker";
 
-import type { AssignmentDetailResponse } from "../api/practice.types";
+import type { AssignmentDetailResponse } from "../api/assignment.types";
 
 const MAX_IMAGES = 3;
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB

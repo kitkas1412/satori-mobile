@@ -6,20 +6,20 @@
 import { create } from "zustand";
 import type { SubmitQuizResponse, SubmitWritingResponse } from "@/features/assignment/api";
 
-interface PracticeState {
+interface AssignmentState {
   quizResult: SubmitQuizResponse | null;
   assignmentId: string | null;   // ID bài tập tương ứng với quizResult
   writingResult: SubmitWritingResponse | null;
 }
 
-interface PracticeActions {
+interface AssignmentActions {
   setQuizResult: (assignmentId: string, result: SubmitQuizResponse) => void;
   clearQuizResult: () => void;
   setWritingResult: (result: SubmitWritingResponse) => void;
   clearWritingResult: () => void;
 }
 
-export const usePracticeStore = create<PracticeState & PracticeActions>()((set) => ({
+export const useAssignmentStore = create<AssignmentState & AssignmentActions>()((set) => ({
   quizResult: null,
   assignmentId: null,
   writingResult: null,

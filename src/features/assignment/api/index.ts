@@ -16,7 +16,7 @@ export type {
   SubmitWritingResponse,
   EvaluateWritingRequest,
   EvaluateWritingResponse,
-} from "./practice.types";
+} from "./assignment.types";
 export { getAssignmentsApi } from "./get-assignments";
 export { getClassesApi } from "./get-classes";
 export { evaluateWritingApi } from "./evaluate-writing";

@@ -1,6 +1,6 @@
 import { api } from "@/lib/axios";
 import type {
-  ForgotPasswordParams,
+  ForgotPasswordRequest,
   ForgotPasswordResponse,
 } from "./auth.types";
 
@@ -9,7 +9,7 @@ import type {
  * Endpoint này là public — không cần accessToken.
  */
 export async function forgotPasswordApi(
-  params: ForgotPasswordParams,
+  params: ForgotPasswordRequest,
 ): Promise<ForgotPasswordResponse> {
   const { data } = await api.post<ForgotPasswordResponse>(
     "/auth/forgot-password",

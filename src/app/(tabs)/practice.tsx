@@ -2,12 +2,14 @@
 // Hiển thị hai tab: "Bài tập GV" (danh sách bài tập từ giáo viên) và "Ôn luyện AI" (banner AI).
 
 import { BookOpen, Sparkles } from "lucide-react-native";
-import { useEffect, useRef, useState } from "react";
-import { useRouter } from "expo-router";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   ActivityIndicator,
   FlatList,
   Pressable,
+  RefreshControl,
   Text,
   View,
 } from "react-native";
@@ -43,8 +45,13 @@ type ActiveTab = "teacher" | "ai";
 
 export default function PracticeTab() {
   const router = useRouter();
+  const { tab } = useLocalSearchParams<{ tab?: string }>();
   const user = useAuthStore((state) => state.user);
   const [activeTab, setActiveTab] = useState<ActiveTab>("teacher");
+
+  useEffect(() => {
+    if (tab === "ai") setActiveTab("ai");
+  }, [tab]);
   const [activeStatus, setActiveStatus] =
     useState<AssignmentStatusFilter>(undefined);
   const [sheetLesson, setSheetLesson] = useState<LessonResponse | null>(null);
@@ -75,12 +82,37 @@ export default function PracticeTab() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    refetch: refetchAssignments,
   } = useAssignments(activeStatus, activeClassId);
   const {
     data: lessons,
     isLoading: isLoadingLessons,
     isError: isErrorLessons,
+    refetch: refetchLessons,
   } = useLessons(courseId);
+
+  const [isFocusRefetching, setIsFocusRefetching] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      const refetch = async () => {
+        setIsFocusRefetching(true);
+        if (activeTab === "teacher") await refetchAssignments();
+        else await refetchLessons();
+        setIsFocusRefetching(false);
+      };
+      refetch();
+    }, [activeTab, refetchAssignments, refetchLessons]),
+  );
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    if (activeTab === "teacher") await refetchAssignments();
+    else await refetchLessons();
+    setRefreshing(false);
+  };
 
   const assignments = data?.pages.flatMap((p) => p.content) ?? [];
 
@@ -236,7 +268,7 @@ export default function PracticeTab() {
       {/* Tiêu đề màn hình — nằm ngoài FlatList để không scroll */}
       <ScreenHeader
         title="Luyện tập"
-        rightAction={<BellButton />}
+        rightAction={<BellButton onPress={() => router.push("/notifications")} />}
         paddingTop={insets.top + 16}
       />
 
@@ -271,11 +303,21 @@ export default function PracticeTab() {
         }}
         onEndReachedThreshold={0.3}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[theme.brand.primary]}
+            tintColor={theme.brand.primary}
+          />
+        }
         contentContainerStyle={{ paddingBottom: 24 }}
       />
 
       {/* Overlay loading khi đang tải lần đầu */}
       <LoadingOverlay visible={isLoading} title="Đang tải bài tập..." />
+      {/* Overlay loading khi focus lại tab */}
+      <LoadingOverlay visible={isFocusRefetching} title="Đang tải..." />
       {/* Overlay loading khi đang tải kết quả bài đã nộp */}
       <LoadingOverlay
         visible={isLoadingSubmission}
