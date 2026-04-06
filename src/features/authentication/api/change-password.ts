@@ -1,6 +1,6 @@
 import { api } from "@/lib/axios";
 import type {
-  ChangePasswordParams,
+  ChangePasswordRequest,
   ChangePasswordResponse,
 } from "./auth.types";
 
@@ -10,7 +10,7 @@ import type {
  * Nếu `logoutOtherDevices: true`, server sẽ hủy tất cả phiên khác.
  */
 export async function changePasswordApi(
-  params: ChangePasswordParams,
+  params: ChangePasswordRequest,
 ): Promise<ChangePasswordResponse> {
   const response = await api.post<ChangePasswordResponse>(
     "/auth/change-password",

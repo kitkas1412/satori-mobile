@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import type { ForgotPasswordParams, ForgotPasswordResponse } from "../api";
+import type { ForgotPasswordRequest, ForgotPasswordResponse } from "../api";
 import { forgotPasswordApi } from "../api";
 
 /**
@@ -8,7 +8,7 @@ import { forgotPasswordApi } from "../api";
  * Xử lý countdown và callback được thực hiện tại `useResetPasswordOTPForm`.
  */
 export const useResendOTP = () => {
-  return useMutation<ForgotPasswordResponse, Error, ForgotPasswordParams>({
+  return useMutation<ForgotPasswordResponse, Error, ForgotPasswordRequest>({
     mutationFn: forgotPasswordApi,
   });
 };
