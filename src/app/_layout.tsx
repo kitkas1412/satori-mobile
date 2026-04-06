@@ -24,10 +24,14 @@ import { useColorScheme as useNativeWindColorScheme } from "nativewind";
 
 import { QueryProvider } from "@/components/providers/query-provider";
 import { useTokenValidation } from "@/features/authentication/hooks";
+import { useRegisterDeviceToken } from "@/features/notification/hooks";
 import { abandonSessionApi } from "@/features/speaking/api";
 import { ACTIVE_SESSION_STORAGE_KEY } from "@/features/speaking/hooks";
+import { getPushToken } from "@/hooks/use-push-notification";
 import { useAuthStore } from "@/stores/auth-store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Constants from "expo-constants";
+import { Platform } from "react-native";
 import "../../global.css";
 
 // Keep splash screen visible while fonts load
@@ -55,6 +59,7 @@ function RootLayoutNav() {
   const segments = useSegments();
   const { isAuthenticated, isHydrated } = useAuthStore();
   const { isValidating } = useTokenValidation();
+  const { mutate: registerDeviceToken } = useRegisterDeviceToken();
 
   useEffect(() => {
     // Chờ store load từ SecureStore trước khi kiểm tra
@@ -70,6 +75,27 @@ function RootLayoutNav() {
       router.replace("/(tabs)");
     }
   }, [isAuthenticated, isHydrated, isValidating, segments]);
+
+  // Đăng ký push notification token với backend sau khi user đã xác thực.
+  useEffect(() => {
+    if (!isHydrated || !isAuthenticated) return;
+
+    const registerToken = async () => {
+      try {
+        const token = await getPushToken();
+        if (!token) return;
+        registerDeviceToken({
+          fcmToken: token,
+          deviceType: Platform.OS === "ios" ? "ios" : "android",
+          appVersion: Constants.expoConfig?.version,
+        });
+      } catch {
+        // best-effort
+      }
+    };
+
+    registerToken();
+  }, [isHydrated, isAuthenticated]);
 
   // Dọn dẹp session tồn đọng sau khi app bị force-quit giữa chừng.
   // Chạy sau khi token đã sẵn sàng để đảm bảo API call thành công.
@@ -170,6 +196,10 @@ function RootLayoutNav() {
       <Stack.Screen
         name="theme-selector"
         options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="notifications"
+        options={{ headerShown: false, gestureEnabled: true }}
       />
     </Stack>
   );
