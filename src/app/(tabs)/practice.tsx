@@ -268,7 +268,7 @@ export default function PracticeTab() {
       {/* Tiêu đề màn hình — nằm ngoài FlatList để không scroll */}
       <ScreenHeader
         title="Luyện tập"
-        rightAction={<BellButton />}
+        rightAction={<BellButton onPress={() => router.push("/notifications")} />}
         paddingTop={insets.top + 16}
       />
 

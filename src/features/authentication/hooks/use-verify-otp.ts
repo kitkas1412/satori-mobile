@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import type { VerifyOTPParams, VerifyOTPResponse } from "../api";
+import type { VerifyOTPRequest, VerifyOTPResponse } from "../api";
 import { verifyOTPApi } from "../api";
 
 /**
@@ -8,7 +8,7 @@ import { verifyOTPApi } from "../api";
  * Xử lý callback được thực hiện tại `useResetPasswordOTPForm`.
  */
 export const useVerifyOTP = () => {
-  return useMutation<VerifyOTPResponse, Error, VerifyOTPParams>({
+  return useMutation<VerifyOTPResponse, Error, VerifyOTPRequest>({
     mutationFn: verifyOTPApi,
   });
 };

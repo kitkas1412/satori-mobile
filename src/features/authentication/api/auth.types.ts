@@ -13,7 +13,7 @@ export interface DeviceInfo {
 }
 
 /** Tham số gửi lên API khi đăng nhập. */
-export interface LoginParams {
+export interface LoginRequest {
   email: string;
   password: string;
   deviceInfo?: DeviceInfo;
@@ -54,7 +54,7 @@ export interface LogoutResponse {
   timestamp: string;
 }
 
-export interface ChangePasswordParams {
+export interface ChangePasswordRequest {
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
@@ -68,7 +68,7 @@ export interface ChangePasswordResponse {
   data: null;
 }
 
-export interface ForgotPasswordParams {
+export interface ForgotPasswordRequest {
   email: string;
 }
 
@@ -80,9 +80,16 @@ export interface ForgotPasswordResponse {
 }
 
 /** Tham số xác thực mã OTP để đặt lại mật khẩu. */
-export interface VerifyOTPParams {
+export interface VerifyOTPRequest {
   email: string;
   otp: string; // Mã 6 chữ số được gửi về email
+}
+
+/** Dữ liệu trả về trong phần `data` của response xác thực OTP thành công. */
+export interface VerifyOTPData {
+  resetToken: string;      // Token tạm thời dùng để đặt lại mật khẩu
+  expiresInSeconds: number;
+  email: string;
 }
 
 /** Response khi xác thực OTP thành công. */
@@ -90,15 +97,11 @@ export interface VerifyOTPResponse {
   success: boolean;
   code: string;
   message: string;
-  data: {
-    resetToken: string;      // Token tạm thời dùng để đặt lại mật khẩu
-    expiresInSeconds: number;
-    email: string;
-  };
+  data: VerifyOTPData;
   timestamp: string;
 }
 
-export interface ResendOTPParams {
+export interface ResendOTPRequest {
   email: string;
 }
 
@@ -109,7 +112,7 @@ export interface ResendOTPResponse {
   timestamp: string;
 }
 
-export interface ResetPasswordParams {
+export interface ResetPasswordRequest {
   resetToken: string;
   newPassword: string;
   confirmPassword: string;
