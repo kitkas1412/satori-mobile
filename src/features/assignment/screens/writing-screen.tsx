@@ -18,6 +18,7 @@ import { StatusBar } from "expo-status-bar";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import {
+  ImageViewerModal,
   LoadingOverlay,
   MarkdownText,
   PrimaryButton,
@@ -63,6 +64,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
   const { handleExit } = useExitAssignment(() => router.back());
 
   const [evaluateFeedback, setEvaluateFeedback] = useState("");
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
   const { handleEvaluate, isPending: isEvaluating } = useWritingEvaluate({
     assignmentId: id,
@@ -91,6 +93,13 @@ export function WritingScreen({ id }: WritingScreenProps) {
           </Pressable>
         }
         rightAction={<View style={{ width: 24 }} />}
+      />
+
+      <ImageViewerModal
+        visible={previewIndex !== null}
+        images={images.map((img) => img.uri)}
+        initialIndex={previewIndex ?? 0}
+        onClose={() => setPreviewIndex(null)}
       />
 
       <ScreenAsyncView
@@ -177,7 +186,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
                   className="font-body text-xs"
                   style={{ color: theme.text.secondary }}
                 >
-                  {images.length} hình ảnh
+                  {images.length}/3 hình ảnh
                 </Text>
               </View>
 
@@ -185,12 +194,13 @@ export function WritingScreen({ id }: WritingScreenProps) {
               <View className="flex-row gap-3">
                 <Pressable
                   onPress={handlePickImage}
+                  disabled={images.length >= 3}
                   className="flex-1 flex-row items-center justify-center gap-2 rounded-xl"
-                  style={{ height: 48, backgroundColor: theme.brand.primary }}
+                  style={{ height: 48, backgroundColor: theme.brand.primary, opacity: images.length >= 3 ? 0.4 : 1 }}
                 >
                   <ImageIcon
                     size={20}
-                    color={theme.brand.onPrimary}
+                    color={theme.icon.onBrand}
                     strokeWidth={2}
                   />
                   <Text
@@ -203,12 +213,14 @@ export function WritingScreen({ id }: WritingScreenProps) {
 
                 <Pressable
                   onPress={handleTakePhoto}
+                  disabled={images.length >= 3}
                   className="flex-1 flex-row items-center justify-center gap-2 rounded-xl"
                   style={{
                     height: 48,
                     backgroundColor: theme.background.surface,
                     borderWidth: 2,
                     borderColor: theme.border.brand,
+                    opacity: images.length >= 3 ? 0.4 : 1,
                   }}
                 >
                   <CameraIcon
@@ -261,10 +273,12 @@ export function WritingScreen({ id }: WritingScreenProps) {
                   <View className="flex-row gap-2">
                     {images.map((img, index) => (
                       <View key={index} style={{ position: "relative" }}>
-                        <Image
-                          source={{ uri: img.uri }}
-                          style={{ width: 100, height: 100, borderRadius: 8 }}
-                        />
+                        <Pressable onPress={() => setPreviewIndex(index)}>
+                          <Image
+                            source={{ uri: img.uri }}
+                            style={{ width: 100, height: 100, borderRadius: 8 }}
+                          />
+                        </Pressable>
                         {/* Nút X để xóa ảnh khỏi danh sách */}
                         <Pressable
                           onPress={() => handleRemoveImage(index)}
@@ -290,7 +304,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
                 className="font-body text-xs"
                 style={{ color: theme.text.secondary }}
               >
-                Bạn có thể tải lên nhiều hình ảnh bài viết của mình
+                Tối đa 3 hình ảnh, mỗi ảnh không quá 5MB
               </Text>
             </View>
 

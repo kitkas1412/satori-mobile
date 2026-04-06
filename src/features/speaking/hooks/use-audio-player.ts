@@ -3,7 +3,11 @@
 // dùng Text-to-Speech (TTS) tiếng Nhật làm phương án dự phòng.
 
 import { createAudioPlayer } from "expo-audio";
+import type { AudioPlayer } from "expo-audio";
 import * as Speech from "expo-speech";
+
+/** Instance player hiện tại đang phát — dùng để dừng từ bên ngoài khi cần */
+let _currentPlayer: AudioPlayer | null = null;
 
 /**
  * Phát tin nhắn của AI dưới dạng âm thanh.
@@ -25,12 +29,25 @@ export async function playAssistantMessage(
 }
 
 /**
+ * Dừng audio đang phát ngay lập tức (cả TTS lẫn URL audio).
+ * Gọi khi người dùng thoát khỏi màn hình hội thoại giữa chừng.
+ */
+export function stopAssistantAudio(): void {
+  Speech.stop();
+  if (_currentPlayer) {
+    _currentPlayer.remove();
+    _currentPlayer = null;
+  }
+}
+
+/**
  * Phát file audio từ URL và đợi đến khi phát xong.
  * Lắng nghe sự kiện "playbackStatusUpdate" để biết khi nào audio kết thúc,
  * sau đó dọn dẹp listener và player để tránh rò rỉ bộ nhớ.
  */
 async function playAudioFromUrl(url: string): Promise<void> {
   const player = createAudioPlayer(url);
+  _currentPlayer = player;
   return new Promise<void>((resolve) => {
     const subscription = player.addListener(
       "playbackStatusUpdate",
@@ -39,6 +56,7 @@ async function playAudioFromUrl(url: string): Promise<void> {
           // Dọn dẹp sau khi phát xong
           subscription.remove();
           player.remove();
+          if (_currentPlayer === player) _currentPlayer = null;
           resolve();
         }
       },

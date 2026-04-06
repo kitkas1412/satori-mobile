@@ -20,7 +20,10 @@ function parseInline(text: string): Segment[] {
   INLINE_RE.lastIndex = 0;
   while ((match = INLINE_RE.exec(text)) !== null) {
     if (match.index > lastIndex) {
-      segments.push({ type: "text", content: text.slice(lastIndex, match.index) });
+      segments.push({
+        type: "text",
+        content: text.slice(lastIndex, match.index),
+      });
     }
     if (match[1] !== undefined) {
       segments.push({ type: "underline", content: match[1] });
@@ -54,28 +57,51 @@ export function MarkdownText({
 }: MarkdownTextProps) {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
-  const textColor = color ?? theme.textDefault;
   const resolvedLineHeight = lineHeight ?? fontSize * 1.5;
 
   if (HAS_INLINE_RE.test(children)) {
     const furiganaSize = Math.max(8, Math.round(fontSize * 0.5));
-    const baseStyle = { fontSize, fontFamily, color: textColor, lineHeight: resolvedLineHeight };
+    const baseStyle = {
+      fontSize,
+      fontFamily,
+      color: color ?? theme.text.primary,
+      lineHeight: resolvedLineHeight,
+    };
     return (
-      <View style={[{ flexDirection: "row", flexWrap: "wrap", alignItems: "flex-end" }, containerStyle]}>
+      <View
+        style={[
+          { flexDirection: "row", flexWrap: "wrap", alignItems: "flex-end" },
+          containerStyle,
+        ]}
+      >
         {parseInline(children).map((seg, i) => {
           if (seg.type === "text") {
-            return <Text key={i} style={baseStyle}>{seg.content}</Text>;
+            return (
+              <Text key={i} style={baseStyle}>
+                {seg.content}
+              </Text>
+            );
           }
           if (seg.type === "underline") {
-            return <Text key={i} style={[baseStyle, { textDecorationLine: "underline" }]}>{seg.content}</Text>;
+            return (
+              <Text
+                key={i}
+                style={[baseStyle, { textDecorationLine: "underline" }]}
+              >
+                {seg.content}
+              </Text>
+            );
           }
           return (
-            <View key={i} style={{ alignItems: "center", paddingTop: furiganaSize + 2 }}>
+            <View
+              key={i}
+              style={{ alignItems: "center", paddingTop: furiganaSize + 2 }}
+            >
               <Text
                 style={{
                   fontSize: furiganaSize,
                   fontFamily,
-                  color: textColor,
+                  color: color ?? theme.text.primary,
                   position: "absolute",
                   bottom: Math.round(fontSize * 1.25),
                   left: -30,
@@ -99,7 +125,7 @@ export function MarkdownText({
         body: {
           fontSize,
           fontFamily,
-          color: textColor,
+          color: color ?? theme.text.primary,
           lineHeight: resolvedLineHeight,
           margin: 0,
           padding: 0,
@@ -122,12 +148,22 @@ export function MarkdownText({
         },
         bullet_list: {
           marginVertical: 2,
+          paddingLeft: 4,
         },
         ordered_list: {
           marginVertical: 2,
+          paddingLeft: 4,
         },
         list_item: {
           marginVertical: 1,
+        },
+        bullet_list_icon: {
+          marginLeft: 4,
+          marginRight: 6,
+        },
+        ordered_list_icon: {
+          marginLeft: 4,
+          marginRight: 6,
         },
       }}
       mergeStyle

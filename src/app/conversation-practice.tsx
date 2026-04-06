@@ -2,8 +2,8 @@ import { ConversationPracticeScreen } from "@/features/speaking/screens/conversa
 import { useLocalSearchParams } from "expo-router";
 
 export default function ConversationPractice() {
-  const { topicId, jlptLevel, language, title } = useLocalSearchParams<{
-    topicId?: string;
+  const { conversationId, jlptLevel, language, title } = useLocalSearchParams<{
+    conversationId?: string;
     jlptLevel?: string;
     language?: string;
     title: string;
@@ -11,7 +11,7 @@ export default function ConversationPractice() {
 
   return (
     <ConversationPracticeScreen
-      topicId={topicId}
+      conversationId={conversationId}
       jlptLevel={jlptLevel}
       language={language}
       title={title ?? ""}

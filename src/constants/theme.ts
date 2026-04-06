@@ -366,7 +366,7 @@ const dark: SemanticTokens = {
     primary: Primitive.neutralDark[100], // #EEF1FD — 15.7:1 AAA
     secondary: Primitive.neutralDark[300], // #A8B5D1 — 8.6:1  AAA
     disabled: Primitive.neutralDark[600], // #3D4F7A — decorative
-    onBrand: Primitive.neutral[900], // #111929
+    onBrand: Primitive.neutral[100], // #111929
     success: Primitive.green[300], // #4ADE80
     warning: Primitive.amber[200], // #FCD34D
     error: Primitive.red[300], // #F87171
