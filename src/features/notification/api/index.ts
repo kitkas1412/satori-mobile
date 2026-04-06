@@ -1,7 +1,7 @@
 export type {
-  RegisterDeviceTokenParams,
+  RegisterDeviceTokenRequest,
   RegisterDeviceTokenResponse,
-  NotificationItem,
+  Content,
   NotificationsResponse,
 } from "./notification.types";
 export { registerDeviceTokenApi } from "./register-device-token";

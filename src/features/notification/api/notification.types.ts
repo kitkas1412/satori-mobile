@@ -1,4 +1,4 @@
-export interface RegisterDeviceTokenParams {
+export interface RegisterDeviceTokenRequest {
   fcmToken: string;
   deviceType: "android" | "ios";
   deviceName?: string;
@@ -10,7 +10,7 @@ export interface RegisterDeviceTokenResponse {
   message?: string;
 }
 
-export interface NotificationItem {
+export interface Content {
   id: string;
   title: string;
   body: string;
@@ -19,7 +19,7 @@ export interface NotificationItem {
 }
 
 export interface NotificationsResponse {
-  content: NotificationItem[];
+  content: Content[];
   number: number;
   size: number;
   last: boolean;

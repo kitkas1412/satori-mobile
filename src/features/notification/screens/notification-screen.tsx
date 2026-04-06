@@ -14,7 +14,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import type { NotificationItem } from "@/features/notification/api";
+import { NotificationItem } from "@/features/notification/components";
 
 export function NotificationScreen() {
   const router = useRouter();
@@ -47,32 +47,6 @@ export function NotificationScreen() {
   };
 
   const notifications = data?.pages.flatMap((p) => p.content) ?? [];
-
-  const renderItem = ({ item }: { item: NotificationItem }) => (
-    <View
-      className="px-4 py-3"
-      style={{ borderBottomWidth: 1, borderBottomColor: theme.border.subtle }}
-    >
-      <Text
-        className={`text-sm mb-0.5 ${item.read ? "font-body" : "font-heading"}`}
-        style={{ color: theme.text.primary }}
-      >
-        {item.title}
-      </Text>
-      <Text className="text-sm font-body" style={{ color: theme.text.secondary }}>
-        {item.body}
-      </Text>
-      <Text className="text-xs font-body mt-1" style={{ color: theme.text.muted }}>
-        {new Date(item.createdAt).toLocaleString("vi-VN", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        })}
-      </Text>
-    </View>
-  );
 
   const renderEmpty = () => {
     if (isLoading) return null;
@@ -121,7 +95,7 @@ export function NotificationScreen() {
         <FlatList
           data={notifications}
           keyExtractor={(item) => item.id}
-          renderItem={renderItem}
+          renderItem={({ item }) => <NotificationItem item={item} theme={theme} />}
           ListEmptyComponent={renderEmpty}
           ListFooterComponent={
             isFetchingNextPage ? (

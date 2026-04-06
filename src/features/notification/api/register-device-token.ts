@@ -1,11 +1,11 @@
 import { api } from "@/lib/axios";
 import type {
-  RegisterDeviceTokenParams,
+  RegisterDeviceTokenRequest,
   RegisterDeviceTokenResponse,
 } from "./notification.types";
 
 export async function registerDeviceTokenApi(
-  params: RegisterDeviceTokenParams,
+  params: RegisterDeviceTokenRequest,
 ): Promise<RegisterDeviceTokenResponse> {
   const response = await api.post<RegisterDeviceTokenResponse>(
     "/notifications/device-token",
