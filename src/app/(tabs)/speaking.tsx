@@ -2,11 +2,11 @@
 // Hiển thị banner free-talk và danh sách các section (chủ đề) để người dùng chọn luyện tập.
 // Tự động highlight section đầu tiên còn topic chưa được luyện.
 
-import { Bell } from "lucide-react-native";
 import { useRef, useCallback, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  RefreshControl,
   Text,
   View,
   useWindowDimensions,
@@ -15,7 +15,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter, useFocusEffect } from "expo-router";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
-import { LoadingOverlay, ScreenHeader } from "@/components/ui";
+import { BellButton, LoadingOverlay, ScreenHeader } from "@/components/ui";
 
 import {
   ConversationBanner,
@@ -43,6 +43,7 @@ export default function SpeakingScreen() {
     data,
     isLoading,
     isError,
+    refetch,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
@@ -58,13 +59,27 @@ export default function SpeakingScreen() {
   const hasScrolledRef = useRef(false);
   const { height: screenHeight } = useWindowDimensions();
   const [focusTrigger, setFocusTrigger] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+  const [isFocusRefetching, setIsFocusRefetching] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  };
 
   useFocusEffect(
     useCallback(() => {
       hasScrolledRef.current = false;
       reset();
       setFocusTrigger((prev) => prev + 1);
-    }, [reset]),
+      const doRefetch = async () => {
+        setIsFocusRefetching(true);
+        await refetch();
+        setIsFocusRefetching(false);
+      };
+      doRefetch();
+    }, [reset, refetch]),
   );
 
   const handleScrollToCard = useCallback(
@@ -93,14 +108,7 @@ export default function SpeakingScreen() {
           title="Luyện nói"
           paddingTop={insets.top + 16}
           rightAction={
-            <View className="relative">
-              <View
-                className="w-9 h-9 rounded-full items-center justify-center"
-                style={{ backgroundColor: theme.icon.disabled }}
-              >
-                <Bell size={20} color={theme.icon.onBrand} />
-              </View>
-            </View>
+            <BellButton onPress={() => router.push("/notifications")} />
           }
         />
 
@@ -189,10 +197,19 @@ export default function SpeakingScreen() {
               }
             }}
             onEndReachedThreshold={0.3}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={[theme.brand.primary]}
+                tintColor={theme.brand.primary}
+              />
+            }
           />
         )}
       </View>
       <LoadingOverlay visible={isLoading} title="Đang tải..." />
+      <LoadingOverlay visible={isFocusRefetching} title="Đang tải..." />
       <ChatbotFab />
     </>
   );
