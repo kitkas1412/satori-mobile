@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import type { ResetPasswordParams, ResetPasswordResponse } from "../api";
+import type { ResetPasswordRequest, ResetPasswordResponse } from "../api";
 import { resetPasswordApi } from "../api";
 
 /**
@@ -7,7 +7,7 @@ import { resetPasswordApi } from "../api";
  * Xử lý callback (điều hướng sau thành công) được thực hiện tại `useResetPasswordForm`.
  */
 export const useResetPassword = () => {
-  return useMutation<ResetPasswordResponse, Error, ResetPasswordParams>({
+  return useMutation<ResetPasswordResponse, Error, ResetPasswordRequest>({
     mutationFn: resetPasswordApi,
   });
 };

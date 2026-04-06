@@ -2,7 +2,6 @@
 // Hiển thị banner free-talk và danh sách các section (chủ đề) để người dùng chọn luyện tập.
 // Tự động highlight section đầu tiên còn topic chưa được luyện.
 
-import { Bell } from "lucide-react-native";
 import { useRef, useCallback, useState } from "react";
 import {
   ActivityIndicator,
@@ -16,7 +15,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter, useFocusEffect } from "expo-router";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
-import { LoadingOverlay, ScreenHeader } from "@/components/ui";
+import { BellButton, LoadingOverlay, ScreenHeader } from "@/components/ui";
 
 import {
   ConversationBanner,
@@ -109,14 +108,7 @@ export default function SpeakingScreen() {
           title="Luyện nói"
           paddingTop={insets.top + 16}
           rightAction={
-            <View className="relative">
-              <View
-                className="w-9 h-9 rounded-full items-center justify-center"
-                style={{ backgroundColor: theme.icon.disabled }}
-              >
-                <Bell size={20} color={theme.icon.onBrand} />
-              </View>
-            </View>
+            <BellButton onPress={() => router.push("/notifications")} />
           }
         />
 
