@@ -1,4 +1,4 @@
-import { LoadingOverlay, PrimaryButton, ScreenHeader } from "@/components/ui";
+import { BellButton, LoadingOverlay, PrimaryButton, ScreenHeader } from "@/components/ui";
 import { useLogout } from "@/features/authentication/hooks";
 import { ThemeSelector } from "@/features/setting/components";
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -44,7 +44,11 @@ export default function ProfileTab() {
       <View className="flex-1" style={{ backgroundColor: theme.background.page }}>
         <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
 
-        <ScreenHeader title="Cá nhân" paddingTop={insets.top + 16} />
+        <ScreenHeader
+          title="Cá nhân"
+          paddingTop={insets.top + 16}
+          rightAction={<BellButton onPress={() => router.push("/notifications")} />}
+        />
 
         {user && (
           <View
