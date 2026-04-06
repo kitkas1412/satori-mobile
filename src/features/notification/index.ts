@@ -3,6 +3,7 @@ export type {
   RegisterDeviceTokenParams,
   RegisterDeviceTokenResponse,
   NotificationItem,
+  NotificationsResponse,
 } from "./api";
-export { registerDeviceTokenApi } from "./api";
-export { useRegisterDeviceToken } from "./hooks";
+export { registerDeviceTokenApi, getNotificationsApi } from "./api";
+export { useRegisterDeviceToken, useNotifications, notificationQueryKeys } from "./hooks";

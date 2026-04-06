@@ -17,3 +17,14 @@ export interface NotificationItem {
   read: boolean;
   createdAt: string;
 }
+
+export interface NotificationsResponse {
+  content: NotificationItem[];
+  number: number;
+  size: number;
+  last: boolean;
+  first: boolean;
+  totalElements: number;
+  totalPages: number;
+  empty: boolean;
+}
