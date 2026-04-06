@@ -1,15 +1,16 @@
 export type {
-  ChangePasswordParams,
+  ChangePasswordRequest,
   ChangePasswordResponse,
-  ForgotPasswordParams,
+  ForgotPasswordRequest,
   ForgotPasswordResponse,
-  LoginParams,
+  LoginRequest,
   LoginResponse,
-  ResendOTPParams,
+  ResendOTPRequest,
   ResendOTPResponse,
-  ResetPasswordParams,
+  ResetPasswordRequest,
   ResetPasswordResponse,
-  VerifyOTPParams,
+  VerifyOTPData,
+  VerifyOTPRequest,
   VerifyOTPResponse,
 } from "./auth.types";
 export { changePasswordApi } from "./change-password";
