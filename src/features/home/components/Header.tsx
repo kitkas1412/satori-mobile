@@ -1,10 +1,13 @@
+import { BellButton } from "@/components/ui";
 import { Image } from "expo-image";
-import { Bell } from "lucide-react-native";
+import { useRouter } from "expo-router";
 import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export function Header() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
+
   return (
     <View
       className="flex-row items-center justify-between px-4 pb-4"
@@ -26,12 +29,7 @@ export function Header() {
         </View>
       </View>
 
-      <View className="relative">
-        <View className="w-9 h-9 bg-secondary-default rounded-full items-center justify-center">
-          <Bell className="w-6 h-6" />
-        </View>
-        <View className="absolute top-1.5 right-0 w-1.5 h-1.5 bg-error-500 rounded-full" />
-      </View>
+      <BellButton onPress={() => router.push("/notifications")} />
     </View>
   );
 }
