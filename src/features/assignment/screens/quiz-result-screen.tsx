@@ -53,7 +53,7 @@ export function QuizResultScreen() {
         contentContainerStyle={{
           paddingHorizontal: 16,
           paddingTop: 40,
-          paddingBottom: insets.bottom + 32,
+          paddingBottom: insets.bottom + 96,
           gap: 32,
         }}
       >

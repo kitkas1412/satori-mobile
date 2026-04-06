@@ -37,5 +37,10 @@ export function useFirstUnpracticedSection() {
     [],
   );
 
-  return { firstUnpracticedSectionId, handleHasUnpracticed };
+  const reset = useCallback(() => {
+    firstUnpracticedOrderIndexRef.current = Infinity;
+    setFirstUnpracticedSectionId(null);
+  }, []);
+
+  return { firstUnpracticedSectionId, handleHasUnpracticed, reset };
 }

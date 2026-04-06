@@ -3,12 +3,12 @@
 
 import { useRouter } from "expo-router";
 
-import { usePracticeStore } from "@/stores";
+import { useAssignmentStore } from "@/stores";
 
 export function useQuizResult() {
   const router = useRouter();
-  const quizResult = usePracticeStore((s) => s.quizResult);
-  const clearQuizResult = usePracticeStore((s) => s.clearQuizResult);
+  const quizResult = useAssignmentStore((s) => s.quizResult);
+  const clearQuizResult = useAssignmentStore((s) => s.clearQuizResult);
 
   if (!quizResult) return null;
 

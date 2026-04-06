@@ -8,7 +8,7 @@ import {
   ViewStyle,
 } from "react-native";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { Colors, Primitive } from "@/constants/theme";
+import { Colors } from "@/constants/theme";
 
 interface PrimaryButtonProps {
   text: string;
@@ -49,7 +49,7 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
     }
   };
 
-  const textColor = isDisabled ? theme.text.disabled : theme.brand.onPrimary;
+  const textColor = isDisabled ? theme.text.disabled : theme.text.onBrand;
 
   return (
     <TouchableOpacity
