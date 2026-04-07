@@ -8,7 +8,8 @@ import { useStreakCurrent, useStreakHistory } from "../hooks";
 export function StreakCard() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
-  const orangeColor = colorScheme === "dark" ? Primitive.amber[200] : Primitive.amber[400];
+  const orangeColor =
+    colorScheme === "dark" ? Primitive.amber[200] : Primitive.amber[400];
 
   const { data: current } = useStreakCurrent();
   const { data: history } = useStreakHistory(7);
@@ -32,29 +33,53 @@ export function StreakCard() {
     return `${vietnameseDays[dayOfWeek]}, ${dayOfMonth} tháng ${month}`;
   };
 
-  const weekDayLabels = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
+  const dayOfWeekLabel: Record<string, string> = {
+    MON: "T2",
+    TUE: "T3",
+    WED: "T4",
+    THU: "T5",
+    FRI: "T6",
+    SAT: "T7",
+    SUN: "CN",
+  };
+
+  // JS getDay(): 0=Sun,1=Mon,...,6=Sat → map to Vietnamese labels
+  const jsIndexToLabel = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
 
   const weekDays = history?.daily_records
-    ? [...history.daily_records]
-        .reverse()
-        .map((record, index) => ({
-          label: weekDayLabels[index] ?? "",
-          active: record.had_activity,
-        }))
-    : weekDayLabels.map((label) => ({ label, active: false }));
+    ? [...history.daily_records].reverse().map((record) => ({
+        label: dayOfWeekLabel[record.day_of_week] ?? record.day_of_week,
+        active: record.had_activity,
+      }))
+    : (() => {
+        const todayIndex = new Date().getDay();
+        return Array.from({ length: 7 }, (_, i) => ({
+          label: jsIndexToLabel[(todayIndex + i) % 7] ?? "",
+          active: false,
+        }));
+      })();
 
   return (
     <View
       className="mx-4 mb-6 rounded-2xl border overflow-hidden"
-      style={{ backgroundColor: theme.background.surface, borderColor: theme.border.subtle }}
+      style={{
+        backgroundColor: theme.background.surface,
+        borderColor: theme.border.subtle,
+      }}
     >
-      <View className="flex-row items-center justify-between px-2 py-5">
-        <Text className="text-lg font-bold font-heading" style={{ color: theme.text.primary }}>
+      <View className="flex-row items-center justify-between px-4 py-5">
+        <Text
+          className="text-lg font-bold font-heading"
+          style={{ color: theme.text.primary }}
+        >
           {getCurrentDateString()}
         </Text>
         <View className="flex-row items-center gap-1">
           <Flame size={20} color={orangeColor} />
-          <Text className="text-base font-bold font-heading" style={{ color: orangeColor }}>
+          <Text
+            className="text-base font-bold font-heading"
+            style={{ color: orangeColor }}
+          >
             {current?.current_streak ?? 0}
           </Text>
         </View>
@@ -66,14 +91,20 @@ export function StreakCard() {
             <View
               className="w-9 h-9 rounded-full items-center justify-center"
               style={{
-                backgroundColor: day.active ? theme.brand.primary : theme.brand.primarySubtle,
+                backgroundColor: day.active
+                  ? theme.brand.primary
+                  : theme.brand.primarySubtle,
               }}
             >
-              {day.active && <Check className="w-5 h-5" color={Primitive.neutral[0]} />}
+              {day.active && (
+                <Check className="w-5 h-5" color={Primitive.neutral[0]} />
+              )}
             </View>
             <Text
               className="text-xs font-bold font-heading"
-              style={{ color: day.active ? theme.brand.primary : theme.text.secondary }}
+              style={{
+                color: day.active ? theme.brand.primary : theme.text.secondary,
+              }}
             >
               {day.label}
             </Text>
