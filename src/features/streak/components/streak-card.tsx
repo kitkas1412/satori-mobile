@@ -1,9 +1,15 @@
+import { Colors, Primitive } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Check, Flame } from "lucide-react-native";
 import { Text, View } from "react-native";
 
 import { useStreakCurrent, useStreakHistory } from "../hooks";
 
 export function StreakCard() {
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
+  const orangeColor = colorScheme === "dark" ? Primitive.amber[200] : Primitive.amber[400];
+
   const { data: current } = useStreakCurrent();
   const { data: history } = useStreakHistory(7);
 
@@ -38,14 +44,17 @@ export function StreakCard() {
     : weekDayLabels.map((label) => ({ label, active: false }));
 
   return (
-    <View className="mx-4 mb-6 bg-background-surface rounded-2xl border border-border overflow-hidden">
+    <View
+      className="mx-4 mb-6 rounded-2xl border overflow-hidden"
+      style={{ backgroundColor: theme.background.surface, borderColor: theme.border.subtle }}
+    >
       <View className="flex-row items-center justify-between px-2 py-5">
-        <Text className="text-text-muted text-lg font-bold font-heading">
+        <Text className="text-lg font-bold font-heading" style={{ color: theme.text.primary }}>
           {getCurrentDateString()}
         </Text>
         <View className="flex-row items-center gap-1">
-          <Flame size={20} color="hsl(25, 95%, 53%)" />
-          <Text className="text-orange-500 text-base font-bold font-heading">
+          <Flame size={20} color={orangeColor} />
+          <Text className="text-base font-bold font-heading" style={{ color: orangeColor }}>
             {current?.current_streak ?? 0}
           </Text>
         </View>
@@ -55,16 +64,16 @@ export function StreakCard() {
         {weekDays.map((day, index) => (
           <View key={index} className="items-center gap-1">
             <View
-              className={`w-9 h-9 rounded-full items-center justify-center ${
-                day.active ? "bg-primary-default" : "bg-[hsla(228,78%,71%,0.2)]"
-              }`}
+              className="w-9 h-9 rounded-full items-center justify-center"
+              style={{
+                backgroundColor: day.active ? theme.brand.primary : theme.brand.primarySubtle,
+              }}
             >
-              {day.active && <Check className="w-5 h-5" color="hsl(0, 0%, 100%)" />}
+              {day.active && <Check className="w-5 h-5" color={Primitive.neutral[0]} />}
             </View>
             <Text
-              className={`text-xs font-bold ${
-                day.active ? "text-primary-default" : "text-text-muted"
-              } font-heading`}
+              className="text-xs font-bold font-heading"
+              style={{ color: day.active ? theme.brand.primary : theme.text.secondary }}
             >
               {day.label}
             </Text>
