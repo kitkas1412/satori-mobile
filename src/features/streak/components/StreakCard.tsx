@@ -1,7 +1,12 @@
 import { Check, Flame } from "lucide-react-native";
 import { Text, View } from "react-native";
 
+import { useStreakCurrent, useStreakHistory } from "../hooks";
+
 export function StreakCard() {
+  const { data: current } = useStreakCurrent();
+  const { data: history } = useStreakHistory(7);
+
   const getCurrentDateString = () => {
     const date = new Date();
     const dayOfWeek = date.getDay();
@@ -21,15 +26,16 @@ export function StreakCard() {
     return `${vietnameseDays[dayOfWeek]}, ${dayOfMonth} tháng ${month}`;
   };
 
-  const weekDays = [
-    { label: "T2", active: true },
-    { label: "T3", active: true },
-    { label: "T4", active: true },
-    { label: "T5", active: true },
-    { label: "T6", active: false },
-    { label: "T7", active: false },
-    { label: "CN", active: false },
-  ];
+  const weekDayLabels = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
+
+  const weekDays = history?.daily_records
+    ? [...history.daily_records]
+        .reverse()
+        .map((record, index) => ({
+          label: weekDayLabels[index] ?? "",
+          active: record.had_activity,
+        }))
+    : weekDayLabels.map((label) => ({ label, active: false }));
 
   return (
     <View className="mx-4 mb-6 bg-background-surface rounded-2xl border border-border overflow-hidden">
@@ -40,7 +46,7 @@ export function StreakCard() {
         <View className="flex-row items-center gap-1">
           <Flame size={20} color="hsl(25, 95%, 53%)" />
           <Text className="text-orange-500 text-base font-bold font-heading">
-            4
+            {current?.current_streak ?? 0}
           </Text>
         </View>
       </View>
