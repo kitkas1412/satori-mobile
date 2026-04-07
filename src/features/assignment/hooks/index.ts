@@ -1,4 +1,5 @@
 export { useAssignments, assignmentQueryKeys } from "./use-assignments";
+export { useUpcomingAssignments } from "./use-upcoming-assignments";
 export { useClasses } from "./use-classes";
 export { useStartAssignment } from "./use-start-assignment";
 export { useSubmitAssignment } from "./use-submit-assignment";
