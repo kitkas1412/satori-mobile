@@ -1,10 +1,18 @@
-import { BellButton, ScreenHeader } from "@/components/ui";
+import { BellButton, LoadingOverlay, ScreenHeader } from "@/components/ui";
 import { Colors } from "@/constants/theme";
 import { StreakCard } from "@/features/streak/components";
+import { StatusBar } from "expo-status-bar";
+import {
+  streakQueryKeys,
+  useStreakCurrent,
+  useStreakHistory,
+} from "@/features/streak/hooks";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { CircleCheck, Clock } from "lucide-react-native";
+import { useCallback } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -169,29 +177,38 @@ export default function HomeScreen() {
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const { isFetching: isCurrentFetching } = useStreakCurrent();
+  const { isFetching: isHistoryFetching } = useStreakHistory(7);
+  const isLoading = isCurrentFetching || isHistoryFetching;
+
+  useFocusEffect(
+    useCallback(() => {
+      queryClient.invalidateQueries({ queryKey: streakQueryKeys.current });
+      queryClient.invalidateQueries({ queryKey: streakQueryKeys.history(7) });
+    }, [queryClient]),
+  );
 
   return (
-    <ScrollView
-      className="flex-1"
-      style={{ backgroundColor: theme.background.page }}
-      showsVerticalScrollIndicator={false}
-    >
+    <View className="flex-1" style={{ backgroundColor: theme.background.page }}>
+      <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
       <ScreenHeader
         title="Chào bạn 👋"
-        leftAction={
-          <Image
-            source={require("../../../assets/images/avatar.png")}
-            style={{ width: 36, height: 36, borderRadius: 18 }}
-          />
-        }
         rightAction={
           <BellButton onPress={() => router.push("/notifications")} />
         }
         paddingTop={insets.top + 16}
       />
-      <StreakCard />
-      <DailyReport />
-      <QuickPractice />
-    </ScrollView>
+      <LoadingOverlay visible={isLoading} />
+      <ScrollView
+        className="flex-1"
+        style={{ backgroundColor: theme.background.page }}
+        showsVerticalScrollIndicator={false}
+      >
+        <StreakCard />
+        <DailyReport />
+        <QuickPractice />
+      </ScrollView>
+    </View>
   );
 }
