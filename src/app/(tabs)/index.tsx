@@ -1,7 +1,13 @@
 import { BellButton, LoadingOverlay, ScreenHeader } from "@/components/ui";
 import { Colors } from "@/constants/theme";
-import { StreakCard } from "@/features/streak/components";
+import { AssignmentCard } from "@/features/assignment/components/assignment-card";
 import { StatusBar } from "expo-status-bar";
+import {
+  useAssignmentNavigation,
+  useUpcomingAssignments,
+} from "@/features/assignment/hooks";
+import { mapAssignmentToCardProps } from "@/features/assignment/utils";
+import { StreakCard } from "@/features/streak/components";
 import {
   streakQueryKeys,
   useStreakCurrent,
@@ -9,165 +15,64 @@ import {
 } from "@/features/streak/hooks";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useQueryClient } from "@tanstack/react-query";
-import { Image } from "expo-image";
 import { useFocusEffect, useRouter } from "expo-router";
-import { CircleCheck, Clock } from "lucide-react-native";
+import { ChevronRight } from "lucide-react-native";
 import { useCallback } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-function DailyReport() {
+function UpcomingAssignments() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
+  const router = useRouter();
+  const { data: assignments } = useUpcomingAssignments();
+  const { handleAssignmentPress, isLoadingSubmission } =
+    useAssignmentNavigation();
+
+  if (!assignments || assignments.length === 0) return null;
 
   return (
     <View className="mx-4 mb-6">
-      <View className="mb-3">
-        <Text
-          className="text-xl font-bold"
-          style={{ fontFamily: "Nunito_700Bold", color: theme.text.primary }}
-        >
-          Báo cáo học tập
-        </Text>
-        <Text
-          className="text-xs font-body"
-          style={{ color: theme.text.secondary }}
-        >
-          Cày cuốc sương sương, tương lai phi thường
-        </Text>
-      </View>
-
-      <View className="flex-row gap-4">
-        <View
-          className="flex-1 rounded-2xl border p-4"
-          style={{
-            backgroundColor: theme.background.surface,
-            borderColor: theme.border.subtle,
-          }}
-        >
-          <View className="flex-row items-center gap-1.5 mb-2">
-            <Clock className="w-5 h-5" color={theme.brand.primary} />
-            <Text
-              className="text-sm font-body"
-              style={{ color: theme.text.secondary }}
-            >
-              Thời gian học
-            </Text>
-          </View>
+      <View className="mb-3 flex-row items-center justify-between">
+        <View>
           <Text
-            className="text-lg font-bold font-heading"
+            className="text-xl font-bold font-heading"
             style={{ color: theme.text.primary }}
           >
-            45 phút
+            Bài tập sắp đến hạn
           </Text>
-        </View>
-
-        <View
-          className="flex-1 rounded-2xl border p-4"
-          style={{
-            backgroundColor: theme.background.surface,
-            borderColor: theme.border.subtle,
-          }}
-        >
-          <View className="flex-row items-center gap-1.5 mb-2">
-            <CircleCheck className="w-5 h-5" color={theme.success.default} />
-            <Text
-              className="text-sm font-body"
-              style={{ color: theme.text.secondary }}
-            >
-              Bài đã học
-            </Text>
-          </View>
           <Text
-            className="text-lg font-bold font-heading"
-            style={{ color: theme.text.primary }}
+            className="text-xs font-body"
+            style={{ color: theme.text.secondary }}
           >
-            12 bài
+            Nộp trước khi quá muộn nha bạn ơi
           </Text>
         </View>
-      </View>
-    </View>
-  );
-}
-
-function QuickPractice() {
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
-
-  return (
-    <View className="mx-4 mb-24">
-      <View className="mb-3">
-        <Text
-          className="text-xl font-bold font-heading"
-          style={{ color: theme.text.primary }}
+        <Pressable
+          className="flex-row items-center gap-0.5"
+          onPress={() => router.push("/(tabs)/practice")}
         >
-          Luyện tập nhanh
-        </Text>
-        <Text
-          className="text-xs font-body"
-          style={{ color: theme.text.secondary }}
-        >
-          Học nhanh đi ngủ, kiến thức đã đủ
-        </Text>
+          <Text
+            className="text-sm font-heading"
+            style={{ color: theme.brand.primary }}
+          >
+            Xem tất cả
+          </Text>
+          <ChevronRight size={16} color={theme.brand.primary} strokeWidth={2} />
+        </Pressable>
       </View>
 
       <View className="gap-2">
-        <Pressable
-          className="rounded-2xl border p-4 flex-row items-center justify-between h-[97px]"
-          style={{
-            backgroundColor: theme.background.surface,
-            borderColor: theme.border.subtle,
-          }}
-        >
-          <View className="flex-1">
-            <Text
-              className="text-lg font-bold mb-1 font-heading"
-              style={{ color: theme.text.primary }}
-            >
-              Ôn tập từ vựng
-            </Text>
-            <Text
-              className="text-tiny-xs font-body"
-              style={{ color: theme.text.secondary }}
-            >
-              Các câu hỏi trắc nghiệm theo bài học
-            </Text>
-          </View>
-          <Image
-            source={require("../../../assets/images/notebook-dynamic-color.png")}
-            style={{ width: 80, height: 80 }}
-            contentFit="contain"
+        {assignments.map((item) => (
+          <AssignmentCard
+            key={item.id}
+            {...mapAssignmentToCardProps(item)}
+            onPress={() => handleAssignmentPress(item)}
           />
-        </Pressable>
-
-        <Pressable
-          className="rounded-2xl border p-4 flex-row items-center justify-between h-[97px]"
-          style={{
-            backgroundColor: theme.background.surface,
-            borderColor: theme.border.subtle,
-          }}
-        >
-          <View className="flex-1">
-            <Text
-              className="text-lg font-bold mb-0.5 font-heading"
-              style={{ color: theme.text.primary }}
-            >
-              Hội thoại với AI
-            </Text>
-            <Text
-              className="text-tiny-xs font-body"
-              style={{ color: theme.text.secondary }}
-            >
-              Chữa lành tâm hồn bằng một bài hội thoại
-            </Text>
-          </View>
-          <Image
-            source={require("../../../assets/images/chat-bubble-dynamic-color.png")}
-            style={{ width: 80, height: 80 }}
-            contentFit="contain"
-          />
-        </Pressable>
+        ))}
       </View>
+
+      <LoadingOverlay visible={isLoadingSubmission} title="Đang tải..." />
     </View>
   );
 }
@@ -206,8 +111,7 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
       >
         <StreakCard />
-        <DailyReport />
-        <QuickPractice />
+        <UpcomingAssignments />
       </ScrollView>
     </View>
   );
