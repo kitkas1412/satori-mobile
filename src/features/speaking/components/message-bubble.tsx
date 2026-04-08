@@ -132,7 +132,7 @@ export function FeedbackBubble({
         >
           <Text
             className="font-body text-sm"
-            style={{ color: theme.brand.primary, textDecorationLine: "underline" }}
+            style={{ color: theme.brand.primary }}
           >
             Xem kết quả chi tiết
           </Text>

@@ -2,7 +2,7 @@
 // Hiển thị tuần tự theo queue: Streak → Level → từng Badge.
 // Dữ liệu đọc từ Zustand store (đã được lưu bởi completeSession).
 
-import { Flame, Shield, Star } from "lucide-react-native";
+import { Award, Check, Flame, Star } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Image, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -12,6 +12,7 @@ import { Colors } from "@/constants/theme";
 import { PrimaryButton, ProgressBar } from "@/components/ui";
 import { useConversationStore } from "@/stores";
 import type { BadgeEarned, LevelUp, StreakNotification } from "@/features/speaking/api";
+import { RewardIconCircle } from "@/features/speaking/components";
 
 type RewardItem =
   | { type: "streak"; data: StreakNotification }
@@ -26,12 +27,32 @@ function buildQueue(
   const queue: RewardItem[] = [];
   if (streakNotification?.is_first_activity_today)
     queue.push({ type: "streak", data: streakNotification });
-  if (levelUp?.isLevelUp)
+  if (levelUp)
     queue.push({ type: "level", data: levelUp });
   for (const badge of newBadgesEarned)
     queue.push({ type: "badge", data: badge });
   return queue;
 }
+
+function getWeekStreakDays(streakLastDate: string, currentStreak: number): boolean[] {
+  const lastDate = new Date(streakLastDate + "T00:00:00");
+  const streakStartDate = new Date(lastDate);
+  streakStartDate.setDate(lastDate.getDate() - currentStreak + 1);
+
+  // Monday of the week containing lastDate (week starts Monday)
+  const dayOfWeek = lastDate.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+  const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  const weekMonday = new Date(lastDate);
+  weekMonday.setDate(lastDate.getDate() - daysToMonday);
+
+  return Array.from({ length: 7 }, (_, i) => {
+    const day = new Date(weekMonday);
+    day.setDate(weekMonday.getDate() + i);
+    return day >= streakStartDate && day <= lastDate;
+  });
+}
+
+const WEEK_DAY_LABELS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 
 function StreakView({
   data,
@@ -40,50 +61,55 @@ function StreakView({
   data: StreakNotification;
   theme: typeof Colors.light;
 }) {
+  const weekDays = getWeekStreakDays(data.streak_last_date, data.current_streak);
+
   return (
-    <View className="flex-1 items-center justify-center px-8 gap-4">
-      <View
-        className="items-center justify-center rounded-full"
-        style={{
-          width: 80,
-          height: 80,
-          backgroundColor: theme.warning.subtle,
-        }}
-      >
-        <Flame size={40} color={theme.warning.default} />
+    <View className="flex-1 items-center justify-center px-8 gap-6">
+      <RewardIconCircle backgroundColor={theme.warning.subtle}>
+        <Flame size={48} color={theme.warning.default} />
+      </RewardIconCircle>
+
+      <View className="items-center gap-3">
+        <Text
+          className="font-heading text-2xl text-center"
+          style={{ color: theme.text.primary }}
+        >
+          Chuỗi {data.current_streak} ngày!
+        </Text>
+
+        <Text
+          className="font-body text-sm text-center"
+          style={{ color: theme.text.secondary, lineHeight: 20 }}
+        >
+          Hôm nay bạn đã xuất hiện. Quay lại vào ngày mai để tiếp tục tích luỹ.
+        </Text>
       </View>
 
-      <Text
-        className="font-heading text-2xl text-center"
-        style={{ color: theme.text.primary }}
-      >
-        Streak hôm nay!
-      </Text>
-
-      <Text
-        className="font-heading text-center"
-        style={{ fontSize: 72, lineHeight: 80, color: theme.warning.default }}
-      >
-        {data.current_streak}
-      </Text>
-
-      <Text
-        className="font-body text-base text-center"
-        style={{ color: theme.text.secondary }}
-      >
-        ngày liên tiếp
-      </Text>
-
-      <View
-        className="rounded-full px-4 py-2"
-        style={{ backgroundColor: theme.border.subtle }}
-      >
-        <Text
-          className="font-body text-sm"
-          style={{ color: theme.text.secondary }}
-        >
-          Kỷ lục: {data.longest_streak} ngày
-        </Text>
+      <View className="flex-row justify-between w-full">
+        {WEEK_DAY_LABELS.map((label, i) => (
+          <View key={label} className="items-center gap-1">
+            <View
+              className="items-center justify-center rounded-full"
+              style={{
+                width: 36,
+                height: 36,
+                backgroundColor: weekDays[i]
+                  ? theme.warning.default
+                  : theme.border.subtle,
+              }}
+            >
+              {weekDays[i] && (
+                <Check size={20} color="white" strokeWidth={2.5} />
+              )}
+            </View>
+            <Text
+              className="font-body text-xs"
+              style={{ color: theme.text.secondary }}
+            >
+              {label}
+            </Text>
+          </View>
+        ))}
       </View>
     </View>
   );
@@ -97,61 +123,79 @@ function LevelUpView({
   theme: typeof Colors.light;
 }) {
   return (
-    <View className="flex-1 items-center justify-center px-8 gap-4">
-      <View
-        className="items-center justify-center rounded-full"
-        style={{
-          width: 80,
-          height: 80,
-          backgroundColor: theme.success.subtle,
-        }}
-      >
-        <Star size={40} color={theme.success.default} />
-      </View>
+    <View className="flex-1 items-center justify-center px-8 gap-6">
+      <RewardIconCircle backgroundColor={theme.brand.primarySubtle}>
+        <Star size={48} color={theme.brand.primary} />
+      </RewardIconCircle>
 
-      <Text
-        className="font-heading text-2xl text-center"
-        style={{ color: theme.text.primary }}
-      >
-        Lên cấp!
-      </Text>
-
-      <View className="flex-row items-center gap-3">
-        <View
-          className="rounded-full px-4 py-2"
-          style={{ backgroundColor: theme.border.subtle }}
-        >
+      {data.isLevelUp ? (
+        <View className="items-center gap-4">
           <Text
-            className="font-heading text-lg"
-            style={{ color: theme.text.secondary }}
+            className="font-heading text-2xl text-center"
+            style={{ color: theme.text.primary }}
           >
-            Level {data.previousLevel}
+            Lên cấp!
+          </Text>
+
+          <View className="flex-row items-center gap-3">
+            <View
+              className="rounded-full px-4 py-2"
+              style={{ backgroundColor: theme.border.subtle }}
+            >
+              <Text
+                className="font-heading text-lg"
+                style={{ color: theme.text.secondary }}
+              >
+                Level {data.previousLevel}
+              </Text>
+            </View>
+
+            <Text
+              className="font-heading text-xl"
+              style={{ color: theme.text.secondary }}
+            >
+              →
+            </Text>
+
+            <View
+              className="rounded-full px-4 py-2"
+              style={{ backgroundColor: theme.brand.primary }}
+            >
+              <Text
+                className="font-heading text-lg"
+                style={{ color: theme.brand.onPrimary }}
+              >
+                Level {data.newLevel}
+              </Text>
+            </View>
+          </View>
+        </View>
+      ) : (
+        <View className="items-center gap-3">
+          <View
+            className="rounded-full px-4 py-2"
+            style={{ backgroundColor: theme.brand.primary }}
+          >
+            <Text
+              className="font-heading text-lg"
+              style={{ color: theme.brand.onPrimary }}
+            >
+              Level {data.newLevel}
+            </Text>
+          </View>
+
+          <Text
+            className="font-body text-sm text-center"
+            style={{ color: theme.text.secondary, lineHeight: 20 }}
+          >
+            Tiến trình của bạn đã tăng lên. Tiếp tục luyện tập để nhận thêm nhiều EXP
           </Text>
         </View>
-
-        <Text
-          className="font-heading text-xl"
-          style={{ color: theme.text.secondary }}
-        >
-          →
-        </Text>
-
-        <View
-          className="rounded-full px-4 py-2"
-          style={{ backgroundColor: theme.success.subtle }}
-        >
-          <Text
-            className="font-heading text-lg"
-            style={{ color: theme.success.bold }}
-          >
-            Level {data.newLevel}
-          </Text>
-        </View>
-      </View>
+      )}
 
       <Text
         className="font-heading text-3xl"
-        style={{ color: theme.success.default }}
+        style={{ color: theme.brand.primary }}
       >
         +{data.expEarned} EXP
       </Text>
@@ -162,7 +206,7 @@ function LevelUpView({
           className="font-body text-xs text-center"
           style={{ color: theme.text.secondary }}
         >
-          {Math.round(data.progressPercentage)}% tới Level {data.newLevel + 1}
+          Cần {Math.round(100 - data.progressPercentage)}% để lên Level {data.newLevel + 1}
         </Text>
       </View>
     </View>
@@ -187,31 +231,26 @@ function BadgeView({
           onError={() => setImageError(true)}
         />
       ) : (
-        <View
-          className="items-center justify-center rounded-full"
-          style={{
-            width: 96,
-            height: 96,
-            backgroundColor: theme.purple.subtle,
-          }}
-        >
-          <Shield size={48} color={theme.purple.default} />
-        </View>
+        <RewardIconCircle backgroundColor={theme.purple.subtle}>
+          <Award size={48} color={theme.purple.default} />
+        </RewardIconCircle>
       )}
 
-      <Text
-        className="font-heading text-2xl text-center"
-        style={{ color: theme.text.primary }}
-      >
-        Huy hiệu mới!
-      </Text>
+      <View className="items-center gap-2">
+        <Text
+          className="font-body text-sm text-center"
+          style={{ color: theme.text.secondary }}
+        >
+          Huy hiệu mới nhận được
+        </Text>
 
-      <Text
-        className="font-heading text-xl text-center"
-        style={{ color: theme.text.primary }}
-      >
-        {data.badgeName}
-      </Text>
+        <Text
+          className="font-heading text-2xl text-center"
+          style={{ color: theme.purple.default }}
+        >
+          {data.badgeName}
+        </Text>
+      </View>
 
       <Text
         className="font-body text-sm text-center"
@@ -219,18 +258,6 @@ function BadgeView({
       >
         {data.description}
       </Text>
-
-      <View
-        className="rounded-full px-4 py-2"
-        style={{ backgroundColor: theme.success.subtle }}
-      >
-        <Text
-          className="font-body text-sm font-semibold"
-          style={{ color: theme.success.bold }}
-        >
-          +{data.expReward} EXP
-        </Text>
-      </View>
     </View>
   );
 }
@@ -273,10 +300,7 @@ export function ConversationRewardScreen() {
     }
   }
 
-  const buttonLabel =
-    current?.type === "badge" ? "Nhận huy hiệu" :
-    current?.type === "level" ? "Tuyệt vời!" :
-    "Tiếp tục";
+  const buttonLabel = "Tiếp tục";
 
   if (!current) return null;
 
