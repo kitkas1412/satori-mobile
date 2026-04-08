@@ -129,61 +129,86 @@ function LevelUpView({
   theme: typeof Colors.light;
 }) {
   return (
-    <View className="flex-1 items-center justify-center px-8 gap-4">
+    <View className="flex-1 items-center justify-center px-8 gap-6">
       <View
         className="items-center justify-center rounded-full"
         style={{
-          width: 80,
-          height: 80,
-          backgroundColor: theme.success.subtle,
+          width: 96,
+          height: 96,
+          backgroundColor: theme.brand.primarySubtle,
         }}
       >
-        <Star size={40} color={theme.success.default} />
+        <Star size={48} color={theme.brand.primary} />
       </View>
 
-      <Text
-        className="font-heading text-2xl text-center"
-        style={{ color: theme.text.primary }}
-      >
-        Lên cấp!
-      </Text>
-
-      <View className="flex-row items-center gap-3">
-        <View
-          className="rounded-full px-4 py-2"
-          style={{ backgroundColor: theme.border.subtle }}
-        >
+      {data.isLevelUp ? (
+        <View className="items-center gap-4">
           <Text
-            className="font-heading text-lg"
-            style={{ color: theme.text.secondary }}
+            className="font-heading text-2xl text-center"
+            style={{ color: theme.text.primary }}
           >
-            Level {data.previousLevel}
+            Lên cấp!
+          </Text>
+
+          <View className="flex-row items-center gap-3">
+            <View
+              className="rounded-full px-4 py-2"
+              style={{ backgroundColor: theme.border.subtle }}
+            >
+              <Text
+                className="font-heading text-lg"
+                style={{ color: theme.text.secondary }}
+              >
+                Level {data.previousLevel}
+              </Text>
+            </View>
+
+            <Text
+              className="font-heading text-xl"
+              style={{ color: theme.text.secondary }}
+            >
+              →
+            </Text>
+
+            <View
+              className="rounded-full px-4 py-2"
+              style={{ backgroundColor: theme.brand.primary }}
+            >
+              <Text
+                className="font-heading text-lg"
+                style={{ color: theme.brand.onPrimary }}
+              >
+                Level {data.newLevel}
+              </Text>
+            </View>
+          </View>
+        </View>
+      ) : (
+        <View className="items-center gap-3">
+          <View
+            className="rounded-full px-4 py-2"
+            style={{ backgroundColor: theme.brand.primary }}
+          >
+            <Text
+              className="font-heading text-lg"
+              style={{ color: theme.brand.onPrimary }}
+            >
+              Level {data.newLevel}
+            </Text>
+          </View>
+
+          <Text
+            className="font-body text-sm text-center"
+            style={{ color: theme.text.secondary, lineHeight: 20 }}
+          >
+            Tiến trình của bạn đã tăng lên. Tiếp tục luyện tập để nhận thêm nhiều EXP
           </Text>
         </View>
-
-        <Text
-          className="font-heading text-xl"
-          style={{ color: theme.text.secondary }}
-        >
-          →
-        </Text>
-
-        <View
-          className="rounded-full px-4 py-2"
-          style={{ backgroundColor: theme.success.subtle }}
-        >
-          <Text
-            className="font-heading text-lg"
-            style={{ color: theme.success.bold }}
-          >
-            Level {data.newLevel}
-          </Text>
-        </View>
-      </View>
+      )}
 
       <Text
         className="font-heading text-3xl"
-        style={{ color: theme.success.default }}
+        style={{ color: theme.brand.primary }}
       >
         +{data.expEarned} EXP
       </Text>
@@ -194,7 +219,7 @@ function LevelUpView({
           className="font-body text-xs text-center"
           style={{ color: theme.text.secondary }}
         >
-          {Math.round(data.progressPercentage)}% tới Level {data.newLevel + 1}
+          Cần {Math.round(100 - data.progressPercentage)}% để lên Level {data.newLevel + 1}
         </Text>
       </View>
     </View>
@@ -307,7 +332,6 @@ export function ConversationRewardScreen() {
 
   const buttonLabel =
     current?.type === "badge" ? "Nhận huy hiệu" :
-    current?.type === "level" ? "Tuyệt vời!" :
     "Tiếp tục";
 
   if (!current) return null;
