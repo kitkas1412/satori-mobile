@@ -12,6 +12,7 @@ import { Colors } from "@/constants/theme";
 import { PrimaryButton, ProgressBar } from "@/components/ui";
 import { useConversationStore } from "@/stores";
 import type { BadgeEarned, LevelUp, StreakNotification } from "@/features/speaking/api";
+import { RewardIconCircle } from "@/features/speaking/components";
 
 type RewardItem =
   | { type: "streak"; data: StreakNotification }
@@ -64,16 +65,9 @@ function StreakView({
 
   return (
     <View className="flex-1 items-center justify-center px-8 gap-6">
-      <View
-        className="items-center justify-center rounded-full"
-        style={{
-          width: 96,
-          height: 96,
-          backgroundColor: theme.warning.subtle,
-        }}
-      >
+      <RewardIconCircle backgroundColor={theme.warning.subtle}>
         <Flame size={48} color={theme.warning.default} />
-      </View>
+      </RewardIconCircle>
 
       <View className="items-center gap-3">
         <Text
@@ -130,16 +124,9 @@ function LevelUpView({
 }) {
   return (
     <View className="flex-1 items-center justify-center px-8 gap-6">
-      <View
-        className="items-center justify-center rounded-full"
-        style={{
-          width: 96,
-          height: 96,
-          backgroundColor: theme.brand.primarySubtle,
-        }}
-      >
+      <RewardIconCircle backgroundColor={theme.brand.primarySubtle}>
         <Star size={48} color={theme.brand.primary} />
-      </View>
+      </RewardIconCircle>
 
       {data.isLevelUp ? (
         <View className="items-center gap-4">
@@ -244,16 +231,9 @@ function BadgeView({
           onError={() => setImageError(true)}
         />
       ) : (
-        <View
-          className="items-center justify-center rounded-full"
-          style={{
-            width: 96,
-            height: 96,
-            backgroundColor: theme.purple.subtle,
-          }}
-        >
+        <RewardIconCircle backgroundColor={theme.purple.subtle}>
           <Award size={48} color={theme.purple.default} />
-        </View>
+        </RewardIconCircle>
       )}
 
       <View className="items-center gap-2">

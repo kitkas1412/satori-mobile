@@ -8,3 +8,4 @@ export { ConversationCard } from "./conversation-card";
 export { TopicSection } from "./topic-section";
 export { LanguageEvaluationCard } from "./language-evaluation-card";
 export { TypingIndicator } from "./typing-indicator";
+export { RewardIconCircle } from "./reward-icon-circle";
