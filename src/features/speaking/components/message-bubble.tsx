@@ -1,6 +1,7 @@
 import { Languages } from "lucide-react-native";
 import { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
+import { useRouter } from "expo-router";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
 import type { FeedbackResultResponse, Messages } from "@/features/speaking/api";
@@ -79,6 +80,7 @@ export function FeedbackBubble({
 }) {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
+  const router = useRouter();
   const summary = feedback.languageEvaluation?.summary;
   const score =
     feedback.overallScore != null ? Math.round(feedback.overallScore) : null;
@@ -124,6 +126,17 @@ export function FeedbackBubble({
             Buổi học đã hoàn thành!
           </Text>
         )}
+        <TouchableOpacity
+          onPress={() => router.push("/conversation-feedback")}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          <Text
+            className="font-body text-sm"
+            style={{ color: theme.brand.primary, textDecorationLine: "underline" }}
+          >
+            Xem kết quả chi tiết
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
