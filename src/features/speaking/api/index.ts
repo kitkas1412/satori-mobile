@@ -14,6 +14,11 @@ export type {
   Missions,
   SessionStatus,
   TurnState,
+  PronunciationSummary,
+  BadgeEarned,
+  BadgeType,
+  LevelUp,
+  StreakNotification,
 } from "./speaking.types";
 export { getTopicsApi } from "./get-topics";
 export { getConversationsApi } from "./get-conversations";

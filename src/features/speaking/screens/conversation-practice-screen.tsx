@@ -192,7 +192,7 @@ export function ConversationPracticeScreen({
             <PrimaryButton
               text="Tiếp tục"
               variant="dark"
-              onPress={() => router.replace("/conversation-feedback")}
+              onPress={() => router.replace("/conversation-reward")}
             />
           ) : (
             /* Session đang diễn ra — hiển thị nút Kết thúc (trái) và nút Mic (giữa) */
