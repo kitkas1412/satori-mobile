@@ -2,7 +2,7 @@
 // Hiển thị tuần tự theo queue: Streak → Level → từng Badge.
 // Dữ liệu đọc từ Zustand store (đã được lưu bởi completeSession).
 
-import { Check, Flame, Shield, Star } from "lucide-react-native";
+import { Award, Check, Flame, Star } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Image, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -252,23 +252,25 @@ function BadgeView({
             backgroundColor: theme.purple.subtle,
           }}
         >
-          <Shield size={48} color={theme.purple.default} />
+          <Award size={48} color={theme.purple.default} />
         </View>
       )}
 
-      <Text
-        className="font-heading text-2xl text-center"
-        style={{ color: theme.text.primary }}
-      >
-        Huy hiệu mới!
-      </Text>
+      <View className="items-center gap-2">
+        <Text
+          className="font-body text-sm text-center"
+          style={{ color: theme.text.secondary }}
+        >
+          Huy hiệu mới nhận được
+        </Text>
 
-      <Text
-        className="font-heading text-xl text-center"
-        style={{ color: theme.text.primary }}
-      >
-        {data.badgeName}
-      </Text>
+        <Text
+          className="font-heading text-2xl text-center"
+          style={{ color: theme.purple.default }}
+        >
+          {data.badgeName}
+        </Text>
+      </View>
 
       <Text
         className="font-body text-sm text-center"
@@ -276,18 +278,6 @@ function BadgeView({
       >
         {data.description}
       </Text>
-
-      <View
-        className="rounded-full px-4 py-2"
-        style={{ backgroundColor: theme.success.subtle }}
-      >
-        <Text
-          className="font-body text-sm font-semibold"
-          style={{ color: theme.success.bold }}
-        >
-          +{data.expReward} EXP
-        </Text>
-      </View>
     </View>
   );
 }
@@ -330,9 +320,7 @@ export function ConversationRewardScreen() {
     }
   }
 
-  const buttonLabel =
-    current?.type === "badge" ? "Nhận huy hiệu" :
-    "Tiếp tục";
+  const buttonLabel = "Tiếp tục";
 
   if (!current) return null;
 
