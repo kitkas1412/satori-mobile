@@ -127,7 +127,7 @@ export function FeedbackBubble({
           </Text>
         )}
         <TouchableOpacity
-          onPress={() => router.replace("/conversation-feedback")}
+          onPress={() => router.push("/conversation-feedback")}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
           <Text
