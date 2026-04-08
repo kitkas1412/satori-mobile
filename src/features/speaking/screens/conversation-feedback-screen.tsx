@@ -2,7 +2,7 @@
 // Hiển thị theo thứ tự: điểm tổng → điểm chi tiết (3 chỉ số) → nhiệm vụ → đánh giá ngôn ngữ.
 // Dữ liệu được đọc từ Zustand store (đã được lưu bởi completeSession).
 
-import { ScrollView, Text, View } from "react-native";
+import { TouchableOpacity, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -13,7 +13,6 @@ import {
   LanguageEvaluationCard,
   MissionDetailsCard,
 } from "@/features/speaking/components";
-import { TouchableOpacity } from "react-native";
 import { ChevronLeft } from "lucide-react-native";
 
 export function ConversationFeedbackScreen() {
