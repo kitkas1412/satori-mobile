@@ -2,7 +2,7 @@
 // Hiển thị theo thứ tự: điểm tổng → điểm chi tiết (3 chỉ số) → nhiệm vụ → đánh giá ngôn ngữ.
 // Dữ liệu được đọc từ Zustand store (đã được lưu bởi completeSession).
 
-import { ScrollView, Text, View } from "react-native";
+import { TouchableOpacity, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -13,6 +13,7 @@ import {
   LanguageEvaluationCard,
   MissionDetailsCard,
 } from "@/features/speaking/components";
+import { ChevronLeft } from "lucide-react-native";
 
 export function ConversationFeedbackScreen() {
   const insets = useSafeAreaInsets();
@@ -21,12 +22,10 @@ export function ConversationFeedbackScreen() {
   const router = useRouter();
 
   const feedback = useConversationStore((s) => s.feedback);
-  const clearSession = useConversationStore((s) => s.clearSession);
 
-  /** Xoá dữ liệu session và quay về trang luyện nói */
-  function handleGoHome() {
-    clearSession();
-    router.replace("/(tabs)/speaking");
+  /** Chuyển sang màn hình phần thưởng sau khi xem kết quả chi tiết */
+  function handleContinue() {
+    router.replace("/conversation-reward");
   }
 
   // Guard: nếu người dùng truy cập trực tiếp màn hình này mà không có dữ liệu feedback
@@ -67,7 +66,18 @@ export function ConversationFeedbackScreen() {
       }}
     >
       {/* Header */}
-      <ScreenHeader title="Kết quả buổi học" titleSize="2xl" />
+      <ScreenHeader
+        title="Kết quả buổi học"
+        titleSize="2xl"
+        leftAction={
+          <TouchableOpacity
+            onPress={() => router.back()}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <ChevronLeft size={24} color={theme.icon.primary} strokeWidth={2} />
+          </TouchableOpacity>
+        }
+      />
 
       {/* Divider */}
       <View className="h-px" style={{ backgroundColor: theme.border.subtle }} />
@@ -145,9 +155,9 @@ export function ConversationFeedbackScreen() {
         style={{ paddingBottom: Math.max(insets.bottom, 16) + 8 }}
       >
         <PrimaryButton
-          text="Về trang luyện nói"
+          text="Tiếp tục"
           variant="dark"
-          onPress={handleGoHome}
+          onPress={handleContinue}
         />
       </View>
     </View>
