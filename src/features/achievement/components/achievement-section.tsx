@@ -1,5 +1,6 @@
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useRouter } from "expo-router";
 import { ChevronRight } from "lucide-react-native";
 import { Text, TouchableOpacity, View } from "react-native";
 import { useAchievementProgress } from "../hooks";
@@ -13,6 +14,7 @@ function chunkArray<T>(arr: T[], size: number): T[][] {
 
 export function AchievementSection() {
   const { data } = useAchievementProgress();
+  const router = useRouter();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
@@ -38,7 +40,7 @@ export function AchievementSection() {
           activeOpacity={0.6}
           hitSlop={12}
           style={{ flexDirection: "row", alignItems: "center" }}
-          onPress={() => console.warn("Achievements screen not yet implemented")}
+          onPress={() => router.push("/achievements")}
         >
           <Text
             className="font-heading"
