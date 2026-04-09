@@ -205,6 +205,10 @@ function RootLayoutNav() {
         options={{ headerShown: false, gestureEnabled: false }}
       />
       <Stack.Screen
+        name="conversation-reward"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
         name="assignment-quiz"
         options={{ headerShown: false, gestureEnabled: false }}
       />
@@ -234,6 +238,10 @@ function RootLayoutNav() {
       />
       <Stack.Screen
         name="theme-selector"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="settings"
         options={{ headerShown: false, gestureEnabled: false }}
       />
       <Stack.Screen

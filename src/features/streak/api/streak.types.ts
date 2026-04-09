@@ -14,17 +14,18 @@ export interface StreakPeriod {
   start_date: string;
   end_date: string;
   days_requested: number;
+  streak_start_date: string;
+  cycle_number: number;
 }
 
 export interface StreakSummary {
-  active_count: number;
-  total_days: number;
-  activity_percentage: number;
   current_streak: number;
 }
 
 export interface StreakDailyRecord {
   date: string;
+  day_of_week: string;
+  is_today: boolean;
   streak_count: number;
   had_activity: boolean;
   activity_type: string | null;

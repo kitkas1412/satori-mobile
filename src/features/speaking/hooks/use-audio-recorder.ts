@@ -85,7 +85,7 @@ export function useRecorder() {
     ExpoSpeechRecognitionModule.start({
       lang: "ja-JP",
       interimResults: true,
-      continuous: false,
+      continuous: true,
       addsPunctuation: true,
       requiresOnDeviceRecognition: true,
       recordingOptions: {

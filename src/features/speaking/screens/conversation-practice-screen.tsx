@@ -7,7 +7,7 @@
 //        → nhấn "Kết thúc" → xem kết quả → chuyển sang FeedbackScreen
 
 import { List, X } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -16,7 +16,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useRef } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Colors } from "@/constants/theme";
@@ -192,7 +191,7 @@ export function ConversationPracticeScreen({
             <PrimaryButton
               text="Tiếp tục"
               variant="dark"
-              onPress={() => router.replace("/conversation-feedback")}
+              onPress={() => router.replace("/conversation-reward")}
             />
           ) : (
             /* Session đang diễn ra — hiển thị nút Kết thúc (trái) và nút Mic (giữa) */
