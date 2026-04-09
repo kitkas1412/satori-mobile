@@ -1,5 +1,9 @@
-import { IconButton, LoadingOverlay, PrimaryButton, ScreenHeader } from "@/components/ui";
-import { ThemeSelector } from "@/features/setting/components";
+import {
+  IconButton,
+  LoadingOverlay,
+  PrimaryButton,
+  ScreenHeader,
+} from "@/components/ui";
 import { useLogout } from "@/features/authentication/hooks";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
@@ -11,7 +15,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const ACCOUNT_ROWS = [
   { label: "Cài đặt chung" },
-  { label: "Giao diện" },
+  { label: "Giao diện", route: "/theme-selector" },
   { label: "Thông báo" },
 ];
 
@@ -68,7 +72,7 @@ export function SettingsScreen() {
               borderColor: theme.border.subtle,
             }}
           >
-            <View className="px-4 pt-4 pb-3">
+            <View className="px-4 py-4">
               <Text
                 className="font-heading text-lg mb-3"
                 style={{ color: theme.text.primary }}
@@ -90,9 +94,10 @@ export function SettingsScreen() {
                   <TouchableOpacity
                     className="flex-row items-center justify-between"
                     activeOpacity={0.6}
+                    onPress={() => row.route && router.push(row.route as any)}
                   >
                     <Text
-                      className="font-body text-xs"
+                      className="font-body text-sm"
                       style={{ color: theme.text.secondary }}
                     >
                       {row.label}
@@ -103,9 +108,6 @@ export function SettingsScreen() {
               ))}
             </View>
           </View>
-
-          {/* Theme selector */}
-          <ThemeSelector />
 
           {/* Change password */}
           <PrimaryButton
