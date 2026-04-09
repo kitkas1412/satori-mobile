@@ -4,7 +4,7 @@ import {
   useSpeechRecognitionEvent,
 } from "expo-speech-recognition";
 import { useRef, useState } from "react";
-import { Alert } from "react-native";
+import { Alert, Platform } from "react-native";
 
 type RecordingResult = { transcript: string; audioUri: string | null };
 
@@ -58,6 +58,25 @@ export function useRecorder() {
 
   useSpeechRecognitionEvent("error", (event) => {
     if (event.error === "aborted") return;
+
+    if (event.error === "language-not-supported") {
+      if (Platform.OS === "android") {
+        ExpoSpeechRecognitionModule.androidTriggerOfflineModelDownload({
+          locale: "ja-JP",
+        }).catch(() => {
+          Alert.alert(
+            "Thiết bị chưa hỗ trợ",
+            "Vào Cài đặt → Quản lý chung → Nhận dạng giọng nói ngoại tuyến và tải tiếng Nhật.",
+          );
+        });
+      } else {
+        Alert.alert(
+          "Thiết bị không hỗ trợ",
+          "Thiết bị này không hỗ trợ nhận dạng tiếng Nhật.",
+        );
+      }
+    }
+
     console.warn("Speech recognition error:", event.error, event.message);
     setIsListening(false);
     endFiredRef.current = true;
