@@ -23,7 +23,11 @@ export function useUpdateProfile() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: UpdateProfileParams) => {
-      const response = await api.put<ApiResponse<UserProfile>>("/profile", data);
+      const cached = queryClient.getQueryData<UserProfile>(profileQueryKey);
+      const response = await api.put<ApiResponse<UserProfile>>("/profile", {
+        email: cached?.email,
+        ...data,
+      });
       return response.data.data;
     },
     onSuccess: () => {
