@@ -72,11 +72,18 @@ async function playAudioFromUrl(url: string): Promise<void> {
  */
 async function speakText(text: string): Promise<void> {
   return new Promise<void>((resolve) => {
+    // Timeout dự phòng: nếu TTS engine không gọi bất kỳ callback nào sau 15s,
+    // tự động resolve để tránh treo luồng hội thoại vĩnh viễn.
+    const timeout = setTimeout(resolve, 3_000);
+    const done = () => {
+      clearTimeout(timeout);
+      resolve();
+    };
     Speech.speak(text, {
       language: "ja-JP",
-      onDone: resolve,
-      onStopped: resolve,
-      onError: () => resolve(), // Không throw lỗi, chỉ bỏ qua và tiếp tục
+      onDone: done,
+      onStopped: done,
+      onError: () => done(), // Không throw lỗi, chỉ bỏ qua và tiếp tục
     });
   });
 }
