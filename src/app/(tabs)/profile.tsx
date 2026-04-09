@@ -124,7 +124,7 @@ export default function ProfileTab() {
                 </View>
 
                 {/* Edit button */}
-                <TouchableOpacity activeOpacity={0.6} hitSlop={12}>
+                <TouchableOpacity activeOpacity={0.6} hitSlop={12} onPress={() => router.push("/edit-profile")}>
                   <Pencil size={16} color={theme.icon.secondary} />
                 </TouchableOpacity>
               </View>

@@ -1,6 +1,6 @@
 import { api } from "@/lib/axios";
 import type { ApiResponse, UserProfile } from "@/types/api";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const profileQueryKey = ["profile"] as const;
 
@@ -10,6 +10,24 @@ export function useProfile() {
     queryFn: async () => {
       const response = await api.get<ApiResponse<UserProfile>>("/profile");
       return response.data.data;
+    },
+  });
+}
+
+interface UpdateProfileParams {
+  displayName?: string;
+  gender?: string;
+}
+
+export function useUpdateProfile() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: UpdateProfileParams) => {
+      const response = await api.put<ApiResponse<UserProfile>>("/profile", data);
+      return response.data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: profileQueryKey });
     },
   });
 }
