@@ -16,12 +16,14 @@ export function useRecorder() {
   // ref-based flags (synchronous, no stale state issues)
   const isCleaningUpRef = useRef(false);
   const endFiredRef = useRef(false);
+  const audioEndFiredRef = useRef(false);
   const resolveRef = useRef<((v: RecordingResult) => void) | null>(null);
   const safetyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function tryResolve() {
     // resolve only when both "end" and "audioend" have fired
     if (!endFiredRef.current) return;
+    if (!audioEndFiredRef.current) return;
     if (resolveRef.current === null) return;
 
     if (safetyTimerRef.current) {
@@ -47,6 +49,7 @@ export function useRecorder() {
 
   useSpeechRecognitionEvent("audioend", (event) => {
     audioUriRef.current = event.uri ?? null;
+    audioEndFiredRef.current = true;
     tryResolve();
   });
 
@@ -98,6 +101,7 @@ export function useRecorder() {
     transcriptRef.current = "";
     audioUriRef.current = null;
     endFiredRef.current = false;
+    audioEndFiredRef.current = false;
     setIsListening(true);
 
     ExpoSpeechRecognitionModule.start({
@@ -131,8 +135,12 @@ export function useRecorder() {
             audioUri: audioUriRef.current,
           });
           resolveRef.current = null;
-          setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true });
+          setAudioModeAsync({
+            allowsRecording: false,
+            playsInSilentMode: true,
+          });
           isCleaningUpRef.current = false;
+          audioEndFiredRef.current = false;
         }
       }, 8000);
     });
