@@ -69,13 +69,14 @@ export default function ProfileTab() {
                       activeOpacity={0.8}
                       onPress={handleAvatarPress}
                       disabled={isUploadingAvatar}
-                      style={{ width: 70, height: 70 }}
+                      style={{ width: 70, height: 70, position: "relative" }}
                     >
                       {profile.avatarUrl ? (
                         <Image
                           source={{ uri: profile.avatarUrl }}
                           className="rounded-full"
                           style={{ width: 70, height: 70 }}
+                          resizeMode="cover"
                         />
                       ) : (
                         <View
