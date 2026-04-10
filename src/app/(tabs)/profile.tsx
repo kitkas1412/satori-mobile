@@ -1,13 +1,27 @@
 import { IconButton, LoadingOverlay, ScreenHeader } from "@/components/ui";
 import { useLogout } from "@/features/authentication/hooks";
-import { AchievementSection, StatsSection } from "@/features/achievement/components";
-import { useProfile, useUploadAvatar } from "@/features/profile-management/hooks";
+import {
+  AchievementSection,
+  StatsSection,
+} from "@/features/achievement/components";
+import { useAchievementProgress } from "@/features/achievement/hooks";
+import {
+  useProfile,
+  useUploadAvatar,
+} from "@/features/profile-management/hooks";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Camera, Pencil, Settings } from "lucide-react-native";
-import { ActivityIndicator, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function ProfileTab() {
@@ -15,6 +29,7 @@ export default function ProfileTab() {
   const router = useRouter();
   const { mutate: logoutUser, isPending } = useLogout();
   const { handleAvatarPress, isPending: isUploadingAvatar } = useUploadAvatar();
+  const { data: achievementProgress } = useAchievementProgress();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
@@ -33,7 +48,10 @@ export default function ProfileTab() {
 
   return (
     <>
-      <View className="flex-1" style={{ backgroundColor: theme.background.page }}>
+      <View
+        className="flex-1"
+        style={{ backgroundColor: theme.background.page }}
+      >
         <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
 
         <ScreenHeader
@@ -47,7 +65,10 @@ export default function ProfileTab() {
           }
         />
 
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 16, paddingBottom: 32 }}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ gap: 16, paddingBottom: 32 }}
+        >
           {!isLoading && profile && (
             <View className="px-4">
               <View
@@ -61,7 +82,10 @@ export default function ProfileTab() {
                 {/* Top section: avatar + name + badges + edit button */}
                 <View
                   className="px-4 pt-4 pb-3 flex-row items-start justify-between"
-                  style={{ borderBottomWidth: 1, borderBottomColor: theme.border.subtle }}
+                  style={{
+                    borderBottomWidth: 1,
+                    borderBottomColor: theme.border.subtle,
+                  }}
                 >
                   <View className="gap-2">
                     {/* Avatar */}
@@ -104,7 +128,10 @@ export default function ProfileTab() {
                         }}
                       >
                         {isUploadingAvatar ? (
-                          <ActivityIndicator size={10} color={theme.text.onBrand} />
+                          <ActivityIndicator
+                            size={10}
+                            color={theme.text.onBrand}
+                          />
                         ) : (
                           <Camera size={12} color={theme.text.onBrand} />
                         )}
@@ -142,14 +169,18 @@ export default function ProfileTab() {
                           className="font-body"
                           style={{ fontSize: 10, color: theme.text.onBrand }}
                         >
-                          Level -
+                          {`Level ${achievementProgress?.currentLevel ?? "-"}`}
                         </Text>
                       </View>
                     </View>
                   </View>
 
                   {/* Edit button */}
-                  <TouchableOpacity activeOpacity={0.6} hitSlop={12} onPress={() => router.push("/edit-profile")}>
+                  <TouchableOpacity
+                    activeOpacity={0.6}
+                    hitSlop={12}
+                    onPress={() => router.push("/edit-profile")}
+                  >
                     <Pencil size={16} color={theme.icon.secondary} />
                   </TouchableOpacity>
                 </View>
