@@ -19,7 +19,7 @@ import { StatusBar } from "expo-status-bar";
 import { ChatbotFab } from "@/features/chatbot/components";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { useProfile } from "@/hooks/api/use-profile";
+import { useProfile } from "@/features/profile-management/hooks";
 import { useAuthStore } from "@/stores/auth-store";
 import { BellButton, LoadingOverlay, ScreenHeader } from "@/components/ui";
 import { AssignmentCard } from "@/features/assignment/components/assignment-card";
