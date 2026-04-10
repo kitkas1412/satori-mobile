@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Satori Nihongo",
-    "slug": "satori-mobile",
+    "slug": "satori-nihongo",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/satori-icon.png",
@@ -82,8 +82,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "cd00c474-0edb-45a4-8c3c-615f74f59577"
+        "projectId": "de3887a0-289f-47f9-93f4-40bf3a556b14"
       }
-    }
+    },
+    "owner": "kitkas1412"
   }
 }
