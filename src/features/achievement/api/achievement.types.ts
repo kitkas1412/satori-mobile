@@ -5,6 +5,7 @@ export interface BadgeProgress {
   requirementValue: number;
   currentValue: number;
   earned: boolean;
+  iconUrl: string;
   progress: number;
 }
 
