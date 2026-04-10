@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "@/constants/theme";
-import { useProfile } from "@/hooks/api/use-profile";
+import { useProfile } from "@/features/profile-management/hooks";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useCreateChatSession, useSendMessage } from "@/features/chatbot/hooks";
 import { ChatbotMessageBubble } from "./chatbot-message-bubble";

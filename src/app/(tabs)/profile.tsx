@@ -1,19 +1,20 @@
 import { IconButton, LoadingOverlay, ScreenHeader } from "@/components/ui";
 import { useLogout } from "@/features/authentication/hooks";
 import { AchievementSection, StatsSection } from "@/features/achievement/components";
-import { useProfile } from "@/hooks/api/use-profile";
+import { useProfile, useUploadAvatar } from "@/features/profile-management/hooks";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { Pencil, Settings } from "lucide-react-native";
-import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Camera, Pencil, Settings } from "lucide-react-native";
+import { ActivityIndicator, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function ProfileTab() {
   const { data: profile, isLoading } = useProfile();
   const router = useRouter();
   const { mutate: logoutUser, isPending } = useLogout();
+  const { handleAvatarPress, isPending: isUploadingAvatar } = useUploadAvatar();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
@@ -64,29 +65,50 @@ export default function ProfileTab() {
                 >
                   <View className="gap-2">
                     {/* Avatar */}
-                    {profile.avatarUrl ? (
-                      <Image
-                        source={{ uri: profile.avatarUrl }}
-                        className="rounded-full"
-                        style={{ width: 70, height: 70 }}
-                      />
-                    ) : (
+                    <TouchableOpacity
+                      activeOpacity={0.8}
+                      onPress={handleAvatarPress}
+                      disabled={isUploadingAvatar}
+                      style={{ width: 70, height: 70 }}
+                    >
+                      {profile.avatarUrl ? (
+                        <Image
+                          source={{ uri: profile.avatarUrl }}
+                          className="rounded-full"
+                          style={{ width: 70, height: 70 }}
+                        />
+                      ) : (
+                        <View
+                          className="rounded-full items-center justify-center"
+                          style={{
+                            width: 70,
+                            height: 70,
+                            backgroundColor: theme.brand.primarySubtle,
+                          }}
+                        >
+                          <Text
+                            className="font-heading text-xl"
+                            style={{ color: theme.brand.primary }}
+                          >
+                            {initials}
+                          </Text>
+                        </View>
+                      )}
                       <View
-                        className="rounded-full items-center justify-center"
+                        className="absolute bottom-0 right-0 rounded-full items-center justify-center"
                         style={{
-                          width: 70,
-                          height: 70,
-                          backgroundColor: theme.brand.primarySubtle,
+                          width: 22,
+                          height: 22,
+                          backgroundColor: theme.brand.primary,
                         }}
                       >
-                        <Text
-                          className="font-heading text-xl"
-                          style={{ color: theme.brand.primary }}
-                        >
-                          {initials}
-                        </Text>
+                        {isUploadingAvatar ? (
+                          <ActivityIndicator size={10} color={theme.text.onBrand} />
+                        ) : (
+                          <Camera size={12} color={theme.text.onBrand} />
+                        )}
                       </View>
-                    )}
+                    </TouchableOpacity>
 
                     {/* Name */}
                     <Text

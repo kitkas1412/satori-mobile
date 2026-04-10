@@ -29,7 +29,7 @@ import {
   useConversationNavigation,
 } from "@/features/speaking/hooks";
 import type { Topic } from "@/features/speaking/api";
-import { useProfile } from "@/hooks/api/use-profile";
+import { useProfile } from "@/features/profile-management/hooks";
 
 export default function SpeakingScreen() {
   const insets = useSafeAreaInsets();
