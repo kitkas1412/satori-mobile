@@ -97,6 +97,14 @@ export default function SpeakingScreen() {
     [screenHeight],
   );
 
+  const blockedMessage = (() => {
+    if (user?.status === "INACTIVE") return "Bạn chưa có lớp. Vui lòng thử lại sau";
+    const classStatus = profile?.enrolledClasses[0]?.status;
+    if (classStatus === "not_started") return "Lớp của bạn chưa bắt đầu. Vui lòng thử lại sau";
+    if (classStatus === "closed") return "Lớp của bạn đã kết thúc. Vui lòng thử lại sau";
+    return null;
+  })();
+
   return (
     <>
       <View
@@ -112,14 +120,13 @@ export default function SpeakingScreen() {
           }
         />
 
-        {/* Khoá tính năng nếu tài khoản người dùng đang bị tạm ngưng */}
-        {user?.status === "INACTIVE" ? (
+        {blockedMessage ? (
           <View className="flex-1 items-center justify-center px-4">
             <Text
               className="text-base text-center font-body"
               style={{ color: theme.text.secondary }}
             >
-              Tính năng đang tạm khoá. Vui lòng thử lại sau
+              {blockedMessage}
             </Text>
           </View>
         ) : (
@@ -210,7 +217,7 @@ export default function SpeakingScreen() {
       </View>
       <LoadingOverlay visible={isLoading} title="Đang tải..." />
       <LoadingOverlay visible={isFocusRefetching} title="Đang tải..." />
-      <ChatbotFab />
+      {!blockedMessage && <ChatbotFab />}
     </>
   );
 }
