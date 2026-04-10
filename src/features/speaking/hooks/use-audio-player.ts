@@ -81,8 +81,8 @@ async function speakText(text: string): Promise<void> {
     };
     Speech.speak(text, {
       language: "ja-JP",
-      onDone: done,
-      onStopped: done,
+      onDone: resolve,
+      onStopped: resolve,
       onError: () => done(), // Không throw lỗi, chỉ bỏ qua và tiếp tục
     });
   });
