@@ -260,6 +260,10 @@ function RootLayoutNav() {
         name="notifications"
         options={{ headerShown: false, gestureEnabled: true }}
       />
+      <Stack.Screen
+        name="achievements"
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
     </Stack>
   );
 }
