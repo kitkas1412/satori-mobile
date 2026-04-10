@@ -10,3 +10,4 @@ export { playAssistantMessage } from "./use-audio-player";
 export { useFirstUnpracticedSection } from "./use-first-unpracticed-section";
 export { useConversationNavigation } from "./use-conversation-navigation";
 export { useMicInteraction } from "./use-mic-interaction";
+export { useLatestFeedback } from "./use-latest-feedback";

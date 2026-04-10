@@ -1,6 +1,6 @@
 export interface RegisterDeviceTokenRequest {
   fcmToken: string;
-  deviceType: "android" | "ios";
+  deviceType: "ANDROID" | "IOS";
   deviceName?: string;
   appVersion?: string;
 }
