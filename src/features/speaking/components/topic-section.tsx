@@ -9,7 +9,7 @@ import { ConversationCard } from "./conversation-card";
 import { useConversations } from "@/features/speaking/hooks";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
-import type { Topic } from "@/features/speaking/api";
+import type { Topic, PracticeStatus } from "@/features/speaking/api";
 
 /** Chuyển điểm độ khó thành nhãn hiển thị: 1 = Dễ, 2 = Trung Bình, khác = Khó */
 function difficultyLabel(score: number): string {
@@ -27,7 +27,7 @@ interface TopicSectionProps {
   /** Callback báo lên parent khi section này có topic chưa luyện tập */
   onHasUnpracticed: (sectionId: string, orderIndex: number) => void;
   /** Callback điều hướng sang màn hình chi tiết conversation */
-  onConversationPress: (conversationId: string) => void;
+  onConversationPress: (conversationId: string, practiceStatus: PracticeStatus) => void;
   /** True nếu đây là section chứa conversation card đầu tiên chưa practiced */
   isTargetSection?: boolean;
   /** Callback trả về (cardY, cardHeight) tương đối với root View của section khi target card layout xong */
@@ -194,7 +194,7 @@ export function TopicSection({
                   practiceStatus={conversation.practiceStatus}
                   showBorder={showFirstUnpracticedBorder && isFirstUnpracticed}
                   accentColor={accentColor}
-                  onPress={() => onConversationPress(conversation.id)}
+                  onPress={() => onConversationPress(conversation.id, conversation.practiceStatus)}
                 />
               </View>
             );
