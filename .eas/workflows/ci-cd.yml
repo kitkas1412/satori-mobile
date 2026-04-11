@@ -1,0 +1,34 @@
+name: CI/CD - Auto Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect native changes
+        id: detect
+        run: |
+          CHANGED=$(git diff HEAD~1 --name-only | grep -cE "^(app\.json|package\.json|plugins/|android/)" || echo 0)
+          if [ "$CHANGED" -gt 0 ]; then
+            echo "native_changed=true" >> $GITHUB_OUTPUT
+            echo "Native changes detected: $CHANGED file(s)"
+          else
+            echo "native_changed=false" >> $GITHUB_OUTPUT
+            echo "No native changes detected"
+          fi
+
+      - name: OTA Update (JS changes)
+        run: eas update --branch production --message "Auto update [$(git log -1 --pretty=%s)]" --non-interactive
+
+      - name: Build Android (native changes)
+        if: ${{ steps.detect.outputs.native_changed == 'true' }}
+        run: eas build --profile production --platform android --non-interactive

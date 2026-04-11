@@ -39,6 +39,12 @@
       "favicon": "./assets/images/satori-icon.png"
     },
     "plugins": [
+      [
+        "expo-updates",
+        {
+          "checkAutomatically": "ON_LOAD"
+        }
+      ],
       "expo-router",
       [
         "expo-splash-screen",
