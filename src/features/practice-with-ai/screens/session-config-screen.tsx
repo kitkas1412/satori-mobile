@@ -152,15 +152,26 @@ export function SessionConfigScreen() {
   const [practiceMode, setPracticeMode] = useState<PracticeMode>("QUICK");
 
   function handleStart() {
-    router.push({
-      pathname: "/practice-session",
-      params: {
-        lessonId,
-        sessionType,
-        itemTypes: JSON.stringify([itemType]),
-        practiceMode,
-      },
-    });
+    if (practiceMode === "CREATIVE") {
+      router.push({
+        pathname: "/creative-selection",
+        params: {
+          lessonId,
+          sessionType,
+          itemTypes: JSON.stringify([itemType]),
+        },
+      });
+    } else {
+      router.push({
+        pathname: "/practice-session",
+        params: {
+          lessonId,
+          sessionType,
+          itemTypes: JSON.stringify([itemType]),
+          preset: practiceMode,
+        },
+      });
+    }
   }
 
   return (
