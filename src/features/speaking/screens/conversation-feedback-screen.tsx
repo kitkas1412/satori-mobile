@@ -1,10 +1,12 @@
 // Màn hình kết quả sau khi hoàn thành session hội thoại.
 // Hiển thị theo thứ tự: điểm tổng → điểm chi tiết (3 chỉ số) → nhiệm vụ → đánh giá ngôn ngữ.
-// Dữ liệu được đọc từ Zustand store (đã được lưu bởi completeSession).
+// Có 2 mode:
+//   - Post-session: không có conversationId param → đọc từ Zustand store, CTA "Tiếp tục" → /conversation-reward
+//   - Review: có conversationId param → fetch từ API, CTA "Làm lại" → /conversation-detail
 
-import { ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, TouchableOpacity, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
 import { PrimaryButton, ScreenHeader, ScoreCircle } from "@/components/ui";
@@ -13,6 +15,8 @@ import {
   LanguageEvaluationCard,
   MissionDetailsCard,
 } from "@/features/speaking/components";
+import { useLatestFeedback } from "@/features/speaking/hooks";
+import { ChevronLeft } from "lucide-react-native";
 
 export function ConversationFeedbackScreen() {
   const insets = useSafeAreaInsets();
@@ -20,13 +24,52 @@ export function ConversationFeedbackScreen() {
   const theme = Colors[colorScheme ?? "light"];
   const router = useRouter();
 
-  const feedback = useConversationStore((s) => s.feedback);
-  const clearSession = useConversationStore((s) => s.clearSession);
+  const { conversationId } = useLocalSearchParams<{ conversationId?: string }>();
+  const isReviewMode = !!conversationId;
 
-  /** Xoá dữ liệu session và quay về trang luyện nói */
-  function handleGoHome() {
-    clearSession();
-    router.replace("/(tabs)/speaking");
+  const storeFeedback = useConversationStore((s) => s.feedback);
+  const { data: apiFeedback, isLoading, isError } = useLatestFeedback(
+    isReviewMode ? conversationId : undefined,
+  );
+
+  const feedback = isReviewMode ? apiFeedback : storeFeedback;
+
+  function handleCTA() {
+    if (isReviewMode) {
+      router.push({
+        pathname: "/conversation-detail",
+        params: { conversationId },
+      });
+    } else {
+      router.replace("/conversation-reward");
+    }
+  }
+
+  if (isReviewMode && isLoading) {
+    return (
+      <View
+        className="flex-1 items-center justify-center"
+        style={{ backgroundColor: theme.background.page, paddingTop: insets.top }}
+      >
+        <ActivityIndicator size="large" color={theme.brand.primary} />
+      </View>
+    );
+  }
+
+  if (isReviewMode && isError) {
+    return (
+      <View
+        className="flex-1 items-center justify-center"
+        style={{ backgroundColor: theme.background.page, paddingTop: insets.top }}
+      >
+        <Text
+          className="font-body text-base"
+          style={{ color: theme.text.secondary }}
+        >
+          Không thể tải kết quả. Vui lòng thử lại sau.
+        </Text>
+      </View>
+    );
   }
 
   // Guard: nếu người dùng truy cập trực tiếp màn hình này mà không có dữ liệu feedback
@@ -67,7 +110,18 @@ export function ConversationFeedbackScreen() {
       }}
     >
       {/* Header */}
-      <ScreenHeader title="Kết quả buổi học" titleSize="2xl" />
+      <ScreenHeader
+        title="Kết quả buổi học"
+        titleSize="2xl"
+        leftAction={
+          <TouchableOpacity
+            onPress={() => router.back()}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <ChevronLeft size={24} color={theme.icon.primary} strokeWidth={2} />
+          </TouchableOpacity>
+        }
+      />
 
       {/* Divider */}
       <View className="h-px" style={{ backgroundColor: theme.border.subtle }} />
@@ -145,9 +199,9 @@ export function ConversationFeedbackScreen() {
         style={{ paddingBottom: Math.max(insets.bottom, 16) + 8 }}
       >
         <PrimaryButton
-          text="Về trang luyện nói"
+          text={isReviewMode ? "Làm lại" : "Tiếp tục"}
           variant="dark"
-          onPress={handleGoHome}
+          onPress={handleCTA}
         />
       </View>
     </View>
