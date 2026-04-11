@@ -42,12 +42,14 @@ export function PracticeSessionScreen() {
   const theme = Colors[colorScheme ?? "light"];
   const router = useRouter();
 
-  const { lessonId, sessionType, questionCount, itemTypes } =
+  const { lessonId, sessionType, preset, itemTypes, selectedVocabIds, selectedGrammarIds } =
     useLocalSearchParams<{
       lessonId: string;
       sessionType: string;
-      questionCount: string;
+      preset?: string;
       itemTypes: string;
+      selectedVocabIds?: string;
+      selectedGrammarIds?: string;
     }>();
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -79,12 +81,14 @@ export function PracticeSessionScreen() {
   }, [isSubmitting]);
 
   useEffect(() => {
-    if (lessonId && sessionType && questionCount && itemTypes) {
+    if (lessonId && sessionType && itemTypes) {
       startSession({
         lessonId,
         sessionType: sessionType as SessionType,
-        itemCount: parseInt(questionCount, 10),
+        ...(preset ? { preset: preset as "QUICK" | "STANDARD" | "FULL" } : {}),
         itemTypes: JSON.parse(itemTypes),
+        selectedVocabIds: selectedVocabIds ? JSON.parse(selectedVocabIds) : null,
+        selectedGrammarIds: selectedGrammarIds ? JSON.parse(selectedGrammarIds) : null,
       });
     }
   }, []);
@@ -246,7 +250,7 @@ export function PracticeSessionScreen() {
   const items = sessionData?.items ?? [];
   const session = sessionData?.session;
   const currentItem: Items | undefined = items[currentIndex];
-  const totalItems = session?.totalItems ?? parseInt(questionCount ?? "0", 10);
+  const totalItems = session?.totalItems ?? 0;
   const completedCount = currentIndex + (answerResult !== null ? 1 : 0);
   const progress = totalItems > 0 ? completedCount / totalItems : 0;
   const sessionTypeLabel =
