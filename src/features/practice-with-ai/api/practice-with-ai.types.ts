@@ -111,6 +111,7 @@ export interface Items {
   questionJapanese?: string;
   hint?: string;
   options: Options[];
+  correctMapping?: Record<string, number>;
 }
 
 /** Đáp án của câu hỏi */
@@ -118,6 +119,7 @@ export interface Options {
   id: number;
   text: string;
   side?: "LEFT" | "RIGHT";
+  isCorrect?: boolean;
 }
 
 // POST: /api/v1/learner/practice/sessions/{{sessionId}}/items/{{itemId}}/answer
