@@ -32,7 +32,7 @@ export function MissionItem({ mission, index }: MissionItemProps) {
           className="font-body text-base flex-1"
           style={{ color: theme.text.secondary }}
         >
-          {mission.titleVi}
+          {mission.title}
         </Text>
       </View>
 

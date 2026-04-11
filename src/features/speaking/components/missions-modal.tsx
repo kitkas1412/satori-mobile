@@ -46,7 +46,7 @@ function MissionItem({
           className="font-body text-base"
           style={{ color: theme.text.secondary, width: 235 }}
         >
-          {mission.titleVi}
+          {mission.title}
         </Text>
       </View>
 
