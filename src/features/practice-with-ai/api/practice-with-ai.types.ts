@@ -37,13 +37,48 @@ export interface LessonResponse {
   grammarPointCount: number;
 }
 
+// GET: /api/v1/learner/practice/lessons/:lessonId/items
+/** Một từ vựng trong bài học */
+export interface VocabItem {
+  id: string;
+  japaneseText: string;
+  reading: string;
+  meaningVi: string;
+  partOfSpeech: string | null;
+  mastery: string | null;
+}
+
+/** Một điểm ngữ pháp trong bài học */
+export interface GrammarItem {
+  id: string;
+  pattern: string;
+  meaningVi: string;
+  shortExplanation: string | null;
+  mastery: string | null;
+}
+
+/** Response cho danh sách nội dung bài học */
+export interface LessonItemsResponse {
+  vocabulary: VocabItem[];
+  grammar: GrammarItem[];
+  summary: {
+    totalVocab: number;
+    totalGrammar: number;
+    masteredVocab: number;
+    masteredGrammar: number;
+    needsReviewCount: number;
+  };
+}
+
 // POST: /api/v1/learner/practice/sessions
 /** Tham số khởi tạo session luyện tập với AI */
 export interface PracticeSessionRequest {
   lessonId: string;
   sessionType: SessionType;
-  itemCount: number;
+  preset?: "QUICK" | "STANDARD" | "FULL";
   itemTypes: ItemType[];
+  selectedVocabIds: string[] | null;
+  selectedGrammarIds: string[] | null;
 }
 
 /** Dữ liệu session trả về khi khởi tạo thành công */
@@ -76,6 +111,7 @@ export interface Items {
   questionJapanese?: string;
   hint?: string;
   options: Options[];
+  correctMapping?: Record<string, number>;
 }
 
 /** Đáp án của câu hỏi */
@@ -83,6 +119,7 @@ export interface Options {
   id: number;
   text: string;
   side?: "LEFT" | "RIGHT";
+  isCorrect?: boolean;
 }
 
 // POST: /api/v1/learner/practice/sessions/{{sessionId}}/items/{{itemId}}/answer
