@@ -197,13 +197,16 @@ export interface SendMessageResponse {
 /** Kết quả tổng hợp sau khi hoàn thành session: điểm số và đánh giá chi tiết */
 export interface FeedbackResultResponse {
   sessionId: string;
-  missionScore: number | null;
-  pronunciationScore: number | null;
-  languageScore: number | null;
-  overallScore: number | null;
+  missionScore: number;
+  pronunciationScore: number;
+  languageScore: number;
+  overallScore: number;
   missionDetails: MissionDetails[];
-  pronunciationSummary: string | null;
+  pronunciationSummary: PronunciationSummary | null;
   languageEvaluation: LanguageEvaluation | null;
+  newBadgesEarned: BadgeEarned[];
+  levelUp: LevelUp | null;
+  streakNotification: StreakNotification | null;
 }
 
 /** Chi tiết kết quả của một nhiệm vụ sau khi session kết thúc */
@@ -211,26 +214,79 @@ export interface MissionDetails {
   title: string;
   titleVi: string;
   titleJapanese: string;
-  status: MissionStatus;
+  status: string;
   progressPct: number;
   /** Giải thích của AI về lý do nhiệm vụ đạt/chưa đạt */
-  reasoning: string | null;
+  reasoning: string;
+}
+
+/** Tóm tắt phát âm tổng hợp sau session */
+export interface PronunciationSummary {
+  averageOverall: number;
+  averageAccuracy: number;
+  averageFluency: number;
+  averageProsody: number;
+  averagePitchAccent: number;
+  averageMoraTiming: number;
+  totalAssessed: number;
 }
 
 /** Đánh giá ngôn ngữ tổng hợp của AI sau session, gồm 4 chỉ số và nhận xét */
 export interface LanguageEvaluation {
   /** Điểm lưu loát (0–100) */
-  fluencyScore: number | null;
+  fluencyScore: number;
   /** Điểm chính xác ngữ pháp (0–100) */
-  accuracyScore: number | null;
+  accuracyScore: number;
   /** Điểm phong phú từ vựng (0–100) */
-  vocabularyScore: number | null;
+  vocabularyScore: number;
   /** Điểm sử dụng ngữ pháp (0–100) */
-  grammarScore: number | null;
+  grammarScore: number;
   /** Danh sách điểm mạnh AI ghi nhận */
   strengths: string[];
   /** Danh sách điểm cần cải thiện */
   improvements: string[];
   /** Nhận xét tổng hợp bằng văn bản */
-  summary: string | null;
+  summary: string;
+}
+
+/** Loại huy hiệu */
+export type BadgeType =
+  | "LEARNING_STREAK"
+  | "CONVERSATION_MASTER"
+  | "PRONUNCIATION_EXPERT"
+  | "VOCABULARY_BUILDER"
+  | "GRAMMAR_GURU"
+  | string;
+
+/** Huy hiệu mới được trao sau khi hoàn thành session */
+export interface BadgeEarned {
+  badgeId: string;
+  badgeName: string;
+  description: string;
+  badgeType: BadgeType;
+  iconUrl: string;
+  expReward: number;
+  earnedAt: string;
+  isFeatured: boolean;
+}
+
+/** Thông tin lên cấp sau khi hoàn thành session */
+export interface LevelUp {
+  previousLevel: number;
+  newLevel: number;
+  expEarned: number;
+  oldTotalExp: number;
+  totalExp: number;
+  expToNextLevel: number;
+  progressPercentage: number;
+  isLevelUp: boolean;
+}
+
+/** Thông báo chuỗi ngày học sau khi hoàn thành session */
+export interface StreakNotification {
+  is_first_activity_today: boolean;
+  current_streak: number;
+  longest_streak: number;
+  /** Định dạng YYYY-MM-DD */
+  streak_last_date: string;
 }
