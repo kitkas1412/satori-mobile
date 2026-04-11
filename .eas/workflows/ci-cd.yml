@@ -1,0 +1,13 @@
+name: CI/CD - OTA Update
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  ota_update:
+    type: update
+    params:
+      branch: production
+      message: Auto update
