@@ -7,8 +7,7 @@ on:
 
 jobs:
   ota_update:
-    name: OTA Update
-    runs-on: ubuntu-latest
-    steps:
-      - name: Push OTA update
-        run: eas update --branch production --message "Auto update" --non-interactive
+    type: update
+    params:
+      branch: production
+      message: Auto update
