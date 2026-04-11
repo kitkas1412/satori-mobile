@@ -1,7 +1,7 @@
 import { IconButton, ScreenHeader } from "@/components/ui";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { useNotifications } from "@/features/notification/hooks";
+import { useNotifications, useMarkReadNotification } from "@/features/notification/hooks";
 import { useRouter } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
 import { useCallback, useState } from "react";
@@ -31,6 +31,8 @@ export function NotificationScreen() {
     isFetchingNextPage,
     refetch,
   } = useNotifications();
+
+  const { mutate: markRead } = useMarkReadNotification();
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -95,7 +97,13 @@ export function NotificationScreen() {
         <FlatList
           data={notifications}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <NotificationItem item={item} theme={theme} />}
+          renderItem={({ item }) => (
+              <NotificationItem
+                item={item}
+                theme={theme}
+                onPress={() => markRead({ notificationIds: [item.id] })}
+              />
+            )}
           ListEmptyComponent={renderEmpty}
           ListFooterComponent={
             isFetchingNextPage ? (
