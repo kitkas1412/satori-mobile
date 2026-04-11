@@ -138,8 +138,8 @@ export function ChatbotPanel({
   return (
     <KeyboardAvoidingView
       className="flex-1"
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={keyboardOffset ?? 0}
+      behavior="padding"
+      keyboardVerticalOffset={Platform.OS === "ios" ? (keyboardOffset ?? 0) : 0}
     >
       {/* Header */}
       <View
