@@ -90,7 +90,7 @@ export function ChatbotPanel({
 
     if (!activeSessionId) {
       const courseId = profile?.enrolledClasses[0]?.courseId;
-      const jlptLevel = profile?.learningPreferences?.targetJlptLevel;
+      const jlptLevel = profile?.enrolledClasses?.[0]?.jlptLevel;
       if (!courseId || !jlptLevel) return;
       const session = await createSession({ courseId, jlptLevel });
       activeSessionId = session.sessionId;

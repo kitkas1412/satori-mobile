@@ -35,7 +35,7 @@ export default function ProfileTab() {
   const insets = useSafeAreaInsets();
 
   const enrolledClass = profile?.enrolledClasses?.[0];
-  const jlptLevel = profile?.learningPreferences?.targetJlptLevel;
+  const jlptLevel = profile?.enrolledClasses?.[0]?.jlptLevel;
 
   const initials = profile?.fullName
     ? profile.fullName
