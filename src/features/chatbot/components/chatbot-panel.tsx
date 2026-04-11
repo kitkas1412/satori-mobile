@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Colors } from "@/constants/theme";
-import { useProfile } from "@/hooks/api/use-profile";
+import { useProfile } from "@/features/profile-management/hooks";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useCreateChatSession, useSendMessage } from "@/features/chatbot/hooks";
 import { ChatbotMessageBubble } from "./chatbot-message-bubble";
@@ -90,7 +90,7 @@ export function ChatbotPanel({
 
     if (!activeSessionId) {
       const courseId = profile?.enrolledClasses[0]?.courseId;
-      const jlptLevel = profile?.learningPreferences?.targetJlptLevel;
+      const jlptLevel = profile?.enrolledClasses?.[0]?.jlptLevel;
       if (!courseId || !jlptLevel) return;
       const session = await createSession({ courseId, jlptLevel });
       activeSessionId = session.sessionId;

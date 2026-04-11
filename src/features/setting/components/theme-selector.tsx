@@ -18,7 +18,7 @@ export function ThemeSelector() {
 
   return (
     <View
-      className="mx-4 mb-4 px-6 py-4 rounded-2xl flex-row justify-between items-center"
+      className="px-6 py-4 rounded-2xl flex-row justify-between items-center"
       style={{
         backgroundColor: theme.background.surface,
         borderColor: theme.border.subtle,
