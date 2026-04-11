@@ -1,13 +1,12 @@
-name: CI/CD - OTA Update
+name: Send updates
 
 on:
   push:
-    branches:
-      - main
+    branches: ["main"]
 
 jobs:
-  ota_update:
+  send_updates:
+    name: Send updates
     type: update
     params:
-      branch: production
-      message: Auto update
+      channel: production
