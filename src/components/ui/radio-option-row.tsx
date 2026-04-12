@@ -4,11 +4,12 @@ import { Text, TouchableOpacity, View } from "react-native";
 
 interface RadioOptionRowProps {
   label: string;
+  subtitle?: string;
   selected: boolean;
   onPress: () => void;
 }
 
-export function RadioOptionRow({ label, selected, onPress }: RadioOptionRowProps) {
+export function RadioOptionRow({ label, subtitle, selected, onPress }: RadioOptionRowProps) {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
@@ -24,9 +25,16 @@ export function RadioOptionRow({ label, selected, onPress }: RadioOptionRowProps
       }}
     >
       <View className="px-4 py-3 flex-row items-center justify-between">
-        <Text className="font-body text-base" style={{ color: theme.text.primary }}>
-          {label}
-        </Text>
+        <View style={{ gap: 2 }}>
+          <Text className="font-body text-base" style={{ color: theme.text.primary }}>
+            {label}
+          </Text>
+          {subtitle && (
+            <Text className="font-body text-sm" style={{ color: theme.text.secondary }}>
+              {subtitle}
+            </Text>
+          )}
+        </View>
         <View
           style={{
             width: 20,

@@ -18,7 +18,9 @@ export function mapAssignmentToCardProps(a: Content): AssignmentCardProps {
   const subtitle =
     a.assignmentType === "QUIZ"
       ? `${a.questionCount} câu hỏi • Trắc nghiệm`
-      : "Bài viết";
+      : a.assignmentType === "TRANSLATION"
+        ? "Bài dịch"
+        : "Bài viết";
 
   // Định dạng ngày hạn nộp sang dd/MM/yyyy
   const date = new Date(a.dueDate);
