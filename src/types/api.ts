@@ -53,6 +53,7 @@ export interface EnrolledClass {
   classCode: string | null;
   courseId: string;
   courseName: string;
+  jlptLevel: string;
   startDate: string | null;
   endDate: string | null;
   status: string;

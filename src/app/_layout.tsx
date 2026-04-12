@@ -23,6 +23,7 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useColorScheme as useNativeWindColorScheme } from "nativewind";
 
 import { QueryProvider } from "@/components/providers/query-provider";
+import { ErrorOverlay } from "@/components/ui";
 import { useTokenValidation } from "@/features/authentication/hooks";
 import { useRegisterDeviceToken } from "@/features/notification/hooks";
 import { abandonSessionApi } from "@/features/speaking/api";
@@ -237,6 +238,10 @@ function RootLayoutNav() {
         options={{ headerShown: false, gestureEnabled: false }}
       />
       <Stack.Screen
+        name="creative-selection"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
         name="theme-selector"
         options={{ headerShown: false, gestureEnabled: false }}
       />
@@ -245,7 +250,23 @@ function RootLayoutNav() {
         options={{ headerShown: false, gestureEnabled: false }}
       />
       <Stack.Screen
+        name="edit-profile"
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
+      <Stack.Screen
+        name="edit-display-name"
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
+      <Stack.Screen
+        name="edit-gender"
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
+      <Stack.Screen
         name="notifications"
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
+      <Stack.Screen
+        name="achievements"
         options={{ headerShown: false, gestureEnabled: true }}
       />
     </Stack>
@@ -283,6 +304,7 @@ export default function RootLayout() {
         <RootLayoutNav />
         <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
       </ThemeProvider>
+      <ErrorOverlay />
     </QueryProvider>
   );
 }

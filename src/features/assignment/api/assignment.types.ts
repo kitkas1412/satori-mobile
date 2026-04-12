@@ -10,7 +10,7 @@ export interface LearnerClass {
 
 // GET /learner/assignments
 // Loại bài tập: trắc nghiệm hoặc bài viết
-export type AssignmentType = "QUIZ" | "WRITING";
+export type AssignmentType = "QUIZ" | "WRITING" | "TRANSLATION";
 
 // Trạng thái nộp bài của học viên
 export type LearnerSubmissionStatus =

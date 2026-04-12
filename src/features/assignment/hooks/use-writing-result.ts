@@ -6,6 +6,8 @@ import { Alert } from "react-native";
 import { useRouter } from "expo-router";
 
 import { useAssignmentStore } from "@/stores";
+import { extractApiError } from "@/lib/extract-api-error";
+import { useErrorOverlayStore } from "@/stores/error-overlay-store";
 import { cancelAssignmentApi } from "../api";
 
 export function useWritingResult() {
@@ -45,8 +47,8 @@ export function useWritingResult() {
                 pathname: "/assignment-writing",
                 params: { id: writingResult.assignmentId },
               });
-            } catch {
-              Alert.alert("Lỗi", "Không thể hủy nộp bài. Vui lòng thử lại.");
+            } catch (error) {
+              useErrorOverlayStore.getState().show(extractApiError(error));
             } finally {
               setIsCancelling(false);
             }

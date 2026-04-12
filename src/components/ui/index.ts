@@ -9,6 +9,8 @@ export { ProgressBar } from "./progress-bar";
 export { ScreenHeader } from "./screen-header";
 export { ScoreCircle } from "./score-circle";
 export { ScoreRing } from "./score-ring";
+export { RadioOptionRow } from "./radio-option-row";
 export { TextLink } from "./text-link";
 export { ScreenAsyncView } from "./screen-async-view";
 export { ImageViewerModal } from "./image-viewer-modal";
+export { ErrorOverlay } from "./error-overlay";
