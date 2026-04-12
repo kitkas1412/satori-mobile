@@ -1,15 +1,8 @@
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { Check } from "lucide-react-native";
-import { Image, Text, View } from "react-native";
+import { Image } from "expo-image";
+import { Text, View } from "react-native";
 import type { BadgeProgress } from "../api";
-
-const DOT_COLOR: Record<BadgeProgress["badgeType"], string> = {
-  LEARNING_STREAK: "#ef4444",
-  AI_SPEAKING_COUNT: "#6b3eec",
-  AI_PRACTICE_COUNT: "#16a34a",
-  LEARNING_LEVEL: "#d97706",
-};
 
 const LABEL: Record<BadgeProgress["badgeType"], string> = {
   LEARNING_STREAK: "ngày",
@@ -41,7 +34,7 @@ export function BadgeCard({ badge }: BadgeCardProps) {
         <Image
           source={{ uri: badge.iconUrl }}
           style={{ width: 48, height: 48 }}
-          resizeMode="contain"
+          contentFit="contain"
         />
       </View>
 
@@ -59,31 +52,13 @@ export function BadgeCard({ badge }: BadgeCardProps) {
           {badge.badgeName}
         </Text>
         <Text
-          style={{ fontSize: 9, color: "#9ca3af", textAlign: "center" }}
+          style={{ fontSize: 9, color: theme.text.tertiary, textAlign: "center" }}
           numberOfLines={2}
         >
           {badge.requirementValue} {LABEL[badge.badgeType]}
         </Text>
       </View>
 
-      {/* Earned dot indicator */}
-      {/*{badge.earned && (
-        <View
-          style={{
-            position: "absolute",
-            top: 8,
-            right: 8,
-            width: 16,
-            height: 16,
-            borderRadius: 8,
-            backgroundColor: DOT_COLOR[badge.badgeType],
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Check size={9} color="#fff" strokeWidth={3} />
-        </View>
-      )}*/}
     </View>
   );
 }
