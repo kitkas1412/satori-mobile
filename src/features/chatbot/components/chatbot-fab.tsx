@@ -197,7 +197,6 @@ export function ChatbotFab() {
             onClose={handleClose}
             onOpenHistory={() => setHistoryVisible(true)}
             loadedSession={loadedSession}
-            keyboardOffset={OPEN_Y + FAB_SIZE + 8}
           />
         </Animated.View>
 
