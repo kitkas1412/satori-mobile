@@ -1,8 +1,8 @@
 import {
-  BaseInput,
   IconButton,
   LoadingOverlay,
   PrimaryButton,
+  RadioOptionRow,
   ScreenHeader,
 } from "@/components/ui";
 import {
@@ -18,6 +18,12 @@ import { useState } from "react";
 import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+const DAILY_GOAL_OPTIONS = [
+  { value: 10, label: "Thông thường", subtitle: "10 phút/ngày" },
+  { value: 15, label: "Tiêu chuẩn", subtitle: "15 phút/ngày" },
+  { value: 20, label: "Nghiêm túc", subtitle: "20 phút/ngày" },
+] as const;
+
 export function EditDailyGoalScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
@@ -27,16 +33,15 @@ export function EditDailyGoalScreen() {
   const { data: prefs } = useLearningPreferences();
   const { mutate: updatePrefs, isPending } = useUpdateLearningPreferences();
 
-  const [value, setValue] = useState(
-    String(prefs?.dailyStudyGoalMinutes ?? ""),
+  const currentValue = prefs?.dailyStudyGoalMinutes;
+  const [selected, setSelected] = useState<number | null>(
+    DAILY_GOAL_OPTIONS.some((o) => o.value === currentValue) ? (currentValue ?? null) : null,
   );
 
-  const isValid = /^\d+$/.test(value) && Number(value) > 0;
-
   const handleConfirm = () => {
-    if (!isValid) return;
+    if (!selected) return;
     updatePrefs(
-      { dailyStudyGoalMinutes: Number(value) },
+      { dailyStudyGoalMinutes: selected },
       { onSuccess: () => router.back() },
     );
   };
@@ -57,15 +62,16 @@ export function EditDailyGoalScreen() {
           }
         />
 
-        <View className="flex-1 px-4">
-          <BaseInput
-            value={value}
-            onChangeText={setValue}
-            placeholder="Nhập số phút"
-            keyboardType="numeric"
-            autoFocus
-            rightAccessory={undefined}
-          />
+        <View className="flex-1 px-4" style={{ gap: 12 }}>
+          {DAILY_GOAL_OPTIONS.map((option) => (
+            <RadioOptionRow
+              key={option.value}
+              label={option.label}
+              subtitle={option.subtitle}
+              selected={selected === option.value}
+              onPress={() => setSelected(option.value)}
+            />
+          ))}
         </View>
 
         <View
@@ -77,7 +83,7 @@ export function EditDailyGoalScreen() {
           <PrimaryButton
             text="Xác nhận"
             onPress={handleConfirm}
-            disabled={!isValid || isPending}
+            disabled={!selected || isPending}
             loading={isPending}
           />
         </View>
