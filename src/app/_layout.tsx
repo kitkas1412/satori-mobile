@@ -294,6 +294,10 @@ function RootLayoutNav() {
         options={{ headerShown: false, gestureEnabled: true }}
       />
       <Stack.Screen
+        name="notification-settings"
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
+      <Stack.Screen
         name="notifications"
         options={{ headerShown: false, gestureEnabled: true }}
       />

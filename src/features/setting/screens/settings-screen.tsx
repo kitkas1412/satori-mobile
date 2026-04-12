@@ -16,7 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 const ACCOUNT_ROWS = [
   { label: "Cài đặt chung", route: "/general-settings" },
   { label: "Giao diện", route: "/theme-selector" },
-  { label: "Thông báo" },
+  { label: "Thông báo", route: "/notification-settings" },
 ];
 
 export function SettingsScreen() {
