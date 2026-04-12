@@ -40,7 +40,7 @@ export function useAssignmentNavigation() {
         } finally {
           setIsLoadingSubmission(false);
         }
-      } else if (item.assignmentType === "WRITING") {
+      } else if (item.assignmentType === "WRITING" || item.assignmentType === "TRANSLATION") {
         try {
           setIsLoadingSubmission(true);
           const submission = await getWritingSubmissionApi(
@@ -56,7 +56,7 @@ export function useAssignmentNavigation() {
       }
     } else if (
       item.learnerSubmissionStatus === "SUBMITTED" &&
-      item.assignmentType === "WRITING"
+      (item.assignmentType === "WRITING" || item.assignmentType === "TRANSLATION")
     ) {
       // Bài viết đã nộp nhưng chưa chấm — cho xem lại trang chi tiết bài nộp
       if (!item.learnerSubmissionId) {
@@ -79,7 +79,7 @@ export function useAssignmentNavigation() {
       Alert.alert("Bài tập đã quá hạn", "Bài tập này đã hết hạn nộp.");
     } else if (item.assignmentType === "QUIZ") {
       router.push({ pathname: "/assignment-quiz", params: { id: item.id } });
-    } else if (item.assignmentType === "WRITING") {
+    } else if (item.assignmentType === "WRITING" || item.assignmentType === "TRANSLATION") {
       router.push({ pathname: "/assignment-writing", params: { id: item.id } });
     }
   }
