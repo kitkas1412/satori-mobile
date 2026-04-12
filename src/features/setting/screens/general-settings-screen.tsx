@@ -34,19 +34,6 @@ const CONVERSATION_STYLE_LABELS: Record<string, string> = {
   casual: "Thông thường",
 };
 
-const TOPIC_LABELS: Record<string, string> = {
-  greetings: "Giao tiếp",
-  shopping: "Mua sắm",
-  food: "Ẩm thực",
-  travel: "Du lịch",
-  business: "Kinh doanh",
-  culture: "Văn hóa",
-};
-
-function formatReminderTime(time: string | null): string {
-  if (!time) return "—";
-  return time.slice(0, 5);
-}
 
 export function GeneralSettingsScreen() {
   const router = useRouter();
@@ -127,6 +114,7 @@ export function GeneralSettingsScreen() {
               }
               onChangePress={() => router.push("/edit-learning-pace")}
             />
+
           </View>
 
           {/* Card 2 — Ngôn ngữ & Hội thoại */}
@@ -163,54 +151,6 @@ export function GeneralSettingsScreen() {
             />
           </View>
 
-          {/* Card 3 — Chủ đề yêu thích */}
-          <View className="pb-2">
-            <Text
-              className="font-heading text-base mb-3"
-              style={{ color: theme.text.primary }}
-            >
-              Chủ đề yêu thích
-            </Text>
-
-            <ProfileRow
-              label="Chủ đề"
-              value={
-                prefs?.preferredTopics && prefs.preferredTopics.length > 0
-                  ? prefs.preferredTopics
-                      .map((t) => TOPIC_LABELS[t] ?? t)
-                      .join(", ")
-                  : "Chưa chọn"
-              }
-              onChangePress={() => router.push("/edit-topics")}
-            />
-          </View>
-
-          {/* Card 4 — Nhắc nhở */}
-          <View className="pb-2">
-            <Text
-              className="font-heading text-base mb-3"
-              style={{ color: theme.text.primary }}
-            >
-              Nhắc nhở
-            </Text>
-
-            <ProfileRow
-              label="Nhắc nhở streak"
-              value={prefs?.streakReminderEnabled ? "Bật" : "Tắt"}
-              onChangePress={() => router.push("/edit-reminder")}
-            />
-
-            {prefs?.streakReminderEnabled && (
-              <>
-                <View style={{ height: 8 }} />
-                <ProfileRow
-                  label="Giờ nhắc nhở"
-                  value={formatReminderTime(prefs.reminderTime)}
-                  onChangePress={() => router.push("/edit-reminder")}
-                />
-              </>
-            )}
-          </View>
         </ScreenAsyncView>
       </ScrollView>
     </View>

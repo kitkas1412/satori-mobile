@@ -19,9 +19,21 @@ import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const FORMALITY_OPTIONS = [
-  { value: "polite", label: "Lịch sự" },
-  { value: "casual", label: "Thân mật" },
-  { value: "formal", label: "Trang trọng" },
+  {
+    value: "polite",
+    label: "Phong cách lịch sự",
+    subtitle: "Phù hợp khi giao tiếp hàng ngày",
+  },
+  {
+    value: "casual",
+    label: "Phong cách thân mật",
+    subtitle: "Ngôn ngữ thoải mái, thân thiết",
+  },
+  {
+    value: "formal",
+    label: "Phong cách trang trọng",
+    subtitle: "Dùng trong môi trường chuyên nghiệp",
+  },
 ] as const;
 
 export function EditFormalityScreen() {
@@ -45,7 +57,10 @@ export function EditFormalityScreen() {
 
   return (
     <>
-      <View className="flex-1" style={{ backgroundColor: theme.background.page }}>
+      <View
+        className="flex-1"
+        style={{ backgroundColor: theme.background.page }}
+      >
         <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
 
         <ScreenHeader
@@ -64,6 +79,7 @@ export function EditFormalityScreen() {
             <RadioOptionRow
               key={option.value}
               label={option.label}
+              subtitle={option.subtitle}
               selected={selected === option.value}
               onPress={() => setSelected(option.value)}
             />
