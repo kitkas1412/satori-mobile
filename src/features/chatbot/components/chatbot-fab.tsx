@@ -18,6 +18,8 @@ import {
   getSessionMessagesApi,
   reopenChatSessionApi,
 } from "@/features/chatbot/api";
+import { extractApiError } from "@/lib/extract-api-error";
+import { useErrorOverlayStore } from "@/stores/error-overlay-store";
 import { ChatHistoryDrawer } from "./chatbot-history-drawer";
 import { ChatbotPanel } from "./chatbot-panel";
 
@@ -67,19 +69,26 @@ export function ChatbotFab() {
 
   const handleSelectSession = async (sessionId: string) => {
     setHistoryVisible(false);
-    const [, apiMessages] = await Promise.all([
-      reopenChatSessionApi(sessionId),
-      getSessionMessagesApi(sessionId),
-    ]);
-    setLoadedSession({
-      sessionId,
-      messages: apiMessages.map((m) => ({
-        id: m.messageId,
-        text: m.content,
-        timestamp: formatTimestamp(m.createdAt),
-        role: m.role === "USER" ? "user" : "ai",
-      })),
-    });
+    try {
+      const [, apiMessages] = await Promise.all([
+        reopenChatSessionApi(sessionId),
+        getSessionMessagesApi(sessionId),
+      ]);
+      setLoadedSession({
+        sessionId,
+        messages: apiMessages.map((m) => ({
+          id: m.messageId,
+          text: m.content,
+          timestamp: formatTimestamp(m.createdAt),
+          role: m.role === "USER" ? "user" : "ai",
+        })),
+      });
+    } catch (error) {
+      useErrorOverlayStore.getState().show(
+        extractApiError(error, "Không thể tải cuộc trò chuyện. Vui lòng thử lại."),
+        () => {}, // Ở lại chat panel, không navigate
+      );
+    }
   };
 
   const handleNewChat = () => {
