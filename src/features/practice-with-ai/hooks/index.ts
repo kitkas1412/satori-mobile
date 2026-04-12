@@ -1,3 +1,4 @@
+export { useLessonItems } from "./use-lesson-items";
 export { practiceWithAiQueryKeys, useLessons } from "./use-lessons";
 export { usePracticeSession } from "./use-practice-session";
 export {

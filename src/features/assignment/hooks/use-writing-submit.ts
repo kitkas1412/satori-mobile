@@ -1,7 +1,6 @@
 // Hook nộp bài viết: gọi API upload ảnh, invalidate cache danh sách bài tập,
 // lưu kết quả vào store và điều hướng đến màn hình kết quả bài viết.
 
-import { Alert } from "react-native";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import type { ImagePickerAsset } from "expo-image-picker";
@@ -40,9 +39,6 @@ export function useWritingSubmit({
       // Lưu kết quả vào store để màn hình kết quả đọc mà không cần gọi API lại
       setWritingResult(data);
       router.replace("/assignment-writing-result");
-    },
-    onError: () => {
-      Alert.alert("Lỗi", "Không thể nộp bài. Vui lòng thử lại.");
     },
   });
 

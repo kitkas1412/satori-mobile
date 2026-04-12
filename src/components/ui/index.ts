@@ -13,3 +13,4 @@ export { RadioOptionRow } from "./radio-option-row";
 export { TextLink } from "./text-link";
 export { ScreenAsyncView } from "./screen-async-view";
 export { ImageViewerModal } from "./image-viewer-modal";
+export { ErrorOverlay } from "./error-overlay";

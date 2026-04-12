@@ -140,12 +140,12 @@ export default function SpeakingScreen() {
             ListHeaderComponent={
               <>
                 {/*
-                 * Banner free-talk: lấy targetJlptLevel từ profile để truyền vào session.
-                 * Nếu chưa cài đặt mục tiêu JLPT thì không điều hướng.
+                 * Banner free-talk: lấy jlptLevel từ lớp đang học để truyền vào session.
+                 * Nếu chưa đăng ký lớp thì không điều hướng.
                  */}
                 <ConversationBanner
                   onPress={() => {
-                    const jlptLevel = profile?.learningPreferences?.targetJlptLevel;
+                    const jlptLevel = profile?.enrolledClasses?.[0]?.jlptLevel;
                     if (!jlptLevel) return;
                     router.push({
                       pathname: "/conversation-practice",

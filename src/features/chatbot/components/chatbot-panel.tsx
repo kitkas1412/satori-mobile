@@ -15,6 +15,8 @@ import { Colors } from "@/constants/theme";
 import { useProfile } from "@/features/profile-management/hooks";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useCreateChatSession, useSendMessage } from "@/features/chatbot/hooks";
+import { extractApiError } from "@/lib/extract-api-error";
+import { useErrorOverlayStore } from "@/stores/error-overlay-store";
 import { ChatbotMessageBubble } from "./chatbot-message-bubble";
 
 interface Message {
@@ -90,11 +92,19 @@ export function ChatbotPanel({
 
     if (!activeSessionId) {
       const courseId = profile?.enrolledClasses[0]?.courseId;
-      const jlptLevel = profile?.learningPreferences?.targetJlptLevel;
+      const jlptLevel = profile?.enrolledClasses?.[0]?.jlptLevel;
       if (!courseId || !jlptLevel) return;
-      const session = await createSession({ courseId, jlptLevel });
-      activeSessionId = session.sessionId;
-      setSessionId(activeSessionId);
+      try {
+        const session = await createSession({ courseId, jlptLevel });
+        activeSessionId = session.sessionId;
+        setSessionId(activeSessionId);
+      } catch (error) {
+        useErrorOverlayStore.getState().show(
+          extractApiError(error, "Không thể khởi tạo cuộc trò chuyện. Vui lòng thử lại."),
+          () => {}, // Ở lại chat, không navigate
+        );
+        return;
+      }
     }
 
     setMessage("");
@@ -123,6 +133,11 @@ export function ChatbotPanel({
           role: "ai",
         },
       ]);
+    } catch (error) {
+      useErrorOverlayStore.getState().show(
+        extractApiError(error, "Không thể gửi tin nhắn. Vui lòng thử lại."),
+        () => {}, // Ở lại chat, không navigate
+      );
     } finally {
       setIsAiLoading(false);
     }
@@ -138,8 +153,8 @@ export function ChatbotPanel({
   return (
     <KeyboardAvoidingView
       className="flex-1"
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={keyboardOffset ?? 0}
+      behavior="padding"
+      keyboardVerticalOffset={Platform.OS === "ios" ? (keyboardOffset ?? 0) : 0}
     >
       {/* Header */}
       <View

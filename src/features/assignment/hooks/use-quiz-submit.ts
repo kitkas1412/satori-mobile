@@ -1,7 +1,6 @@
 // Hook tổng hợp toàn bộ logic nộp bài trắc nghiệm:
 // build payload đáp án, tính thời gian, gọi API, lưu kết quả vào store và điều hướng.
 
-import { Alert } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 
@@ -55,9 +54,6 @@ export function useQuizSubmit({
           // Làm mới danh sách bài tập để cập nhật trạng thái bài vừa nộp
           queryClient.invalidateQueries({ queryKey: ["assignments"] });
           router.push("/assignment-result");
-        },
-        onError: () => {
-          Alert.alert("Lỗi", "Không thể nộp bài. Vui lòng thử lại.");
         },
       },
     );

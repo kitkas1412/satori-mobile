@@ -6,5 +6,7 @@ export function useCreateChatSession() {
   return useMutation({
     mutationFn: (request: CreateChatSessionRequest) =>
       createChatSessionApi(request),
+    // Component tự xử lý lỗi với onBack phù hợp — tránh global overlay router.back()
+    meta: { suppressGlobalError: true },
   });
 }
