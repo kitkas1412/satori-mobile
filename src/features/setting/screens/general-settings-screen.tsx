@@ -1,6 +1,6 @@
 import { IconButton, ScreenAsyncView, ScreenHeader } from "@/components/ui";
 import { ProfileRow } from "@/features/profile-management/components";
-import { useProfile } from "@/features/profile-management/hooks";
+import { useLearningPreferences } from "@/features/setting/hooks";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useRouter } from "expo-router";
@@ -53,9 +53,7 @@ export function GeneralSettingsScreen() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
-  const { data: profile, isLoading, isError } = useProfile();
-
-  const prefs = profile?.learningPreferences;
+  const { data: prefs, isLoading, isError } = useLearningPreferences();
 
   return (
     <View className="flex-1" style={{ backgroundColor: theme.background.page }}>
@@ -76,7 +74,6 @@ export function GeneralSettingsScreen() {
         className="flex-1"
         contentContainerStyle={{
           paddingHorizontal: 16,
-          paddingTop: 16,
           paddingBottom: insets.bottom + 24,
           gap: 12,
         }}
@@ -88,155 +85,131 @@ export function GeneralSettingsScreen() {
           emptyText="Chưa có cài đặt học tập."
         >
           {/* Card 1 — Mục tiêu học tập */}
-          <View
-            className="rounded-2xl overflow-hidden"
-            style={{
-              backgroundColor: theme.background.surface,
-              borderWidth: 1,
-              borderColor: theme.border.subtle,
-            }}
-          >
-            <View className="px-4 pt-4 pb-2">
-              <Text
-                className="font-heading text-base mb-3"
-                style={{ color: theme.text.primary }}
-              >
-                Mục tiêu học tập
-              </Text>
+          <View className="pb-2">
+            <Text
+              className="font-heading text-base mb-3"
+              style={{ color: theme.text.primary }}
+            >
+              Mục tiêu học tập
+            </Text>
 
-              <ProfileRow
-                label="Mục tiêu học mỗi ngày"
-                value={prefs?.dailyStudyGoalMinutes != null ? `${prefs.dailyStudyGoalMinutes} phút` : "—"}
-              />
+            <ProfileRow
+              label="Mục tiêu học mỗi ngày"
+              value={
+                prefs?.dailyStudyGoalMinutes != null
+                  ? `${prefs.dailyStudyGoalMinutes} phút`
+                  : "—"
+              }
+              onChangePress={() => router.push("/edit-daily-goal")}
+            />
 
-              <View style={{ height: 8 }} />
+            <View style={{ height: 8 }} />
 
-              <ProfileRow
-                label="Thời gian học ưa thích"
-                value={prefs?.preferredStudyTime ? (STUDY_TIME_LABELS[prefs.preferredStudyTime] ?? prefs.preferredStudyTime) : "—"}
-              />
+            <ProfileRow
+              label="Thời gian học ưa thích"
+              value={
+                prefs?.preferredStudyTime
+                  ? (STUDY_TIME_LABELS[prefs.preferredStudyTime] ??
+                    prefs.preferredStudyTime)
+                  : "—"
+              }
+              onChangePress={() => router.push("/edit-study-time")}
+            />
 
-              <View style={{ height: 8 }} />
+            <View style={{ height: 8 }} />
 
-              <ProfileRow
-                label="Tốc độ học"
-                value={prefs?.learningPace ? (PACE_LABELS[prefs.learningPace] ?? prefs.learningPace) : "—"}
-              />
-            </View>
+            <ProfileRow
+              label="Tốc độ học"
+              value={
+                prefs?.learningPace
+                  ? (PACE_LABELS[prefs.learningPace] ?? prefs.learningPace)
+                  : "—"
+              }
+              onChangePress={() => router.push("/edit-learning-pace")}
+            />
           </View>
 
           {/* Card 2 — Ngôn ngữ & Hội thoại */}
-          <View
-            className="rounded-2xl overflow-hidden"
-            style={{
-              backgroundColor: theme.background.surface,
-              borderWidth: 1,
-              borderColor: theme.border.subtle,
-            }}
-          >
-            <View className="px-4 pt-4 pb-2">
-              <Text
-                className="font-heading text-base mb-3"
-                style={{ color: theme.text.primary }}
-              >
-                Ngôn ngữ & Hội thoại
-              </Text>
+          <View className="pb-2">
+            <Text
+              className="font-heading text-base mb-3"
+              style={{ color: theme.text.primary }}
+            >
+              Ngôn ngữ & Hội thoại
+            </Text>
 
-              <ProfileRow
-                label="Phong cách ngôn ngữ"
-                value={prefs?.preferredFormality ? (FORMALITY_LABELS[prefs.preferredFormality] ?? prefs.preferredFormality) : "—"}
-              />
+            <ProfileRow
+              label="Phong cách ngôn ngữ"
+              value={
+                prefs?.preferredFormality
+                  ? (FORMALITY_LABELS[prefs.preferredFormality] ??
+                    prefs.preferredFormality)
+                  : "—"
+              }
+              onChangePress={() => router.push("/edit-formality")}
+            />
 
-              <View style={{ height: 8 }} />
+            <View style={{ height: 8 }} />
 
-              <ProfileRow
-                label="Phong cách hội thoại"
-                value={prefs?.conversationStyle ? (CONVERSATION_STYLE_LABELS[prefs.conversationStyle] ?? prefs.conversationStyle) : "—"}
-              />
-            </View>
+            <ProfileRow
+              label="Phong cách hội thoại"
+              value={
+                prefs?.conversationStyle
+                  ? (CONVERSATION_STYLE_LABELS[prefs.conversationStyle] ??
+                    prefs.conversationStyle)
+                  : "—"
+              }
+              onChangePress={() => router.push("/edit-conversation-style")}
+            />
           </View>
 
           {/* Card 3 — Chủ đề yêu thích */}
-          <View
-            className="rounded-2xl overflow-hidden"
-            style={{
-              backgroundColor: theme.background.surface,
-              borderWidth: 1,
-              borderColor: theme.border.subtle,
-            }}
-          >
-            <View className="px-4 py-4">
-              <Text
-                className="font-heading text-base mb-3"
-                style={{ color: theme.text.primary }}
-              >
-                Chủ đề yêu thích
-              </Text>
+          <View className="pb-2">
+            <Text
+              className="font-heading text-base mb-3"
+              style={{ color: theme.text.primary }}
+            >
+              Chủ đề yêu thích
+            </Text>
 
-              {prefs?.preferredTopics && prefs.preferredTopics.length > 0 ? (
-                <View className="flex-row flex-wrap" style={{ gap: 8 }}>
-                  {prefs.preferredTopics.map((topic) => (
-                    <View
-                      key={topic}
-                      className="rounded-full px-3 py-1"
-                      style={{
-                        backgroundColor: theme.background.page,
-                        borderWidth: 1,
-                        borderColor: theme.border.subtle,
-                      }}
-                    >
-                      <Text
-                        className="font-body text-sm"
-                        style={{ color: theme.text.secondary }}
-                      >
-                        {TOPIC_LABELS[topic] ?? topic}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-              ) : (
-                <Text
-                  className="font-body text-sm"
-                  style={{ color: theme.text.secondary }}
-                >
-                  Chưa chọn chủ đề
-                </Text>
-              )}
-            </View>
+            <ProfileRow
+              label="Chủ đề"
+              value={
+                prefs?.preferredTopics && prefs.preferredTopics.length > 0
+                  ? prefs.preferredTopics
+                      .map((t) => TOPIC_LABELS[t] ?? t)
+                      .join(", ")
+                  : "Chưa chọn"
+              }
+              onChangePress={() => router.push("/edit-topics")}
+            />
           </View>
 
           {/* Card 4 — Nhắc nhở */}
-          <View
-            className="rounded-2xl overflow-hidden"
-            style={{
-              backgroundColor: theme.background.surface,
-              borderWidth: 1,
-              borderColor: theme.border.subtle,
-            }}
-          >
-            <View className="px-4 pt-4 pb-2">
-              <Text
-                className="font-heading text-base mb-3"
-                style={{ color: theme.text.primary }}
-              >
-                Nhắc nhở
-              </Text>
+          <View className="pb-2">
+            <Text
+              className="font-heading text-base mb-3"
+              style={{ color: theme.text.primary }}
+            >
+              Nhắc nhở
+            </Text>
 
-              <ProfileRow
-                label="Nhắc nhở streak"
-                value={prefs?.streakReminderEnabled ? "Bật" : "Tắt"}
-              />
+            <ProfileRow
+              label="Nhắc nhở streak"
+              value={prefs?.streakReminderEnabled ? "Bật" : "Tắt"}
+              onChangePress={() => router.push("/edit-reminder")}
+            />
 
-              {prefs?.streakReminderEnabled && (
-                <>
-                  <View style={{ height: 8 }} />
-                  <ProfileRow
-                    label="Giờ nhắc nhở"
-                    value={formatReminderTime(prefs.reminderTime)}
-                  />
-                </>
-              )}
-            </View>
+            {prefs?.streakReminderEnabled && (
+              <>
+                <View style={{ height: 8 }} />
+                <ProfileRow
+                  label="Giờ nhắc nhở"
+                  value={formatReminderTime(prefs.reminderTime)}
+                  onChangePress={() => router.push("/edit-reminder")}
+                />
+              </>
+            )}
           </View>
         </ScreenAsyncView>
       </ScrollView>

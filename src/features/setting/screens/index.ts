@@ -1,3 +1,10 @@
 export { SettingsScreen } from "./settings-screen";
 export { ThemeSelectorScreen } from "./theme-selector-screen";
 export { GeneralSettingsScreen } from "./general-settings-screen";
+export { EditDailyGoalScreen } from "./edit-daily-goal-screen";
+export { EditStudyTimeScreen } from "./edit-study-time-screen";
+export { EditLearningPaceScreen } from "./edit-learning-pace-screen";
+export { EditFormalityScreen } from "./edit-formality-screen";
+export { EditConversationStyleScreen } from "./edit-conversation-style-screen";
+export { EditTopicsScreen } from "./edit-topics-screen";
+export { EditReminderScreen } from "./edit-reminder-screen";
