@@ -2,6 +2,7 @@ import { BellButton, LoadingOverlay, ScreenHeader } from "@/components/ui";
 import { Colors } from "@/constants/theme";
 import { AssignmentCard } from "@/features/assignment/components/assignment-card";
 import { ChatbotFab } from "@/features/chatbot/components";
+import { useProfile } from "@/features/profile-management/hooks";
 import { StatusBar } from "expo-status-bar";
 import {
   useAssignmentNavigation,
@@ -21,6 +22,7 @@ import { ChevronRight } from "lucide-react-native";
 import { useCallback } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useAuthStore } from "@/stores";
 
 function UpcomingAssignments() {
   const colorScheme = useColorScheme();
@@ -87,6 +89,14 @@ export default function HomeScreen() {
   const { isFetching: isCurrentFetching } = useStreakCurrent();
   const { isFetching: isHistoryFetching } = useStreakHistory(7);
   const isLoading = isCurrentFetching || isHistoryFetching;
+  const user = useAuthStore((state) => state.user);
+  const { data: profile } = useProfile();
+  const isBlocked = (() => {
+    if (user?.status === "INACTIVE") return true;
+    const classStatus = profile?.enrolledClasses[0]?.status;
+    if (classStatus === "not_started" || classStatus === "closed") return true;
+    return false;
+  })();
 
   useFocusEffect(
     useCallback(() => {
@@ -114,7 +124,7 @@ export default function HomeScreen() {
         <StreakCard />
         <UpcomingAssignments />
       </ScrollView>
-      <ChatbotFab />
+      {!isBlocked && <ChatbotFab />}
     </View>
   );
 }

@@ -347,7 +347,7 @@ export default function PracticeTab() {
           }, 350);
         }}
       />
-      {!(activeTab === "ai" && blockedMessage) && <ChatbotFab />}
+      {!blockedMessage && <ChatbotFab />}
     </View>
   );
 }
