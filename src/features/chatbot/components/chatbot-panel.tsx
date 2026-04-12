@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from "react";
 import {
   FlatList,
   Keyboard,
-  KeyboardAvoidingView,
   Platform,
   Pressable,
   Text,
@@ -37,20 +36,19 @@ interface ChatbotPanelProps {
   onClose: () => void;
   onOpenHistory: () => void;
   loadedSession?: LoadedSession;
-  keyboardOffset?: number;
 }
 
 export function ChatbotPanel({
   onClose,
   onOpenHistory,
   loadedSession,
-  keyboardOffset,
 }: ChatbotPanelProps) {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
   const [message, setMessage] = useState("");
-  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const keyboardVisible = keyboardHeight > 0;
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isAiLoading, setIsAiLoading] = useState(false);
@@ -67,11 +65,13 @@ export function ChatbotPanel({
   }, [loadedSession]);
 
   useEffect(() => {
-    const show = Keyboard.addListener("keyboardDidShow", () =>
-      setKeyboardVisible(true),
+    const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+    const show = Keyboard.addListener(showEvent, (e) =>
+      setKeyboardHeight(e.endCoordinates.height),
     );
-    const hide = Keyboard.addListener("keyboardDidHide", () =>
-      setKeyboardVisible(false),
+    const hide = Keyboard.addListener(hideEvent, () =>
+      setKeyboardHeight(0),
     );
     return () => {
       show.remove();
@@ -151,11 +151,7 @@ export function ChatbotPanel({
     : messages;
 
   return (
-    <KeyboardAvoidingView
-      className="flex-1"
-      behavior="padding"
-      keyboardVerticalOffset={Platform.OS === "ios" ? (keyboardOffset ?? 0) : 0}
-    >
+    <View className="flex-1" style={{ paddingBottom: keyboardHeight }}>
       {/* Header */}
       <View
         className="flex-row items-center px-4 py-4 gap-3"
@@ -258,6 +254,6 @@ export function ChatbotPanel({
           <Send size={18} color={theme.icon.onBrand} />
         </Pressable>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
