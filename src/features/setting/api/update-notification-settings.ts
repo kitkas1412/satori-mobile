@@ -9,7 +9,7 @@ export async function updateNotificationSettings(
   data: UpdateNotificationSettingsRequest,
 ): Promise<NotificationSettings> {
   const response = await api.put<ApiResponse<NotificationSettings>>(
-    "/api/v1/notifications/preferences",
+    "/notifications/preferences",
     data,
   );
   return response.data.data;
