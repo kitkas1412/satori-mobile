@@ -2,7 +2,7 @@
   "expo": {
     "name": "Satori Nihongo",
     "slug": "satori-nihongo",
-    "version": "1.0.0",
+    "version": "1.1.2",
     "orientation": "portrait",
     "icon": "./assets/images/satori-icon.png",
     "scheme": "satorimobile",

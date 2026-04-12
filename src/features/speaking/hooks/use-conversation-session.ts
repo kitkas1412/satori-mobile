@@ -12,6 +12,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Alert, AppState, type AppStateStatus } from "react-native";
+import { extractApiError } from "@/lib/extract-api-error";
+import { useErrorOverlayStore } from "@/stores/error-overlay-store";
 import {
   abandonSessionApi,
   completeSessionApi,
@@ -84,9 +86,11 @@ export function useConversationSession() {
           }
         }
         if (!cancelledRef.current) setTurnState("USER_TURN");
-      } catch {
-        Alert.alert("Lỗi", "Không thể bắt đầu buổi học. Vui lòng thử lại.");
-        router.back();
+      } catch (error) {
+        useErrorOverlayStore.getState().show(
+          extractApiError(error, "Không thể bắt đầu buổi học. Vui lòng thử lại."),
+          () => router.back(),
+        );
       } finally {
         setIsInitializing(false);
       }
@@ -181,8 +185,11 @@ export function useConversationSession() {
           await playAssistantMessage(msg.content, msg.audioUrl).catch(() => {});
         }
         if (!cancelledRef.current) setTurnState("USER_TURN");
-      } catch {
-        Alert.alert("Lỗi", "Không thể gửi tin nhắn. Vui lòng thử lại.");
+      } catch (error) {
+        useErrorOverlayStore.getState().show(
+          extractApiError(error, "Không thể gửi tin nhắn. Vui lòng thử lại."),
+          () => {}, // Ở lại session, không navigate
+        );
         setTurnState("USER_TURN");
       }
     },
@@ -201,8 +208,10 @@ export function useConversationSession() {
       setFeedback(feedback);
       queryClient.invalidateQueries({ queryKey: ["speaking", "conversations"] });
       queryClient.invalidateQueries({ queryKey: speakingQueryKeys.topics });
-    } catch {
-      Alert.alert("Lỗi", "Không thể hoàn thành buổi học. Vui lòng thử lại.");
+    } catch (error) {
+      useErrorOverlayStore.getState().show(
+        extractApiError(error, "Không thể hoàn thành buổi học. Vui lòng thử lại."),
+      );
     } finally {
       await AsyncStorage.removeItem(ACTIVE_SESSION_STORAGE_KEY);
       setIsCompleting(false);
@@ -253,7 +262,10 @@ export function useConversationSession() {
             await AsyncStorage.removeItem(ACTIVE_SESSION_STORAGE_KEY);
             clearSession();
             router.replace("/(tabs)/speaking");
-            Alert.alert("Buổi học đã kết thúc", "Buổi học đã kết thúc do không hoạt động.");
+            useErrorOverlayStore.getState().show(
+              "Buổi học đã kết thúc do không hoạt động.",
+              () => {}, // Đã navigate, chỉ dismiss overlay
+            );
           }
         }
       }
