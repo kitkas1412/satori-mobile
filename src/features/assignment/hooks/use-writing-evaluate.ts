@@ -1,7 +1,6 @@
 // Hook gọi AI đánh giá bài viết trước khi nộp.
 // Gọi API evaluate, trả kết quả feedback qua callback onSuccess.
 
-import { Alert } from "react-native";
 import { useMutation } from "@tanstack/react-query";
 import type { ImagePickerAsset } from "expo-image-picker";
 
@@ -33,9 +32,6 @@ export function useWritingEvaluate({
       ),
     onSuccess: (data) => {
       onSuccess(data.feedback);
-    },
-    onError: () => {
-      Alert.alert("Lỗi", "Không thể đánh giá bài. Vui lòng thử lại.");
     },
   });
 

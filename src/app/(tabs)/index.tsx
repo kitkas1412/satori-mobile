@@ -1,6 +1,7 @@
 import { BellButton, LoadingOverlay, ScreenHeader } from "@/components/ui";
 import { Colors } from "@/constants/theme";
 import { AssignmentCard } from "@/features/assignment/components/assignment-card";
+import { ChatbotFab } from "@/features/chatbot/components";
 import { StatusBar } from "expo-status-bar";
 import {
   useAssignmentNavigation,
@@ -113,6 +114,7 @@ export default function HomeScreen() {
         <StreakCard />
         <UpcomingAssignments />
       </ScrollView>
+      <ChatbotFab />
     </View>
   );
 }

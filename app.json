@@ -1,8 +1,8 @@
 {
   "expo": {
     "name": "Satori Nihongo",
-    "slug": "satori-mobile",
-    "version": "1.0.0",
+    "slug": "satori-nihongo",
+    "version": "1.1.2",
     "orientation": "portrait",
     "icon": "./assets/images/satori-icon.png",
     "scheme": "satorimobile",
@@ -31,6 +31,10 @@
         "android.permission.RECORD_AUDIO",
         "android.permission.MODIFY_AUDIO_SETTINGS",
         "android.permission.CAMERA",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.CAMERA",
         "android.permission.POST_NOTIFICATIONS"
       ]
     },
@@ -39,6 +43,12 @@
       "favicon": "./assets/images/satori-icon.png"
     },
     "plugins": [
+      [
+        "expo-updates",
+        {
+          "checkAutomatically": "ON_LOAD"
+        }
+      ],
       "expo-router",
       [
         "expo-splash-screen",
@@ -72,7 +82,8 @@
           "photosPermission": "Satori Nihongo cần quyền truy cập thư viện ảnh để bạn có thể tải lên bài làm.",
           "cameraPermission": "Satori Nihongo cần quyền truy cập camera để bạn có thể chụp ảnh bài làm."
         }
-      ]
+      ],
+      "./plugins/withoutIosPushNotifications.js"
     ],
     "experiments": {
       "typedRoutes": true,
@@ -81,8 +92,15 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "cd00c474-0edb-45a4-8c3c-615f74f59577"
+        "projectId": "11faa6f1-3968-4362-a94d-049a3da3463d"
       }
+    },
+    "owner": "satori-nihongo",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/11faa6f1-3968-4362-a94d-049a3da3463d"
     }
   }
 }

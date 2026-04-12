@@ -10,5 +10,7 @@ export function useSendMessage() {
       sessionId: string;
       message: string;
     }) => sendMessageApi(sessionId, { message }),
+    // Component tự xử lý lỗi với onBack phù hợp — tránh global overlay router.back()
+    meta: { suppressGlobalError: true },
   });
 }

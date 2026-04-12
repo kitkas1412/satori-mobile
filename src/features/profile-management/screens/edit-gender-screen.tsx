@@ -1,5 +1,5 @@
 import { IconButton, LoadingOverlay, PrimaryButton, RadioOptionRow, ScreenHeader } from "@/components/ui";
-import { useProfile, useUpdateProfile } from "@/hooks/api/use-profile";
+import { useProfile, useUpdateProfile } from "@/features/profile-management/hooks";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
 import { useRouter } from "expo-router";

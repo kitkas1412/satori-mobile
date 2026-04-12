@@ -42,21 +42,22 @@ export function PracticeSessionScreen() {
   const theme = Colors[colorScheme ?? "light"];
   const router = useRouter();
 
-  const { lessonId, sessionType, questionCount, itemTypes } =
+  const { lessonId, sessionType, preset, itemTypes, selectedVocabIds, selectedGrammarIds } =
     useLocalSearchParams<{
       lessonId: string;
       sessionType: string;
-      questionCount: string;
+      preset?: string;
       itemTypes: string;
+      selectedVocabIds?: string;
+      selectedGrammarIds?: string;
     }>();
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOptionId, setSelectedOptionId] = useState<number | null>(null);
   const [selectedWordIds, setSelectedWordIds] = useState<number[]>([]);
-  const [matchedPairs, setMatchedPairs] = useState<
+  const [confirmedMatchingPairs, setConfirmedMatchingPairs] = useState<
     { leftId: number; rightId: number }[]
   >([]);
-  const [selectedLeftId, setSelectedLeftId] = useState<number | null>(null);
   const [streak, setStreak] = useState(0);
   const [showHint, setShowHint] = useState(false);
   const [answerResult, setAnswerResult] = useState<AnswerResponse | null>(null);
@@ -79,12 +80,14 @@ export function PracticeSessionScreen() {
   }, [isSubmitting]);
 
   useEffect(() => {
-    if (lessonId && sessionType && questionCount && itemTypes) {
+    if (lessonId && sessionType && itemTypes) {
       startSession({
         lessonId,
         sessionType: sessionType as SessionType,
-        itemCount: parseInt(questionCount, 10),
+        ...(preset ? { preset: preset as "QUICK" | "STANDARD" | "FULL" } : {}),
         itemTypes: JSON.parse(itemTypes),
+        selectedVocabIds: selectedVocabIds ? JSON.parse(selectedVocabIds) : null,
+        selectedGrammarIds: selectedGrammarIds ? JSON.parse(selectedGrammarIds) : null,
       });
     }
   }, []);
@@ -95,27 +98,8 @@ export function PracticeSessionScreen() {
     );
   }
 
-  function handleSelectLeft(id: number) {
-    const isPaired = matchedPairs.some((p) => p.leftId === id);
-    if (isPaired) {
-      setMatchedPairs((prev) => prev.filter((p) => p.leftId !== id));
-      return;
-    }
-    setSelectedLeftId((prev) => (prev === id ? null : id));
-  }
-
-  function handleSelectRight(id: number) {
-    const isPaired = matchedPairs.some((p) => p.rightId === id);
-    if (isPaired) {
-      setMatchedPairs((prev) => prev.filter((p) => p.rightId !== id));
-      return;
-    }
-    if (selectedLeftId === null) return;
-    setMatchedPairs((prev) => [
-      ...prev,
-      { leftId: selectedLeftId, rightId: id },
-    ]);
-    setSelectedLeftId(null);
+  function handleMatchingPairsChange(pairs: { leftId: number; rightId: number }[]) {
+    setConfirmedMatchingPairs(pairs);
   }
 
   function handleClose() {
@@ -136,29 +120,10 @@ export function PracticeSessionScreen() {
   function handleConfirm() {
     if (!sessionData || !currentItem) return;
 
-    // Phase 2: feedback đã hiển thị → chuyển câu tiếp
-    if (answerResult !== null) {
-      if (answerResult.sessionCompleted || currentIndex + 1 >= totalItems) {
-        router.replace({
-          pathname: "/practice-result",
-          params: { practiceSessionId: sessionData.session.sessionId },
-        });
-      } else {
-        setCurrentIndex((i) => i + 1);
-        setSelectedOptionId(null);
-        setSelectedWordIds([]);
-        setMatchedPairs([]);
-        setSelectedLeftId(null);
-        setAnswerResult(null);
-        setShowHint(false);
-      }
-      return;
-    }
-
-    // Phase 1: submit câu trả lời
+    // MATCHING: submit trực tiếp, không qua FeedbackPanel
     if (currentItem.itemType === "MATCHING") {
-      if (matchedPairs.length === 0) return;
-      const userAnswer = matchedPairs
+      if (confirmedMatchingPairs.length === 0) return;
+      const userAnswer = confirmedMatchingPairs
         .map(({ leftId, rightId }) => `${leftId}:${rightId}`)
         .join(",");
       submitAnswer(
@@ -170,10 +135,39 @@ export function PracticeSessionScreen() {
         {
           onSuccess: (result) => {
             setStreak((s) => (result.correct ? s + 1 : 0));
-            setAnswerResult(result);
+            if (result.sessionCompleted || currentIndex + 1 >= totalItems) {
+              router.replace({
+                pathname: "/practice-result",
+                params: { practiceSessionId: sessionData.session.sessionId },
+              });
+            } else {
+              setCurrentIndex((i) => i + 1);
+              setConfirmedMatchingPairs([]);
+              setSelectedOptionId(null);
+              setSelectedWordIds([]);
+              setAnswerResult(null);
+              setShowHint(false);
+            }
           },
         },
       );
+      return;
+    }
+
+    // Phase 2: feedback đã hiển thị → chuyển câu tiếp
+    if (answerResult !== null) {
+      if (answerResult.sessionCompleted || currentIndex + 1 >= totalItems) {
+        router.replace({
+          pathname: "/practice-result",
+          params: { practiceSessionId: sessionData.session.sessionId },
+        });
+      } else {
+        setCurrentIndex((i) => i + 1);
+        setSelectedOptionId(null);
+        setSelectedWordIds([]);
+        setAnswerResult(null);
+        setShowHint(false);
+      }
       return;
     }
 
@@ -246,7 +240,7 @@ export function PracticeSessionScreen() {
   const items = sessionData?.items ?? [];
   const session = sessionData?.session;
   const currentItem: Items | undefined = items[currentIndex];
-  const totalItems = session?.totalItems ?? parseInt(questionCount ?? "0", 10);
+  const totalItems = session?.totalItems ?? 0;
   const completedCount = currentIndex + (answerResult !== null ? 1 : 0);
   const progress = totalItems > 0 ? completedCount / totalItems : 0;
   const sessionTypeLabel =
@@ -348,14 +342,11 @@ export function PracticeSessionScreen() {
                 />
               ) : currentItem.itemType === "MATCHING" ? (
                 <MatchingSection
+                  key={currentIndex}
                   currentItem={currentItem}
-                  matchedPairs={matchedPairs}
-                  selectedLeftId={selectedLeftId}
-                  answerResult={answerResult}
                   isSubmitting={isSubmitting}
                   theme={theme}
-                  onSelectLeft={handleSelectLeft}
-                  onSelectRight={handleSelectRight}
+                  onConfirmedPairsChange={handleMatchingPairsChange}
                 />
               ) : currentItem.itemType === "TRUE_FALSE" ? (
                 <TrueFalseSection
@@ -402,14 +393,22 @@ export function PracticeSessionScreen() {
             <FeedbackPanel answerResult={answerResult} theme={theme} />
           )}
           <PrimaryButton
-            text={answerResult !== null ? "Tiếp theo" : "Xác nhận"}
+            text={
+              currentItem?.itemType === "MATCHING"
+                ? "Tiếp tục"
+                : answerResult !== null
+                  ? "Tiếp theo"
+                  : "Xác nhận"
+            }
             onPress={handleConfirm}
             disabled={
-              (selectedOptionId === null &&
-                selectedWordIds.length === 0 &&
-                matchedPairs.length === 0 &&
-                answerResult === null) ||
-              !currentItem
+              !currentItem ||
+              (currentItem.itemType === "MATCHING"
+                ? confirmedMatchingPairs.length <
+                  currentItem.options.filter((o) => o.side === "LEFT").length
+                : selectedOptionId === null &&
+                  selectedWordIds.length === 0 &&
+                  answerResult === null)
             }
             loading={isSubmitting}
           />
