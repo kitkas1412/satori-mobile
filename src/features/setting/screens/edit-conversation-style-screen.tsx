@@ -19,9 +19,21 @@ import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const CONVERSATION_STYLE_OPTIONS = [
-  { value: "practical", label: "Thực hành" },
-  { value: "academic", label: "Học thuật" },
-  { value: "casual", label: "Thông thường" },
+  {
+    value: "practical",
+    label: "Thực hành",
+    subtitle: "Tập trung vào hội thoại thực tế ",
+  },
+  {
+    value: "academic",
+    label: "Học thuật",
+    subtitle: "Chú trọng ngữ pháp và từ vựng",
+  },
+  {
+    value: "casual",
+    label: "Thông thường",
+    subtitle: "Hội thoại tự nhiên, cân bằng",
+  },
 ] as const;
 
 export function EditConversationStyleScreen() {
@@ -45,7 +57,10 @@ export function EditConversationStyleScreen() {
 
   return (
     <>
-      <View className="flex-1" style={{ backgroundColor: theme.background.page }}>
+      <View
+        className="flex-1"
+        style={{ backgroundColor: theme.background.page }}
+      >
         <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
 
         <ScreenHeader
@@ -64,6 +79,7 @@ export function EditConversationStyleScreen() {
             <RadioOptionRow
               key={option.value}
               label={option.label}
+              subtitle={option.subtitle}
               selected={selected === option.value}
               onPress={() => setSelected(option.value)}
             />
