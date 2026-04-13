@@ -6,6 +6,7 @@
 // - Còn lại: điều hướng đến màn hình làm bài tương ứng
 
 import { useState } from "react";
+import { Alert } from "react-native";
 import { useRouter } from "expo-router";
 
 import { useAssignmentStore } from "@/stores";
