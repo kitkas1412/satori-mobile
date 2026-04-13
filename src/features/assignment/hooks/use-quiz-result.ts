@@ -34,7 +34,7 @@ export function useQuizResult() {
     }
 
     const hasReward =
-      quizResult.newBadgesEarned.length > 0 ||
+      (quizResult.newBadgesEarned?.length ?? 0) > 0 ||
       quizResult.levelUp !== null ||
       quizResult.streakNotification?.is_first_activity_today === true;
 
