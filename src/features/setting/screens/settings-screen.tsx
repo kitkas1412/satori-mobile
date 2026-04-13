@@ -14,9 +14,9 @@ import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const ACCOUNT_ROWS = [
-  { label: "Cài đặt chung" },
+  { label: "Cài đặt chung", route: "/general-settings" },
   { label: "Giao diện", route: "/theme-selector" },
-  { label: "Thông báo" },
+  { label: "Thông báo", route: "/notification-settings" },
 ];
 
 export function SettingsScreen() {
@@ -74,7 +74,7 @@ export function SettingsScreen() {
           >
             <View className="px-4 py-4">
               <Text
-                className="font-heading text-lg mb-3"
+                className="font-heading text-lg mb-4"
                 style={{ color: theme.text.primary }}
               >
                 Tài khoản
@@ -82,15 +82,7 @@ export function SettingsScreen() {
 
               {ACCOUNT_ROWS.map((row, index) => (
                 <View key={row.label}>
-                  {index > 0 && (
-                    <View
-                      style={{
-                        height: 1,
-                        backgroundColor: theme.border.subtle,
-                        marginVertical: 12,
-                      }}
-                    />
-                  )}
+                  {index > 0 && <View className="mb-6" />}
                   <TouchableOpacity
                     className="flex-row items-center justify-between"
                     activeOpacity={0.6}
@@ -102,7 +94,7 @@ export function SettingsScreen() {
                     >
                       {row.label}
                     </Text>
-                    <ChevronRight size={20} color={theme.icon.secondary} />
+                    <ChevronRight size={24} color={theme.icon.secondary} />
                   </TouchableOpacity>
                 </View>
               ))}

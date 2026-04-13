@@ -1,6 +1,7 @@
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { Image, Text, View } from "react-native";
+import { Image } from "expo-image";
+import { Text, View } from "react-native";
 import type { Badge } from "../api";
 
 export function EarnedBadgeCard({ badge }: { badge: Badge }) {
@@ -23,7 +24,7 @@ export function EarnedBadgeCard({ badge }: { badge: Badge }) {
       <Image
         source={{ uri: badge.iconUrl }}
         style={{ width: 48, height: 48 }}
-        resizeMode="contain"
+        contentFit="contain"
       />
 
       <View style={{ alignItems: "center", gap: 2, width: "100%" }}>
