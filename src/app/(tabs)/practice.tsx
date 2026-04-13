@@ -63,7 +63,9 @@ export default function PracticeTab() {
     undefined,
   );
   const { handleAssignmentPress, isLoadingSubmission } =
-    useAssignmentNavigation();
+    useAssignmentNavigation(
+      (pathname, params) => router.push({ pathname: pathname as any, params }),
+    );
   const { data: profile } = useProfile();
   const { data: classes } = useClasses();
   const courseId = profile?.enrolledClasses[0]?.courseId;

@@ -5,13 +5,16 @@
 
 import { CheckCircle2, ChevronLeft, Clock, X } from "lucide-react-native";
 import { useState } from "react";
-import { Image, Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
+import { Image } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
+import { useRouter } from "expo-router";
 
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import {
+  IconButton,
   ImageViewerModal,
   LoadingOverlay,
   PrimaryButton,
@@ -21,6 +24,7 @@ import { useWritingResult } from "../hooks";
 import { StatusBanner } from "../components";
 
 export function WritingResultScreen() {
+  const router = useRouter();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
@@ -34,7 +38,10 @@ export function WritingResultScreen() {
     handleContinue,
     handleCancelSubmission,
     isReview,
-  } = useWritingResult();
+  } = useWritingResult({
+    onNavigate: (pathname, params) =>
+      router.replace(params ? { pathname: pathname as any, params } : (pathname as any)),
+  });
 
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
@@ -51,9 +58,10 @@ export function WritingResultScreen() {
         title={isGraded ? "Bài tập đã nộp" : "Chi tiết bài nộp"}
         showDivider
         leftAction={
-          <Pressable onPress={handleContinue} hitSlop={8}>
-            <ChevronLeft size={24} color={theme.text.primary} strokeWidth={2} />
-          </Pressable>
+          <IconButton
+            icon={<ChevronLeft size={24} color={theme.text.primary} strokeWidth={2} />}
+            onPress={handleContinue}
+          />
         }
         rightAction={<View style={{ width: 24 }} />}
       />
@@ -234,7 +242,7 @@ export function WritingResultScreen() {
                           borderWidth: 1,
                           borderColor: theme.border.subtle,
                         }}
-                        resizeMode="cover"
+                        contentFit="cover"
                       />
                     </Pressable>
                     {/* Số thứ tự ảnh */}

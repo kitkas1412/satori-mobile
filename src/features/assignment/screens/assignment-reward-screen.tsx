@@ -4,15 +4,15 @@
 
 import { Award, Check, Flame, Star } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { Image, Text, View } from "react-native";
+import { Text, View } from "react-native";
+import { Image } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
-import { PrimaryButton, ProgressBar } from "@/components/ui";
+import { PrimaryButton, ProgressBar, RewardIconCircle } from "@/components/ui";
 import { useAssignmentStore } from "@/stores";
-import { RewardIconCircle } from "@/features/speaking/components";
 import type { BadgeEarned, LevelUp, StreakNotification } from "../api/assignment.types";
 
 type RewardItem =
