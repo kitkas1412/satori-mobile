@@ -1,12 +1,12 @@
 // Hook tổng hợp toàn bộ logic nộp bài trắc nghiệm:
 // build payload đáp án, tính thời gian, gọi API, lưu kết quả vào store và điều hướng.
 
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 
 import { useAssignmentStore } from "@/stores";
 import type { Question } from "../api";
-import { useSubmitAssignment } from "./use-submit-assignment";
+import { submitAssignmentApi } from "../api";
 
 interface UseQuizSubmitParams {
   assignmentId: string;
@@ -21,7 +21,10 @@ export function useQuizSubmit({
 }: UseQuizSubmitParams) {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const submitMutation = useSubmitAssignment();
+  const submitMutation = useMutation({
+    mutationFn: (body: { answers: string }) =>
+      submitAssignmentApi(assignmentId, body),
+  });
   const setQuizResult = useAssignmentStore((s) => s.setQuizResult);
 
   function handleSubmit() {
@@ -34,10 +37,7 @@ export function useQuizSubmit({
 
     submitMutation.mutate(
       {
-        assignmentId,
-        body: {
-          answers: JSON.stringify(answersPayload), // API yêu cầu serialize thành chuỗi JSON
-        },
+        answers: JSON.stringify(answersPayload), // API yêu cầu serialize thành chuỗi JSON
       },
       {
         onSuccess: (result) => {

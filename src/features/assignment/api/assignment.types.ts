@@ -1,14 +1,10 @@
 // Định nghĩa tất cả TypeScript types dùng trong tính năng Assignment (bài tập).
 // Mỗi interface tương ứng với một endpoint hoặc một phần của response từ server.
 
-// GET /learner/classes
-export interface LearnerClass {
-  id: string;
-  name: string;
-  status: "ACTIVE" | "CLOSED";
-}
+// ---------------------------------------------------------------------------
+// Shared types
+// ---------------------------------------------------------------------------
 
-// GET /learner/assignments
 // Loại bài tập: trắc nghiệm hoặc bài viết
 export type AssignmentType = "QUIZ" | "WRITING" | "TRANSLATION";
 
@@ -22,6 +18,20 @@ export type LearnerSubmissionStatus =
 
 // undefined = "Tất cả" (không gửi param status lên API)
 export type AssignmentStatusFilter = LearnerSubmissionStatus | undefined;
+
+// ---------------------------------------------------------------------------
+// GET /learner/classes
+// ---------------------------------------------------------------------------
+
+export interface LearnerClass {
+  id: string;
+  name: string;
+  status: "ACTIVE" | "CLOSED";
+}
+
+// ---------------------------------------------------------------------------
+// GET /learner/assignments
+// ---------------------------------------------------------------------------
 
 // Response danh sách bài tập (có phân trang)
 export interface AssignmentsResponse {
@@ -47,7 +57,10 @@ export interface Content {
   learnerSubmissionId: string | null;
 }
 
+// ---------------------------------------------------------------------------
 // POST /learner/assignments/:id/start
+// ---------------------------------------------------------------------------
+
 // Thông tin chi tiết bài tập sau khi bắt đầu làm — bao gồm câu hỏi hoặc nội dung bài viết
 export interface AssignmentDetailResponse {
   id: string;
@@ -93,56 +106,9 @@ export interface WritingContent {
   createdAt: string;
 }
 
-// POST /learner/assignments/:id/submit-quiz
-// Body request khi nộp bài trắc nghiệm
-export interface SubmitQuizRequest {
-  answers: string;
-}
-
-// Response sau khi nộp hoặc lấy kết quả bài trắc nghiệm
-export interface SubmitQuizResponse {
-  id: string;
-  assignmentId: string;
-  assignmentTitle: string;
-  userId: string;
-  userFullName: string;
-  userEmail: string;
-  status: LearnerSubmissionStatus;
-  attemptNumber: number;
-  startedAt: string;
-  submittedAt: string;
-  gradedAt: string | null;
-  gradedBy: string | null;
-  score: number; // Điểm tính theo thang 100
-  correctCount: number;
-  totalQuestions: number;
-  feedback: string | null;
-  answers: string;
-  imageUrls: string[] | null;
-  quizDetails: QuizDetail[]; // Chi tiết đáp án từng câu
-  createdAt: string;
-  newBadgesEarned: BadgeEarned[];
-  levelUp: LevelUp | null;
-  streakNotification: StreakNotification | null;
-}
-
-// Đáp án của một câu hỏi khi gửi lên server
-export interface SubmitQuizAnswer {
-  questionId: string;
-  selectedAnswer: string;
-}
-
-// Chi tiết kết quả một câu hỏi sau khi chấm
-export interface QuizDetail {
-  questionId: string;
-  questionText: string;
-  questionType: string;
-  selectedAnswer: string; // Đáp án học viên đã chọn
-  correctAnswer: string; // Đáp án đúng
-  explanation: string; // Giải thích đáp án
-  options: Record<string, unknown>;
-  correct: boolean;
-}
+// ---------------------------------------------------------------------------
+// Shared reward types — dùng trong response của submit-quiz và submit-writing
+// ---------------------------------------------------------------------------
 
 export type BadgeType =
   | "LEARNING_STREAK"
@@ -182,17 +148,57 @@ export interface StreakNotification {
   streak_last_date: string;
 }
 
-// POST /learner/assignments/writing/evaluate
-// Dữ liệu gửi lên trong key "data" của FormData
-export interface EvaluateWritingRequest {
-  assignmentId: string;
-  prompt: string;
+// ---------------------------------------------------------------------------
+// POST /learner/assignments/:id/submit-quiz
+// ---------------------------------------------------------------------------
+
+// Body request khi nộp bài trắc nghiệm
+export interface SubmitQuizRequest {
+  answers: string;
 }
 
-// Response trả về từ endpoint evaluate
-export interface EvaluateWritingResponse {
-  feedback: string;
+// Chi tiết kết quả một câu hỏi sau khi chấm
+export interface QuizDetail {
+  questionId: string;
+  questionText: string;
+  questionType: string;
+  selectedAnswer: string; // Đáp án học viên đã chọn
+  correctAnswer: string; // Đáp án đúng
+  explanation: string; // Giải thích đáp án
+  options: Record<string, unknown>;
+  correct: boolean;
 }
+
+// Response sau khi nộp hoặc lấy kết quả bài trắc nghiệm
+export interface SubmitQuizResponse {
+  id: string;
+  assignmentId: string;
+  assignmentTitle: string;
+  userId: string;
+  userFullName: string;
+  userEmail: string;
+  status: LearnerSubmissionStatus;
+  attemptNumber: number;
+  startedAt: string;
+  submittedAt: string;
+  gradedAt: string | null;
+  gradedBy: string | null;
+  score: number; // Điểm tính theo thang 100
+  correctCount: number;
+  totalQuestions: number;
+  feedback: string | null;
+  answers: string;
+  imageUrls: string[] | null;
+  quizDetails: QuizDetail[]; // Chi tiết đáp án từng câu
+  createdAt: string;
+  newBadgesEarned: BadgeEarned[];
+  levelUp: LevelUp | null;
+  streakNotification: StreakNotification | null;
+}
+
+// ---------------------------------------------------------------------------
+// POST /learner/assignments/:id/submit-writing
+// ---------------------------------------------------------------------------
 
 // Response sau khi nộp hoặc lấy kết quả bài viết
 export interface SubmitWritingResponse {
@@ -219,4 +225,19 @@ export interface SubmitWritingResponse {
   newBadgesEarned: BadgeEarned[];
   levelUp: LevelUp | null;
   streakNotification: StreakNotification | null;
+}
+
+// ---------------------------------------------------------------------------
+// POST /learner/assignments/writing/evaluate
+// ---------------------------------------------------------------------------
+
+// Dữ liệu gửi lên trong key "data" của FormData
+export interface EvaluateWritingRequest {
+  assignmentId: string;
+  prompt: string;
+}
+
+// Response trả về từ endpoint evaluate
+export interface EvaluateWritingResponse {
+  feedback: string;
 }

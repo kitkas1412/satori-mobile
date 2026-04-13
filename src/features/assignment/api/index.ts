@@ -8,7 +8,6 @@ export type {
   LearnerClass,
   Option,
   Question,
-  SubmitQuizAnswer,
   SubmitQuizRequest,
   SubmitQuizResponse,
   QuizDetail,
