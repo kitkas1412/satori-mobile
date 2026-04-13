@@ -12,12 +12,17 @@ export const assignmentQueryKeys = {
     ["assignments", status ?? "all", classId ?? "all"] as const,
 };
 
-export function useAssignments(status?: LearnerSubmissionStatus, classId?: string) {
+export function useAssignments(
+  status?: LearnerSubmissionStatus,
+  classId?: string,
+) {
   return useInfiniteQuery({
     queryKey: assignmentQueryKeys.assignments(status, classId),
     queryFn: ({ pageParam }) => getAssignmentsApi(pageParam, status, classId),
-    initialPageParam: 1,
+    initialPageParam: 0,
     getNextPageParam: (lastPage) =>
-      lastPage.pageNumber < lastPage.totalPages ? lastPage.pageNumber + 1 : undefined,
+      lastPage.pageNumber < lastPage.totalPages
+        ? lastPage.pageNumber + 1
+        : undefined,
   });
 }
