@@ -93,18 +93,19 @@ export function AssignmentCard({
 
       {/* Hạn nộp + nhãn trạng thái */}
       <View className="flex-row items-center justify-between">
-        <View className="flex-row items-center gap-1">
+        <View className="flex-row items-center gap-1" style={{ flex: 1 }}>
           <Clock size={16} color={theme.icon.secondary} strokeWidth={1.5} />
           <Text
             className="font-body text-xs"
             style={{ color: theme.text.secondary }}
+            numberOfLines={1}
           >
             Hạn: {dueDate}
           </Text>
         </View>
         <Text
           className="font-heading text-xs"
-          style={{ color: statusColor[status] }}
+          style={{ color: statusColor[status], flexShrink: 0 }}
         >
           {STATUS_LABEL[status]}
         </Text>
