@@ -11,7 +11,7 @@ import { StatusBar } from "expo-status-bar";
 
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { LoadingOverlay, ProgressBar, ScreenAsyncView, ScreenHeader } from "@/components/ui";
+import { IconButton, LoadingOverlay, ProgressBar, ScreenAsyncView, ScreenHeader } from "@/components/ui";
 import {
   useStartAssignment,
   useQuizNavigation,
@@ -43,6 +43,7 @@ export function QuizScreen({ id }: QuizScreenProps) {
     assignmentId: id,
     questions,
     answers,
+    onNavigate: () => router.push("/quiz-result"),
   });
   const { handleExit } = useExitAssignment(() => router.back());
 
@@ -67,14 +68,10 @@ export function QuizScreen({ id }: QuizScreenProps) {
         title={data?.title ?? "Bài tập"}
         showDivider
         leftAction={
-          <Pressable
+          <IconButton
+            icon={<X size={22} color={theme.icon.primary} strokeWidth={2} />}
             onPress={handleExit}
-            hitSlop={8}
-            className="items-center justify-center"
-            style={{ width: 24, height: 24 }}
-          >
-            <X size={22} color={theme.icon.primary} strokeWidth={2} />
-          </Pressable>
+          />
         }
         rightAction={<View style={{ width: 24 }} />}
       />

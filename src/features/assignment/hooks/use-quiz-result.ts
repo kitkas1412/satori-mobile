@@ -1,12 +1,13 @@
 // Hook đọc kết quả bài trắc nghiệm từ store, tính nhãn đánh giá và xử lý điều hướng về trang chủ.
 // Trả về null nếu chưa có kết quả trong store (màn hình sẽ không render gì).
 
-import { useRouter } from "expo-router";
-
 import { useAssignmentStore } from "@/stores";
 
-export function useQuizResult() {
-  const router = useRouter();
+interface UseQuizResultParams {
+  onNavigate: (path: string) => void;
+}
+
+export function useQuizResult({ onNavigate }: UseQuizResultParams) {
   const quizResult = useAssignmentStore((s) => s.quizResult);
   const clearQuizResult = useAssignmentStore((s) => s.clearQuizResult);
   const isReview = useAssignmentStore((s) => s.isReview);
@@ -29,7 +30,7 @@ export function useQuizResult() {
   function handleContinue() {
     if (isReview) {
       clearQuizResult();
-      router.replace("/(tabs)/practice");
+      onNavigate("/(tabs)/practice");
       return;
     }
 
@@ -39,10 +40,10 @@ export function useQuizResult() {
       quizResult.streakNotification?.is_first_activity_today === true;
 
     if (hasReward) {
-      router.replace("/assignment-reward");
+      onNavigate("/assignment-reward");
     } else {
       clearQuizResult();
-      router.replace("/(tabs)/practice");
+      onNavigate("/(tabs)/practice");
     }
   }
 

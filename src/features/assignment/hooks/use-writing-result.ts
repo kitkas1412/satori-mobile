@@ -3,15 +3,17 @@
 
 import { useState } from "react";
 import { Alert } from "react-native";
-import { useRouter } from "expo-router";
 
 import { useAssignmentStore } from "@/stores";
 import { extractApiError } from "@/lib/extract-api-error";
 import { useErrorOverlayStore } from "@/stores/error-overlay-store";
 import { cancelAssignmentApi } from "../api";
 
-export function useWritingResult() {
-  const router = useRouter();
+interface UseWritingResultParams {
+  onNavigate: (pathname: string, params?: Record<string, string>) => void;
+}
+
+export function useWritingResult({ onNavigate }: UseWritingResultParams) {
   const writingResult = useAssignmentStore((s) => s.writingResult);
   const clearWritingResult = useAssignmentStore((s) => s.clearWritingResult);
   const isReview = useAssignmentStore((s) => s.isReview);
@@ -26,7 +28,7 @@ export function useWritingResult() {
   function handleContinue() {
     if (isReview) {
       clearWritingResult();
-      router.replace("/(tabs)/practice");
+      onNavigate("/(tabs)/practice");
       return;
     }
 
@@ -36,10 +38,10 @@ export function useWritingResult() {
       writingResult?.streakNotification?.is_first_activity_today === true;
 
     if (hasReward) {
-      router.replace("/assignment-reward");
+      onNavigate("/assignment-reward");
     } else {
       clearWritingResult();
-      router.replace("/(tabs)/practice");
+      onNavigate("/(tabs)/practice");
     }
   }
 
@@ -60,10 +62,7 @@ export function useWritingResult() {
               setIsCancelling(true);
               await cancelAssignmentApi(writingResult.assignmentId);
               clearWritingResult();
-              router.replace({
-                pathname: "/assignment-writing",
-                params: { id: writingResult.assignmentId },
-              });
+              onNavigate("/assignment-writing", { id: writingResult.assignmentId });
             } catch (error) {
               useErrorOverlayStore.getState().show(extractApiError(error));
             } finally {
