@@ -31,7 +31,7 @@ export function WritingResultScreen() {
     imageUrls,
     score,
     isCancelling,
-    handleGoHome,
+    handleContinue,
     handleCancelSubmission,
   } = useWritingResult();
 
@@ -50,7 +50,7 @@ export function WritingResultScreen() {
         title={isGraded ? "Bài tập đã nộp" : "Chi tiết bài nộp"}
         showDivider
         leftAction={
-          <Pressable onPress={handleGoHome} hitSlop={8}>
+          <Pressable onPress={handleContinue} hitSlop={8}>
             <ChevronLeft size={24} color={theme.text.primary} strokeWidth={2} />
           </Pressable>
         }
@@ -318,8 +318,8 @@ export function WritingResultScreen() {
       >
         <View className="flex-row gap-3">
           <PrimaryButton
-            text="Quay về"
-            onPress={handleGoHome}
+            text="Tiếp tục"
+            onPress={handleContinue}
             style={{ flex: 1 }}
           />
 

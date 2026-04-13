@@ -20,10 +20,20 @@ export function useWritingResult() {
   const imageUrls = writingResult?.imageUrls ?? [];
   const score = writingResult?.score ?? 0;
 
-  // Xóa kết quả khỏi store và quay về tab Practice
-  function handleGoHome() {
-    clearWritingResult();
-    router.replace("/(tabs)/practice");
+  // Nếu có reward → sang màn reward, store giữ lại để reward screen đọc.
+  // Nếu không → clear store và về tab Practice.
+  function handleContinue() {
+    const hasReward =
+      (writingResult?.newBadgesEarned?.length ?? 0) > 0 ||
+      writingResult?.levelUp !== null && writingResult?.levelUp !== undefined ||
+      writingResult?.streakNotification?.is_first_activity_today === true;
+
+    if (hasReward) {
+      router.replace("/assignment-reward");
+    } else {
+      clearWritingResult();
+      router.replace("/(tabs)/practice");
+    }
   }
 
   // Hiển thị xác nhận trước khi hủy nộp bài.
@@ -58,5 +68,5 @@ export function useWritingResult() {
     );
   }
 
-  return { writingResult, isGraded, imageUrls, score, isCancelling, handleGoHome, handleCancelSubmission };
+  return { writingResult, isGraded, imageUrls, score, isCancelling, handleContinue, handleCancelSubmission };
 }

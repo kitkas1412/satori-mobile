@@ -203,13 +203,18 @@ export function AssignmentRewardScreen() {
 
   const quizResult = useAssignmentStore((s) => s.quizResult);
   const clearQuizResult = useAssignmentStore((s) => s.clearQuizResult);
+  const writingResult = useAssignmentStore((s) => s.writingResult);
+  const clearWritingResult = useAssignmentStore((s) => s.clearWritingResult);
+
+  const source = quizResult ?? writingResult;
+  const clearSource = quizResult ? clearQuizResult : clearWritingResult;
 
   const [queue, setQueue] = useState<RewardItem[]>(() => {
-    if (!quizResult) return [];
+    if (!source) return [];
     return buildQueue(
-      quizResult.streakNotification,
-      quizResult.levelUp,
-      quizResult.newBadgesEarned,
+      source.streakNotification,
+      source.levelUp,
+      source.newBadgesEarned,
     );
   });
 
@@ -218,7 +223,7 @@ export function AssignmentRewardScreen() {
   // Nếu không có phần thưởng, về practice tab ngay
   useEffect(() => {
     if (queue.length === 0) {
-      clearQuizResult();
+      clearSource();
       router.replace("/(tabs)/practice");
     }
   }, []);
@@ -226,7 +231,7 @@ export function AssignmentRewardScreen() {
   function handleNext() {
     const next = queue.slice(1);
     if (next.length === 0) {
-      clearQuizResult();
+      clearSource();
       router.replace("/(tabs)/practice");
     } else {
       setQueue(next);

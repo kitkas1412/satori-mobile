@@ -212,11 +212,11 @@ export interface SubmitWritingResponse {
   correctCount: number;
   totalQuestions: number;
   feedback: string | null; // Nhận xét của giáo viên (nếu đã chấm)
-  timeSpentSeconds: number;
   answers: string;
-  writtenAnswer: string | null;
   imageUrls: string[] | null; // Danh sách URL ảnh bài làm đã nộp
-  teacherScore: number | null;
   quizDetails: QuizDetail[] | null;
   createdAt: string;
+  newBadgesEarned: BadgeEarned[];
+  levelUp: LevelUp | null;
+  streakNotification: StreakNotification | null;
 }
