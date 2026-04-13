@@ -19,7 +19,7 @@ import {
   useQuizSubmit,
   useExitAssignment,
 } from "../hooks";
-import { QuestionView } from "../components";
+import { AudioPlayerBar, QuestionView } from "../components";
 
 interface QuizScreenProps {
   id: string;
@@ -87,6 +87,11 @@ export function QuizScreen({ id }: QuizScreenProps) {
         emptyText="Bài tập này chưa có câu hỏi."
       >
         <>
+          {/* Audio player — chỉ hiển thị khi bài tập có file âm thanh đề bài */}
+          {data?.audioUrl && (
+            <AudioPlayerBar audioUrl={data.audioUrl} theme={theme} />
+          )}
+
           {/* Khu vực hiển thị câu hỏi hiện tại */}
           <View className="flex-1">
             {current && (
