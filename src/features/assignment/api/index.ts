@@ -20,7 +20,7 @@ export { getAssignmentsApi } from "./get-assignments";
 export { getClassesApi } from "./get-classes";
 export { evaluateWritingApi } from "./evaluate-writing";
 export { startAssignmentApi } from "./start-assignment";
-export { submitAssignmentApi } from "./submit-assignment";
+export { submitQuizApi } from "./submit-quiz";
 export { submitWritingApi } from "./submit-writing";
 export { getQuizSubmissionApi } from "./get-quiz-submission";
 export { getWritingSubmissionApi } from "./get-writing-submission";

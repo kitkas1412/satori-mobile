@@ -35,7 +35,7 @@ export function useAssignmentNavigation() {
           );
           // Lưu kết quả vào store để màn hình kết quả có thể đọc
           setQuizResult(item.id, submission, true);
-          router.push({ pathname: "/assignment-result" });
+          router.push({ pathname: "/quiz-result" });
         } catch (error) {
           useErrorOverlayStore.getState().show(extractApiError(error));
         } finally {

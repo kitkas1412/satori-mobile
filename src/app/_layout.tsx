@@ -214,7 +214,7 @@ function RootLayoutNav() {
         options={{ headerShown: false, gestureEnabled: false }}
       />
       <Stack.Screen
-        name="assignment-result"
+        name="quiz-result"
         options={{ headerShown: false, gestureEnabled: false }}
       />
       <Stack.Screen

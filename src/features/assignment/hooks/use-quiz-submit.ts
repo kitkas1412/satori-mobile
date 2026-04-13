@@ -6,7 +6,7 @@ import { useRouter } from "expo-router";
 
 import { useAssignmentStore } from "@/stores";
 import type { Question } from "../api";
-import { submitAssignmentApi } from "../api";
+import { submitQuizApi } from "../api";
 
 interface UseQuizSubmitParams {
   assignmentId: string;
@@ -23,7 +23,7 @@ export function useQuizSubmit({
   const queryClient = useQueryClient();
   const submitMutation = useMutation({
     mutationFn: (body: { answers: string }) =>
-      submitAssignmentApi(assignmentId, body),
+      submitQuizApi(assignmentId, body),
   });
   const setQuizResult = useAssignmentStore((s) => s.setQuizResult);
 
@@ -45,7 +45,7 @@ export function useQuizSubmit({
           setQuizResult(assignmentId, result);
           // Làm mới danh sách bài tập để cập nhật trạng thái bài vừa nộp
           queryClient.invalidateQueries({ queryKey: ["assignments"] });
-          router.push("/assignment-result");
+          router.push("/quiz-result");
         },
       },
     );
