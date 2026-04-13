@@ -5,7 +5,7 @@ import { api } from "@/lib/axios";
 import type { ApiResponse } from "@/types/api";
 import type { SubmitQuizRequest, SubmitQuizResponse } from "./assignment.types";
 
-export async function submitAssignmentApi(
+export async function submitQuizApi(
   assignmentId: string,
   body: SubmitQuizRequest,
 ): Promise<SubmitQuizResponse> {

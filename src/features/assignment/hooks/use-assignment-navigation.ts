@@ -6,6 +6,7 @@
 // - Còn lại: điều hướng đến màn hình làm bài tương ứng
 
 import { useState } from "react";
+import { Alert } from "react-native";
 import { useRouter } from "expo-router";
 
 import { useAssignmentStore } from "@/stores";
@@ -33,8 +34,8 @@ export function useAssignmentNavigation() {
             item.learnerSubmissionId,
           );
           // Lưu kết quả vào store để màn hình kết quả có thể đọc
-          setQuizResult(item.id, submission);
-          router.push({ pathname: "/assignment-result" });
+          setQuizResult(item.id, submission, true);
+          router.push({ pathname: "/quiz-result" });
         } catch (error) {
           useErrorOverlayStore.getState().show(extractApiError(error));
         } finally {
@@ -46,7 +47,7 @@ export function useAssignmentNavigation() {
           const submission = await getWritingSubmissionApi(
             item.learnerSubmissionId,
           );
-          setWritingResult(submission);
+          setWritingResult(submission, true);
           router.push({ pathname: "/assignment-writing-result" });
         } catch (error) {
           useErrorOverlayStore.getState().show(extractApiError(error));
@@ -68,7 +69,7 @@ export function useAssignmentNavigation() {
         const submission = await getWritingSubmissionApi(
           item.learnerSubmissionId,
         );
-        setWritingResult(submission);
+        setWritingResult(submission, true);
         router.push({ pathname: "/assignment-writing-result" });
       } catch (error) {
         useErrorOverlayStore.getState().show(extractApiError(error));

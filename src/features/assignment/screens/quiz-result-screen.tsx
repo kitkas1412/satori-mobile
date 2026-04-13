@@ -22,7 +22,7 @@ export function QuizResultScreen() {
   // Không render nếu chưa có kết quả trong store (tránh màn hình trắng)
   if (!result) return null;
 
-  const { quizResult, wrongCount, performanceLabel, handleContinue } = result;
+  const { quizResult, wrongCount, performanceLabel, handleContinue, isReview } = result;
 
   return (
     <View
@@ -175,7 +175,7 @@ export function QuizResultScreen() {
           backgroundColor: theme.background.page,
         }}
       >
-        <PrimaryButton text="Quay về" onPress={handleContinue} />
+        <PrimaryButton text={isReview ? "Quay về" : "Tiếp tục"} onPress={handleContinue} />
       </View>
     </View>
   );
