@@ -16,7 +16,6 @@ import {
   useStartAssignment,
   useQuizNavigation,
   useQuizAnswers,
-  useQuizTimer,
   useQuizSubmit,
   useExitAssignment,
 } from "../hooks";
@@ -40,13 +39,10 @@ export function QuizScreen({ id }: QuizScreenProps) {
     useQuizNavigation(total);
   const { answers, handleSelectOption, handleFillBlankChange } =
     useQuizAnswers();
-  // Bắt đầu đếm giờ khi bài tập đã tải xong (isPending = false và data có giá trị)
-  const { getTimeStats } = useQuizTimer(!isPending && !!data);
   const { handleSubmit, isPending: isSubmitting } = useQuizSubmit({
     assignmentId: id,
     questions,
     answers,
-    getTimeStats,
   });
   const { handleExit } = useExitAssignment(() => router.back());
 

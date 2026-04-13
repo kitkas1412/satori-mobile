@@ -9,6 +9,7 @@ export function useQuizResult() {
   const router = useRouter();
   const quizResult = useAssignmentStore((s) => s.quizResult);
   const clearQuizResult = useAssignmentStore((s) => s.clearQuizResult);
+  const isReview = useAssignmentStore((s) => s.isReview);
 
   if (!quizResult) return null;
 
@@ -23,11 +24,27 @@ export function useQuizResult() {
         ? "Tốt!"
         : "Cố lên!";
 
-  // Xóa kết quả khỏi store và quay về tab Practice
+  // Khi xem lại bài đã chấm → clear store và về tab Practice (không hiện reward).
+  // Khi vừa submit xong → kiểm tra reward trước khi về.
   function handleContinue() {
-    clearQuizResult();
-    router.replace("/(tabs)/practice");
+    if (isReview) {
+      clearQuizResult();
+      router.replace("/(tabs)/practice");
+      return;
+    }
+
+    const hasReward =
+      quizResult.newBadgesEarned.length > 0 ||
+      quizResult.levelUp !== null ||
+      quizResult.streakNotification?.is_first_activity_today === true;
+
+    if (hasReward) {
+      router.replace("/assignment-reward");
+    } else {
+      clearQuizResult();
+      router.replace("/(tabs)/practice");
+    }
   }
 
-  return { quizResult, wrongCount, performanceLabel, handleContinue };
+  return { quizResult, wrongCount, performanceLabel, handleContinue, isReview };
 }

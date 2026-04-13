@@ -14,16 +14,33 @@ export function useWritingResult() {
   const router = useRouter();
   const writingResult = useAssignmentStore((s) => s.writingResult);
   const clearWritingResult = useAssignmentStore((s) => s.clearWritingResult);
+  const isReview = useAssignmentStore((s) => s.isReview);
   const [isCancelling, setIsCancelling] = useState(false);
 
   const isGraded = writingResult?.status === "GRADED";
   const imageUrls = writingResult?.imageUrls ?? [];
   const score = writingResult?.score ?? 0;
 
-  // Xóa kết quả khỏi store và quay về tab Practice
-  function handleGoHome() {
-    clearWritingResult();
-    router.replace("/(tabs)/practice");
+  // Khi xem lại bài đã nộp/chấm → clear store và về tab Practice (không hiện reward).
+  // Khi vừa submit xong → kiểm tra reward trước khi về.
+  function handleContinue() {
+    if (isReview) {
+      clearWritingResult();
+      router.replace("/(tabs)/practice");
+      return;
+    }
+
+    const hasReward =
+      (writingResult?.newBadgesEarned?.length ?? 0) > 0 ||
+      writingResult?.levelUp !== null && writingResult?.levelUp !== undefined ||
+      writingResult?.streakNotification?.is_first_activity_today === true;
+
+    if (hasReward) {
+      router.replace("/assignment-reward");
+    } else {
+      clearWritingResult();
+      router.replace("/(tabs)/practice");
+    }
   }
 
   // Hiển thị xác nhận trước khi hủy nộp bài.
@@ -58,5 +75,5 @@ export function useWritingResult() {
     );
   }
 
-  return { writingResult, isGraded, imageUrls, score, isCancelling, handleGoHome, handleCancelSubmission };
+  return { writingResult, isGraded, imageUrls, score, isCancelling, handleContinue, handleCancelSubmission, isReview };
 }
