@@ -30,7 +30,7 @@ function buildQueue(
     queue.push({ type: "streak", data: streakNotification });
   if (levelUp)
     queue.push({ type: "level", data: levelUp });
-  for (const badge of newBadgesEarned)
+  for (const badge of newBadgesEarned ?? [])
     queue.push({ type: "badge", data: badge });
   return queue;
 }
