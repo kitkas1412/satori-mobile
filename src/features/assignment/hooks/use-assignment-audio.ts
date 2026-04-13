@@ -3,6 +3,7 @@
 // và dọn dẹp player khi unmount để tránh rò rỉ bộ nhớ.
 
 import { useEffect, useRef, useState } from "react";
+import { AppState } from "react-native";
 import { createAudioPlayer } from "expo-audio";
 import type { AudioPlayer } from "expo-audio";
 
@@ -38,8 +39,22 @@ export function useAssignmentAudio(
       }
     });
 
+    // Pause khi app vào background, resume khi trở lại foreground.
+    // Dùng ref để đọc trạng thái tức thời bên trong callback (state update là async).
+    const wasPlayingRef = { current: false };
+    const appStateSubscription = AppState.addEventListener("change", (nextState) => {
+      if (nextState === "background" || nextState === "inactive") {
+        wasPlayingRef.current = playerRef.current?.playing ?? false;
+        if (wasPlayingRef.current) playerRef.current?.pause();
+      } else if (nextState === "active") {
+        if (wasPlayingRef.current) playerRef.current?.play();
+      }
+    });
+
     return () => {
       subscription.remove();
+      appStateSubscription.remove();
+      playerRef.current?.pause();
       player.remove();
       playerRef.current = null;
       setIsPlaying(false);
