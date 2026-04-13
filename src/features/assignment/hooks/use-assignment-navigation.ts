@@ -33,7 +33,7 @@ export function useAssignmentNavigation() {
             item.learnerSubmissionId,
           );
           // Lưu kết quả vào store để màn hình kết quả có thể đọc
-          setQuizResult(item.id, submission);
+          setQuizResult(item.id, submission, true);
           router.push({ pathname: "/assignment-result" });
         } catch (error) {
           useErrorOverlayStore.getState().show(extractApiError(error));
@@ -46,7 +46,7 @@ export function useAssignmentNavigation() {
           const submission = await getWritingSubmissionApi(
             item.learnerSubmissionId,
           );
-          setWritingResult(submission);
+          setWritingResult(submission, true);
           router.push({ pathname: "/assignment-writing-result" });
         } catch (error) {
           useErrorOverlayStore.getState().show(extractApiError(error));
@@ -68,7 +68,7 @@ export function useAssignmentNavigation() {
         const submission = await getWritingSubmissionApi(
           item.learnerSubmissionId,
         );
-        setWritingResult(submission);
+        setWritingResult(submission, true);
         router.push({ pathname: "/assignment-writing-result" });
       } catch (error) {
         useErrorOverlayStore.getState().show(extractApiError(error));

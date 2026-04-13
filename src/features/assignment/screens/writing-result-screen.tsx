@@ -33,6 +33,7 @@ export function WritingResultScreen() {
     isCancelling,
     handleContinue,
     handleCancelSubmission,
+    isReview,
   } = useWritingResult();
 
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
@@ -318,7 +319,7 @@ export function WritingResultScreen() {
       >
         <View className="flex-row gap-3">
           <PrimaryButton
-            text="Tiếp tục"
+            text={isReview ? "Quay về" : "Tiếp tục"}
             onPress={handleContinue}
             style={{ flex: 1 }}
           />

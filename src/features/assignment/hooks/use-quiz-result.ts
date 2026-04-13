@@ -9,6 +9,7 @@ export function useQuizResult() {
   const router = useRouter();
   const quizResult = useAssignmentStore((s) => s.quizResult);
   const clearQuizResult = useAssignmentStore((s) => s.clearQuizResult);
+  const isReview = useAssignmentStore((s) => s.isReview);
 
   if (!quizResult) return null;
 
@@ -23,9 +24,15 @@ export function useQuizResult() {
         ? "Tốt!"
         : "Cố lên!";
 
-  // Nếu có reward → sang màn reward, store giữ lại để reward screen đọc.
-  // Nếu không → clear store và về tab Practice.
+  // Khi xem lại bài đã chấm → clear store và về tab Practice (không hiện reward).
+  // Khi vừa submit xong → kiểm tra reward trước khi về.
   function handleContinue() {
+    if (isReview) {
+      clearQuizResult();
+      router.replace("/(tabs)/practice");
+      return;
+    }
+
     const hasReward =
       quizResult.newBadgesEarned.length > 0 ||
       quizResult.levelUp !== null ||
@@ -39,5 +46,5 @@ export function useQuizResult() {
     }
   }
 
-  return { quizResult, wrongCount, performanceLabel, handleContinue };
+  return { quizResult, wrongCount, performanceLabel, handleContinue, isReview };
 }
