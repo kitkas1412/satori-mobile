@@ -18,6 +18,6 @@ export function useAssignments(status?: LearnerSubmissionStatus, classId?: strin
     queryFn: ({ pageParam }) => getAssignmentsApi(pageParam, status, classId),
     initialPageParam: 1,
     getNextPageParam: (lastPage) =>
-      lastPage.last ? undefined : lastPage.pageNumber + 1,
+      lastPage.pageNumber < lastPage.totalPages ? lastPage.pageNumber + 1 : undefined,
   });
 }
