@@ -12,7 +12,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter, useFocusEffect } from "expo-router";
+import { useRouter, useFocusEffect, useIsFocused } from "expo-router";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
 import { BellButton, LoadingOverlay, ScreenHeader } from "@/components/ui";
@@ -34,6 +34,7 @@ import { useProfile } from "@/features/profile-management/hooks";
 export default function SpeakingScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const isFocused = useIsFocused();
   const user = useAuthStore((state) => state.user);
   const language = useAppStore((state) => state.language);
   const { data: profile } = useProfile();
@@ -215,8 +216,8 @@ export default function SpeakingScreen() {
           />
         )}
       </View>
-      <LoadingOverlay visible={isLoading} title="Đang tải..." />
-      <LoadingOverlay visible={isFocusRefetching} title="Đang tải..." />
+      <LoadingOverlay visible={isFocused && isLoading} title="Đang tải..." />
+      <LoadingOverlay visible={isFocused && isFocusRefetching} title="Đang tải..." />
       {!blockedMessage && <ChatbotFab />}
     </>
   );

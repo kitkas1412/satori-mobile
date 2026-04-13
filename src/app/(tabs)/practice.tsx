@@ -3,7 +3,7 @@
 
 import { BookOpen, Sparkles } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   ActivityIndicator,
@@ -47,6 +47,7 @@ export default function PracticeTab() {
   const router = useRouter();
   const { tab } = useLocalSearchParams<{ tab?: string }>();
   const user = useAuthStore((state) => state.user);
+  const isFocused = useIsFocused();
   const [activeTab, setActiveTab] = useState<ActiveTab>("teacher");
 
   useEffect(() => {
@@ -321,17 +322,17 @@ export default function PracticeTab() {
       />
 
       {/* Overlay loading khi đang tải lần đầu */}
-      <LoadingOverlay visible={isLoading} title="Đang tải bài tập..." />
+      <LoadingOverlay visible={isFocused && isLoading} title="Đang tải bài tập..." />
       {/* Overlay loading khi focus lại tab */}
-      <LoadingOverlay visible={isFocusRefetching} title="Đang tải..." />
+      <LoadingOverlay visible={isFocused && isFocusRefetching} title="Đang tải..." />
       {/* Overlay loading khi đang tải kết quả bài đã nộp */}
       <LoadingOverlay
-        visible={isLoadingSubmission}
+        visible={isFocused && isLoadingSubmission}
         title="Đang tải kết quả..."
       />
       {/* Overlay loading khi đang tải danh sách bài học AI */}
       <LoadingOverlay
-        visible={activeTab === "ai" && isLoadingLessons}
+        visible={isFocused && activeTab === "ai" && isLoadingLessons}
         title="Đang tải bài học..."
       />
       <SessionTypesModal
