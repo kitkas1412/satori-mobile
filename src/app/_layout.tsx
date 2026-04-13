@@ -218,6 +218,10 @@ function RootLayoutNav() {
         options={{ headerShown: false, gestureEnabled: false }}
       />
       <Stack.Screen
+        name="assignment-reward"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
         name="assignment-writing"
         options={{ headerShown: false, gestureEnabled: false }}
       />

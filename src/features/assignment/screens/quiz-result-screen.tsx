@@ -175,7 +175,7 @@ export function QuizResultScreen() {
           backgroundColor: theme.background.page,
         }}
       >
-        <PrimaryButton text="Quay về" onPress={handleContinue} />
+        <PrimaryButton text="Tiếp tục" onPress={handleContinue} />
       </View>
     </View>
   );

@@ -14,11 +14,11 @@ export type AssignmentType = "QUIZ" | "WRITING" | "TRANSLATION";
 
 // Trạng thái nộp bài của học viên
 export type LearnerSubmissionStatus =
-  | "GRADED"       // Đã chấm điểm
-  | "IN_PROGRESS"  // Đang làm
-  | "NOT_STARTED"  // Chưa bắt đầu
-  | "OVERDUE"      // Quá hạn
-  | "SUBMITTED";   // Đã nộp, chờ chấm
+  | "GRADED" // Đã chấm điểm
+  | "IN_PROGRESS" // Đang làm
+  | "NOT_STARTED" // Chưa bắt đầu
+  | "OVERDUE" // Quá hạn
+  | "SUBMITTED"; // Đã nộp, chờ chấm
 
 // undefined = "Tất cả" (không gửi param status lên API)
 export type AssignmentStatusFilter = LearnerSubmissionStatus | undefined;
@@ -70,17 +70,17 @@ export interface Question {
   assignmentQuestionId: string; // ID trong ngữ cảnh bài tập (dùng làm key lưu đáp án)
   orderIndex: number;
   points: number | null;
-  questionId: string;           // ID gốc của câu hỏi
+  questionId: string; // ID gốc của câu hỏi
   questionText: string;
-  questionType: string;         // Ví dụ: "multiple_choice", "fill_blank", "true_false"
-  options: Option[] | null;     // null nếu là câu điền vào chỗ trống
+  questionType: string; // Ví dụ: "multiple_choice", "fill_blank", "true_false"
+  options: Option[] | null; // null nếu là câu điền vào chỗ trống
   imageUrl: string | null;
   jlptLevel: string;
 }
 
 // Một lựa chọn trong câu hỏi trắc nghiệm
 export interface Option {
-  id: string;   // Giá trị được gửi lên server khi chọn đáp án này
+  id: string; // Giá trị được gửi lên server khi chọn đáp án này
   text: string; // Nội dung hiển thị
 }
 
@@ -88,7 +88,7 @@ export interface Option {
 export interface WritingContent {
   id: string;
   assignmentId: string;
-  prompt: string;            // Yêu cầu/đề bài
+  prompt: string; // Yêu cầu/đề bài
   sourceText: string | null; // Văn bản tham khảo (nếu có)
   createdAt: string;
 }
@@ -96,8 +96,7 @@ export interface WritingContent {
 // POST /learner/assignments/:id/submit-quiz
 // Body request khi nộp bài trắc nghiệm
 export interface SubmitQuizRequest {
-  answers: string; // JSON.stringify(SubmitQuizAnswer[]) — serialize thành chuỗi theo yêu cầu API
-  timeSpentSeconds: number;
+  answers: string;
 }
 
 // Response sau khi nộp hoặc lấy kết quả bài trắc nghiệm
@@ -114,24 +113,23 @@ export interface SubmitQuizResponse {
   submittedAt: string;
   gradedAt: string | null;
   gradedBy: string | null;
-  score: number;           // Điểm tính theo thang 100
+  score: number; // Điểm tính theo thang 100
   correctCount: number;
   totalQuestions: number;
   feedback: string | null;
-  timeSpentSeconds: number;
   answers: string;
-  writtenAnswer: string | null;
   imageUrls: string[] | null;
-  teacherScore: number | null;
   quizDetails: QuizDetail[]; // Chi tiết đáp án từng câu
   createdAt: string;
+  newBadgesEarned: BadgeEarned[];
+  levelUp: LevelUp | null;
+  streakNotification: StreakNotification | null;
 }
 
 // Đáp án của một câu hỏi khi gửi lên server
 export interface SubmitQuizAnswer {
   questionId: string;
   selectedAnswer: string;
-  timeSpent: number; // Thời gian làm câu này (giây)
 }
 
 // Chi tiết kết quả một câu hỏi sau khi chấm
@@ -139,11 +137,49 @@ export interface QuizDetail {
   questionId: string;
   questionText: string;
   questionType: string;
-  selectedAnswer: string;  // Đáp án học viên đã chọn
-  correctAnswer: string;   // Đáp án đúng
-  explanation: string;     // Giải thích đáp án
-  options: Option[];
+  selectedAnswer: string; // Đáp án học viên đã chọn
+  correctAnswer: string; // Đáp án đúng
+  explanation: string; // Giải thích đáp án
+  options: Record<string, unknown>;
   correct: boolean;
+}
+
+export type BadgeType =
+  | "LEARNING_STREAK"
+  | "CONVERSATION_MASTER"
+  | "PRONUNCIATION_EXPERT"
+  | "VOCABULARY_BUILDER"
+  | "GRAMMAR_GURU"
+  | string;
+
+export interface BadgeEarned {
+  badgeId: string;
+  badgeName: string;
+  description: string;
+  badgeType: BadgeType;
+  iconUrl: string;
+  expReward: number;
+  earnedAt: string;
+  isFeatured: boolean;
+}
+
+export interface LevelUp {
+  previousLevel: number;
+  newLevel: number;
+  expEarned: number;
+  oldTotalExp: number;
+  totalExp: number;
+  expToNextLevel: number;
+  progressPercentage: number;
+  isLevelUp: boolean;
+}
+
+export interface StreakNotification {
+  is_first_activity_today: boolean;
+  current_streak: number;
+  longest_streak: number;
+  /** Định dạng YYYY-MM-DD */
+  streak_last_date: string;
 }
 
 // POST /learner/assignments/writing/evaluate
@@ -172,7 +208,7 @@ export interface SubmitWritingResponse {
   submittedAt: string;
   gradedAt: string | null;
   gradedBy: string | null;
-  score: number | null;    // null nếu chưa được chấm điểm
+  score: number | null; // null nếu chưa được chấm điểm
   correctCount: number;
   totalQuestions: number;
   feedback: string | null; // Nhận xét của giáo viên (nếu đã chấm)

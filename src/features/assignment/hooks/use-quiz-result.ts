@@ -23,10 +23,20 @@ export function useQuizResult() {
         ? "Tốt!"
         : "Cố lên!";
 
-  // Xóa kết quả khỏi store và quay về tab Practice
+  // Nếu có reward → sang màn reward, store giữ lại để reward screen đọc.
+  // Nếu không → clear store và về tab Practice.
   function handleContinue() {
-    clearQuizResult();
-    router.replace("/(tabs)/practice");
+    const hasReward =
+      quizResult.newBadgesEarned.length > 0 ||
+      quizResult.levelUp !== null ||
+      quizResult.streakNotification?.is_first_activity_today === true;
+
+    if (hasReward) {
+      router.replace("/assignment-reward");
+    } else {
+      clearQuizResult();
+      router.replace("/(tabs)/practice");
+    }
   }
 
   return { quizResult, wrongCount, performanceLabel, handleContinue };
