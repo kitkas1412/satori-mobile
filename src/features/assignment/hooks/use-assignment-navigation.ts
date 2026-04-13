@@ -7,14 +7,16 @@
 
 import { useState } from "react";
 import { Alert } from "react-native";
-import { useRouter } from "expo-router";
 
 import { useAssignmentStore } from "@/stores";
+import { extractApiError } from "@/lib/extract-api-error";
+import { useErrorOverlayStore } from "@/stores/error-overlay-store";
 import type { Content } from "../api";
 import { getQuizSubmissionApi, getWritingSubmissionApi } from "../api";
 
-export function useAssignmentNavigation() {
-  const router = useRouter();
+export function useAssignmentNavigation(
+  onNavigate: (pathname: string, params?: Record<string, string>) => void,
+) {
   const setQuizResult = useAssignmentStore((s) => s.setQuizResult);
   const setWritingResult = useAssignmentStore((s) => s.setWritingResult);
   const [isLoadingSubmission, setIsLoadingSubmission] = useState(false);
@@ -22,7 +24,7 @@ export function useAssignmentNavigation() {
   async function handleAssignmentPress(item: Content) {
     if (item.learnerSubmissionStatus === "GRADED") {
       if (!item.learnerSubmissionId) {
-        Alert.alert("Lỗi", "Không tìm thấy thông tin bài nộp.");
+        useErrorOverlayStore.getState().show("Không tìm thấy thông tin bài nộp.");
         return;
       }
       if (item.assignmentType === "QUIZ") {
@@ -32,40 +34,34 @@ export function useAssignmentNavigation() {
             item.learnerSubmissionId,
           );
           // Lưu kết quả vào store để màn hình kết quả có thể đọc
-          setQuizResult(item.id, submission);
-          router.push({ pathname: "/assignment-result" });
-        } catch {
-          Alert.alert(
-            "Lỗi",
-            "Không thể tải kết quả bài tập. Vui lòng thử lại.",
-          );
+          setQuizResult(item.id, submission, true);
+          onNavigate("/quiz-result");
+        } catch (error) {
+          useErrorOverlayStore.getState().show(extractApiError(error));
         } finally {
           setIsLoadingSubmission(false);
         }
-      } else if (item.assignmentType === "WRITING") {
+      } else if (item.assignmentType === "WRITING" || item.assignmentType === "TRANSLATION") {
         try {
           setIsLoadingSubmission(true);
           const submission = await getWritingSubmissionApi(
             item.learnerSubmissionId,
           );
-          setWritingResult(submission);
-          router.push({ pathname: "/assignment-writing-result" });
-        } catch {
-          Alert.alert(
-            "Lỗi",
-            "Không thể tải kết quả bài tập. Vui lòng thử lại.",
-          );
+          setWritingResult(submission, true);
+          onNavigate("/assignment-writing-result");
+        } catch (error) {
+          useErrorOverlayStore.getState().show(extractApiError(error));
         } finally {
           setIsLoadingSubmission(false);
         }
       }
     } else if (
       item.learnerSubmissionStatus === "SUBMITTED" &&
-      item.assignmentType === "WRITING"
+      (item.assignmentType === "WRITING" || item.assignmentType === "TRANSLATION")
     ) {
       // Bài viết đã nộp nhưng chưa chấm — cho xem lại trang chi tiết bài nộp
       if (!item.learnerSubmissionId) {
-        Alert.alert("Lỗi", "Không tìm thấy thông tin bài nộp.");
+        useErrorOverlayStore.getState().show("Không tìm thấy thông tin bài nộp.");
         return;
       }
       try {
@@ -73,19 +69,19 @@ export function useAssignmentNavigation() {
         const submission = await getWritingSubmissionApi(
           item.learnerSubmissionId,
         );
-        setWritingResult(submission);
-        router.push({ pathname: "/assignment-writing-result" });
-      } catch {
-        Alert.alert("Lỗi", "Không thể tải kết quả bài tập. Vui lòng thử lại.");
+        setWritingResult(submission, true);
+        onNavigate("/assignment-writing-result");
+      } catch (error) {
+        useErrorOverlayStore.getState().show(extractApiError(error));
       } finally {
         setIsLoadingSubmission(false);
       }
     } else if (item.learnerSubmissionStatus === "OVERDUE") {
       Alert.alert("Bài tập đã quá hạn", "Bài tập này đã hết hạn nộp.");
     } else if (item.assignmentType === "QUIZ") {
-      router.push({ pathname: "/assignment-quiz", params: { id: item.id } });
-    } else if (item.assignmentType === "WRITING") {
-      router.push({ pathname: "/assignment-writing", params: { id: item.id } });
+      onNavigate("/assignment-quiz", { id: item.id });
+    } else if (item.assignmentType === "WRITING" || item.assignmentType === "TRANSLATION") {
+      onNavigate("/assignment-writing", { id: item.id });
     }
   }
 

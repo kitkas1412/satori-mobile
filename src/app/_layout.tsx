@@ -23,6 +23,7 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useColorScheme as useNativeWindColorScheme } from "nativewind";
 
 import { QueryProvider } from "@/components/providers/query-provider";
+import { ErrorOverlay } from "@/components/ui";
 import { useTokenValidation } from "@/features/authentication/hooks";
 import { useRegisterDeviceToken } from "@/features/notification/hooks";
 import { abandonSessionApi } from "@/features/speaking/api";
@@ -31,8 +32,10 @@ import { getPushToken } from "@/hooks/use-push-notification";
 import { useAuthStore } from "@/stores/auth-store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
-import { Platform } from "react-native";
+import { AppState, Platform } from "react-native";
 import "../../global.css";
+
+const FCM_TOKEN_STORAGE_KEY = "fcm_token";
 
 // Keep splash screen visible while fonts load
 SplashScreen.preventAutoHideAsync();
@@ -76,25 +79,62 @@ function RootLayoutNav() {
     }
   }, [isAuthenticated, isHydrated, isValidating, segments]);
 
-  // Đăng ký push notification token với backend sau khi user đã xác thực.
+  // Gửi FCM token lên backend và cập nhật AsyncStorage sau khi thành công.
+  const sendToken = async () => {
+    try {
+      const token = await getPushToken();
+      if (!token) return;
+      registerDeviceToken(
+        {
+          fcmToken: token,
+          deviceType: Platform.OS === "ios" ? "IOS" : "ANDROID",
+          appVersion: Constants.expoConfig?.version,
+        },
+        { onSuccess: () => AsyncStorage.setItem(FCM_TOKEN_STORAGE_KEY, token) },
+      );
+    } catch {
+      // best-effort
+    }
+  };
+
+  // Gửi nếu token hiện tại khác token đã lưu (dùng cho foreground check).
+  const registerIfTokenChanged = async () => {
+    try {
+      const token = await getPushToken();
+      if (!token) return;
+      const storedToken = await AsyncStorage.getItem(FCM_TOKEN_STORAGE_KEY);
+      if (token === storedToken) return;
+      registerDeviceToken(
+        {
+          fcmToken: token,
+          deviceType: Platform.OS === "ios" ? "IOS" : "ANDROID",
+          appVersion: Constants.expoConfig?.version,
+        },
+        { onSuccess: () => AsyncStorage.setItem(FCM_TOKEN_STORAGE_KEY, token) },
+      );
+    } catch {
+      // best-effort
+    }
+  };
+
+  // Luôn gửi token sau mỗi lần login để đảm bảo backend luôn có token mới nhất,
+  // kể cả khi backend bị mất token (migration, reset, v.v.).
+  useEffect(() => {
+    if (!isHydrated || !isAuthenticated) return;
+    sendToken();
+  }, [isHydrated, isAuthenticated]);
+
+  // Kiểm tra lại FCM token mỗi khi app vào foreground.
   useEffect(() => {
     if (!isHydrated || !isAuthenticated) return;
 
-    const registerToken = async () => {
-      try {
-        const token = await getPushToken();
-        if (!token) return;
-        registerDeviceToken({
-          fcmToken: token,
-          deviceType: Platform.OS === "ios" ? "ios" : "android",
-          appVersion: Constants.expoConfig?.version,
-        });
-      } catch {
-        // best-effort
+    const subscription = AppState.addEventListener("change", (nextState) => {
+      if (nextState === "active") {
+        registerIfTokenChanged();
       }
-    };
+    });
 
-    registerToken();
+    return () => subscription.remove();
   }, [isHydrated, isAuthenticated]);
 
   // Dọn dẹp session tồn đọng sau khi app bị force-quit giữa chừng.
@@ -166,11 +206,19 @@ function RootLayoutNav() {
         options={{ headerShown: false, gestureEnabled: false }}
       />
       <Stack.Screen
+        name="conversation-reward"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
         name="assignment-quiz"
         options={{ headerShown: false, gestureEnabled: false }}
       />
       <Stack.Screen
-        name="assignment-result"
+        name="quiz-result"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="assignment-reward"
         options={{ headerShown: false, gestureEnabled: false }}
       />
       <Stack.Screen
@@ -194,11 +242,71 @@ function RootLayoutNav() {
         options={{ headerShown: false, gestureEnabled: false }}
       />
       <Stack.Screen
+        name="creative-selection"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="general-settings"
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
+      <Stack.Screen
+        name="edit-daily-goal"
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
+      <Stack.Screen
+        name="edit-study-time"
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
+      <Stack.Screen
+        name="edit-learning-pace"
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
+      <Stack.Screen
+        name="edit-formality"
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
+      <Stack.Screen
+        name="edit-conversation-style"
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
+      <Stack.Screen
+        name="edit-topics"
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
+      <Stack.Screen
+        name="edit-reminder"
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
+      <Stack.Screen
         name="theme-selector"
         options={{ headerShown: false, gestureEnabled: false }}
       />
       <Stack.Screen
+        name="settings"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="edit-profile"
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
+      <Stack.Screen
+        name="edit-display-name"
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
+      <Stack.Screen
+        name="edit-gender"
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
+      <Stack.Screen
+        name="notification-settings"
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
+      <Stack.Screen
         name="notifications"
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
+      <Stack.Screen
+        name="achievements"
         options={{ headerShown: false, gestureEnabled: true }}
       />
     </Stack>
@@ -236,6 +344,7 @@ export default function RootLayout() {
         <RootLayoutNav />
         <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
       </ThemeProvider>
+      <ErrorOverlay />
     </QueryProvider>
   );
 }

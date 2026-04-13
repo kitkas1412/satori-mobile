@@ -1,9 +1,9 @@
 import { IconButton, ScreenHeader } from "@/components/ui";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { useNotifications } from "@/features/notification/hooks";
+import { useNotifications, useMarkReadNotification, useMarkAllReadNotification } from "@/features/notification/hooks";
 import { useRouter } from "expo-router";
-import { ArrowLeft } from "lucide-react-native";
+import { ArrowLeft, CheckCheck } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import {
@@ -31,6 +31,9 @@ export function NotificationScreen() {
     isFetchingNextPage,
     refetch,
   } = useNotifications();
+
+  const { mutate: markRead } = useMarkReadNotification();
+  const { mutate: markAllRead, isPending: isMarkingAll } = useMarkAllReadNotification();
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -85,6 +88,13 @@ export function NotificationScreen() {
             onPress={() => router.back()}
           />
         }
+        rightAction={
+          <IconButton
+            icon={<CheckCheck size={22} color={theme.icon.primary} />}
+            onPress={() => markAllRead()}
+            disabled={isMarkingAll || notifications.length === 0}
+          />
+        }
       />
 
       {isLoading ? (
@@ -95,7 +105,13 @@ export function NotificationScreen() {
         <FlatList
           data={notifications}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <NotificationItem item={item} theme={theme} />}
+          renderItem={({ item }) => (
+              <NotificationItem
+                item={item}
+                theme={theme}
+                onPress={() => markRead({ notificationIds: [item.id] })}
+              />
+            )}
           ListEmptyComponent={renderEmpty}
           ListFooterComponent={
             isFetchingNextPage ? (

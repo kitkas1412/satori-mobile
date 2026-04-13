@@ -1,6 +1,8 @@
 import { useAuthStore } from "@/stores/auth-store";
 import { useRef, useState } from "react";
 import { Alert, TextInput } from "react-native";
+import { extractApiError } from "@/lib/extract-api-error";
+import { useErrorOverlayStore } from "@/stores/error-overlay-store";
 import { useChangePassword } from "./use-change-password";
 
 /**
@@ -53,10 +55,7 @@ export function useChangePasswordForm(onSuccess: () => void) {
           );
         },
         onError: (error: any) => {
-          const errorMessage =
-            error?.response?.data?.message ||
-            error?.message ||
-            "Có lỗi xảy ra khi đổi mật khẩu";
+          const errorMessage = extractApiError(error, "Có lỗi xảy ra khi đổi mật khẩu");
 
           if (
             errorMessage.toLowerCase().includes("mật khẩu hiện tại") ||
@@ -64,9 +63,11 @@ export function useChangePasswordForm(onSuccess: () => void) {
             errorMessage.toLowerCase().includes("wrong password") ||
             errorMessage.toLowerCase().includes("current password")
           ) {
+            // Lỗi mật khẩu hiện tại → hiện field error, ở lại form để sửa
             setCurrentPasswordError(errorMessage);
           } else {
-            Alert.alert("Lỗi", errorMessage);
+            // Lỗi khác → show overlay, chỉ dismiss (không navigate vì user muốn thử lại)
+            useErrorOverlayStore.getState().show(errorMessage, () => {});
           }
         },
       },

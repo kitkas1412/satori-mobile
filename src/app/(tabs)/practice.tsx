@@ -19,7 +19,7 @@ import { StatusBar } from "expo-status-bar";
 import { ChatbotFab } from "@/features/chatbot/components";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { useProfile } from "@/hooks/api/use-profile";
+import { useProfile } from "@/features/profile-management/hooks";
 import { useAuthStore } from "@/stores/auth-store";
 import { BellButton, LoadingOverlay, ScreenHeader } from "@/components/ui";
 import { AssignmentCard } from "@/features/assignment/components/assignment-card";
@@ -63,7 +63,9 @@ export default function PracticeTab() {
     undefined,
   );
   const { handleAssignmentPress, isLoadingSubmission } =
-    useAssignmentNavigation();
+    useAssignmentNavigation(
+      (pathname, params) => router.push({ pathname: pathname as any, params }),
+    );
   const { data: profile } = useProfile();
   const { data: classes } = useClasses();
   const courseId = profile?.enrolledClasses[0]?.courseId;
@@ -116,16 +118,13 @@ export default function PracticeTab() {
 
   const assignments = data?.pages.flatMap((p) => p.content) ?? [];
 
-  if (user?.status === "INACTIVE") {
-    return (
-      <View className="flex-1 bg-background-default items-center justify-center px-8">
-        <StatusBar style="dark" />
-        <Text className="font-body text-base text-text-muted text-center">
-          Tính năng đang tạm khoá. Vui lòng thử lại sau
-        </Text>
-      </View>
-    );
-  }
+  const blockedMessage = (() => {
+    if (user?.status === "INACTIVE") return "Bạn chưa có lớp. Vui lòng thử lại sau";
+    const classStatus = profile?.enrolledClasses[0]?.status;
+    if (classStatus === "not_started") return "Lớp của bạn chưa bắt đầu. Vui lòng thử lại sau";
+    if (classStatus === "closed") return "Lớp của bạn đã kết thúc. Vui lòng thử lại sau";
+    return null;
+  })();
 
   const listHeader = (
     <>
@@ -243,7 +242,14 @@ export default function PracticeTab() {
       </View>
     ) : activeTab === "ai" && !isLoadingLessons ? (
       <View className="px-4">
-        {isErrorLessons ? (
+        {blockedMessage ? (
+          <Text
+            className="font-body text-sm text-center"
+            style={{ color: theme.text.secondary }}
+          >
+            {blockedMessage}
+          </Text>
+        ) : isErrorLessons ? (
           <Text
             className="font-body text-sm text-center"
             style={{ color: theme.text.secondary }}
@@ -274,7 +280,7 @@ export default function PracticeTab() {
 
       <FlatList<Content | LessonResponse>
         ref={flatListRef}
-        data={activeTab === "teacher" ? assignments : (lessons ?? [])}
+        data={activeTab === "teacher" ? assignments : (blockedMessage ? [] : (lessons ?? []))}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View className="px-4 mb-3">
@@ -343,7 +349,7 @@ export default function PracticeTab() {
           }, 350);
         }}
       />
-      <ChatbotFab />
+      {!blockedMessage && <ChatbotFab />}
     </View>
   );
 }

@@ -1,6 +1,15 @@
+export interface MarkReadRequest {
+  notificationIds: string[];
+}
+
+export interface MarkReadResponse {
+  success: boolean;
+  data: number;
+}
+
 export interface RegisterDeviceTokenRequest {
   fcmToken: string;
-  deviceType: "android" | "ios";
+  deviceType: "ANDROID" | "IOS";
   deviceName?: string;
   appVersion?: string;
 }
@@ -12,9 +21,15 @@ export interface RegisterDeviceTokenResponse {
 
 export interface Content {
   id: string;
+  type: string;
+  priority: string;
   title: string;
   body: string;
-  read: boolean;
+  data: Record<string, object>;
+  imageUrl: string | null;
+  actionUrl: string | null;
+  isRead: boolean;
+  readAt: string | null;
   createdAt: string;
 }
 
@@ -26,5 +41,8 @@ export interface NotificationsResponse {
   first: boolean;
   totalElements: number;
   totalPages: number;
+  numberOfElements: number;
   empty: boolean;
+  sort: object[];
+  pageable: object;
 }

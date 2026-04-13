@@ -10,12 +10,14 @@ interface AssignmentState {
   quizResult: SubmitQuizResponse | null;
   assignmentId: string | null;   // ID bài tập tương ứng với quizResult
   writingResult: SubmitWritingResponse | null;
+  // true khi user đang xem lại bài đã nộp/chấm từ danh sách (không phải vừa submit xong)
+  isReview: boolean;
 }
 
 interface AssignmentActions {
-  setQuizResult: (assignmentId: string, result: SubmitQuizResponse) => void;
+  setQuizResult: (assignmentId: string, result: SubmitQuizResponse, isReview?: boolean) => void;
   clearQuizResult: () => void;
-  setWritingResult: (result: SubmitWritingResponse) => void;
+  setWritingResult: (result: SubmitWritingResponse, isReview?: boolean) => void;
   clearWritingResult: () => void;
 }
 
@@ -23,9 +25,10 @@ export const useAssignmentStore = create<AssignmentState & AssignmentActions>()(
   quizResult: null,
   assignmentId: null,
   writingResult: null,
+  isReview: false,
 
-  setQuizResult: (assignmentId, result) => set({ assignmentId, quizResult: result }),
-  clearQuizResult: () => set({ assignmentId: null, quizResult: null }),
-  setWritingResult: (result) => set({ writingResult: result }),
-  clearWritingResult: () => set({ writingResult: null }),
+  setQuizResult: (assignmentId, result, isReview = false) => set({ assignmentId, quizResult: result, isReview }),
+  clearQuizResult: () => set({ assignmentId: null, quizResult: null, isReview: false }),
+  setWritingResult: (result, isReview = false) => set({ writingResult: result, isReview }),
+  clearWritingResult: () => set({ writingResult: null, isReview: false }),
 }));

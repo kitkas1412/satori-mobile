@@ -11,16 +11,15 @@ import { StatusBar } from "expo-status-bar";
 
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { LoadingOverlay, ScreenAsyncView, ScreenHeader } from "@/components/ui";
+import { IconButton, LoadingOverlay, ProgressBar, ScreenAsyncView, ScreenHeader } from "@/components/ui";
 import {
   useStartAssignment,
   useQuizNavigation,
   useQuizAnswers,
-  useQuizTimer,
   useQuizSubmit,
   useExitAssignment,
 } from "../hooks";
-import { QuestionView } from "../components";
+import { AudioPlayerBar, QuestionView } from "../components";
 
 interface QuizScreenProps {
   id: string;
@@ -40,13 +39,11 @@ export function QuizScreen({ id }: QuizScreenProps) {
     useQuizNavigation(total);
   const { answers, handleSelectOption, handleFillBlankChange } =
     useQuizAnswers();
-  // Bắt đầu đếm giờ khi bài tập đã tải xong (isPending = false và data có giá trị)
-  const { getTimeStats } = useQuizTimer(!isPending && !!data);
   const { handleSubmit, isPending: isSubmitting } = useQuizSubmit({
     assignmentId: id,
     questions,
     answers,
-    getTimeStats,
+    onNavigate: () => router.push("/quiz-result"),
   });
   const { handleExit } = useExitAssignment(() => router.back());
 
@@ -71,14 +68,10 @@ export function QuizScreen({ id }: QuizScreenProps) {
         title={data?.title ?? "Bài tập"}
         showDivider
         leftAction={
-          <Pressable
+          <IconButton
+            icon={<X size={22} color={theme.icon.primary} strokeWidth={2} />}
             onPress={handleExit}
-            hitSlop={8}
-            className="items-center justify-center"
-            style={{ width: 24, height: 24 }}
-          >
-            <X size={22} color={theme.icon.primary} strokeWidth={2} />
-          </Pressable>
+          />
         }
         rightAction={<View style={{ width: 24 }} />}
       />
@@ -91,13 +84,35 @@ export function QuizScreen({ id }: QuizScreenProps) {
         emptyText="Bài tập này chưa có câu hỏi."
       >
         <>
+          {/* Số thứ tự câu hỏi và thanh tiến độ */}
+          <View className="px-4 pt-4">
+            <View className="flex-row items-center justify-between mb-3">
+              <Text
+                className="font-heading text-sm"
+                style={{ color: theme.text.primary }}
+              >
+                問題
+              </Text>
+              <Text
+                className="font-heading text-sm"
+                style={{ color: theme.text.primary }}
+              >
+                {currentIndex + 1}/{total}
+              </Text>
+            </View>
+            <ProgressBar progress={total > 0 ? (currentIndex + 1) / total : 0} />
+          </View>
+
+          {/* Audio player — chỉ hiển thị khi bài tập có file âm thanh đề bài */}
+          {data?.audioUrl && (
+            <AudioPlayerBar audioUrl={data.audioUrl} theme={theme} />
+          )}
+
           {/* Khu vực hiển thị câu hỏi hiện tại */}
           <View className="flex-1">
             {current && (
               <QuestionView
                 question={current}
-                index={currentIndex}
-                total={total}
                 selectedOptionId={answers[current.assignmentQuestionId]}
                 fillBlankAnswer={answers[current.assignmentQuestionId]}
                 onSelectOption={(optionId) =>
