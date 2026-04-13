@@ -9,10 +9,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
-import { PrimaryButton, ProgressBar } from "@/components/ui";
+import { PrimaryButton, ProgressBar, RewardIconCircle } from "@/components/ui";
 import { useConversationStore } from "@/stores";
 import type { BadgeEarned, LevelUp, StreakNotification } from "@/features/speaking/api";
-import { RewardIconCircle } from "@/features/speaking/components";
 
 type RewardItem =
   | { type: "streak"; data: StreakNotification }
