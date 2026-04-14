@@ -81,9 +81,7 @@ export function FeedbackBubble({
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const router = useRouter();
-  const summary = feedback.languageEvaluation?.summary;
-  const score =
-    feedback.overallScore != null ? Math.round(feedback.overallScore) : null;
+  const summary = feedback.qualitativeSummary?.overallAssessment;
 
   return (
     <View className="self-start max-w-[85%]">
@@ -103,14 +101,6 @@ export function FeedbackBubble({
         >
           Tóm tắt đánh giá
         </Text>
-        {score != null && (
-          <Text
-            className="font-body text-sm"
-            style={{ color: theme.brand.primary }}
-          >
-            Điểm tổng: {score}/100
-          </Text>
-        )}
         {summary ? (
           <Text
             className="font-body text-sm"
