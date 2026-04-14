@@ -65,7 +65,7 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
       ) : (
         <View className="flex-row items-center gap-2">
           {icon}
-          <Text className="font-heading text-lg" style={{ color: textColor }}>
+          <Text className="font-heading text-lg" style={{ color: textColor }} numberOfLines={1}>
             {text}
           </Text>
         </View>
