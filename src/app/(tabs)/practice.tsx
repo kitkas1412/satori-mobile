@@ -20,7 +20,6 @@ import { ChatbotFab } from "@/features/chatbot/components";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useProfile } from "@/features/profile-management/hooks";
-import { useAuthStore } from "@/stores/auth-store";
 import { BellButton, LoadingOverlay, ScreenHeader } from "@/components/ui";
 import { AssignmentCard } from "@/features/assignment/components/assignment-card";
 import { AssignmentFilterBar } from "@/features/assignment/components/assignment-filter-bar";
@@ -46,7 +45,6 @@ type ActiveTab = "teacher" | "ai";
 export default function PracticeTab() {
   const router = useRouter();
   const { tab } = useLocalSearchParams<{ tab?: string }>();
-  const user = useAuthStore((state) => state.user);
   const isFocused = useIsFocused();
   const [activeTab, setActiveTab] = useState<ActiveTab>("teacher");
 
@@ -67,7 +65,7 @@ export default function PracticeTab() {
     useAssignmentNavigation(
       (pathname, params) => router.push({ pathname: pathname as any, params }),
     );
-  const { data: profile } = useProfile();
+  const { data: profile, refetch: refetchProfile } = useProfile();
   const { data: classes } = useClasses();
   const courseId = profile?.enrolledClasses[0]?.courseId;
 
@@ -101,11 +99,11 @@ export default function PracticeTab() {
       const refetch = async () => {
         setIsFocusRefetching(true);
         if (activeTab === "teacher") await refetchAssignments();
-        else await refetchLessons();
+        else await Promise.all([refetchLessons(), refetchProfile()]);
         setIsFocusRefetching(false);
       };
       refetch();
-    }, [activeTab, refetchAssignments, refetchLessons]),
+    }, [activeTab, refetchAssignments, refetchLessons, refetchProfile]),
   );
 
   const [refreshing, setRefreshing] = useState(false);
@@ -114,13 +112,14 @@ export default function PracticeTab() {
     setRefreshing(true);
     if (activeTab === "teacher") await refetchAssignments();
     else await refetchLessons();
+    await refetchProfile();
     setRefreshing(false);
   };
 
   const assignments = data?.pages.flatMap((p) => p.content) ?? [];
 
   const blockedMessage = (() => {
-    if (user?.status === "INACTIVE") return "Bạn chưa có lớp. Vui lòng thử lại sau";
+    if (!profile?.enrolledClasses?.length) return "Bạn chưa có lớp. Vui lòng thử lại sau";
     const classStatus = profile?.enrolledClasses[0]?.status;
     if (classStatus === "not_started") return "Lớp của bạn chưa bắt đầu. Vui lòng thử lại sau";
     if (classStatus === "closed") return "Lớp của bạn đã kết thúc. Vui lòng thử lại sau";
