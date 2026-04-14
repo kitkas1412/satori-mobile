@@ -194,15 +194,75 @@ export interface SendMessageResponse {
 }
 
 // POST: /learner/roleplay/sessions/{{session_id}}/complete
-/** Kết quả tổng hợp sau khi hoàn thành session: điểm số và đánh giá chi tiết */
+/** Kết quả độ chính xác ngôn ngữ sau session */
+export interface AccuracyResult {
+  score: number;
+  totalCorrections: number;
+  userMessageCount: number;
+  /** Tỷ lệ lỗi dạng %, có thể null nếu không tính được */
+  errorRate: number | null;
+  errorBreakdown: Record<string, number>;
+  feedback: string;
+}
+
+/** Kết quả phát âm tổng hợp sau session */
+export interface PronunciationResult {
+  score: number;
+  averageAccuracy: number;
+  averageFluency: number;
+  averageCompleteness: number;
+  totalAssessed: number;
+  feedback: string;
+}
+
+/** Kết quả hoàn thành nhiệm vụ sau session */
+export interface TaskCompletionResult {
+  score: number;
+  completedMissions: number;
+  totalMissions: number;
+  details: MissionDetails[];
+  feedback: string;
+}
+
+/** Kết quả độ phức tạp ngôn ngữ sau session */
+export interface ComplexityResult {
+  score: number;
+  uniqueVocabularyCount: number;
+  /** Phân bố theo cấp độ JLPT, ví dụ: { "N5": 3, "N4": 1 } */
+  jlptDistribution: Record<string, number>;
+  feedback: string;
+}
+
+/** Đánh giá định tính tổng hợp sau session, bao gồm nhận xét chi tiết và bước tiếp theo */
+export interface QualitativeSummary {
+  overallAssessment: string;
+  jlptEstimate: string;
+  accuracyFeedback: string;
+  pronunciationFeedback: string;
+  taskCompletionFeedback: string;
+  complexityFeedback: string;
+  recurringWarning: string;
+  nextSteps: string[];
+}
+
+/** Mẫu lỗi lặp lại qua nhiều session */
+export interface RecurringPattern {
+  errorType: string;
+  totalOccurrences: number;
+  sessionCount: number;
+  totalSessionsChecked: number;
+}
+
+/** Kết quả tổng hợp sau khi hoàn thành session */
 export interface FeedbackResultResponse {
   sessionId: string;
-  missionScore: number;
-  pronunciationScore: number;
-  languageScore: number;
-  overallScore: number;
+  accuracy: AccuracyResult;
+  pronunciation: PronunciationResult;
+  taskCompletion: TaskCompletionResult;
+  complexity: ComplexityResult;
+  qualitativeSummary: QualitativeSummary;
+  recurringPatterns: RecurringPattern[];
   missionDetails: MissionDetails[];
-  pronunciationSummary: PronunciationSummary | null;
   languageEvaluation: LanguageEvaluation | null;
   newBadgesEarned: BadgeEarned[];
   levelUp: LevelUp | null;
@@ -218,17 +278,6 @@ export interface MissionDetails {
   progressPct: number;
   /** Giải thích của AI về lý do nhiệm vụ đạt/chưa đạt */
   reasoning: string;
-}
-
-/** Tóm tắt phát âm tổng hợp sau session */
-export interface PronunciationSummary {
-  averageOverall: number;
-  averageAccuracy: number;
-  averageFluency: number;
-  averageProsody: number;
-  averagePitchAccent: number;
-  averageMoraTiming: number;
-  totalAssessed: number;
 }
 
 /** Đánh giá ngôn ngữ tổng hợp của AI sau session, gồm 4 chỉ số và nhận xét */

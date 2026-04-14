@@ -6,5 +6,4 @@ export { MissionItem } from "./mission-item";
 export { MissionsModal } from "./missions-modal";
 export { ConversationCard } from "./conversation-card";
 export { TopicSection } from "./topic-section";
-export { LanguageEvaluationCard } from "./language-evaluation-card";
 export { TypingIndicator } from "./typing-indicator";
