@@ -22,7 +22,7 @@ import {
   TopicSection,
 } from "@/features/speaking/components";
 import { ChatbotFab } from "@/features/chatbot/components";
-import { useAppStore, useAuthStore } from "@/stores";
+import { useAppStore } from "@/stores";
 import {
   useTopics,
   useFirstUnpracticedSection,
@@ -35,9 +35,8 @@ export default function SpeakingScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const isFocused = useIsFocused();
-  const user = useAuthStore((state) => state.user);
   const language = useAppStore((state) => state.language);
-  const { data: profile } = useProfile();
+  const { data: profile, refetch: refetchProfile } = useProfile();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const {
@@ -65,7 +64,7 @@ export default function SpeakingScreen() {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await refetch();
+    await Promise.all([refetch(), refetchProfile()]);
     setRefreshing(false);
   };
 
@@ -76,7 +75,7 @@ export default function SpeakingScreen() {
       setFocusTrigger((prev) => prev + 1);
       const doRefetch = async () => {
         setIsFocusRefetching(true);
-        await refetch();
+        await Promise.all([refetch(), refetchProfile()]);
         setIsFocusRefetching(false);
       };
       doRefetch();
@@ -99,7 +98,7 @@ export default function SpeakingScreen() {
   );
 
   const blockedMessage = (() => {
-    if (user?.status === "INACTIVE") return "Bạn chưa có lớp. Vui lòng thử lại sau";
+    if (!profile?.enrolledClasses?.length) return "Bạn chưa có lớp. Vui lòng thử lại sau";
     const classStatus = profile?.enrolledClasses[0]?.status;
     if (classStatus === "not_started") return "Lớp của bạn chưa bắt đầu. Vui lòng thử lại sau";
     if (classStatus === "closed") return "Lớp của bạn đã kết thúc. Vui lòng thử lại sau";
