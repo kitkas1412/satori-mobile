@@ -1,10 +1,6 @@
 // Types cho tính năng Luyện tập AI.
 
-export type SessionType =
-  | "VOCAB_DRILL"
-  | "GRAMMAR_DRILL"
-  | "MIXED_LESSON"
-  | "KANJI_READING";
+export type SessionType = "VOCAB_DRILL" | "GRAMMAR_DRILL" | "MIXED_LESSON";
 
 export type SessionStatus = "IN_PROGRESS";
 
