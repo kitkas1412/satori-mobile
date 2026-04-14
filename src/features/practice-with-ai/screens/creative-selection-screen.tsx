@@ -548,7 +548,7 @@ export function CreativeSelectionScreen() {
 
           {/* Grammar list */}
           {!isPending && showGrammar && (
-            <View style={{ gap: 6 }}>
+            <View style={{ gap: 16 }}>
               {filteredGrammar.length === 0 ? (
                 <Text
                   className="font-body text-sm text-center"
