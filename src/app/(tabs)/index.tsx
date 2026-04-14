@@ -17,7 +17,7 @@ import {
 } from "@/features/streak/hooks";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useQueryClient } from "@tanstack/react-query";
-import { useFocusEffect, useIsFocused, useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { ChevronRight } from "lucide-react-native";
 import { useCallback } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
@@ -28,7 +28,6 @@ function UpcomingAssignments() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const router = useRouter();
-  const isFocused = useIsFocused();
   const { data: assignments } = useUpcomingAssignments();
   const { handleAssignmentPress, isLoadingSubmission } =
     useAssignmentNavigation();
@@ -76,7 +75,7 @@ function UpcomingAssignments() {
         ))}
       </View>
 
-      <LoadingOverlay visible={isFocused && isLoadingSubmission} title="Đang tải..." />
+      <LoadingOverlay visible={isLoadingSubmission} title="Đang tải..." />
     </View>
   );
 }
@@ -86,7 +85,6 @@ export default function HomeScreen() {
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const isFocused = useIsFocused();
   const queryClient = useQueryClient();
   const { isFetching: isCurrentFetching } = useStreakCurrent();
   const { isFetching: isHistoryFetching } = useStreakHistory(7);
@@ -117,7 +115,7 @@ export default function HomeScreen() {
         }
         paddingTop={insets.top + 16}
       />
-      <LoadingOverlay visible={isFocused && isLoading} />
+      <LoadingOverlay visible={isLoading} />
       <ScrollView
         className="flex-1"
         style={{ backgroundColor: theme.background.page }}
