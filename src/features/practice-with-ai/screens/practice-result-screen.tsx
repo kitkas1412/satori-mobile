@@ -37,6 +37,25 @@ export function PracticeResultScreen() {
     router.replace({ pathname: "/(tabs)/practice", params: { tab: "ai" } });
   }
 
+  function handleContinue() {
+    if (!summary || !practiceSessionId) {
+      handleGoPracticeHome();
+      return;
+    }
+    const hasReward =
+      (summary.newBadgesEarned?.length ?? 0) > 0 ||
+      summary.levelUp !== null ||
+      summary.streakNotification?.is_first_activity_today === true;
+    if (hasReward) {
+      router.replace({
+        pathname: "/practice-reward",
+        params: { practiceSessionId },
+      });
+    } else {
+      handleGoPracticeHome();
+    }
+  }
+
   if (!practiceSessionId) {
     return (
       <View
@@ -257,8 +276,8 @@ export function PracticeResultScreen() {
         }}
       >
         <PrimaryButton
-          text="Về trang luyện tập"
-          onPress={handleGoPracticeHome}
+          text="Tiếp tục"
+          onPress={handleContinue}
         />
       </View>
     </View>
