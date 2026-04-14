@@ -12,7 +12,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter, useFocusEffect, useIsFocused } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
 import { BellButton, LoadingOverlay, ScreenHeader } from "@/components/ui";
@@ -34,7 +34,6 @@ import { useProfile } from "@/features/profile-management/hooks";
 export default function SpeakingScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const isFocused = useIsFocused();
   const language = useAppStore((state) => state.language);
   const { data: profile, refetch: refetchProfile } = useProfile();
   const colorScheme = useColorScheme();
@@ -98,10 +97,13 @@ export default function SpeakingScreen() {
   );
 
   const blockedMessage = (() => {
-    if (!profile?.enrolledClasses?.length) return "Bạn chưa có lớp. Vui lòng thử lại sau";
+    if (!profile?.enrolledClasses?.length)
+      return "Bạn chưa có lớp. Vui lòng thử lại sau";
     const classStatus = profile?.enrolledClasses[0]?.status;
-    if (classStatus === "not_started") return "Lớp của bạn chưa bắt đầu. Vui lòng thử lại sau";
-    if (classStatus === "closed") return "Lớp của bạn đã kết thúc. Vui lòng thử lại sau";
+    if (classStatus === "not_started")
+      return "Lớp của bạn chưa bắt đầu. Vui lòng thử lại sau";
+    if (classStatus === "closed")
+      return "Lớp của bạn đã kết thúc. Vui lòng thử lại sau";
     return null;
   })();
 
@@ -133,7 +135,11 @@ export default function SpeakingScreen() {
           <FlatList<Topic>
             ref={scrollViewRef}
             className="flex-1"
-            contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32, gap: 16 }}
+            contentContainerStyle={{
+              paddingHorizontal: 16,
+              paddingBottom: 32,
+              gap: 16,
+            }}
             showsVerticalScrollIndicator={false}
             data={sections}
             keyExtractor={(item) => item.id}
@@ -149,7 +155,11 @@ export default function SpeakingScreen() {
                     if (!jlptLevel) return;
                     router.push({
                       pathname: "/conversation-practice",
-                      params: { jlptLevel, language, title: "Nói chuyện với AI" },
+                      params: {
+                        jlptLevel,
+                        language,
+                        title: "Nói chuyện với AI",
+                      },
                     });
                   }}
                 />
@@ -215,8 +225,8 @@ export default function SpeakingScreen() {
           />
         )}
       </View>
-      <LoadingOverlay visible={isFocused && isLoading} title="Đang tải..." />
-      <LoadingOverlay visible={isFocused && isFocusRefetching} title="Đang tải..." />
+      <LoadingOverlay visible={isLoading} title="Đang tải..." />
+      <LoadingOverlay visible={isFocusRefetching} title="Đang tải..." />
       {!blockedMessage && <ChatbotFab />}
     </>
   );
