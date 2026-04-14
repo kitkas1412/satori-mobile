@@ -48,7 +48,7 @@ export function TrueFalseSection({
 
       {/* True / False buttons */}
       <View style={{ flexDirection: "row", gap: 16 }}>
-        {currentItem.options.map((option, index) => {
+        {[...currentItem.options].sort((a, b) => a.id - b.id).map((option, index) => {
           const isSelected = selectedOptionId === option.id;
           const isCorrectAnswer =
             answerResult !== null && option.text === answerResult.correctAnswer;
