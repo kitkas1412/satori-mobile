@@ -19,7 +19,7 @@ import { StatusBar } from "expo-status-bar";
 import { PrimaryButton } from "@/components/ui";
 import { Colors, Primitive } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import type { GrammarItem, SessionType, VocabItem } from "../api/practice-with-ai.types";
+import type { GrammarItem, MasteryInfo, SessionType, VocabItem } from "../api/practice-with-ai.types";
 import { useLessonItems } from "../hooks";
 
 // ---------------------------------------------------------------------------
@@ -36,21 +36,21 @@ const MASTERY_FILTERS: { value: MasteryFilter; label: string }[] = [
   { value: "THANH_THAO", label: "Thành thạo" },
 ];
 
-function getMasteryLabel(mastery: string | null): string {
+function getMasteryLabel(mastery: MasteryInfo | null): string {
   if (mastery === null) return "Chưa luyện";
-  return mastery;
+  return mastery.label;
 }
 
-function getMasteryColor(mastery: string | null): string {
+function getMasteryColor(mastery: MasteryInfo | null): string {
   if (mastery === null) return Primitive.neutral[600]; // #8090ae
-  const lower = mastery.toLowerCase();
-  if (lower.includes("quen") || lower === "familiar") return Primitive.amber[300]; // #f59e0b
-  if (lower.includes("nắm") || lower.includes("nam") || lower === "proficient") return Primitive.blue[600]; // #5477e8
-  if (lower.includes("thành") || lower.includes("thanh") || lower === "mastered") return Primitive.green[500]; // #16a34a
+  const lower = mastery.label.toLowerCase();
+  if (lower.includes("quen") || mastery.level === "FAMILIAR") return Primitive.amber[300]; // #f59e0b
+  if (lower.includes("nắm") || lower.includes("nam") || mastery.level === "PROFICIENT") return Primitive.blue[600]; // #5477e8
+  if (lower.includes("thành") || lower.includes("thanh") || mastery.level === "MASTERED") return Primitive.green[500]; // #16a34a
   return Primitive.neutral[600];
 }
 
-function matchesMasteryFilter(mastery: string | null, filter: MasteryFilter): boolean {
+function matchesMasteryFilter(mastery: MasteryInfo | null, filter: MasteryFilter): boolean {
   if (filter === "ALL") return true;
   if (filter === "CHUA_LUYEN") return mastery === null;
   const label = getMasteryLabel(mastery).toLowerCase();
@@ -414,7 +414,7 @@ export function CreativeSelectionScreen() {
   function toggleVocab(id: string) {
     setSelectedVocabIds((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) { next.delete(id); } else { next.add(id); }
       return next;
     });
   }
@@ -422,7 +422,7 @@ export function CreativeSelectionScreen() {
   function toggleGrammar(id: string) {
     setSelectedGrammarIds((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) { next.delete(id); } else { next.add(id); }
       return next;
     });
   }

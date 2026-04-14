@@ -38,6 +38,14 @@ export interface LessonResponse {
 }
 
 // GET: /api/v1/learner/practice/lessons/:lessonId/items
+export interface MasteryInfo {
+  level: string;
+  label: string;
+  attemptCount: number;
+  emaScore: number;
+  lastPracticedAt: string;
+}
+
 /** Một từ vựng trong bài học */
 export interface VocabItem {
   id: string;
@@ -45,7 +53,7 @@ export interface VocabItem {
   reading: string;
   meaningVi: string;
   partOfSpeech: string | null;
-  mastery: string | null;
+  mastery: MasteryInfo | null;
 }
 
 /** Một điểm ngữ pháp trong bài học */
@@ -54,7 +62,7 @@ export interface GrammarItem {
   pattern: string;
   meaningVi: string;
   shortExplanation: string | null;
-  mastery: string | null;
+  mastery: MasteryInfo | null;
 }
 
 /** Response cho danh sách nội dung bài học */
