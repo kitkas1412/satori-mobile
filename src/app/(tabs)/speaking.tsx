@@ -12,7 +12,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter, useFocusEffect } from "expo-router";
+import { useRouter, useFocusEffect, useIsFocused } from "expo-router";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
 import { BellButton, LoadingOverlay, ScreenHeader } from "@/components/ui";
@@ -22,7 +22,7 @@ import {
   TopicSection,
 } from "@/features/speaking/components";
 import { ChatbotFab } from "@/features/chatbot/components";
-import { useAppStore, useAuthStore } from "@/stores";
+import { useAppStore } from "@/stores";
 import {
   useTopics,
   useFirstUnpracticedSection,
@@ -34,9 +34,9 @@ import { useProfile } from "@/features/profile-management/hooks";
 export default function SpeakingScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const user = useAuthStore((state) => state.user);
+  const isFocused = useIsFocused();
   const language = useAppStore((state) => state.language);
-  const { data: profile } = useProfile();
+  const { data: profile, refetch: refetchProfile } = useProfile();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const {
@@ -64,7 +64,7 @@ export default function SpeakingScreen() {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await refetch();
+    await Promise.all([refetch(), refetchProfile()]);
     setRefreshing(false);
   };
 
@@ -75,7 +75,7 @@ export default function SpeakingScreen() {
       setFocusTrigger((prev) => prev + 1);
       const doRefetch = async () => {
         setIsFocusRefetching(true);
-        await refetch();
+        await Promise.all([refetch(), refetchProfile()]);
         setIsFocusRefetching(false);
       };
       doRefetch();
@@ -98,7 +98,7 @@ export default function SpeakingScreen() {
   );
 
   const blockedMessage = (() => {
-    if (user?.status === "INACTIVE") return "Bạn chưa có lớp. Vui lòng thử lại sau";
+    if (!profile?.enrolledClasses?.length) return "Bạn chưa có lớp. Vui lòng thử lại sau";
     const classStatus = profile?.enrolledClasses[0]?.status;
     if (classStatus === "not_started") return "Lớp của bạn chưa bắt đầu. Vui lòng thử lại sau";
     if (classStatus === "closed") return "Lớp của bạn đã kết thúc. Vui lòng thử lại sau";
@@ -140,12 +140,12 @@ export default function SpeakingScreen() {
             ListHeaderComponent={
               <>
                 {/*
-                 * Banner free-talk: lấy targetJlptLevel từ profile để truyền vào session.
-                 * Nếu chưa cài đặt mục tiêu JLPT thì không điều hướng.
+                 * Banner free-talk: lấy jlptLevel từ lớp đang học để truyền vào session.
+                 * Nếu chưa đăng ký lớp thì không điều hướng.
                  */}
                 <ConversationBanner
                   onPress={() => {
-                    const jlptLevel = profile?.learningPreferences?.targetJlptLevel;
+                    const jlptLevel = profile?.enrolledClasses?.[0]?.jlptLevel;
                     if (!jlptLevel) return;
                     router.push({
                       pathname: "/conversation-practice",
@@ -215,8 +215,8 @@ export default function SpeakingScreen() {
           />
         )}
       </View>
-      <LoadingOverlay visible={isLoading} title="Đang tải..." />
-      <LoadingOverlay visible={isFocusRefetching} title="Đang tải..." />
+      <LoadingOverlay visible={isFocused && isLoading} title="Đang tải..." />
+      <LoadingOverlay visible={isFocused && isFocusRefetching} title="Đang tải..." />
       {!blockedMessage && <ChatbotFab />}
     </>
   );

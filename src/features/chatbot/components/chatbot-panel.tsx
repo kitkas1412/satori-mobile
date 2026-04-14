@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from "react";
 import {
   FlatList,
   Keyboard,
-  KeyboardAvoidingView,
   Platform,
   Pressable,
   Text,
@@ -15,6 +14,8 @@ import { Colors } from "@/constants/theme";
 import { useProfile } from "@/features/profile-management/hooks";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useCreateChatSession, useSendMessage } from "@/features/chatbot/hooks";
+import { extractApiError } from "@/lib/extract-api-error";
+import { useErrorOverlayStore } from "@/stores/error-overlay-store";
 import { ChatbotMessageBubble } from "./chatbot-message-bubble";
 
 interface Message {
@@ -35,20 +36,19 @@ interface ChatbotPanelProps {
   onClose: () => void;
   onOpenHistory: () => void;
   loadedSession?: LoadedSession;
-  keyboardOffset?: number;
 }
 
 export function ChatbotPanel({
   onClose,
   onOpenHistory,
   loadedSession,
-  keyboardOffset,
 }: ChatbotPanelProps) {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
   const [message, setMessage] = useState("");
-  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const keyboardVisible = keyboardHeight > 0;
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isAiLoading, setIsAiLoading] = useState(false);
@@ -65,11 +65,13 @@ export function ChatbotPanel({
   }, [loadedSession]);
 
   useEffect(() => {
-    const show = Keyboard.addListener("keyboardDidShow", () =>
-      setKeyboardVisible(true),
+    const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+    const show = Keyboard.addListener(showEvent, (e) =>
+      setKeyboardHeight(e.endCoordinates.height),
     );
-    const hide = Keyboard.addListener("keyboardDidHide", () =>
-      setKeyboardVisible(false),
+    const hide = Keyboard.addListener(hideEvent, () =>
+      setKeyboardHeight(0),
     );
     return () => {
       show.remove();
@@ -90,11 +92,19 @@ export function ChatbotPanel({
 
     if (!activeSessionId) {
       const courseId = profile?.enrolledClasses[0]?.courseId;
-      const jlptLevel = profile?.learningPreferences?.targetJlptLevel;
+      const jlptLevel = profile?.enrolledClasses?.[0]?.jlptLevel;
       if (!courseId || !jlptLevel) return;
-      const session = await createSession({ courseId, jlptLevel });
-      activeSessionId = session.sessionId;
-      setSessionId(activeSessionId);
+      try {
+        const session = await createSession({ courseId, jlptLevel });
+        activeSessionId = session.sessionId;
+        setSessionId(activeSessionId);
+      } catch (error) {
+        useErrorOverlayStore.getState().show(
+          extractApiError(error, "Không thể khởi tạo cuộc trò chuyện. Vui lòng thử lại."),
+          () => {}, // Ở lại chat, không navigate
+        );
+        return;
+      }
     }
 
     setMessage("");
@@ -123,6 +133,11 @@ export function ChatbotPanel({
           role: "ai",
         },
       ]);
+    } catch (error) {
+      useErrorOverlayStore.getState().show(
+        extractApiError(error, "Không thể gửi tin nhắn. Vui lòng thử lại."),
+        () => {}, // Ở lại chat, không navigate
+      );
     } finally {
       setIsAiLoading(false);
     }
@@ -136,11 +151,7 @@ export function ChatbotPanel({
     : messages;
 
   return (
-    <KeyboardAvoidingView
-      className="flex-1"
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={keyboardOffset ?? 0}
-    >
+    <View className="flex-1" style={{ paddingBottom: keyboardHeight }}>
       {/* Header */}
       <View
         className="flex-row items-center px-4 py-4 gap-3"
@@ -243,6 +254,6 @@ export function ChatbotPanel({
           <Send size={18} color={theme.icon.onBrand} />
         </Pressable>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 }

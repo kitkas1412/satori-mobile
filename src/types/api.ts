@@ -33,6 +33,17 @@ export interface User {
   status: string;
 }
 
+export interface SkillPoint {
+  category: string | null;
+  skill: string | null;
+  description: string | null;
+  confidence: number;
+  source: string | null;
+  jlptLevel: string | null;
+  relatedEntityIds: string[] | null;
+  lastUpdated: string | null;
+}
+
 export interface LearningPreferences {
   targetJlptLevel: string;
   dailyStudyGoalMinutes: number;
@@ -43,8 +54,9 @@ export interface LearningPreferences {
   conversationStyle: string | null;
   streakReminderEnabled: boolean;
   reminderTime: string | null;
-  weakPoints: { item: string; type: string }[];
-  strongPoints: { item: string; type: string }[];
+  weakPoints: SkillPoint[];
+  strongPoints: SkillPoint[];
+  skillScores: unknown[];
 }
 
 export interface EnrolledClass {
@@ -53,6 +65,7 @@ export interface EnrolledClass {
   classCode: string | null;
   courseId: string;
   courseName: string;
+  jlptLevel: string;
   startDate: string | null;
   endDate: string | null;
   status: string;

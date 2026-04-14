@@ -1,6 +1,8 @@
 import { BellButton, LoadingOverlay, ScreenHeader } from "@/components/ui";
 import { Colors } from "@/constants/theme";
 import { AssignmentCard } from "@/features/assignment/components/assignment-card";
+import { ChatbotFab } from "@/features/chatbot/components";
+import { useProfile } from "@/features/profile-management/hooks";
 import { StatusBar } from "expo-status-bar";
 import {
   useAssignmentNavigation,
@@ -86,6 +88,13 @@ export default function HomeScreen() {
   const { isFetching: isCurrentFetching } = useStreakCurrent();
   const { isFetching: isHistoryFetching } = useStreakHistory(7);
   const isLoading = isCurrentFetching || isHistoryFetching;
+  const { data: profile } = useProfile();
+  const isBlocked = (() => {
+    if (!profile?.enrolledClasses?.length) return true;
+    const classStatus = profile?.enrolledClasses[0]?.status;
+    if (classStatus === "not_started" || classStatus === "closed") return true;
+    return false;
+  })();
 
   useFocusEffect(
     useCallback(() => {
@@ -113,6 +122,7 @@ export default function HomeScreen() {
         <StreakCard />
         <UpcomingAssignments />
       </ScrollView>
+      {!isBlocked && <ChatbotFab />}
     </View>
   );
 }

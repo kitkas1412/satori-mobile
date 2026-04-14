@@ -1,11 +1,10 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { getBadgesApi } from "../api";
-
-export const badgesQueryKey = ["badges"] as const;
+import { achievementQueryKeys } from "./use-achievement-progress";
 
 export function useBadges() {
   return useInfiniteQuery({
-    queryKey: badgesQueryKey,
+    queryKey: achievementQueryKeys.badges(),
     queryFn: ({ pageParam }) => getBadgesApi(pageParam),
     initialPageParam: 0,
     getNextPageParam: (lastPage) =>

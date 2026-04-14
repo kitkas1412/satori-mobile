@@ -23,7 +23,9 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useColorScheme as useNativeWindColorScheme } from "nativewind";
 
 import { QueryProvider } from "@/components/providers/query-provider";
+import { ErrorOverlay } from "@/components/ui";
 import { useTokenValidation } from "@/features/authentication/hooks";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRegisterDeviceToken } from "@/features/notification/hooks";
 import { abandonSessionApi } from "@/features/speaking/api";
 import { ACTIVE_SESSION_STORAGE_KEY } from "@/features/speaking/hooks";
@@ -62,6 +64,7 @@ function RootLayoutNav() {
   const { isAuthenticated, isHydrated } = useAuthStore();
   const { isValidating } = useTokenValidation();
   const { mutate: registerDeviceToken } = useRegisterDeviceToken();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     // Chờ store load từ SecureStore trước khi kiểm tra
@@ -77,6 +80,16 @@ function RootLayoutNav() {
       router.replace("/(tabs)");
     }
   }, [isAuthenticated, isHydrated, isValidating, segments]);
+
+  // Dọn toàn bộ React Query cache khi đăng xuất.
+  // Đặt ở đây thay vì trong useLogout.onSuccess để đảm bảo cache chỉ bị clear
+  // sau khi isAuthenticated = false — thời điểm tabs đang unmount và không còn
+  // active observer nào, tránh kích hoạt refetch không cần thiết trên Android.
+  useEffect(() => {
+    if (!isAuthenticated && isHydrated) {
+      queryClient.clear();
+    }
+  }, [isAuthenticated, isHydrated, queryClient]);
 
   // Gửi FCM token lên backend và cập nhật AsyncStorage sau khi thành công.
   const sendToken = async () => {
@@ -213,7 +226,11 @@ function RootLayoutNav() {
         options={{ headerShown: false, gestureEnabled: false }}
       />
       <Stack.Screen
-        name="assignment-result"
+        name="quiz-result"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="assignment-reward"
         options={{ headerShown: false, gestureEnabled: false }}
       />
       <Stack.Screen
@@ -237,6 +254,42 @@ function RootLayoutNav() {
         options={{ headerShown: false, gestureEnabled: false }}
       />
       <Stack.Screen
+        name="creative-selection"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="general-settings"
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
+      <Stack.Screen
+        name="edit-daily-goal"
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
+      <Stack.Screen
+        name="edit-study-time"
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
+      <Stack.Screen
+        name="edit-learning-pace"
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
+      <Stack.Screen
+        name="edit-formality"
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
+      <Stack.Screen
+        name="edit-conversation-style"
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
+      <Stack.Screen
+        name="edit-topics"
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
+      <Stack.Screen
+        name="edit-reminder"
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
+      <Stack.Screen
         name="theme-selector"
         options={{ headerShown: false, gestureEnabled: false }}
       />
@@ -254,6 +307,10 @@ function RootLayoutNav() {
       />
       <Stack.Screen
         name="edit-gender"
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
+      <Stack.Screen
+        name="notification-settings"
         options={{ headerShown: false, gestureEnabled: true }}
       />
       <Stack.Screen
@@ -299,6 +356,7 @@ export default function RootLayout() {
         <RootLayoutNav />
         <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
       </ThemeProvider>
+      <ErrorOverlay />
     </QueryProvider>
   );
 }

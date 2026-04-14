@@ -2,7 +2,7 @@
   "expo": {
     "name": "Satori Nihongo",
     "slug": "satori-nihongo",
-    "version": "1.0.0",
+    "version": "1.1.2",
     "orientation": "portrait",
     "icon": "./assets/images/satori-icon.png",
     "scheme": "satorimobile",
@@ -28,6 +28,10 @@
       "predictiveBackGestureEnabled": false,
       "package": "com.kitkas1412.satorimobile",
       "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.CAMERA",
+        "android.permission.POST_NOTIFICATIONS",
         "android.permission.RECORD_AUDIO",
         "android.permission.MODIFY_AUDIO_SETTINGS",
         "android.permission.CAMERA",
@@ -91,6 +95,12 @@
         "projectId": "11faa6f1-3968-4362-a94d-049a3da3463d"
       }
     },
-    "owner": "satori-nihongo"
+    "owner": "satori-nihongo",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/11faa6f1-3968-4362-a94d-049a3da3463d"
+    }
   }
 }
