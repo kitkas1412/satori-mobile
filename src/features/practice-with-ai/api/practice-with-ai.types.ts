@@ -1,5 +1,9 @@
 // Types cho tính năng Luyện tập AI.
 
+// ---------------------------------------------------------------------------
+// Shared / Common
+// ---------------------------------------------------------------------------
+
 export type SessionType = "VOCAB_DRILL" | "GRAMMAR_DRILL" | "MIXED_LESSON";
 
 export type SessionStatus = "IN_PROGRESS";
@@ -18,7 +22,47 @@ export interface SessionConfig {
   itemTypes: ItemType[];
 }
 
-// GET: /api/v1/courses/{{courseId}}/lessons
+export type BadgeType =
+  | "LEARNING_STREAK"
+  | "LESSON_MASTER"
+  | "QUIZ_CHAMPION"
+  | "FIRST_STEPS"
+  | "DEDICATED_LEARNER"
+  | string;
+
+export interface BadgeEarned {
+  badgeId: string;
+  badgeName: string;
+  description: string;
+  badgeType: BadgeType;
+  iconUrl: string;
+  expReward: number;
+  earnedAt: string;
+  isFeatured: boolean;
+}
+
+export interface LevelUp {
+  previousLevel: number;
+  newLevel: number;
+  expEarned: number;
+  oldTotalExp: number;
+  totalExp: number;
+  expToNextLevel: number;
+  progressPercentage: number;
+  isLevelUp: boolean;
+}
+
+export interface StreakNotification {
+  is_first_activity_today: boolean;
+  current_streak: number;
+  longest_streak: number;
+  streak_last_date: string;
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/v1/courses/:courseId/lessons
+// ---------------------------------------------------------------------------
+
 /** Một bài học trong sách */
 export interface LessonResponse {
   id: string;
@@ -33,7 +77,10 @@ export interface LessonResponse {
   grammarPointCount: number;
 }
 
-// GET: /api/v1/learner/practice/lessons/:lessonId/items
+// ---------------------------------------------------------------------------
+// GET /api/v1/learner/practice/lessons/:lessonId/items
+// ---------------------------------------------------------------------------
+
 export interface MasteryInfo {
   level: string;
   label: string;
@@ -74,7 +121,10 @@ export interface LessonItemsResponse {
   };
 }
 
-// POST: /api/v1/learner/practice/sessions
+// ---------------------------------------------------------------------------
+// POST /api/v1/learner/practice/sessions
+// ---------------------------------------------------------------------------
+
 /** Tham số khởi tạo session luyện tập với AI */
 export interface PracticeSessionRequest {
   lessonId: string;
@@ -83,12 +133,6 @@ export interface PracticeSessionRequest {
   itemTypes: ItemType[];
   selectedVocabIds: string[] | null;
   selectedGrammarIds: string[] | null;
-}
-
-/** Dữ liệu session trả về khi khởi tạo thành công */
-export interface PracticeSessionResponse {
-  session: Session;
-  items: Items[];
 }
 
 /** Một session luyện tập */
@@ -126,7 +170,16 @@ export interface Options {
   isCorrect?: boolean;
 }
 
-// POST: /api/v1/learner/practice/sessions/{{sessionId}}/items/{{itemId}}/answer
+/** Dữ liệu session trả về khi khởi tạo thành công */
+export interface PracticeSessionResponse {
+  session: Session;
+  items: Items[];
+}
+
+// ---------------------------------------------------------------------------
+// POST /api/v1/learner/practice/sessions/:sessionId/items/:itemId/answer
+// ---------------------------------------------------------------------------
+
 /** Request body gửi câu trả lời */
 export interface AnswerRequest {
   userAnswer: string;
@@ -142,7 +195,10 @@ export interface AnswerResponse {
   correct: boolean;
 }
 
-// GET: /api/v1/learner/practice/sessions/{{practiceSessionId}}/summary
+// ---------------------------------------------------------------------------
+// GET /api/v1/learner/practice/sessions/:practiceSessionId/summary
+// ---------------------------------------------------------------------------
+
 /** Chi tiết kết quả cho từng câu trong phiên luyện tập */
 export interface PracticeSessionSummaryItem {
   itemIndex: number;
@@ -155,6 +211,15 @@ export interface PracticeSessionSummaryItem {
   aiFeedback: string;
 }
 
+export interface MasteryChange {
+  entityId: string;
+  entityType: string;
+  japaneseText: string;
+  levelBefore: number;
+  levelAfter: number;
+  newlyMastered: boolean;
+}
+
 /** Tổng kết toàn phiên luyện tập */
 export interface PracticeSessionSummaryResponse {
   sessionId: string;
@@ -163,4 +228,8 @@ export interface PracticeSessionSummaryResponse {
   totalItems: number;
   aiFeedback: string;
   items: PracticeSessionSummaryItem[];
+  newBadgesEarned: BadgeEarned[];
+  levelUp: LevelUp | null;
+  streakNotification: StreakNotification | null;
+  masteryChanges: MasteryChange[];
 }
