@@ -31,7 +31,7 @@ function UpcomingAssignments() {
   const { handleAssignmentPress, isLoadingSubmission } =
     useAssignmentNavigation();
 
-  if (!assignments || assignments.length === 0) return null;
+  const isEmpty = !assignments || assignments.length === 0;
 
   return (
     <View className="mx-4 mb-6">
@@ -64,15 +64,24 @@ function UpcomingAssignments() {
         </Pressable>
       </View>
 
-      <View className="gap-2">
-        {assignments.map((item) => (
-          <AssignmentCard
-            key={item.id}
-            {...mapAssignmentToCardProps(item)}
-            onPress={() => handleAssignmentPress(item)}
-          />
-        ))}
-      </View>
+      {isEmpty ? (
+        <Text
+          className="text-sm font-body text-center py-4"
+          style={{ color: theme.text.secondary }}
+        >
+          Không có bài tập sắp đến hạn
+        </Text>
+      ) : (
+        <View className="gap-2">
+          {assignments.map((item) => (
+            <AssignmentCard
+              key={item.id}
+              {...mapAssignmentToCardProps(item)}
+              onPress={() => handleAssignmentPress(item)}
+            />
+          ))}
+        </View>
+      )}
 
       <LoadingOverlay visible={isLoadingSubmission} title="Đang tải..." />
     </View>
