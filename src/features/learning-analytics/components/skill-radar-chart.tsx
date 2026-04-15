@@ -1,8 +1,8 @@
+import { Colors } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import React from "react";
 import { View } from "react-native";
-import Svg, { Polygon, Line, Text as SvgText } from "react-native-svg";
-import { useColorScheme } from "@/hooks/use-color-scheme";
-import { Colors } from "@/constants/theme";
+import Svg, { Line, Polygon, Text as SvgText } from "react-native-svg";
 import type { SkillRadarItem } from "../api";
 
 const SKILL_ORDER = [
@@ -41,15 +41,6 @@ function pointsAttr(pts: [number, number][]) {
   return pts.map(([x, y]) => `${x},${y}`).join(" ");
 }
 
-
-/** Horizontal anchor based on horizontal position relative to center */
-function textAnchor(x: number, cx: number): "start" | "middle" | "end" {
-  const dx = x - cx;
-  if (dx > 8) return "start";
-  if (dx < -8) return "end";
-  return "middle";
-}
-
 interface SkillRadarChartProps {
   skills: SkillRadarItem[];
   overallScore: number;
@@ -71,7 +62,7 @@ export function SkillRadarChart({
 
   // Map skills to the fixed display order
   const orderedSkills = SKILL_ORDER.map(
-    (key) => skills.find((s) => s.skill === key) ?? null
+    (key) => skills.find((s) => s.skill === key) ?? null,
   );
 
   // Background pentagon vertices (full radius)
@@ -81,7 +72,10 @@ export function SkillRadarChart({
   const dataVertices: [number, number][] = orderedSkills.map((skill, i) => {
     const pct = skill ? Math.min(Math.max(skill.score / 100, 0), 1) : 0;
     const angle = toRad(-90 + i * 72);
-    return [cx + maxR * pct * Math.cos(angle), cy + maxR * pct * Math.sin(angle)];
+    return [
+      cx + maxR * pct * Math.cos(angle),
+      cy + maxR * pct * Math.sin(angle),
+    ];
   });
 
   return (
@@ -92,7 +86,7 @@ export function SkillRadarChart({
           <Polygon
             key={level}
             points={pointsAttr(getVertices(cx, cy, maxR * level))}
-            fill={level === 1 ? theme.background.surface : "none"}
+            fill={level === 1 ? theme.background.page : "none"}
             stroke={theme.border.subtle}
             strokeWidth={1}
           />
@@ -106,7 +100,7 @@ export function SkillRadarChart({
             y1={cy}
             x2={x}
             y2={y}
-            stroke={theme.border.subtle}
+            stroke={theme.background.page}
             strokeWidth={1}
           />
         ))}
@@ -123,7 +117,7 @@ export function SkillRadarChart({
 
         {/* Overall score at center */}
         <SvgText
-          x={cx}
+          x={cx - 8}
           y={cy + 8}
           textAnchor="middle"
           fontSize={20}
@@ -134,15 +128,13 @@ export function SkillRadarChart({
         </SvgText>
 
         {/* Skill labels at each axis tip */}
-        {bgVertices.map(([vx, vy], i) => {
+        {bgVertices.map((_v, i) => {
           const skill = orderedSkills[i];
           const label = SKILL_LABELS[SKILL_ORDER[i]] ?? SKILL_ORDER[i];
           const score = skill ? Math.round(skill.score) : 0;
-          const anchor = textAnchor(vx, cx);
-
           // Direction unit vector from center
           const angle = toRad(-90 + i * 72);
-          const labelGap = 10;
+          const labelGap = 20;
           const lx = cx + (maxR + labelGap) * Math.cos(angle);
           const ly = cy + (maxR + labelGap) * Math.sin(angle);
 
@@ -169,7 +161,7 @@ export function SkillRadarChart({
               <SvgText
                 x={lx}
                 y={nameY}
-                textAnchor={anchor}
+                textAnchor="middle"
                 fontSize={11}
                 fill={theme.text.secondary}
               >
@@ -178,12 +170,12 @@ export function SkillRadarChart({
               <SvgText
                 x={lx}
                 y={scoreY}
-                textAnchor={anchor}
+                textAnchor="middle"
                 fontSize={11}
                 fontWeight="700"
                 fill={theme.text.primary}
               >
-                {score}%
+                {score} %
               </SvgText>
             </React.Fragment>
           );
