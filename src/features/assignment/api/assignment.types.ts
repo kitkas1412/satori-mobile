@@ -191,9 +191,6 @@ export interface SubmitQuizResponse {
   imageUrls: string[] | null;
   quizDetails: QuizDetail[]; // Chi tiết đáp án từng câu
   createdAt: string;
-  newBadgesEarned: BadgeEarned[];
-  levelUp: LevelUp | null;
-  streakNotification: StreakNotification | null;
 }
 
 // ---------------------------------------------------------------------------
