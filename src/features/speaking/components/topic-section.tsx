@@ -53,6 +53,9 @@ export function TopicSection({
   const cardPositions = useRef<Record<string, { y: number; height: number }>>(
     {},
   );
+  // Y offset của cards container relative to section root View.
+  // Cần cộng vào cardY để tính đúng vị trí tuyệt đối trong FlatList content.
+  const cardsContainerOffsetRef = useRef<number>(0);
 
   const accentColor =
     section.orderIndex % 2 === 0 ? theme.purple.default : theme.brand.primary;
@@ -107,7 +110,7 @@ export function TopicSection({
     if (!target) return;
     const pos = cardPositions.current[target.id];
     if (pos) {
-      onScrollToCard?.(pos.y, pos.height);
+      onScrollToCard?.(cardsContainerOffsetRef.current + pos.y, pos.height);
     }
   }, [isTargetSection]);
 
@@ -162,7 +165,11 @@ export function TopicSection({
 
       {/* Lesson Cards */}
       {isExpanded && (
-        <View>
+        <View
+          onLayout={(e) => {
+            cardsContainerOffsetRef.current = e.nativeEvent.layout.y;
+          }}
+        >
           {conversations.map((conversation, index) => {
             const isFirstUnpracticed = index === firstUnpracticedIndex;
             return (
@@ -172,7 +179,7 @@ export function TopicSection({
                   const { y, height } = e.nativeEvent.layout;
                   cardPositions.current[conversation.id] = { y, height };
                   if (isFirstUnpracticed && isTargetSection) {
-                    onScrollToCard?.(y, height);
+                    onScrollToCard?.(cardsContainerOffsetRef.current + y, height);
                   }
                 }}
               >
