@@ -1,7 +1,6 @@
 import { Tabs } from "expo-router";
 import { Dumbbell, House, Mic, UserRound } from "lucide-react-native";
 import React from "react";
-import { Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { HapticTab } from "@/components/haptic-tab";
@@ -21,7 +20,7 @@ export default function TabLayout() {
         tabBarButton: HapticTab,
         tabBarStyle: {
           backgroundColor: Colors[colorScheme ?? "light"].background.page,
-          paddingBottom: Platform.OS === "android" ? Math.max(insets.bottom, 8) : insets.bottom,
+          paddingBottom: insets.bottom,
         },
         tabBarLabelStyle: {
           fontFamily: "Nunito_700Bold",
