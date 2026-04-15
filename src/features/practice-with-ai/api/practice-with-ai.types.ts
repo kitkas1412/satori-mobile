@@ -167,7 +167,6 @@ export interface Options {
   id: number;
   text: string;
   side?: "LEFT" | "RIGHT";
-  isCorrect?: boolean;
 }
 
 /** Dữ liệu session trả về khi khởi tạo thành công */
