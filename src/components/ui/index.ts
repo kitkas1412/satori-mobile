@@ -4,7 +4,7 @@ export { BaseInput } from "./base-input";
 export { IconButton } from "./icon-button";
 export { MarkdownText } from "./markdown-text";
 export { PrimaryButton } from "./button";
-export { LoadingOverlay, LoadingSpinner } from "./loading-overlay";
+export { LoadingOverlay, LoadingOverlayRenderer, LoadingSpinner } from "./loading-overlay";
 export { ProgressBar } from "./progress-bar";
 export { ScreenHeader } from "./screen-header";
 export { ScoreCircle } from "./score-circle";
