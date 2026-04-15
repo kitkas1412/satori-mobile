@@ -4,6 +4,20 @@
 //   - Post-session: không có conversationId param → đọc từ Zustand store, CTA "Tiếp tục" → /conversation-reward
 //   - Review: có conversationId param → fetch từ API, CTA "Làm lại" → /conversation-detail
 
+import { PrimaryButton, ScreenHeader } from "@/components/ui";
+import { Colors } from "@/constants/theme";
+import {
+  FeedbackAccuracyTab,
+  FeedbackComplexityTab,
+  FeedbackMissionTab,
+  FeedbackOverviewTab,
+  FeedbackPronunciationTab,
+} from "@/features/speaking/components";
+import { useLatestFeedback } from "@/features/speaking/hooks";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useConversationStore } from "@/stores";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { X } from "lucide-react-native";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -13,20 +27,6 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { X } from "lucide-react-native";
-import { useColorScheme } from "@/hooks/use-color-scheme";
-import { Colors } from "@/constants/theme";
-import { PrimaryButton, ScreenHeader } from "@/components/ui";
-import { useConversationStore } from "@/stores";
-import {
-  FeedbackOverviewTab,
-  FeedbackAccuracyTab,
-  FeedbackPronunciationTab,
-  FeedbackMissionTab,
-  FeedbackComplexityTab,
-} from "@/features/speaking/components";
-import { useLatestFeedback } from "@/features/speaking/hooks";
 
 // ─── Tab config ────────────────────────────────────────────────────────────────
 
@@ -48,13 +48,17 @@ export function ConversationFeedbackScreen() {
   const theme = Colors[colorScheme ?? "light"];
   const router = useRouter();
 
-  const { conversationId } = useLocalSearchParams<{ conversationId?: string }>();
+  const { conversationId } = useLocalSearchParams<{
+    conversationId?: string;
+  }>();
   const isReviewMode = !!conversationId;
 
   const storeFeedback = useConversationStore((s) => s.feedback);
-  const { data: apiFeedback, isLoading, isError } = useLatestFeedback(
-    isReviewMode ? conversationId : undefined,
-  );
+  const {
+    data: apiFeedback,
+    isLoading,
+    isError,
+  } = useLatestFeedback(isReviewMode ? conversationId : undefined);
 
   const feedback = isReviewMode ? apiFeedback : storeFeedback;
 
@@ -75,7 +79,10 @@ export function ConversationFeedbackScreen() {
     return (
       <View
         className="flex-1 items-center justify-center"
-        style={{ backgroundColor: theme.background.page, paddingTop: insets.top }}
+        style={{
+          backgroundColor: theme.background.page,
+          paddingTop: insets.top,
+        }}
       >
         <ActivityIndicator size="large" color={theme.brand.primary} />
       </View>
@@ -86,9 +93,15 @@ export function ConversationFeedbackScreen() {
     return (
       <View
         className="flex-1 items-center justify-center"
-        style={{ backgroundColor: theme.background.page, paddingTop: insets.top }}
+        style={{
+          backgroundColor: theme.background.page,
+          paddingTop: insets.top,
+        }}
       >
-        <Text className="font-body text-base" style={{ color: theme.text.secondary }}>
+        <Text
+          className="font-body text-base"
+          style={{ color: theme.text.secondary }}
+        >
           Không thể tải kết quả. Vui lòng thử lại sau.
         </Text>
       </View>
@@ -99,17 +112,28 @@ export function ConversationFeedbackScreen() {
     return (
       <View
         className="flex-1 items-center justify-center"
-        style={{ backgroundColor: theme.background.page, paddingTop: insets.top }}
+        style={{
+          backgroundColor: theme.background.page,
+          paddingTop: insets.top,
+        }}
       >
-        <Text className="font-body text-base" style={{ color: theme.text.secondary }}>
+        <Text
+          className="font-body text-base"
+          style={{ color: theme.text.secondary }}
+        >
           Không có dữ liệu phản hồi.
         </Text>
       </View>
     );
   }
 
-  const { accuracy, pronunciation, taskCompletion, complexity, qualitativeSummary } =
-    feedback;
+  const {
+    accuracy,
+    pronunciation,
+    taskCompletion,
+    complexity,
+    qualitativeSummary,
+  } = feedback;
 
   function renderTabContent() {
     switch (activeTab) {
@@ -188,13 +212,15 @@ export function ConversationFeedbackScreen() {
             <TouchableOpacity
               key={tab.key}
               onPress={() => setActiveTab(tab.key)}
-              className="rounded-2xl px-3 py-1"
+              className="rounded-2xl px-3 py-2"
               style={{
                 backgroundColor: isActive
                   ? theme.brand.primary
                   : theme.background.surface,
                 borderWidth: 0.5,
-                borderColor: isActive ? theme.brand.primary : theme.border.subtle,
+                borderColor: isActive
+                  ? theme.brand.primary
+                  : theme.border.subtle,
               }}
             >
               <Text
