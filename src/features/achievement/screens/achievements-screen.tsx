@@ -2,7 +2,7 @@ import { IconButton, ScreenHeader } from "@/components/ui";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useRouter } from "expo-router";
-import { ArrowLeft } from "lucide-react-native";
+import { ChevronLeft } from "lucide-react-native";
 import {
   ActivityIndicator,
   FlatList,
@@ -49,7 +49,7 @@ export function AchievementsScreen() {
         paddingTop={insets.top + 16}
         leftAction={
           <IconButton
-            icon={<ArrowLeft size={24} color={theme.icon.primary} />}
+            icon={<ChevronLeft size={24} color={theme.icon.primary} />}
             onPress={() => router.back()}
           />
         }
