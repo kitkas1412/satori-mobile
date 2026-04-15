@@ -1,4 +1,12 @@
 export { ConversationBanner } from "./conversation-banner";
+export { EmptyMissionsCard } from "./empty-missions-card";
+export { FeedbackAccuracyTab } from "./feedback-accuracy-tab";
+export { FeedbackCard } from "./feedback-card";
+export { FeedbackComplexityTab } from "./feedback-complexity-tab";
+export { FeedbackMissionTab } from "./feedback-mission-tab";
+export { FeedbackOverviewTab } from "./feedback-overview-tab";
+export { FeedbackPronunciationTab } from "./feedback-pronunciation-tab";
+export { FeedbackScoreCard } from "./feedback-score-card";
 export { FeedbackBubble, MessageBubble } from "./message-bubble";
 export { MicButton } from "./mic-button";
 export { MissionDetailsCard } from "./mission-details-card";
