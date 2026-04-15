@@ -4,7 +4,7 @@ import { Colors } from "@/constants/theme";
 import { useResetPasswordOTPForm } from "@/features/authentication/hooks";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ArrowLeft } from "lucide-react-native";
+import { ChevronLeft } from "lucide-react-native";
 import React from "react";
 import {
   KeyboardAvoidingView,
@@ -52,7 +52,7 @@ export function ResetPasswordOTPScreen() {
     >
       <SafeAreaView className="flex-1">
         <View className="flex-col px-4">
-          <IconButton icon={<ArrowLeft size={24} color={theme.icon.primary} />} onPress={() => router.back()} />
+          <IconButton icon={<ChevronLeft size={24} color={theme.icon.primary} />} onPress={() => router.back()} />
 
           <View className="mt-8">
             <SectionHeader title="Thay đổi mật khẩu" />

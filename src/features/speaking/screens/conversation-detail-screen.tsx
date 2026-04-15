@@ -2,15 +2,15 @@
 // Bao gồm: tên conversation, độ khó, mô tả và danh sách nhiệm vụ cần hoàn thành.
 // Người dùng nhấn "Hiểu rồi" để chuyển sang màn hình luyện tập.
 
+import { LoadingOverlay, PrimaryButton } from "@/components/ui";
+import { Colors } from "@/constants/theme";
+import { MissionItem } from "@/features/speaking/components";
+import { useConversationDetail } from "@/features/speaking/hooks";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useRouter } from "expo-router";
 import { ListChecks, X } from "lucide-react-native";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
-import { useColorScheme } from "@/hooks/use-color-scheme";
-import { Colors } from "@/constants/theme";
-import { LoadingOverlay, PrimaryButton } from "@/components/ui";
-import { useConversationDetail } from "@/features/speaking/hooks";
-import { MissionItem } from "@/features/speaking/components";
 
 /** Chuyển điểm độ khó thành nhãn hiển thị: 1 = Dễ, 2 = Trung Bình, khác = Khó */
 function difficultyLabel(score: number): string {
@@ -145,7 +145,7 @@ export function ConversationDetailScreen({
             className="absolute bottom-0 left-0 right-0 px-6"
             style={{ paddingBottom: Math.max(insets.bottom, 16) + 8 }}
           >
-            <PrimaryButton text="Hiểu rồi" onPress={handleStart} />
+            <PrimaryButton text="Bắt đầu luyện" onPress={handleStart} />
           </View>
         )}
       </View>

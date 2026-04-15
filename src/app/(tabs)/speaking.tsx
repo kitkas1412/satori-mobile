@@ -9,7 +9,6 @@ import {
   RefreshControl,
   Text,
   View,
-  useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter, useFocusEffect } from "expo-router";
@@ -56,7 +55,7 @@ export default function SpeakingScreen() {
   const scrollViewRef = useRef<FlatList<Topic>>(null);
   const sectionYMap = useRef<Record<string, number>>({});
   const hasScrolledRef = useRef(false);
-  const { height: screenHeight } = useWindowDimensions();
+  const flatListHeightRef = useRef<number>(0);
   const [focusTrigger, setFocusTrigger] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
   const [isFocusRefetching, setIsFocusRefetching] = useState(false);
@@ -86,14 +85,14 @@ export default function SpeakingScreen() {
       if (hasScrolledRef.current) return;
       const sectionY = sectionYMap.current[sectionId] ?? 0;
       const totalY = sectionY + cardY;
-      const centeredY = totalY - screenHeight / 2 + cardHeight / 2;
+      const centeredY = totalY - flatListHeightRef.current / 2 + cardHeight / 2;
       scrollViewRef.current?.scrollToOffset({
         offset: Math.max(0, centeredY),
         animated: true,
       });
       hasScrolledRef.current = true;
     },
-    [screenHeight],
+    [],
   );
 
   const blockedMessage = (() => {
@@ -135,6 +134,9 @@ export default function SpeakingScreen() {
           <FlatList<Topic>
             ref={scrollViewRef}
             className="flex-1"
+            onLayout={(e) => {
+              flatListHeightRef.current = e.nativeEvent.layout.height;
+            }}
             contentContainerStyle={{
               paddingHorizontal: 16,
               paddingBottom: 32,
