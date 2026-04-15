@@ -3,60 +3,80 @@
 // - GRAMMAR_DRILL  → danh sách ngữ pháp có checkbox
 // - MIXED_LESSON   → tab switcher Từ vựng | Ngữ pháp
 
-import { Check, Square, X } from "lucide-react-native";
-import { useState } from "react";
-import {
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { Check, Square, X } from "lucide-react-native";
+import { useEffect, useState } from "react";
+import { Platform, Pressable, ScrollView, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { PrimaryButton } from "@/components/ui";
 import { Colors, Primitive } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import type { GrammarItem, MasteryInfo, SessionType, VocabItem } from "../api/practice-with-ai.types";
+import type {
+  GrammarItem,
+  MasteryInfo,
+  SessionType,
+  VocabItem,
+} from "../api/practice-with-ai.types";
 import { useLessonItems } from "../hooks";
 
 // ---------------------------------------------------------------------------
 // Mastery helpers
 // ---------------------------------------------------------------------------
 
-type MasteryFilter = "ALL" | "CHUA_LUYEN" | "QUEN_THUOC" | "NAM_VUNG" | "THANH_THAO";
+type MasteryFilter =
+  | "ALL"
+  | "CHUA_THANH_THAO"
+  | "QUEN_THUOC"
+  | "NAM_VUNG"
+  | "THANH_THAO";
 
 const MASTERY_FILTERS: { value: MasteryFilter; label: string }[] = [
   { value: "ALL", label: "Tất cả" },
-  { value: "CHUA_LUYEN", label: "Chưa luyện" },
+  { value: "CHUA_THANH_THAO", label: "Chưa thành thạo" },
   { value: "QUEN_THUOC", label: "Quen thuộc" },
   { value: "NAM_VUNG", label: "Nắm vững" },
   { value: "THANH_THAO", label: "Thành thạo" },
 ];
 
 function getMasteryLabel(mastery: MasteryInfo | null): string {
-  if (mastery === null) return "Chưa luyện";
+  if (mastery === null) return "Chưa thành thạo";
   return mastery.label;
 }
 
 function getMasteryColor(mastery: MasteryInfo | null): string {
   if (mastery === null) return Primitive.neutral[600]; // #8090ae
   const lower = mastery.label.toLowerCase();
-  if (lower.includes("quen") || mastery.level === "FAMILIAR") return Primitive.amber[300]; // #f59e0b
-  if (lower.includes("nắm") || lower.includes("nam") || mastery.level === "PROFICIENT") return Primitive.blue[600]; // #5477e8
-  if (lower.includes("thành") || lower.includes("thanh") || mastery.level === "MASTERED") return Primitive.green[500]; // #16a34a
+  if (lower.includes("quen") || mastery.level === "FAMILIAR")
+    return Primitive.amber[300]; // #f59e0b
+  if (
+    lower.includes("nắm") ||
+    lower.includes("nam") ||
+    mastery.level === "PROFICIENT"
+  )
+    return Primitive.blue[600]; // #5477e8
+  if (
+    lower.includes("thành") ||
+    lower.includes("thanh") ||
+    mastery.level === "MASTERED"
+  )
+    return Primitive.green[500]; // #16a34a
   return Primitive.neutral[600];
 }
 
-function matchesMasteryFilter(mastery: MasteryInfo | null, filter: MasteryFilter): boolean {
+function matchesMasteryFilter(
+  mastery: MasteryInfo | null,
+  filter: MasteryFilter,
+): boolean {
   if (filter === "ALL") return true;
-  if (filter === "CHUA_LUYEN") return mastery === null;
+  if (filter === "CHUA_THANH_THAO") return mastery === null;
   const label = getMasteryLabel(mastery).toLowerCase();
   if (filter === "QUEN_THUOC") return label.includes("quen");
-  if (filter === "NAM_VUNG") return label.includes("nắm") || label.includes("nam");
-  if (filter === "THANH_THAO") return label.includes("thành") || label.includes("thanh");
+  if (filter === "NAM_VUNG")
+    return label.includes("nắm") || label.includes("nam");
+  if (filter === "THANH_THAO")
+    return label.includes("thành") || label.includes("thanh");
   return true;
 }
 
@@ -86,7 +106,9 @@ function FilterChips({
             key={f.value}
             onPress={() => onChange(f.value)}
             style={{
-              backgroundColor: isActive ? theme.brand.primary : theme.background.surface,
+              backgroundColor: isActive
+                ? theme.brand.primary
+                : theme.background.surface,
               borderWidth: 1,
               borderColor: isActive ? theme.brand.primary : theme.border.subtle,
               borderRadius: 20,
@@ -125,10 +147,7 @@ function VocabCard({
   const masteryColor = getMasteryColor(item.mastery);
 
   return (
-    <Pressable
-      onPress={onToggle}
-      style={{ flexDirection: "row", gap: 8 }}
-    >
+    <Pressable onPress={onToggle} style={{ flexDirection: "row", gap: 8 }}>
       {/* Left box — kanji + reading */}
       <View
         style={{
@@ -208,7 +227,11 @@ function VocabCard({
             {selected ? (
               <Check size={15} color={theme.brand.primary} strokeWidth={2.5} />
             ) : (
-              <Square size={15} color={theme.border.default} strokeWidth={1.5} />
+              <Square
+                size={15}
+                color={theme.border.default}
+                strokeWidth={1.5}
+              />
             )}
           </View>
 
@@ -251,7 +274,14 @@ function GrammarCard({
       }}
     >
       {/* Top row: pattern + checkbox */}
-      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 6,
+        }}
+      >
         <Text
           className="font-heading"
           style={{
@@ -340,9 +370,16 @@ function TabSwitcher({
               alignItems: "center",
               justifyContent: "center",
               gap: 4,
-              backgroundColor: isActive ? theme.background.surface : "transparent",
+              backgroundColor: isActive
+                ? theme.background.surface
+                : "transparent",
               ...(isActive && Platform.OS === "ios"
-                ? { shadowColor: "#000", shadowOpacity: 0.1, shadowRadius: 2, shadowOffset: { width: 0, height: 1 } }
+                ? {
+                    shadowColor: "#000",
+                    shadowOpacity: 0.1,
+                    shadowRadius: 2,
+                    shadowOffset: { width: 0, height: 1 },
+                  }
                 : isActive
                   ? { elevation: 2 }
                   : {}),
@@ -362,7 +399,9 @@ function TabSwitcher({
                 borderRadius: 9999,
                 paddingHorizontal: 5,
                 paddingVertical: 1,
-                backgroundColor: isActive ? Primitive.neutral[200] : "transparent",
+                backgroundColor: isActive
+                  ? Primitive.neutral[200]
+                  : "transparent",
               }}
             >
               <Text
@@ -400,21 +439,44 @@ export function CreativeSelectionScreen() {
 
   const { data, isPending } = useLessonItems(lessonId);
 
-  const [selectedVocabIds, setSelectedVocabIds] = useState<Set<string>>(new Set());
-  const [selectedGrammarIds, setSelectedGrammarIds] = useState<Set<string>>(new Set());
+  const [selectedVocabIds, setSelectedVocabIds] = useState<Set<string>>(
+    new Set(),
+  );
+  const [selectedGrammarIds, setSelectedGrammarIds] = useState<Set<string>>(
+    new Set(),
+  );
   const [masteryFilter, setMasteryFilter] = useState<MasteryFilter>("ALL");
+
+  // Auto-select top 5 vocab / top 3 grammar when data first loads
+  useEffect(() => {
+    if (!data) return;
+    if (sessionType !== "GRAMMAR_DRILL") {
+      setSelectedVocabIds(new Set(data.vocabulary.slice(0, 5).map((v) => v.id)));
+    }
+    if (sessionType !== "VOCAB_DRILL") {
+      setSelectedGrammarIds(new Set(data.grammar.slice(0, 3).map((g) => g.id)));
+    }
+  }, [data]);
   const [activeTab, setActiveTab] = useState<"vocab" | "grammar">("vocab");
 
   const vocabulary = data?.vocabulary ?? [];
   const grammar = data?.grammar ?? [];
 
-  const filteredVocab = vocabulary.filter((v) => matchesMasteryFilter(v.mastery, masteryFilter));
-  const filteredGrammar = grammar.filter((g) => matchesMasteryFilter(g.mastery, masteryFilter));
+  const filteredVocab = vocabulary.filter((v) =>
+    matchesMasteryFilter(v.mastery, masteryFilter),
+  );
+  const filteredGrammar = grammar.filter((g) =>
+    matchesMasteryFilter(g.mastery, masteryFilter),
+  );
 
   function toggleVocab(id: string) {
     setSelectedVocabIds((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) { next.delete(id); } else { next.add(id); }
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
       return next;
     });
   }
@@ -422,7 +484,11 @@ export function CreativeSelectionScreen() {
   function toggleGrammar(id: string) {
     setSelectedGrammarIds((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) { next.delete(id); } else { next.add(id); }
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
       return next;
     });
   }
@@ -457,8 +523,12 @@ export function CreativeSelectionScreen() {
         : selectedVocabIds.size > 0 || selectedGrammarIds.size > 0;
 
   // Which list to show
-  const showVocab = sessionType === "VOCAB_DRILL" || (sessionType === "MIXED_LESSON" && activeTab === "vocab");
-  const showGrammar = sessionType === "GRAMMAR_DRILL" || (sessionType === "MIXED_LESSON" && activeTab === "grammar");
+  const showVocab =
+    sessionType === "VOCAB_DRILL" ||
+    (sessionType === "MIXED_LESSON" && activeTab === "vocab");
+  const showGrammar =
+    sessionType === "GRAMMAR_DRILL" ||
+    (sessionType === "MIXED_LESSON" && activeTab === "grammar");
 
   return (
     <View className="flex-1" style={{ backgroundColor: theme.background.page }}>
