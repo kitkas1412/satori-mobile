@@ -258,7 +258,7 @@ export interface FeedbackResultResponse {
   sessionId: string;
   accuracy: AccuracyResult;
   pronunciation: PronunciationResult;
-  taskCompletion: TaskCompletionResult;
+  taskCompletion: TaskCompletionResult | null;
   complexity: ComplexityResult;
   qualitativeSummary: QualitativeSummary;
   recurringPatterns: RecurringPattern[];
