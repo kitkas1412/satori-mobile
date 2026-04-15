@@ -1,7 +1,7 @@
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import React, { useEffect } from "react";
-import { Modal, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -75,38 +75,41 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
   transparent = false,
 }) => {
   const theme = useColorScheme() ?? "light";
+
+  if (!visible) return null;
+
   return (
-    <Modal visible={visible} transparent statusBarTranslucent>
-      <View
-        className="flex-1 items-center justify-center"
-        style={
-          !transparent
-            ? { backgroundColor: Colors[theme].background.page }
-            : { backgroundColor: "rgba(0,0,0,0.5)" }
-        }
-      >
+    <View
+      style={[
+        StyleSheet.absoluteFill,
+        { zIndex: 999, elevation: 999 },
+        !transparent
+          ? { backgroundColor: Colors[theme].background.page }
+          : { backgroundColor: "rgba(0,0,0,0.5)" },
+      ]}
+      className="items-center justify-center"
+    >
+      <View className="items-center gap-3">
+        <LoadingSpinner />
         <View className="items-center gap-3">
-          <LoadingSpinner />
-          <View className="items-center gap-3">
-            {title && (
-              <Text
-                className="font-heading text-2xl text-center"
-                style={{ color: Colors[theme].text.primary }}
-              >
-                {title}
-              </Text>
-            )}
-            {message && (
-              <Text
-                className="font-body text-base text-center"
-                style={{ color: Colors[theme].text.secondary }}
-              >
-                {message}
-              </Text>
-            )}
-          </View>
+          {title && (
+            <Text
+              className="font-heading text-2xl text-center"
+              style={{ color: Colors[theme].text.primary }}
+            >
+              {title}
+            </Text>
+          )}
+          {message && (
+            <Text
+              className="font-body text-base text-center"
+              style={{ color: Colors[theme].text.secondary }}
+            >
+              {message}
+            </Text>
+          )}
         </View>
       </View>
-    </Modal>
+    </View>
   );
 };
