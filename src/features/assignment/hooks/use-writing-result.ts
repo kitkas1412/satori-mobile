@@ -23,26 +23,9 @@ export function useWritingResult({ onNavigate }: UseWritingResultParams) {
   const imageUrls = writingResult?.imageUrls ?? [];
   const score = writingResult?.score ?? 0;
 
-  // Khi xem lại bài đã nộp/chấm → clear store và về tab Practice (không hiện reward).
-  // Khi vừa submit xong → kiểm tra reward trước khi về.
   function handleContinue() {
-    if (isReview) {
-      clearWritingResult();
-      onNavigate("/(tabs)/practice");
-      return;
-    }
-
-    const hasReward =
-      (writingResult?.newBadgesEarned?.length ?? 0) > 0 ||
-      writingResult?.levelUp !== null && writingResult?.levelUp !== undefined ||
-      writingResult?.streakNotification?.is_first_activity_today === true;
-
-    if (hasReward) {
-      onNavigate("/assignment-reward");
-    } else {
-      clearWritingResult();
-      onNavigate("/(tabs)/practice");
-    }
+    clearWritingResult();
+    onNavigate("/(tabs)/practice");
   }
 
   // Hiển thị xác nhận trước khi hủy nộp bài.
