@@ -23,7 +23,7 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useColorScheme as useNativeWindColorScheme } from "nativewind";
 
 import { QueryProvider } from "@/components/providers/query-provider";
-import { ErrorOverlay } from "@/components/ui";
+import { ErrorOverlay, LoadingOverlayRenderer } from "@/components/ui";
 import { useTokenValidation } from "@/features/authentication/hooks";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRegisterDeviceToken } from "@/features/notification/hooks";
@@ -357,6 +357,7 @@ export default function RootLayout() {
         <RootLayoutNav />
         <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
       </ThemeProvider>
+      <LoadingOverlayRenderer />
       <ErrorOverlay />
     </QueryProvider>
   );
