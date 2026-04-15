@@ -107,48 +107,6 @@ export interface WritingContent {
 }
 
 // ---------------------------------------------------------------------------
-// Shared reward types — dùng trong response của submit-quiz và submit-writing
-// ---------------------------------------------------------------------------
-
-export type BadgeType =
-  | "LEARNING_STREAK"
-  | "CONVERSATION_MASTER"
-  | "PRONUNCIATION_EXPERT"
-  | "VOCABULARY_BUILDER"
-  | "GRAMMAR_GURU"
-  | string;
-
-export interface BadgeEarned {
-  badgeId: string;
-  badgeName: string;
-  description: string;
-  badgeType: BadgeType;
-  iconUrl: string;
-  expReward: number;
-  earnedAt: string;
-  isFeatured: boolean;
-}
-
-export interface LevelUp {
-  previousLevel: number;
-  newLevel: number;
-  expEarned: number;
-  oldTotalExp: number;
-  totalExp: number;
-  expToNextLevel: number;
-  progressPercentage: number;
-  isLevelUp: boolean;
-}
-
-export interface StreakNotification {
-  is_first_activity_today: boolean;
-  current_streak: number;
-  longest_streak: number;
-  /** Định dạng YYYY-MM-DD */
-  streak_last_date: string;
-}
-
-// ---------------------------------------------------------------------------
 // POST /learner/assignments/:id/submit-quiz
 // ---------------------------------------------------------------------------
 
@@ -191,9 +149,6 @@ export interface SubmitQuizResponse {
   imageUrls: string[] | null;
   quizDetails: QuizDetail[]; // Chi tiết đáp án từng câu
   createdAt: string;
-  newBadgesEarned: BadgeEarned[];
-  levelUp: LevelUp | null;
-  streakNotification: StreakNotification | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -222,9 +177,6 @@ export interface SubmitWritingResponse {
   imageUrls: string[] | null; // Danh sách URL ảnh bài làm đã nộp
   quizDetails: QuizDetail[] | null;
   createdAt: string;
-  newBadgesEarned: BadgeEarned[];
-  levelUp: LevelUp | null;
-  streakNotification: StreakNotification | null;
 }
 
 // ---------------------------------------------------------------------------
