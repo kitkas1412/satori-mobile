@@ -6,11 +6,14 @@ import { Text, View } from "react-native";
 
 import { Colors } from "@/constants/theme";
 import { IconButton, ProgressBar } from "@/components/ui";
-import { useAssignmentAudio } from "../hooks";
 
 interface AudioPlayerBarProps {
-  audioUrl: string;
   theme: typeof Colors.light;
+  isPlaying: boolean;
+  progress: number;
+  currentTime: number;
+  duration: number;
+  toggle: () => void;
 }
 
 function formatTime(seconds: number): string {
@@ -19,10 +22,14 @@ function formatTime(seconds: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-export function AudioPlayerBar({ audioUrl, theme }: AudioPlayerBarProps) {
-  const { isPlaying, progress, currentTime, duration, toggle } =
-    useAssignmentAudio(audioUrl);
-
+export function AudioPlayerBar({
+  theme,
+  isPlaying,
+  progress,
+  currentTime,
+  duration,
+  toggle,
+}: AudioPlayerBarProps) {
   return (
     <View
       className="flex-row items-center gap-3 mx-4 my-3 px-4 py-3 rounded-xl"

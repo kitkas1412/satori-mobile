@@ -18,6 +18,7 @@ import {
   useQuizAnswers,
   useQuizSubmit,
   useExitAssignment,
+  useAssignmentAudio,
 } from "../hooks";
 import { AudioPlayerBar, QuestionView } from "../components";
 
@@ -39,13 +40,15 @@ export function QuizScreen({ id }: QuizScreenProps) {
     useQuizNavigation(total);
   const { answers, handleSelectOption, handleFillBlankChange } =
     useQuizAnswers();
+  const { isPlaying, progress, currentTime, duration, toggle, stop } =
+    useAssignmentAudio(data?.audioUrl ?? null);
   const { handleSubmit, isPending: isSubmitting } = useQuizSubmit({
     assignmentId: id,
     questions,
     answers,
-    onNavigate: () => router.push("/quiz-result"),
+    onNavigate: () => { stop(); router.push("/quiz-result"); },
   });
-  const { handleExit } = useExitAssignment(() => router.back());
+  const { handleExit } = useExitAssignment(() => { stop(); router.back(); });
 
   const current = questions[currentIndex];
 
@@ -105,7 +108,14 @@ export function QuizScreen({ id }: QuizScreenProps) {
 
           {/* Audio player — chỉ hiển thị khi bài tập có file âm thanh đề bài */}
           {data?.audioUrl && (
-            <AudioPlayerBar audioUrl={data.audioUrl} theme={theme} />
+            <AudioPlayerBar
+              theme={theme}
+              isPlaying={isPlaying}
+              progress={progress}
+              currentTime={currentTime}
+              duration={duration}
+              toggle={toggle}
+            />
           )}
 
           {/* Khu vực hiển thị câu hỏi hiện tại */}

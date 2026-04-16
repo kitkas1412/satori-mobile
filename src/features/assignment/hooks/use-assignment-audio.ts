@@ -13,6 +13,7 @@ interface UseAssignmentAudioReturn {
   currentTime: number; // giây
   duration: number; // giây
   toggle: () => void; // phát nếu đang dừng, dừng nếu đang phát
+  stop: () => void; // dừng và về đầu
 }
 
 export function useAssignmentAudio(
@@ -73,11 +74,19 @@ export function useAssignmentAudio(
     }
   }
 
+  function stop() {
+    const player = playerRef.current;
+    if (!player) return;
+    player.pause();
+    player.seekTo(0);
+  }
+
   return {
     isPlaying,
     progress: duration > 0 ? currentTime / duration : 0,
     currentTime,
     duration,
     toggle,
+    stop,
   };
 }
