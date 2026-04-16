@@ -21,8 +21,9 @@ export function PracticeResultScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
-  const { practiceSessionId } = useLocalSearchParams<{
+  const { practiceSessionId, itemTypes } = useLocalSearchParams<{
     practiceSessionId?: string;
+    itemTypes?: string;
   }>();
 
   const {
@@ -122,6 +123,10 @@ export function PracticeResultScreen() {
   }
 
   const wrongCount = Math.max(0, summary.totalItems - summary.correctItems);
+
+  const isMatchingSession =
+    itemTypes !== undefined &&
+    (JSON.parse(itemTypes) as string[]).includes("MATCHING");
 
   return (
     <View
@@ -244,23 +249,25 @@ export function PracticeResultScreen() {
           </View>
         </View>
 
-        <View className="gap-3">
-          <Text
-            className="font-heading text-base"
-            style={{ color: theme.text.primary }}
-          >
-            Chi tiết câu trả lời
-          </Text>
+        {!isMatchingSession && (
+          <View className="gap-3">
+            <Text
+              className="font-heading text-base"
+              style={{ color: theme.text.primary }}
+            >
+              Chi tiết câu trả lời
+            </Text>
 
-          {summary.items.map((item, index) => (
-            <PracticeAnswerItem
-              key={`${item.itemIndex}-${index}`}
-              item={item}
-              index={index}
-              theme={theme}
-            />
-          ))}
-        </View>
+            {summary.items.map((item, index) => (
+              <PracticeAnswerItem
+                key={`${item.itemIndex}-${index}`}
+                item={item}
+                index={index}
+                theme={theme}
+              />
+            ))}
+          </View>
+        )}
       </ScrollView>
 
       <View
