@@ -47,7 +47,7 @@ export function useAssignmentNavigation(
           const submission = await getWritingSubmissionApi(
             item.learnerSubmissionId,
           );
-          setWritingResult(submission, true);
+          setWritingResult(submission, true, item.dueDate);
           onNavigate("/assignment-writing-result");
         } catch (error) {
           useErrorOverlayStore.getState().show(extractApiError(error));
@@ -69,7 +69,7 @@ export function useAssignmentNavigation(
         const submission = await getWritingSubmissionApi(
           item.learnerSubmissionId,
         );
-        setWritingResult(submission, true);
+        setWritingResult(submission, true, item.dueDate);
         onNavigate("/assignment-writing-result");
       } catch (error) {
         useErrorOverlayStore.getState().show(extractApiError(error));
