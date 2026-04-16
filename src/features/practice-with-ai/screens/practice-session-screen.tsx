@@ -213,7 +213,9 @@ export function PracticeSessionScreen() {
       {
         sessionId: sessionData.session.sessionId,
         itemId: currentItem.id,
-        userAnswer: selectedOption.text,
+        userAnswer: currentItem.itemType === "TRUE_FALSE"
+        ? String(selectedOptionId)
+        : selectedOption.text,
       },
       {
         onSuccess: (result) => {
