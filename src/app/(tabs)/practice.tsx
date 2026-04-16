@@ -37,6 +37,7 @@ import {
   SessionTypesModal,
 } from "@/features/practice-with-ai/components";
 import { useLessons } from "@/features/practice-with-ai/hooks";
+import { useUnreadNotificationsCount } from "@/features/notification/hooks";
 import { useProfile } from "@/features/profile-management/hooks";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
@@ -66,6 +67,7 @@ export default function PracticeTab() {
       router.push({ pathname: pathname as any, params }),
     );
   const { data: profile, refetch: refetchProfile } = useProfile();
+  const { unreadCount, hasMore } = useUnreadNotificationsCount();
   const { data: classes } = useClasses();
   const courseId = profile?.enrolledClasses[0]?.courseId;
 
@@ -276,7 +278,11 @@ export default function PracticeTab() {
       <ScreenHeader
         title="Luyện tập"
         rightAction={
-          <BellButton onPress={() => router.push("/notifications")} />
+          <BellButton
+            badgeCount={unreadCount}
+            showPlus={hasMore}
+            onPress={() => router.push("/notifications")}
+          />
         }
         paddingTop={insets.top + 16}
       />

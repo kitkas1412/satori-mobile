@@ -401,7 +401,7 @@ export function PracticeSessionScreen() {
           }}
         >
           {answerResult !== null && (
-            <FeedbackPanel answerResult={answerResult} theme={theme} />
+            <FeedbackPanel answerResult={answerResult} theme={theme} options={currentItem?.options} />
           )}
           <PrimaryButton
             text={
