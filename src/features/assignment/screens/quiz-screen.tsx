@@ -40,7 +40,7 @@ export function QuizScreen({ id }: QuizScreenProps) {
     useQuizNavigation(total);
   const { answers, handleSelectOption, handleFillBlankChange } =
     useQuizAnswers();
-  const { isPlaying, progress, currentTime, duration, toggle, stop } =
+  const { isPlaying, progress, currentTime, duration, toggle, stop, seekTo } =
     useAssignmentAudio(data?.audioUrl ?? null);
   const { handleSubmit, isPending: isSubmitting } = useQuizSubmit({
     assignmentId: id,
@@ -115,6 +115,7 @@ export function QuizScreen({ id }: QuizScreenProps) {
               currentTime={currentTime}
               duration={duration}
               toggle={toggle}
+              onSeek={seekTo}
             />
           )}
 
