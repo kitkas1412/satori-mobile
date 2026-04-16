@@ -45,7 +45,7 @@ export function useChangePasswordForm(onSuccess: () => void) {
             "Vui lòng đăng nhập lại với mật khẩu mới.",
             [
               {
-                text: "OK",
+                text: "Đồng ý",
                 onPress: () => {
                   logout();
                   onSuccess();
