@@ -27,10 +27,10 @@ let isRefreshing = false;
  * Hàng đợi các request bị 401 trong khi đang refresh token.
  * Khi refresh xong, tất cả request trong queue sẽ được retry với token mới.
  */
-let failedQueue: Array<{
+let failedQueue: {
   resolve: (token: string) => void;
   reject: (error: unknown) => void;
-}> = [];
+}[] = [];
 
 /**
  * Giải quyết tất cả request đang chờ trong hàng đợi.
@@ -167,9 +167,7 @@ axiosInstance.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
           processQueue(null, accessToken);
 
-          console.log(
-            "Làm mới token thành công, đang thử lại request gốc",
-          );
+          console.log("Làm mới token thành công, đang thử lại request gốc");
           return axiosInstance(originalRequest);
         } catch (refreshError) {
           processQueue(refreshError, null);
@@ -184,10 +182,10 @@ axiosInstance.interceptors.response.use(
 
       switch (status) {
         case 403:
-          console.error("Forbidden - Không có quyền truy cập");
+          console.error("Không có quyền truy cập");
           break;
         case 404:
-          console.error("Not Found - API endpoint không tồn tại");
+          console.error("API endpoint không tồn tại");
           break;
         case 500:
           console.error("Lỗi máy chủ nội bộ");
@@ -197,10 +195,10 @@ axiosInstance.interceptors.response.use(
       }
     } else if (error.code === "ECONNABORTED") {
       // Request timeout - server không phản hồi trong thời gian cho phép
-      console.error("Timeout Error - Request quá thời gian chờ");
+      console.error("Yêu cầu quá thời gian chờ. Vui lòng thử lại.");
     } else if (error.request) {
       // Request đã được gửi nhưng không nhận được response
-      console.error("Network Error - Không thể kết nối đến server");
+      console.error("Không thể kết nối đến server. Vui lòng kiểm tra mạng.");
     } else {
       // Lỗi khác
       console.error("Lỗi:", error.message);
