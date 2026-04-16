@@ -63,12 +63,6 @@ const SESSION_TYPES: {
     image: require("../../../../assets/images/practice/grammar.png"),
   },
   {
-    value: "KANJI_READING",
-    label: "Kanji",
-    subtitle: "Nghĩa chữ Hán",
-    image: require("../../../../assets/images/practice/kanji.png"),
-  },
-  {
     value: "MIXED_LESSON",
     label: "Tổng hợp",
     subtitle: "Tất cả loại hình",
