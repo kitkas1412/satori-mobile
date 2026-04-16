@@ -3,6 +3,7 @@
 // Tự động highlight section đầu tiên còn topic chưa được luyện.
 
 import { BellButton, LoadingOverlay, ScreenHeader } from "@/components/ui";
+import { useUnreadNotificationsCount } from "@/features/notification/hooks";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -35,6 +36,7 @@ export default function SpeakingScreen() {
   const router = useRouter();
   const language = useAppStore((state) => state.language);
   const { data: profile, refetch: refetchProfile } = useProfile();
+  const { unreadCount, hasMore } = useUnreadNotificationsCount();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const {
@@ -115,7 +117,11 @@ export default function SpeakingScreen() {
           title="Luyện nói"
           paddingTop={insets.top + 16}
           rightAction={
-            <BellButton onPress={() => router.push("/notifications")} />
+            <BellButton
+              badgeCount={unreadCount}
+              showPlus={hasMore}
+              onPress={() => router.push("/notifications")}
+            />
           }
         />
 

@@ -1,4 +1,5 @@
 import { BellButton, LoadingOverlay, ScreenHeader } from "@/components/ui";
+import { useUnreadNotificationsCount } from "@/features/notification/hooks";
 import { Colors } from "@/constants/theme";
 import { AssignmentCard } from "@/features/assignment/components/assignment-card";
 import { ChatbotFab } from "@/features/chatbot/components";
@@ -98,6 +99,7 @@ export default function HomeScreen() {
   const { isFetching: isHistoryFetching } = useStreakHistory(7);
   const isLoading = isCurrentFetching || isHistoryFetching;
   const { data: profile } = useProfile();
+  const { unreadCount, hasMore } = useUnreadNotificationsCount();
   const isBlocked = (() => {
     if (!profile?.enrolledClasses?.length) return true;
     const classStatus = profile?.enrolledClasses[0]?.status;
@@ -118,7 +120,11 @@ export default function HomeScreen() {
       <ScreenHeader
         title="Chào bạn 👋"
         rightAction={
-          <BellButton onPress={() => router.push("/notifications")} />
+          <BellButton
+            badgeCount={unreadCount}
+            showPlus={hasMore}
+            onPress={() => router.push("/notifications")}
+          />
         }
         paddingTop={insets.top + 16}
       />
