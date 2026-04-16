@@ -2,6 +2,7 @@ import { BellButton, LoadingOverlay, ScreenHeader } from "@/components/ui";
 import { Colors } from "@/constants/theme";
 import { AssignmentCard } from "@/features/assignment/components/assignment-card";
 import { ChatbotFab } from "@/features/chatbot/components";
+import { useProfile } from "@/features/profile-management/hooks";
 import { StatusBar } from "expo-status-bar";
 import {
   useAssignmentNavigation,
@@ -30,7 +31,7 @@ function UpcomingAssignments() {
   const { handleAssignmentPress, isLoadingSubmission } =
     useAssignmentNavigation();
 
-  if (!assignments || assignments.length === 0) return null;
+  const isEmpty = !assignments || assignments.length === 0;
 
   return (
     <View className="mx-4 mb-6">
@@ -63,15 +64,24 @@ function UpcomingAssignments() {
         </Pressable>
       </View>
 
-      <View className="gap-2">
-        {assignments.map((item) => (
-          <AssignmentCard
-            key={item.id}
-            {...mapAssignmentToCardProps(item)}
-            onPress={() => handleAssignmentPress(item)}
-          />
-        ))}
-      </View>
+      {isEmpty ? (
+        <Text
+          className="text-sm font-body text-center py-4"
+          style={{ color: theme.text.secondary }}
+        >
+          Không có bài tập sắp đến hạn
+        </Text>
+      ) : (
+        <View className="gap-2">
+          {assignments.map((item) => (
+            <AssignmentCard
+              key={item.id}
+              {...mapAssignmentToCardProps(item)}
+              onPress={() => handleAssignmentPress(item)}
+            />
+          ))}
+        </View>
+      )}
 
       <LoadingOverlay visible={isLoadingSubmission} title="Đang tải..." />
     </View>
@@ -87,6 +97,13 @@ export default function HomeScreen() {
   const { isFetching: isCurrentFetching } = useStreakCurrent();
   const { isFetching: isHistoryFetching } = useStreakHistory(7);
   const isLoading = isCurrentFetching || isHistoryFetching;
+  const { data: profile } = useProfile();
+  const isBlocked = (() => {
+    if (!profile?.enrolledClasses?.length) return true;
+    const classStatus = profile?.enrolledClasses[0]?.status;
+    if (classStatus === "not_started" || classStatus === "closed") return true;
+    return false;
+  })();
 
   useFocusEffect(
     useCallback(() => {
@@ -114,7 +131,7 @@ export default function HomeScreen() {
         <StreakCard />
         <UpcomingAssignments />
       </ScrollView>
-      <ChatbotFab />
+      {!isBlocked && <ChatbotFab />}
     </View>
   );
 }

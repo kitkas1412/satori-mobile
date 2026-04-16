@@ -8,3 +8,4 @@ export { EditFormalityScreen } from "./edit-formality-screen";
 export { EditConversationStyleScreen } from "./edit-conversation-style-screen";
 export { EditTopicsScreen } from "./edit-topics-screen";
 export { EditReminderScreen } from "./edit-reminder-screen";
+export { NotificationSettingsScreen } from "./notification-settings-screen";

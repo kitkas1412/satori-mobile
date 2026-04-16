@@ -4,6 +4,7 @@ import {
   AchievementSection,
   StatsSection,
 } from "@/features/achievement/components";
+import { SkillRadarCard } from "@/features/learning-analytics/components";
 import { useAchievementProgress } from "@/features/achievement/hooks";
 import {
   useProfile,
@@ -11,7 +12,8 @@ import {
 } from "@/features/profile-management/hooks";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback } from "react";
 import { StatusBar } from "expo-status-bar";
 import { Camera, Pencil, Settings } from "lucide-react-native";
 import {
@@ -25,7 +27,13 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function ProfileTab() {
-  const { data: profile, isLoading } = useProfile();
+  const { data: profile, isFetching, refetch } = useProfile();
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
   const router = useRouter();
   const { mutate: logoutUser, isPending } = useLogout();
   const { handleAvatarPress, isPending: isUploadingAvatar } = useUploadAvatar();
@@ -69,7 +77,7 @@ export default function ProfileTab() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ gap: 16, paddingBottom: 32 }}
         >
-          {!isLoading && profile && (
+          {!isFetching && profile && (
             <View className="px-4">
               <View
                 className="rounded-2xl overflow-hidden"
@@ -205,9 +213,13 @@ export default function ProfileTab() {
           )}
 
           <StatsSection />
+          <View className="px-4">
+            <SkillRadarCard />
+          </View>
           <AchievementSection />
         </ScrollView>
       </View>
+      <LoadingOverlay visible={isFetching} title="Đang tải..." />
       <LoadingOverlay visible={isPending} title="Đang đăng xuất..." />
     </>
   );

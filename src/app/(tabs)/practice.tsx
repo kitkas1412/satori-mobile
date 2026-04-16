@@ -1,10 +1,11 @@
 // Màn hình chính của tính năng Ôn tập.
 // Hiển thị hai tab: "Bài tập GV" (danh sách bài tập từ giáo viên) và "Ôn luyện AI" (banner AI).
 
+import { useFocusEffect, useIsFocused } from "@react-navigation/native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { BookOpen, Sparkles } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useFocusEffect } from "@react-navigation/native";
-import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   ActivityIndicator,
   FlatList,
@@ -14,39 +15,37 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { StatusBar } from "expo-status-bar";
 
-import { ChatbotFab } from "@/features/chatbot/components";
-import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
-import { useProfile } from "@/features/profile-management/hooks";
-import { useAuthStore } from "@/stores/auth-store";
 import { BellButton, LoadingOverlay, ScreenHeader } from "@/components/ui";
+import { Colors } from "@/constants/theme";
+import type {
+  AssignmentStatusFilter,
+  Content,
+} from "@/features/assignment/api";
 import { AssignmentCard } from "@/features/assignment/components/assignment-card";
 import { AssignmentFilterBar } from "@/features/assignment/components/assignment-filter-bar";
-import { mapAssignmentToCardProps } from "@/features/assignment/utils";
 import {
-  useAssignments,
   useAssignmentNavigation,
+  useAssignments,
   useClasses,
 } from "@/features/assignment/hooks";
+import { mapAssignmentToCardProps } from "@/features/assignment/utils";
+import { ChatbotFab } from "@/features/chatbot/components";
+import type { LessonResponse } from "@/features/practice-with-ai/api";
 import {
   LessonCard,
   SessionTypesModal,
 } from "@/features/practice-with-ai/components";
 import { useLessons } from "@/features/practice-with-ai/hooks";
-import type {
-  AssignmentStatusFilter,
-  Content,
-} from "@/features/assignment/api";
-import type { LessonResponse } from "@/features/practice-with-ai/api";
+import { useProfile } from "@/features/profile-management/hooks";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 
 type ActiveTab = "teacher" | "ai";
 
 export default function PracticeTab() {
   const router = useRouter();
   const { tab } = useLocalSearchParams<{ tab?: string }>();
-  const user = useAuthStore((state) => state.user);
+  const isFocused = useIsFocused();
   const [activeTab, setActiveTab] = useState<ActiveTab>("teacher");
 
   useEffect(() => {
@@ -63,8 +62,10 @@ export default function PracticeTab() {
     undefined,
   );
   const { handleAssignmentPress, isLoadingSubmission } =
-    useAssignmentNavigation();
-  const { data: profile } = useProfile();
+    useAssignmentNavigation((pathname, params) =>
+      router.push({ pathname: pathname as any, params }),
+    );
+  const { data: profile, refetch: refetchProfile } = useProfile();
   const { data: classes } = useClasses();
   const courseId = profile?.enrolledClasses[0]?.courseId;
 
@@ -98,11 +99,11 @@ export default function PracticeTab() {
       const refetch = async () => {
         setIsFocusRefetching(true);
         if (activeTab === "teacher") await refetchAssignments();
-        else await refetchLessons();
+        else await Promise.all([refetchLessons(), refetchProfile()]);
         setIsFocusRefetching(false);
       };
       refetch();
-    }, [activeTab, refetchAssignments, refetchLessons]),
+    }, [activeTab, refetchAssignments, refetchLessons, refetchProfile]),
   );
 
   const [refreshing, setRefreshing] = useState(false);
@@ -111,16 +112,18 @@ export default function PracticeTab() {
     setRefreshing(true);
     if (activeTab === "teacher") await refetchAssignments();
     else await refetchLessons();
+    await refetchProfile();
     setRefreshing(false);
   };
 
   const assignments = data?.pages.flatMap((p) => p.content) ?? [];
 
   const blockedMessage = (() => {
-    if (user?.status === "INACTIVE") return "Bạn chưa có lớp. Vui lòng thử lại sau";
+    if (profile?.status !== "ACTIVE")
+      return "Bạn chưa có lớp. Vui lòng thử lại sau";
     const classStatus = profile?.enrolledClasses[0]?.status;
-    if (classStatus === "not_started") return "Lớp của bạn chưa bắt đầu. Vui lòng thử lại sau";
-    if (classStatus === "closed") return "Lớp của bạn đã kết thúc. Vui lòng thử lại sau";
+    if (classStatus === "not_started")
+      return "Lớp của bạn chưa bắt đầu. Vui lòng thử lại sau";
     return null;
   })();
 
@@ -272,13 +275,21 @@ export default function PracticeTab() {
       {/* Tiêu đề màn hình — nằm ngoài FlatList để không scroll */}
       <ScreenHeader
         title="Luyện tập"
-        rightAction={<BellButton onPress={() => router.push("/notifications")} />}
+        rightAction={
+          <BellButton onPress={() => router.push("/notifications")} />
+        }
         paddingTop={insets.top + 16}
       />
 
       <FlatList<Content | LessonResponse>
         ref={flatListRef}
-        data={activeTab === "teacher" ? assignments : (blockedMessage ? [] : (lessons ?? []))}
+        data={
+          activeTab === "teacher"
+            ? assignments
+            : blockedMessage
+              ? []
+              : (lessons ?? [])
+        }
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View className="px-4 mb-3">
@@ -319,17 +330,23 @@ export default function PracticeTab() {
       />
 
       {/* Overlay loading khi đang tải lần đầu */}
-      <LoadingOverlay visible={isLoading} title="Đang tải bài tập..." />
+      <LoadingOverlay
+        visible={isFocused && isLoading}
+        title="Đang tải bài tập..."
+      />
       {/* Overlay loading khi focus lại tab */}
-      <LoadingOverlay visible={isFocusRefetching} title="Đang tải..." />
+      <LoadingOverlay
+        visible={isFocused && isFocusRefetching}
+        title="Đang tải..."
+      />
       {/* Overlay loading khi đang tải kết quả bài đã nộp */}
       <LoadingOverlay
-        visible={isLoadingSubmission}
+        visible={isFocused && isLoadingSubmission}
         title="Đang tải kết quả..."
       />
       {/* Overlay loading khi đang tải danh sách bài học AI */}
       <LoadingOverlay
-        visible={activeTab === "ai" && isLoadingLessons}
+        visible={isFocused && activeTab === "ai" && isLoadingLessons}
         title="Đang tải bài học..."
       />
       <SessionTypesModal
@@ -347,7 +364,7 @@ export default function PracticeTab() {
           }, 350);
         }}
       />
-      {!(activeTab === "ai" && blockedMessage) && <ChatbotFab />}
+      {!blockedMessage && <ChatbotFab />}
     </View>
   );
 }

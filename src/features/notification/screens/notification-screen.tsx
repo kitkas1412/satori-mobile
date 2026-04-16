@@ -3,7 +3,7 @@ import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useNotifications, useMarkReadNotification, useMarkAllReadNotification } from "@/features/notification/hooks";
 import { useRouter } from "expo-router";
-import { ArrowLeft, CheckCheck } from "lucide-react-native";
+import { ChevronLeft, CheckCheck } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import {
@@ -84,7 +84,7 @@ export function NotificationScreen() {
         paddingTop={insets.top + 16}
         leftAction={
           <IconButton
-            icon={<ArrowLeft size={24} color={theme.icon.primary} />}
+            icon={<ChevronLeft size={24} color={theme.icon.primary} />}
             onPress={() => router.back()}
           />
         }

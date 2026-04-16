@@ -6,7 +6,7 @@
 // - Còn lại: điều hướng đến màn hình làm bài tương ứng
 
 import { useState } from "react";
-import { useRouter } from "expo-router";
+import { Alert } from "react-native";
 
 import { useAssignmentStore } from "@/stores";
 import { extractApiError } from "@/lib/extract-api-error";
@@ -14,8 +14,9 @@ import { useErrorOverlayStore } from "@/stores/error-overlay-store";
 import type { Content } from "../api";
 import { getQuizSubmissionApi, getWritingSubmissionApi } from "../api";
 
-export function useAssignmentNavigation() {
-  const router = useRouter();
+export function useAssignmentNavigation(
+  onNavigate: (pathname: string, params?: Record<string, string>) => void,
+) {
   const setQuizResult = useAssignmentStore((s) => s.setQuizResult);
   const setWritingResult = useAssignmentStore((s) => s.setWritingResult);
   const [isLoadingSubmission, setIsLoadingSubmission] = useState(false);
@@ -33,8 +34,8 @@ export function useAssignmentNavigation() {
             item.learnerSubmissionId,
           );
           // Lưu kết quả vào store để màn hình kết quả có thể đọc
-          setQuizResult(item.id, submission);
-          router.push({ pathname: "/assignment-result" });
+          setQuizResult(item.id, submission, true);
+          onNavigate("/quiz-result");
         } catch (error) {
           useErrorOverlayStore.getState().show(extractApiError(error));
         } finally {
@@ -46,8 +47,8 @@ export function useAssignmentNavigation() {
           const submission = await getWritingSubmissionApi(
             item.learnerSubmissionId,
           );
-          setWritingResult(submission);
-          router.push({ pathname: "/assignment-writing-result" });
+          setWritingResult(submission, true);
+          onNavigate("/assignment-writing-result");
         } catch (error) {
           useErrorOverlayStore.getState().show(extractApiError(error));
         } finally {
@@ -68,8 +69,8 @@ export function useAssignmentNavigation() {
         const submission = await getWritingSubmissionApi(
           item.learnerSubmissionId,
         );
-        setWritingResult(submission);
-        router.push({ pathname: "/assignment-writing-result" });
+        setWritingResult(submission, true);
+        onNavigate("/assignment-writing-result");
       } catch (error) {
         useErrorOverlayStore.getState().show(extractApiError(error));
       } finally {
@@ -78,9 +79,9 @@ export function useAssignmentNavigation() {
     } else if (item.learnerSubmissionStatus === "OVERDUE") {
       Alert.alert("Bài tập đã quá hạn", "Bài tập này đã hết hạn nộp.");
     } else if (item.assignmentType === "QUIZ") {
-      router.push({ pathname: "/assignment-quiz", params: { id: item.id } });
+      onNavigate("/assignment-quiz", { id: item.id });
     } else if (item.assignmentType === "WRITING" || item.assignmentType === "TRANSLATION") {
-      router.push({ pathname: "/assignment-writing", params: { id: item.id } });
+      onNavigate("/assignment-writing", { id: item.id });
     }
   }
 

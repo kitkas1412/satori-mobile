@@ -2,41 +2,39 @@
 // Hiển thị banner free-talk và danh sách các section (chủ đề) để người dùng chọn luyện tập.
 // Tự động highlight section đầu tiên còn topic chưa được luyện.
 
-import { useRef, useCallback, useState } from "react";
+import { BellButton, LoadingOverlay, ScreenHeader } from "@/components/ui";
+import { Colors } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
   RefreshControl,
   Text,
   View,
-  useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter, useFocusEffect } from "expo-router";
-import { useColorScheme } from "@/hooks/use-color-scheme";
-import { Colors } from "@/constants/theme";
-import { BellButton, LoadingOverlay, ScreenHeader } from "@/components/ui";
 
+import { ChatbotFab } from "@/features/chatbot/components";
+import { useProfile } from "@/features/profile-management/hooks";
+import type { Topic } from "@/features/speaking/api";
 import {
   ConversationBanner,
   TopicSection,
 } from "@/features/speaking/components";
-import { ChatbotFab } from "@/features/chatbot/components";
-import { useAppStore, useAuthStore } from "@/stores";
 import {
-  useTopics,
-  useFirstUnpracticedSection,
   useConversationNavigation,
+  useFirstUnpracticedSection,
+  useTopics,
 } from "@/features/speaking/hooks";
-import type { Topic } from "@/features/speaking/api";
-import { useProfile } from "@/features/profile-management/hooks";
+import { useAppStore } from "@/stores";
 
 export default function SpeakingScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const user = useAuthStore((state) => state.user);
   const language = useAppStore((state) => state.language);
-  const { data: profile } = useProfile();
+  const { data: profile, refetch: refetchProfile } = useProfile();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const {
@@ -57,14 +55,14 @@ export default function SpeakingScreen() {
   const scrollViewRef = useRef<FlatList<Topic>>(null);
   const sectionYMap = useRef<Record<string, number>>({});
   const hasScrolledRef = useRef(false);
-  const { height: screenHeight } = useWindowDimensions();
+  const flatListHeightRef = useRef<number>(0);
   const [focusTrigger, setFocusTrigger] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
   const [isFocusRefetching, setIsFocusRefetching] = useState(false);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await refetch();
+    await Promise.all([refetch(), refetchProfile()]);
     setRefreshing(false);
   };
 
@@ -75,7 +73,7 @@ export default function SpeakingScreen() {
       setFocusTrigger((prev) => prev + 1);
       const doRefetch = async () => {
         setIsFocusRefetching(true);
-        await refetch();
+        await Promise.all([refetch(), refetchProfile()]);
         setIsFocusRefetching(false);
       };
       doRefetch();
@@ -87,21 +85,22 @@ export default function SpeakingScreen() {
       if (hasScrolledRef.current) return;
       const sectionY = sectionYMap.current[sectionId] ?? 0;
       const totalY = sectionY + cardY;
-      const centeredY = totalY - screenHeight / 2 + cardHeight / 2;
+      const centeredY = totalY - flatListHeightRef.current / 2 + cardHeight / 2;
       scrollViewRef.current?.scrollToOffset({
         offset: Math.max(0, centeredY),
         animated: true,
       });
       hasScrolledRef.current = true;
     },
-    [screenHeight],
+    [],
   );
 
   const blockedMessage = (() => {
-    if (user?.status === "INACTIVE") return "Bạn chưa có lớp. Vui lòng thử lại sau";
+    if (profile?.status !== "ACTIVE")
+      return "Bạn chưa có lớp. Vui lòng thử lại sau";
     const classStatus = profile?.enrolledClasses[0]?.status;
-    if (classStatus === "not_started") return "Lớp của bạn chưa bắt đầu. Vui lòng thử lại sau";
-    if (classStatus === "closed") return "Lớp của bạn đã kết thúc. Vui lòng thử lại sau";
+    if (classStatus === "not_started")
+      return "Lớp của bạn chưa bắt đầu. Vui lòng thử lại sau";
     return null;
   })();
 
@@ -133,7 +132,14 @@ export default function SpeakingScreen() {
           <FlatList<Topic>
             ref={scrollViewRef}
             className="flex-1"
-            contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32, gap: 16 }}
+            onLayout={(e) => {
+              flatListHeightRef.current = e.nativeEvent.layout.height;
+            }}
+            contentContainerStyle={{
+              paddingHorizontal: 16,
+              paddingBottom: 32,
+              gap: 16,
+            }}
             showsVerticalScrollIndicator={false}
             data={sections}
             keyExtractor={(item) => item.id}
@@ -149,7 +155,11 @@ export default function SpeakingScreen() {
                     if (!jlptLevel) return;
                     router.push({
                       pathname: "/conversation-practice",
-                      params: { jlptLevel, language, title: "Nói chuyện với AI" },
+                      params: {
+                        jlptLevel,
+                        language,
+                        title: "Nói chuyện với AI",
+                      },
                     });
                   }}
                 />

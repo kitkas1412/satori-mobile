@@ -195,6 +195,9 @@ axiosInstance.interceptors.response.use(
         default:
           console.error("API Error:", status, error.response.data);
       }
+    } else if (error.code === "ECONNABORTED") {
+      // Request timeout - server không phản hồi trong thời gian cho phép
+      console.error("Timeout Error - Request quá thời gian chờ");
     } else if (error.request) {
       // Request đã được gửi nhưng không nhận được response
       console.error("Network Error - Không thể kết nối đến server");

@@ -3,27 +3,29 @@
 
 import { useState } from "react";
 import { Alert } from "react-native";
-import { useRouter } from "expo-router";
 
 import { useAssignmentStore } from "@/stores";
 import { extractApiError } from "@/lib/extract-api-error";
 import { useErrorOverlayStore } from "@/stores/error-overlay-store";
 import { cancelAssignmentApi } from "../api";
 
-export function useWritingResult() {
-  const router = useRouter();
+interface UseWritingResultParams {
+  onNavigate: (pathname: string, params?: Record<string, string>) => void;
+}
+
+export function useWritingResult({ onNavigate }: UseWritingResultParams) {
   const writingResult = useAssignmentStore((s) => s.writingResult);
   const clearWritingResult = useAssignmentStore((s) => s.clearWritingResult);
+  const isReview = useAssignmentStore((s) => s.isReview);
   const [isCancelling, setIsCancelling] = useState(false);
 
   const isGraded = writingResult?.status === "GRADED";
   const imageUrls = writingResult?.imageUrls ?? [];
   const score = writingResult?.score ?? 0;
 
-  // Xóa kết quả khỏi store và quay về tab Practice
-  function handleGoHome() {
+  function handleContinue() {
     clearWritingResult();
-    router.replace("/(tabs)/practice");
+    onNavigate("/(tabs)/practice");
   }
 
   // Hiển thị xác nhận trước khi hủy nộp bài.
@@ -43,10 +45,7 @@ export function useWritingResult() {
               setIsCancelling(true);
               await cancelAssignmentApi(writingResult.assignmentId);
               clearWritingResult();
-              router.replace({
-                pathname: "/assignment-writing",
-                params: { id: writingResult.assignmentId },
-              });
+              onNavigate("/assignment-writing", { id: writingResult.assignmentId });
             } catch (error) {
               useErrorOverlayStore.getState().show(extractApiError(error));
             } finally {
@@ -58,5 +57,5 @@ export function useWritingResult() {
     );
   }
 
-  return { writingResult, isGraded, imageUrls, score, isCancelling, handleGoHome, handleCancelSubmission };
+  return { writingResult, isGraded, imageUrls, score, isCancelling, handleContinue, handleCancelSubmission, isReview };
 }

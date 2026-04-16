@@ -4,7 +4,7 @@
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 
 import { Colors } from "@/constants/theme";
-import { MarkdownText, ProgressBar } from "@/components/ui";
+import { MarkdownText } from "@/components/ui";
 import type { Question, Option } from "../api";
 
 // Component một lựa chọn trong câu trắc nghiệm.
@@ -68,8 +68,6 @@ function OptionButton({
 
 interface QuestionViewProps {
   question: Question;
-  index: number;
-  total: number;
   selectedOptionId: string | undefined;
   fillBlankAnswer: string | undefined;
   onSelectOption: (optionId: string) => void;
@@ -79,17 +77,12 @@ interface QuestionViewProps {
 
 export function QuestionView({
   question,
-  index,
-  total,
   selectedOptionId,
   fillBlankAnswer,
   onSelectOption,
   onFillBlankChange,
   theme,
 }: QuestionViewProps) {
-  // Tiến độ tính theo số câu đã xem (index + 1 trên tổng số)
-  const progress = (index + 1) / total;
-
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
@@ -99,27 +92,6 @@ export function QuestionView({
         paddingTop: 16,
       }}
     >
-      {/* Bộ đếm câu hỏi: hiển thị "問題" (mondai) và số thứ tự */}
-      <View className="flex-row items-center justify-between mb-3">
-        <Text
-          className="font-heading text-sm"
-          style={{ color: theme.text.primary }}
-        >
-          問題
-        </Text>
-        <Text
-          className="font-heading text-sm"
-          style={{ color: theme.text.primary }}
-        >
-          {index + 1}/{total}
-        </Text>
-      </View>
-
-      {/* Thanh tiến độ */}
-      <View className="mb-6">
-        <ProgressBar progress={progress} />
-      </View>
-
       {/* Thẻ câu hỏi */}
       <View
         className="rounded-2xl p-5 mb-6"

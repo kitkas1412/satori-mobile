@@ -135,7 +135,7 @@ export function FillBlankSection({
 
       {/* Word chips */}
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
-        {currentItem.options.map((option) => {
+        {[...currentItem.options].sort((a, b) => a.id - b.id).map((option) => {
           const isSelected = selectedOptionId === option.id;
           const isCorrectAnswer =
             answerResult !== null && option.text === answerResult.correctAnswer;

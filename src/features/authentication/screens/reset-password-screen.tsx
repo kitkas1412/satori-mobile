@@ -13,7 +13,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ArrowLeft } from "lucide-react-native";
+import { ChevronLeft } from "lucide-react-native";
 import { PasswordInput, PasswordValidation } from "../components";
 
 export function ResetPasswordScreen() {
@@ -47,7 +47,7 @@ export function ResetPasswordScreen() {
     >
       <SafeAreaView className="flex-1">
         <View className="flex-col px-4">
-          <IconButton icon={<ArrowLeft size={24} color={theme.icon.primary} />} onPress={() => router.back()} />
+          <IconButton icon={<ChevronLeft size={24} color={theme.icon.primary} />} onPress={() => router.back()} />
 
           <PasswordInput
             value={newPassword}

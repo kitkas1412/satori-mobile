@@ -46,10 +46,11 @@ export function ChatHistoryDrawer({
   const theme = Colors[colorScheme ?? "light"];
   const progress = useSharedValue(0);
 
-  const { data, isLoading } = useChatSessions(visible);
+  const { data, isLoading, refetch } = useChatSessions(visible);
 
   useEffect(() => {
     progress.value = withTiming(visible ? 1 : 0, TIMING_CONFIG);
+    if (visible) refetch();
   }, [visible]);
 
   const drawerAnimatedStyle = useAnimatedStyle(() => ({

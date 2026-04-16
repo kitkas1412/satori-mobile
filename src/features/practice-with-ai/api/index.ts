@@ -5,11 +5,15 @@ export { getPracticesApi } from "./get-practices";
 export type {
   AnswerRequest,
   AnswerResponse,
+  BadgeEarned,
+  BadgeType,
   GrammarItem,
   ItemType,
   Items,
   LessonItemsResponse,
   LessonResponse,
+  LevelUp,
+  MasteryChange,
   PracticeSessionRequest,
   PracticeSessionResponse,
   PracticeSessionSummaryItem,
@@ -17,6 +21,7 @@ export type {
   Session,
   SessionConfig,
   SessionType,
+  StreakNotification,
   VocabItem,
 } from "./practice-with-ai.types";
 export { submitAnswerApi } from "./submit-answer";
