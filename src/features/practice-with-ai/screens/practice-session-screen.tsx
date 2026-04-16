@@ -149,7 +149,7 @@ export function PracticeSessionScreen() {
             if (result.sessionCompleted || currentIndex + 1 >= totalItems) {
               router.replace({
                 pathname: "/practice-result",
-                params: { practiceSessionId: sessionData.session.sessionId },
+                params: { practiceSessionId: sessionData.session.sessionId, itemTypes },
               });
             } else {
               setCurrentIndex((i) => i + 1);
@@ -170,7 +170,7 @@ export function PracticeSessionScreen() {
       if (answerResult.sessionCompleted || currentIndex + 1 >= totalItems) {
         router.replace({
           pathname: "/practice-result",
-          params: { practiceSessionId: sessionData.session.sessionId },
+          params: { practiceSessionId: sessionData.session.sessionId, itemTypes },
         });
       } else {
         setCurrentIndex((i) => i + 1);
