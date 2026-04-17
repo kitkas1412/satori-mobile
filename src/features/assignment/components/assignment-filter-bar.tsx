@@ -132,6 +132,7 @@ export function AssignmentFilterBar({
       ref={scrollRef}
       horizontal
       showsHorizontalScrollIndicator={false}
+      nestedScrollEnabled
       contentContainerStyle={{
         paddingHorizontal: 16,
         gap: 8,
