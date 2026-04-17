@@ -12,12 +12,14 @@ interface UseWritingSubmitParams {
   assignmentId: string;
   images: ImagePickerAsset[];
   onNavigate: () => void;
+  dueDate?: string;
 }
 
 export function useWritingSubmit({
   assignmentId,
   images,
   onNavigate,
+  dueDate,
 }: UseWritingSubmitParams) {
   const queryClient = useQueryClient();
   const setWritingResult = useAssignmentStore((s) => s.setWritingResult);
@@ -38,7 +40,7 @@ export function useWritingSubmit({
         queryKey: assignmentQueryKeys.all,
       });
       // Lưu kết quả vào store để màn hình kết quả đọc mà không cần gọi API lại
-      setWritingResult(data);
+      setWritingResult(data, false, dueDate);
       onNavigate();
     },
   });

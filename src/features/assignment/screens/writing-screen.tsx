@@ -63,6 +63,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
     assignmentId: id,
     images,
     onNavigate: () => router.replace("/assignment-writing-result"),
+    dueDate: data?.dueDate,
   });
   const { handleExit } = useExitAssignment(() => router.back());
 
