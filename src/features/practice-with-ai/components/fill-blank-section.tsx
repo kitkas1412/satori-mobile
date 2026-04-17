@@ -138,7 +138,7 @@ export function FillBlankSection({
         {[...currentItem.options].sort((a, b) => a.id - b.id).map((option) => {
           const isSelected = selectedOptionId === option.id;
           const isCorrectAnswer =
-            answerResult !== null && option.text === answerResult.correctAnswer;
+            answerResult !== null && String(option.id) === answerResult.correctAnswer;
           const isWrongSelected =
             answerResult !== null && isSelected && !answerResult.correct;
 

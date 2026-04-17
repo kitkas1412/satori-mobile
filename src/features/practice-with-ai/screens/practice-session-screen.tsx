@@ -149,7 +149,7 @@ export function PracticeSessionScreen() {
             if (result.sessionCompleted || currentIndex + 1 >= totalItems) {
               router.replace({
                 pathname: "/practice-result",
-                params: { practiceSessionId: sessionData.session.sessionId, itemTypes },
+                params: { practiceSessionId: sessionData.session.sessionId, itemTypes, items: JSON.stringify(sessionData.items) },
               });
             } else {
               setCurrentIndex((i) => i + 1);
@@ -170,7 +170,7 @@ export function PracticeSessionScreen() {
       if (answerResult.sessionCompleted || currentIndex + 1 >= totalItems) {
         router.replace({
           pathname: "/practice-result",
-          params: { practiceSessionId: sessionData.session.sessionId, itemTypes },
+          params: { practiceSessionId: sessionData.session.sessionId, itemTypes, items: JSON.stringify(sessionData.items) },
         });
       } else {
         setCurrentIndex((i) => i + 1);
@@ -184,9 +184,7 @@ export function PracticeSessionScreen() {
 
     if (currentItem.itemType === "SENTENCE_ORDER") {
       if (selectedWordIds.length === 0) return;
-      const userAnswer = selectedWordIds
-        .map((id) => currentItem.options.find((o) => o.id === id)?.text ?? "")
-        .join(" ");
+      const userAnswer = selectedWordIds.join(",");
       submitAnswer(
         {
           sessionId: sessionData.session.sessionId,
@@ -204,18 +202,12 @@ export function PracticeSessionScreen() {
     }
 
     if (selectedOptionId === null) return;
-    const selectedOption = currentItem.options.find(
-      (o) => o.id === selectedOptionId,
-    );
-    if (!selectedOption) return;
 
     submitAnswer(
       {
         sessionId: sessionData.session.sessionId,
         itemId: currentItem.id,
-        userAnswer: currentItem.itemType === "TRUE_FALSE"
-        ? String(selectedOptionId)
-        : selectedOption.text,
+        userAnswer: String(selectedOptionId),
       },
       {
         onSuccess: (result) => {
