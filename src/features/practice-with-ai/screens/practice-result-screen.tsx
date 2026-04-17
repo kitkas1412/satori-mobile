@@ -14,6 +14,7 @@ import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { usePracticeSessionSummary } from "../hooks";
 import { PracticeAnswerItem } from "../components";
+import type { Items } from "../api/practice-with-ai.types";
 
 export function PracticeResultScreen() {
   const colorScheme = useColorScheme();
@@ -21,10 +22,13 @@ export function PracticeResultScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
-  const { practiceSessionId, itemTypes } = useLocalSearchParams<{
+  const { practiceSessionId, itemTypes, items: itemsParam } = useLocalSearchParams<{
     practiceSessionId?: string;
     itemTypes?: string;
+    items?: string;
   }>();
+
+  const sessionItems: Items[] = itemsParam ? (JSON.parse(itemsParam) as Items[]) : [];
 
   const {
     data: summary,
@@ -258,14 +262,19 @@ export function PracticeResultScreen() {
               Chi tiết câu trả lời
             </Text>
 
-            {summary.items.map((item, index) => (
+            {summary.items.map((item, index) => {
+              const sessionItem = sessionItems.find((si) => si.itemIndex === item.itemIndex);
+              return (
               <PracticeAnswerItem
                 key={`${item.itemIndex}-${index}`}
                 item={item}
                 index={index}
                 theme={theme}
+                options={sessionItem?.options}
+                itemType={sessionItem?.itemType}
               />
-            ))}
+              );
+            })}
           </View>
         )}
       </ScrollView>
