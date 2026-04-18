@@ -17,32 +17,17 @@ export function useWritingResult({ onNavigate }: UseWritingResultParams) {
   const writingResult = useAssignmentStore((s) => s.writingResult);
   const clearWritingResult = useAssignmentStore((s) => s.clearWritingResult);
   const isReview = useAssignmentStore((s) => s.isReview);
+  const writingDueDate = useAssignmentStore((s) => s.writingDueDate);
   const [isCancelling, setIsCancelling] = useState(false);
 
   const isGraded = writingResult?.status === "GRADED";
+  const isPastDeadline = writingDueDate ? new Date() > new Date(writingDueDate) : false;
   const imageUrls = writingResult?.imageUrls ?? [];
   const score = writingResult?.score ?? 0;
 
-  // Khi xem lại bài đã nộp/chấm → clear store và về tab Practice (không hiện reward).
-  // Khi vừa submit xong → kiểm tra reward trước khi về.
   function handleContinue() {
-    if (isReview) {
-      clearWritingResult();
-      onNavigate("/(tabs)/practice");
-      return;
-    }
-
-    const hasReward =
-      (writingResult?.newBadgesEarned?.length ?? 0) > 0 ||
-      writingResult?.levelUp !== null && writingResult?.levelUp !== undefined ||
-      writingResult?.streakNotification?.is_first_activity_today === true;
-
-    if (hasReward) {
-      onNavigate("/assignment-reward");
-    } else {
-      clearWritingResult();
-      onNavigate("/(tabs)/practice");
-    }
+    clearWritingResult();
+    onNavigate("/(tabs)/practice");
   }
 
   // Hiển thị xác nhận trước khi hủy nộp bài.
@@ -74,5 +59,5 @@ export function useWritingResult({ onNavigate }: UseWritingResultParams) {
     );
   }
 
-  return { writingResult, isGraded, imageUrls, score, isCancelling, handleContinue, handleCancelSubmission, isReview };
+  return { writingResult, isGraded, isPastDeadline, imageUrls, score, isCancelling, handleContinue, handleCancelSubmission, isReview };
 }

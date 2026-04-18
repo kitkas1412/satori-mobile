@@ -2,17 +2,10 @@ import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Image } from "expo-image";
 import { Text, View } from "react-native";
-import type { BadgeProgress } from "../api";
-
-const LABEL: Record<BadgeProgress["badgeType"], string> = {
-  LEARNING_STREAK: "ngày",
-  AI_SPEAKING_COUNT: "hội thoại",
-  AI_PRACTICE_COUNT: "lần",
-  LEARNING_LEVEL: "level",
-};
+import type { EarnedBadge } from "../api";
 
 interface BadgeCardProps {
-  badge: BadgeProgress;
+  badge: EarnedBadge;
 }
 
 export function BadgeCard({ badge }: BadgeCardProps) {
@@ -55,7 +48,7 @@ export function BadgeCard({ badge }: BadgeCardProps) {
           style={{ fontSize: 9, color: theme.text.tertiary, textAlign: "center" }}
           numberOfLines={2}
         >
-          {badge.requirementValue} {LABEL[badge.badgeType]}
+          {badge.description}
         </Text>
       </View>
 

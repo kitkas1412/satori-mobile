@@ -105,6 +105,7 @@ export function AssignmentCard({
         </View>
         <Text
           className="font-heading text-xs"
+          numberOfLines={1}
           style={{ color: statusColor[status], flexShrink: 0 }}
         >
           {STATUS_LABEL[status]}

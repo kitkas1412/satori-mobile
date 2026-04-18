@@ -3,7 +3,7 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useRouter } from "expo-router";
 import { ChevronRight } from "lucide-react-native";
 import { Text, TouchableOpacity, View } from "react-native";
-import { useAchievementProgress } from "../hooks";
+import { useEarnedBadges } from "../hooks";
 import { BadgeCard } from "./badge-card";
 
 function chunkArray<T>(arr: T[], size: number): T[][] {
@@ -13,17 +13,14 @@ function chunkArray<T>(arr: T[], size: number): T[][] {
 }
 
 export function AchievementSection() {
-  const { data } = useAchievementProgress();
+  const { data } = useEarnedBadges();
   const router = useRouter();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
   if (!data) return null;
 
-  const sorted = [...data.badgeProgress].sort((a, b) =>
-    a.earned === b.earned ? 0 : a.earned ? -1 : 1
-  );
-  const preview = sorted.slice(0, 6);
+  const preview = data.slice(0, 6);
   const rows = chunkArray(preview, 3);
 
   return (
