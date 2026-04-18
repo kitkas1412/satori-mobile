@@ -191,6 +191,8 @@ export interface VocabularyUsed {
 export interface SendMessageResponse {
   messages: Messages[];
   missions: Missions[];
+  limitReached: boolean;
+  allMissionsCompleted: boolean;
 }
 
 // POST: /learner/roleplay/sessions/{{session_id}}/complete
