@@ -23,7 +23,7 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useColorScheme as useNativeWindColorScheme } from "nativewind";
 
 import { QueryProvider } from "@/components/providers/query-provider";
-import { ErrorOverlay } from "@/components/ui";
+import { ErrorOverlay, LoadingOverlayRenderer } from "@/components/ui";
 import { useTokenValidation } from "@/features/authentication/hooks";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRegisterDeviceToken } from "@/features/notification/hooks";
@@ -34,6 +34,7 @@ import { useAuthStore } from "@/stores/auth-store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 import { AppState, Platform } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "../../global.css";
 
 const FCM_TOKEN_STORAGE_KEY = "fcm_token";
@@ -352,12 +353,15 @@ export default function RootLayout() {
   }
 
   return (
-    <QueryProvider>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <RootLayoutNav />
-        <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
-      </ThemeProvider>
-      <ErrorOverlay />
-    </QueryProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <QueryProvider>
+        <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+          <RootLayoutNav />
+          <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+        </ThemeProvider>
+        <LoadingOverlayRenderer />
+        <ErrorOverlay />
+      </QueryProvider>
+    </GestureHandlerRootView>
   );
 }

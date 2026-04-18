@@ -1,5 +1,6 @@
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useLoadingOverlayStore } from "@/stores/loading-overlay-store";
 import React, { useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Animated, {
@@ -68,15 +69,34 @@ interface LoadingOverlayProps {
   transparent?: boolean;
 }
 
+// Messenger component: syncs visible prop into the global store, renders nothing.
 export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
   visible,
-  title = "Đang xử lý...",
-  message = "Vui lòng đợi trong giây lát",
-  transparent = false,
+  title,
+  message,
+  transparent,
 }) => {
-  const theme = useColorScheme() ?? "light";
+  const { show, hide } = useLoadingOverlayStore();
 
-  if (!visible) return null;
+  useEffect(() => {
+    if (visible) {
+      show({ title, message, transparent });
+      return () => {
+        hide();
+      };
+    }
+  }, [visible, title, message, transparent]);
+
+  return null;
+};
+
+// Renderer component: reads from the global store and renders the actual UI.
+// Must be placed at root layout level to cover the tab bar.
+export const LoadingOverlayRenderer: React.FC = () => {
+  const theme = useColorScheme() ?? "light";
+  const { counter, title, message, transparent } = useLoadingOverlayStore();
+
+  if (counter === 0) return null;
 
   return (
     <View

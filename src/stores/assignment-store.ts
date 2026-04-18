@@ -10,6 +10,7 @@ interface AssignmentState {
   quizResult: SubmitQuizResponse | null;
   assignmentId: string | null;   // ID bài tập tương ứng với quizResult
   writingResult: SubmitWritingResponse | null;
+  writingDueDate: string | null; // Deadline của bài viết — dùng để ẩn nút hủy nộp sau hạn
   // true khi user đang xem lại bài đã nộp/chấm từ danh sách (không phải vừa submit xong)
   isReview: boolean;
 }
@@ -17,7 +18,7 @@ interface AssignmentState {
 interface AssignmentActions {
   setQuizResult: (assignmentId: string, result: SubmitQuizResponse, isReview?: boolean) => void;
   clearQuizResult: () => void;
-  setWritingResult: (result: SubmitWritingResponse, isReview?: boolean) => void;
+  setWritingResult: (result: SubmitWritingResponse, isReview?: boolean, dueDate?: string) => void;
   clearWritingResult: () => void;
 }
 
@@ -25,10 +26,11 @@ export const useAssignmentStore = create<AssignmentState & AssignmentActions>()(
   quizResult: null,
   assignmentId: null,
   writingResult: null,
+  writingDueDate: null,
   isReview: false,
 
   setQuizResult: (assignmentId, result, isReview = false) => set({ assignmentId, quizResult: result, isReview }),
   clearQuizResult: () => set({ assignmentId: null, quizResult: null, isReview: false }),
-  setWritingResult: (result, isReview = false) => set({ writingResult: result, isReview }),
-  clearWritingResult: () => set({ writingResult: null, isReview: false }),
+  setWritingResult: (result, isReview = false, dueDate) => set({ writingResult: result, isReview, writingDueDate: dueDate ?? null }),
+  clearWritingResult: () => set({ writingResult: null, writingDueDate: null, isReview: false }),
 }));

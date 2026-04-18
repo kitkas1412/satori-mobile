@@ -17,9 +17,11 @@ export function useWritingResult({ onNavigate }: UseWritingResultParams) {
   const writingResult = useAssignmentStore((s) => s.writingResult);
   const clearWritingResult = useAssignmentStore((s) => s.clearWritingResult);
   const isReview = useAssignmentStore((s) => s.isReview);
+  const writingDueDate = useAssignmentStore((s) => s.writingDueDate);
   const [isCancelling, setIsCancelling] = useState(false);
 
   const isGraded = writingResult?.status === "GRADED";
+  const isPastDeadline = writingDueDate ? new Date() > new Date(writingDueDate) : false;
   const imageUrls = writingResult?.imageUrls ?? [];
   const score = writingResult?.score ?? 0;
 
@@ -57,5 +59,5 @@ export function useWritingResult({ onNavigate }: UseWritingResultParams) {
     );
   }
 
-  return { writingResult, isGraded, imageUrls, score, isCancelling, handleContinue, handleCancelSubmission, isReview };
+  return { writingResult, isGraded, isPastDeadline, imageUrls, score, isCancelling, handleContinue, handleCancelSubmission, isReview };
 }
