@@ -37,9 +37,21 @@ export interface Badge {
 
 export interface BadgesPage {
   content: Badge[];
-  last: boolean;
-  totalElements: number;
-  totalPages: number;
-  number: number;
-  size: number;
+  page: {
+    size: number;
+    number: number;
+    totalElements: number;
+    totalPages: number;
+  };
+}
+
+export interface EarnedBadge {
+  badgeId: string;
+  badgeName: string;
+  description: string;
+  badgeType: "LEARNING_STREAK" | "AI_SPEAKING_COUNT" | "AI_PRACTICE_COUNT" | "LEARNING_LEVEL";
+  iconUrl: string;
+  expReward: number;
+  earnedAt: string;
+  isFeatured: boolean;
 }
