@@ -109,6 +109,7 @@ export function AssignmentFilterBar({
     statusMaxWidth.value = withTiming(0, TIMING);
     statusOpacity.value = withTiming(0, TIMING);
     statusChevronDeg.value = withTiming(0, TIMING);
+    scrollRef.current?.scrollTo({ x: 0, animated: true });
   }
 
   function selectClass(id: string) {
@@ -117,6 +118,7 @@ export function AssignmentFilterBar({
     classMaxWidth.value = withTiming(0, TIMING);
     classOpacity.value = withTiming(0, TIMING);
     classChevronDeg.value = withTiming(0, TIMING);
+    scrollRef.current?.scrollTo({ x: 0, animated: true });
   }
 
   const statusPillActive = expanded === "status" || status !== undefined;
@@ -132,6 +134,7 @@ export function AssignmentFilterBar({
       ref={scrollRef}
       horizontal
       showsHorizontalScrollIndicator={false}
+      nestedScrollEnabled
       contentContainerStyle={{
         paddingHorizontal: 16,
         gap: 8,

@@ -81,6 +81,7 @@ export default function PracticeTab() {
   const {
     data,
     isLoading,
+    isFetching,
     isError,
     fetchNextPage,
     hasNextPage,
@@ -337,7 +338,7 @@ export default function PracticeTab() {
 
       {/* Overlay loading khi đang tải lần đầu */}
       <LoadingOverlay
-        visible={isFocused && isLoading}
+        visible={isFocused && (isLoading || (isFetching && !isFetchingNextPage))}
         title="Đang tải bài tập..."
       />
       {/* Overlay loading khi focus lại tab */}

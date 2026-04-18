@@ -7,7 +7,9 @@ export function useBadges() {
     queryKey: achievementQueryKeys.badges(),
     queryFn: ({ pageParam }) => getBadgesApi(pageParam),
     initialPageParam: 0,
-    getNextPageParam: (lastPage) =>
-      lastPage.last ? undefined : lastPage.number + 1,
+    getNextPageParam: (lastPage) => {
+      const { number, totalPages } = lastPage.page;
+      return number + 1 < totalPages ? number + 1 : undefined;
+    },
   });
 }
