@@ -1,19 +1,23 @@
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Image } from "expo-image";
-import { Text, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import type { EarnedBadge } from "../api";
 
 interface BadgeCardProps {
   badge: EarnedBadge;
+  onPress?: () => void;
 }
 
-export function BadgeCard({ badge }: BadgeCardProps) {
+export function BadgeCard({ badge, onPress }: BadgeCardProps) {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
   return (
-    <View
+    <TouchableOpacity
+      activeOpacity={0.7}
+      onPress={onPress}
+      disabled={!onPress}
       style={{
         width: 114,
         borderRadius: 14,
@@ -52,6 +56,6 @@ export function BadgeCard({ badge }: BadgeCardProps) {
         </Text>
       </View>
 
-    </View>
+    </TouchableOpacity>
   );
 }
