@@ -4,7 +4,7 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useNotifications, useMarkReadNotification, useMarkAllReadNotification } from "@/features/notification/hooks";
 import { useRouter } from "expo-router";
 import { ChevronLeft, CheckCheck } from "lucide-react-native";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import {
   ActivityIndicator,
@@ -22,23 +22,20 @@ export function NotificationScreen() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
-  const {
-    data,
-    isLoading,
-    isError,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    refetch,
-  } = useNotifications();
+  const { data, isLoading, isError, refetch, fetchNextPage, isFetchingNextPage, hasNextPage } = useNotifications();
 
   const { mutate: markRead } = useMarkReadNotification();
   const { mutate: markAllRead, isPending: isMarkingAll } = useMarkAllReadNotification();
 
   const [refreshing, setRefreshing] = useState(false);
+  const isMounted = useRef(false);
 
   useFocusEffect(
     useCallback(() => {
+      if (!isMounted.current) {
+        isMounted.current = true;
+        return;
+      }
       refetch();
     }, [refetch]),
   );
@@ -52,7 +49,6 @@ export function NotificationScreen() {
   const notifications = data?.pages.flatMap((p) => p.content) ?? [];
 
   const renderEmpty = () => {
-    if (isLoading) return null;
     if (isError) {
       return (
         <View className="flex-1 items-center justify-center px-8 mt-24">
@@ -106,13 +102,13 @@ export function NotificationScreen() {
           data={notifications}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-              <NotificationItem
-                item={item}
-                theme={theme}
-                onPress={() => markRead({ notificationIds: [item.id] })}
-              />
-            )}
-          ListEmptyComponent={renderEmpty}
+            <NotificationItem
+              item={item}
+              theme={theme}
+              onPress={() => markRead({ notificationIds: [item.id] })}
+            />
+          )}
+          ListEmptyComponent={renderEmpty()}
           ListFooterComponent={
             isFetchingNextPage ? (
               <View className="py-4 items-center">

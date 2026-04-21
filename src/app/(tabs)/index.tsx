@@ -53,7 +53,12 @@ function UpcomingAssignments() {
         </View>
         <Pressable
           className="flex-row items-center gap-0.5"
-          onPress={() => router.push("/(tabs)/practice")}
+          onPress={() =>
+            router.push({
+              pathname: "/(tabs)/practice",
+              params: { tab: "teacher" },
+            })
+          }
         >
           <Text
             className="text-sm font-heading"
