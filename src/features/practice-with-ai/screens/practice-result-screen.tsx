@@ -22,10 +22,12 @@ export function PracticeResultScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
-  const { practiceSessionId, itemTypes, items: itemsParam } = useLocalSearchParams<{
+  const { practiceSessionId, itemTypes, items: itemsParam, sessionType, lessonId } = useLocalSearchParams<{
     practiceSessionId?: string;
     itemTypes?: string;
     items?: string;
+    sessionType?: string;
+    lessonId?: string;
   }>();
 
   const sessionItems: Items[] = itemsParam ? (JSON.parse(itemsParam) as Items[]) : [];
@@ -42,6 +44,14 @@ export function PracticeResultScreen() {
     router.replace({ pathname: "/(tabs)/practice", params: { tab: "ai" } });
   }
 
+  function handleGoSessionConfig() {
+    if (lessonId && sessionType) {
+      router.replace({ pathname: "/session-config", params: { lessonId, sessionType } });
+    } else {
+      handleGoPracticeHome();
+    }
+  }
+
   function handleContinue() {
     if (!summary || !practiceSessionId) {
       handleGoPracticeHome();
@@ -54,10 +64,10 @@ export function PracticeResultScreen() {
     if (hasReward) {
       router.replace({
         pathname: "/practice-reward",
-        params: { practiceSessionId },
+        params: { practiceSessionId, sessionType, lessonId },
       });
     } else {
-      handleGoPracticeHome();
+      handleGoSessionConfig();
     }
   }
 
