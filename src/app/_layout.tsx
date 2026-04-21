@@ -323,6 +323,10 @@ function RootLayoutNav() {
         name="achievements"
         options={{ headerShown: false, gestureEnabled: true }}
       />
+      <Stack.Screen
+        name="badge-detail"
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
     </Stack>
   );
 }

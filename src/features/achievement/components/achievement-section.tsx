@@ -54,7 +54,13 @@ export function AchievementSection() {
         {rows.map((row, rowIndex) => (
           <View key={rowIndex} style={{ flexDirection: "row", gap: 8 }}>
             {row.map((badge) => (
-              <BadgeCard key={badge.badgeId} badge={badge} />
+              <BadgeCard
+                key={badge.badgeId}
+                badge={badge}
+                onPress={() =>
+                  router.push({ pathname: "/badge-detail", params: { badgeId: badge.badgeId } })
+                }
+              />
             ))}
           </View>
         ))}
