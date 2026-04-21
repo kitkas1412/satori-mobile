@@ -22,7 +22,8 @@ export async function playAssistantMessage(
 ): Promise<void> {
   if (audioUrl) {
     // Ưu tiên phát audio từ URL vì chất lượng tốt hơn TTS
-    return playAudioFromUrl(audioUrl);
+    // Nếu URL lỗi, fallback sang TTS để không bỏ qua lượt nói của AI
+    return playAudioFromUrl(audioUrl).catch(() => speakText(content));
   }
   // Fallback: đọc văn bản bằng TTS tiếng Nhật
   return speakText(content);
@@ -42,22 +43,33 @@ export function stopAssistantAudio(): void {
 
 /**
  * Phát file audio từ URL và đợi đến khi phát xong.
- * Lắng nghe sự kiện "playbackStatusUpdate" để biết khi nào audio kết thúc,
- * sau đó dọn dẹp listener và player để tránh rò rỉ bộ nhớ.
+ * Reject ngay khi player báo lỗi (fail fast), timeout 5s làm safety net.
  */
 async function playAudioFromUrl(url: string): Promise<void> {
   const player = createAudioPlayer(url);
   _currentPlayer = player;
-  return new Promise<void>((resolve) => {
+  return new Promise<void>((resolve, reject) => {
+    const cleanup = () => {
+      clearTimeout(timeoutId);
+      subscription.remove();
+      player.remove();
+      if (_currentPlayer === player) _currentPlayer = null;
+    };
+
+    const timeoutId = setTimeout(() => {
+      cleanup();
+      resolve(); // Safety net: không block luồng nếu không có sự kiện nào
+    }, 5_000);
+
     const subscription = player.addListener(
       "playbackStatusUpdate",
       (status) => {
         if (status.didJustFinish) {
-          // Dọn dẹp sau khi phát xong
-          subscription.remove();
-          player.remove();
-          if (_currentPlayer === player) _currentPlayer = null;
+          cleanup();
           resolve();
+        } else if (status.error) {
+          cleanup();
+          reject(new Error(status.error));
         }
       },
     );
@@ -67,23 +79,25 @@ async function playAudioFromUrl(url: string): Promise<void> {
 
 /**
  * Đọc văn bản bằng TTS tiếng Nhật và đợi đến khi đọc xong.
- * Resolve trong cả 3 trường hợp: đọc xong, bị dừng, hoặc lỗi —
- * để đảm bảo luồng hội thoại không bị treo.
+ * Chia thành từng câu theo ký tự kết thúc câu (。！？) và chèn ngắt 250ms
+ * giữa các câu để âm thanh tự nhiên hơn, dễ theo hơn.
  */
 async function speakText(text: string): Promise<void> {
-  return new Promise<void>((resolve) => {
-    // Timeout dự phòng: nếu TTS engine không gọi bất kỳ callback nào sau 30s,
-    // tự động resolve để tránh treo luồng hội thoại vĩnh viễn.
-    // const timeout = setTimeout(resolve, 30_000);
-    // const done = () => {
-    //   clearTimeout(timeout);
-    //   resolve();
-    // };
-    Speech.speak(text, {
-      language: "ja-JP",
-      onDone: resolve,
-      onStopped: resolve,
-      onError: () => {},
+  const sentences = text.split(/(?<=[。！？\n])/).map((s) => s.trim()).filter(Boolean);
+  const chunks = sentences.length > 0 ? sentences : [text];
+
+  for (let i = 0; i < chunks.length; i++) {
+    await new Promise<void>((resolve) => {
+      Speech.speak(chunks[i], {
+        language: "ja-JP",
+        rate: 0.9,
+        onDone: resolve,
+        onStopped: resolve,
+        onError: () => resolve(),
+      });
     });
-  });
+    if (i < chunks.length - 1) {
+      await new Promise<void>((resolve) => setTimeout(resolve, 250));
+    }
+  }
 }
