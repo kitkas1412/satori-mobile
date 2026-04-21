@@ -182,7 +182,12 @@ export function SessionConfigScreen() {
           className="flex-row items-center gap-2 px-4"
           style={{ height: 48, opacity: 0.9 }}
         >
-          <Pressable onPress={() => router.back()} hitSlop={30}>
+          <Pressable
+            onPress={() =>
+              router.replace({ pathname: "/(tabs)/practice", params: { tab: "ai" } })
+            }
+            hitSlop={30}
+          >
             <X size={24} color={theme.icon.primary} strokeWidth={2} />
           </Pressable>
           <Text
