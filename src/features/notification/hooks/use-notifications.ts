@@ -8,7 +8,7 @@ export const notificationQueryKeys = {
 export function useNotifications() {
   return useInfiniteQuery({
     queryKey: notificationQueryKeys.list(),
-    queryFn: ({ pageParam }) => getNotificationsApi(pageParam),
+    queryFn: ({ pageParam }) => getNotificationsApi(pageParam, 20),
     initialPageParam: 0,
     getNextPageParam: (lastPage) =>
       lastPage.last ? undefined : lastPage.number + 1,
