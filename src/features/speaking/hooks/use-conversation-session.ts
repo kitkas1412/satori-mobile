@@ -73,6 +73,7 @@ export function useConversationSession() {
         setTurnState("AI_TURN");
         // Tắt overlay trước khi phát audio để người dùng thấy tin nhắn xuất hiện
         setIsInitializing(false);
+        console.log("[startSession] initial messages:", session.messages.map((m) => ({ role: m.role, audioUrl: m.audioUrl })));
         for (const msg of session.messages) {
           if (cancelledRef.current) break;
           await delay(600); // Độ trễ tự nhiên giữa các tin nhắn
@@ -184,6 +185,8 @@ export function useConversationSession() {
           transcript,
           audioUri ?? undefined,
         );
+
+        console.log("[sendMessage] messages:", result.messages.map((m) => ({ role: m.role, audioUrl: m.audioUrl })));
 
         // Tách tin nhắn người dùng (có dữ liệu thật) và tin nhắn AI
         const userMessages = result.messages.filter(
