@@ -8,8 +8,8 @@ import { useCallback, useRef, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import {
   ActivityIndicator,
+  FlatList,
   RefreshControl,
-  ScrollView,
   Text,
   View,
 } from "react-native";
@@ -22,7 +22,7 @@ export function NotificationScreen() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
-  const { data, isLoading, isError, refetch } = useNotifications();
+  const { data, isLoading, isError, refetch, fetchNextPage, isFetchingNextPage, hasNextPage } = useNotifications();
 
   const { mutate: markRead } = useMarkReadNotification();
   const { mutate: markAllRead, isPending: isMarkingAll } = useMarkAllReadNotification();
@@ -46,7 +46,7 @@ export function NotificationScreen() {
     setRefreshing(false);
   };
 
-  const notifications = data?.content ?? [];
+  const notifications = data?.pages.flatMap((p) => p.content) ?? [];
 
   const renderEmpty = () => {
     if (isError) {
@@ -98,7 +98,28 @@ export function NotificationScreen() {
           <ActivityIndicator color={theme.brand.primary} />
         </View>
       ) : (
-        <ScrollView
+        <FlatList
+          data={notifications}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <NotificationItem
+              item={item}
+              theme={theme}
+              onPress={() => markRead({ notificationIds: [item.id] })}
+            />
+          )}
+          ListEmptyComponent={renderEmpty()}
+          ListFooterComponent={
+            isFetchingNextPage ? (
+              <View className="py-4 items-center">
+                <ActivityIndicator color={theme.brand.primary} />
+              </View>
+            ) : null
+          }
+          onEndReached={() => {
+            if (hasNextPage) fetchNextPage();
+          }}
+          onEndReachedThreshold={0.3}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -106,18 +127,7 @@ export function NotificationScreen() {
               tintColor={theme.brand.primary}
             />
           }
-        >
-          {notifications.length === 0
-            ? renderEmpty()
-            : notifications.map((item) => (
-                <NotificationItem
-                  key={item.id}
-                  item={item}
-                  theme={theme}
-                  onPress={() => markRead({ notificationIds: [item.id] })}
-                />
-              ))}
-        </ScrollView>
+        />
       )}
     </View>
   );
