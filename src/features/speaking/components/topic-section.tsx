@@ -71,6 +71,8 @@ export function TopicSection({
       practiceStatus: topic.practiceStatus,
     })) ?? [];
 
+  const practicedCount = conversations.filter((c) => c.practiced).length;
+
   /** true nếu section còn ít nhất một topic chưa được luyện tập */
   const hasUnpracticed =
     topics?.some((t) => t.practiceStatus !== "COMPLETED") ?? false;
@@ -138,7 +140,7 @@ export function TopicSection({
               className="text-xs font-body"
               style={{ color: theme.text.secondary }}
             >
-              0/{section.conversationCount} HỘI THOẠI
+              {practicedCount}/{section.conversationCount} HỘI THOẠI
             </Text>
           </View>
           {isExpanded ? (

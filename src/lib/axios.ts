@@ -27,10 +27,10 @@ let isRefreshing = false;
  * Hàng đợi các request bị 401 trong khi đang refresh token.
  * Khi refresh xong, tất cả request trong queue sẽ được retry với token mới.
  */
-let failedQueue: Array<{
+let failedQueue: {
   resolve: (token: string) => void;
   reject: (error: unknown) => void;
-}> = [];
+}[] = [];
 
 /**
  * Giải quyết tất cả request đang chờ trong hàng đợi.
@@ -95,7 +95,7 @@ axiosInstance.interceptors.request.use(
     return config;
   },
   (error: AxiosError) => {
-    console.error("Request Error:", error);
+    console.error("Lỗi request:", error);
     return Promise.reject(error);
   },
 );
@@ -126,7 +126,7 @@ axiosInstance.interceptors.response.use(
       if (status === 401) {
         // Nếu chính request refresh bị 401 → refresh token hết hạn, logout ngay
         if (originalRequest.url?.includes("/auth/refresh")) {
-          console.error("Refresh token expired, logging out");
+          console.error("Refresh token hết hạn, đang đăng xuất");
           useAuthStore.getState().logout();
           queryClient.clear();
           return Promise.reject(error);
@@ -145,7 +145,7 @@ axiosInstance.interceptors.response.use(
         // Không có refreshToken → logout ngay
         const refreshToken = useAuthStore.getState().refreshToken;
         if (!refreshToken) {
-          console.error("No refresh token available, logging out");
+          console.error("Không có refresh token, đang đăng xuất");
           useAuthStore.getState().logout();
           queryClient.clear();
           return Promise.reject(error);
@@ -167,15 +167,13 @@ axiosInstance.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
           processQueue(null, accessToken);
 
-          console.log(
-            "Token refreshed successfully, retrying original request",
-          );
+          console.log("Làm mới token thành công, đang thử lại request gốc");
           return axiosInstance(originalRequest);
         } catch (refreshError) {
           processQueue(refreshError, null);
           useAuthStore.getState().logout();
           queryClient.clear();
-          console.error("Token refresh failed, logging out");
+          console.error("Làm mới token thất bại, đang đăng xuất");
           return Promise.reject(refreshError);
         } finally {
           isRefreshing = false;
@@ -184,26 +182,26 @@ axiosInstance.interceptors.response.use(
 
       switch (status) {
         case 403:
-          console.error("Forbidden - Không có quyền truy cập");
+          console.error("Không có quyền truy cập");
           break;
         case 404:
-          console.error("Not Found - API endpoint không tồn tại");
+          console.error("API endpoint không tồn tại");
           break;
         case 500:
-          console.error("Internal Server Error");
+          console.error("Lỗi máy chủ nội bộ");
           break;
         default:
-          console.error("API Error:", status, error.response.data);
+          console.error("Lỗi API:", status, error.response.data);
       }
     } else if (error.code === "ECONNABORTED") {
       // Request timeout - server không phản hồi trong thời gian cho phép
-      console.error("Timeout Error - Request quá thời gian chờ");
+      console.error("Yêu cầu quá thời gian chờ. Vui lòng thử lại.");
     } else if (error.request) {
       // Request đã được gửi nhưng không nhận được response
-      console.error("Network Error - Không thể kết nối đến server");
+      console.error("Không thể kết nối đến server. Vui lòng kiểm tra mạng.");
     } else {
       // Lỗi khác
-      console.error("Error:", error.message);
+      console.error("Lỗi:", error.message);
     }
 
     return Promise.reject(error);

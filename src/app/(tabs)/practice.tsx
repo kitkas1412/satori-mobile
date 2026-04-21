@@ -49,9 +49,12 @@ export default function PracticeTab() {
   const isFocused = useIsFocused();
   const [activeTab, setActiveTab] = useState<ActiveTab>("teacher");
 
-  useEffect(() => {
-    if (tab === "ai") setActiveTab("ai");
-  }, [tab]);
+  useFocusEffect(
+    useCallback(() => {
+      if (tab === "ai") setActiveTab("ai");
+      else if (tab === "teacher") setActiveTab("teacher");
+    }, [tab]),
+  );
   const [activeStatus, setActiveStatus] =
     useState<AssignmentStatusFilter>(undefined);
   const [sheetLesson, setSheetLesson] = useState<LessonResponse | null>(null);
@@ -81,6 +84,7 @@ export default function PracticeTab() {
   const {
     data,
     isLoading,
+    isFetching,
     isError,
     fetchNextPage,
     hasNextPage,
@@ -337,7 +341,7 @@ export default function PracticeTab() {
 
       {/* Overlay loading khi đang tải lần đầu */}
       <LoadingOverlay
-        visible={isFocused && isLoading}
+        visible={isFocused && (isLoading || (isFetching && !isFetchingNextPage))}
         title="Đang tải bài tập..."
       />
       {/* Overlay loading khi focus lại tab */}
