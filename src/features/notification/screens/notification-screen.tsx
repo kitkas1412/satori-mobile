@@ -4,12 +4,12 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useNotifications, useMarkReadNotification, useMarkAllReadNotification } from "@/features/notification/hooks";
 import { useRouter } from "expo-router";
 import { ChevronLeft, CheckCheck } from "lucide-react-native";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import {
   ActivityIndicator,
-  FlatList,
   RefreshControl,
+  ScrollView,
   Text,
   View,
 } from "react-native";
@@ -22,23 +22,20 @@ export function NotificationScreen() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
-  const {
-    data,
-    isLoading,
-    isError,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    refetch,
-  } = useNotifications();
+  const { data, isLoading, isError, refetch } = useNotifications();
 
   const { mutate: markRead } = useMarkReadNotification();
   const { mutate: markAllRead, isPending: isMarkingAll } = useMarkAllReadNotification();
 
   const [refreshing, setRefreshing] = useState(false);
+  const isMounted = useRef(false);
 
   useFocusEffect(
     useCallback(() => {
+      if (!isMounted.current) {
+        isMounted.current = true;
+        return;
+      }
       refetch();
     }, [refetch]),
   );
@@ -49,10 +46,9 @@ export function NotificationScreen() {
     setRefreshing(false);
   };
 
-  const notifications = data?.pages.flatMap((p) => p.content) ?? [];
+  const notifications = data?.content ?? [];
 
   const renderEmpty = () => {
-    if (isLoading) return null;
     if (isError) {
       return (
         <View className="flex-1 items-center justify-center px-8 mt-24">
@@ -102,28 +98,7 @@ export function NotificationScreen() {
           <ActivityIndicator color={theme.brand.primary} />
         </View>
       ) : (
-        <FlatList
-          data={notifications}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-              <NotificationItem
-                item={item}
-                theme={theme}
-                onPress={() => markRead({ notificationIds: [item.id] })}
-              />
-            )}
-          ListEmptyComponent={renderEmpty}
-          ListFooterComponent={
-            isFetchingNextPage ? (
-              <View className="py-4 items-center">
-                <ActivityIndicator color={theme.brand.primary} />
-              </View>
-            ) : null
-          }
-          onEndReached={() => {
-            if (hasNextPage) fetchNextPage();
-          }}
-          onEndReachedThreshold={0.3}
+        <ScrollView
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -131,7 +106,18 @@ export function NotificationScreen() {
               tintColor={theme.brand.primary}
             />
           }
-        />
+        >
+          {notifications.length === 0
+            ? renderEmpty()
+            : notifications.map((item) => (
+                <NotificationItem
+                  key={item.id}
+                  item={item}
+                  theme={theme}
+                  onPress={() => markRead({ notificationIds: [item.id] })}
+                />
+              ))}
+        </ScrollView>
       )}
     </View>
   );

@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { getNotificationsApi } from "../api";
 
 export const notificationQueryKeys = {
@@ -6,12 +6,9 @@ export const notificationQueryKeys = {
 };
 
 export function useNotifications() {
-  return useInfiniteQuery({
+  return useQuery({
     queryKey: notificationQueryKeys.list(),
-    queryFn: ({ pageParam }) => getNotificationsApi(pageParam),
-    initialPageParam: 0,
-    getNextPageParam: (lastPage) =>
-      lastPage.last ? undefined : lastPage.number + 1,
+    queryFn: () => getNotificationsApi(0, 100),
     staleTime: 0,
   });
 }
