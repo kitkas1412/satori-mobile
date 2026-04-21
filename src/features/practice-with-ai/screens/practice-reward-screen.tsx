@@ -263,8 +263,10 @@ export function PracticeRewardScreen() {
   const theme = Colors[colorScheme ?? "light"];
   const router = useRouter();
 
-  const { practiceSessionId } = useLocalSearchParams<{
+  const { practiceSessionId, sessionType, lessonId } = useLocalSearchParams<{
     practiceSessionId?: string;
+    sessionType?: string;
+    lessonId?: string;
   }>();
 
   const { data: summary } = usePracticeSessionSummary(practiceSessionId);
@@ -283,17 +285,25 @@ export function PracticeRewardScreen() {
     setInitialized(true);
   }, [summary]);
 
+  function handleGoSessionConfig() {
+    if (lessonId && sessionType) {
+      router.replace({ pathname: "/session-config", params: { lessonId, sessionType } });
+    } else {
+      router.replace({ pathname: "/(tabs)/practice", params: { tab: "ai" } });
+    }
+  }
+
   // Redirect nếu không có reward sau khi data đã load
   useEffect(() => {
     if (initialized && queue.length === 0) {
-      router.replace({ pathname: "/(tabs)/practice", params: { tab: "ai" } });
+      handleGoSessionConfig();
     }
   }, [initialized, queue.length]);
 
   function handleNext() {
     const next = queue.slice(1);
     if (next.length === 0) {
-      router.replace({ pathname: "/(tabs)/practice", params: { tab: "ai" } });
+      handleGoSessionConfig();
     } else {
       setQueue(next);
     }
