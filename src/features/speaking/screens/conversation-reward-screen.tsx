@@ -55,7 +55,7 @@ function StreakView({
   const weekDays = history?.daily_records
     ? [...history.daily_records].reverse().map((record) => ({
         label: dayOfWeekLabel[record.day_of_week] ?? record.day_of_week,
-        active: record.had_activity,
+        active: record.had_activity || record.is_today,
       }))
     : Array.from({ length: 7 }, (_, i) => ({
         label: Object.values(dayOfWeekLabel)[i] ?? "",
