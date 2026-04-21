@@ -112,6 +112,28 @@ export function useConversationSession() {
   );
 
   /**
+   * Kết thúc session và lấy kết quả đánh giá từ AI.
+   * Sau khi gọi, feedback sẽ được lưu vào store và màn hình sẽ hiển thị nút "Tiếp tục".
+   */
+  const completeSession = useCallback(async () => {
+    if (!sessionId) return;
+    setIsCompleting(true);
+    try {
+      const feedback = await completeSessionApi(sessionId);
+      setFeedback(feedback);
+      queryClient.invalidateQueries({ queryKey: ["speaking", "conversations"] });
+      queryClient.invalidateQueries({ queryKey: speakingQueryKeys.topics });
+    } catch (error) {
+      useErrorOverlayStore.getState().show(
+        extractApiError(error, "Không thể hoàn thành buổi học. Vui lòng thử lại."),
+      );
+    } finally {
+      await AsyncStorage.removeItem(ACTIVE_SESSION_STORAGE_KEY);
+      setIsCompleting(false);
+    }
+  }, [sessionId, setFeedback, queryClient]);
+
+  /**
    * Gửi tin nhắn của người dùng và xử lý phản hồi từ AI.
    *
    * Sử dụng Optimistic UI: hiển thị tin nhắn của người dùng ngay lập tức
@@ -184,7 +206,13 @@ export function useConversationSession() {
           addMessages([msg]);
           await playAssistantMessage(msg.content, msg.audioUrl).catch(() => {});
         }
-        if (!cancelledRef.current) setTurnState("USER_TURN");
+        if (!cancelledRef.current) {
+          if (result.allMissionsCompleted) {
+            await completeSession();
+          } else {
+            setTurnState("USER_TURN");
+          }
+        }
       } catch (error) {
         useErrorOverlayStore.getState().show(
           extractApiError(error, "Không thể gửi tin nhắn. Vui lòng thử lại."),
@@ -193,30 +221,8 @@ export function useConversationSession() {
         setTurnState("USER_TURN");
       }
     },
-    [sessionId, addMessages, setMissions],
+    [sessionId, addMessages, setMissions, completeSession],
   );
-
-  /**
-   * Kết thúc session và lấy kết quả đánh giá từ AI.
-   * Sau khi gọi, feedback sẽ được lưu vào store và màn hình sẽ hiển thị nút "Tiếp tục".
-   */
-  const completeSession = useCallback(async () => {
-    if (!sessionId) return;
-    setIsCompleting(true);
-    try {
-      const feedback = await completeSessionApi(sessionId);
-      setFeedback(feedback);
-      queryClient.invalidateQueries({ queryKey: ["speaking", "conversations"] });
-      queryClient.invalidateQueries({ queryKey: speakingQueryKeys.topics });
-    } catch (error) {
-      useErrorOverlayStore.getState().show(
-        extractApiError(error, "Không thể hoàn thành buổi học. Vui lòng thử lại."),
-      );
-    } finally {
-      await AsyncStorage.removeItem(ACTIVE_SESSION_STORAGE_KEY);
-      setIsCompleting(false);
-    }
-  }, [sessionId, setFeedback]);
 
   /**
    * Bỏ dở session (người dùng thoát giữa chừng).
