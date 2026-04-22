@@ -29,29 +29,18 @@ export function EarnedBadgeCard({ badge, onPress }: { badge: Badge; onPress?: ()
         contentFit="contain"
       />
 
-      <View style={{ alignItems: "center", gap: 2, width: "100%" }}>
-        <Text
-          className="font-heading"
-          style={{
-            fontSize: 11,
-            color: theme.text.primary,
-            textAlign: "center",
-          }}
-          numberOfLines={2}
-        >
-          {badge.name}
-        </Text>
-        <Text
-          style={{
-            fontSize: 9,
-            color: theme.text.secondary,
-            textAlign: "center",
-          }}
-          numberOfLines={2}
-        >
-          {badge.description}
-        </Text>
-      </View>
+      <Text
+        className="font-heading"
+        style={{
+          fontSize: 11,
+          color: theme.text.primary,
+          textAlign: "center",
+          width: "100%",
+        }}
+        numberOfLines={2}
+      >
+        {badge.name}
+      </Text>
     </TouchableOpacity>
   );
 }
