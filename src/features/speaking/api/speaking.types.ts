@@ -146,6 +146,8 @@ export interface Messages {
   romaji: string | null;
   /** URL file audio do AI tạo ra (nếu có) */
   audioUrl: string | null;
+  /** Audio MP3 dạng base64 do AI tạo ra (nếu có) */
+  audioBase64: string | null;
   /** URL file audio do người dùng ghi âm */
   userAudioUrl: string | null;
   correction: Correction[] | null;
