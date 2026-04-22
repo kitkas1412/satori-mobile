@@ -22,24 +22,12 @@ export async function playAssistantMessage(
   audioUrl?: string | null,
   audioBase64?: string | null,
 ): Promise<void> {
-  console.log("[audio] playAssistantMessage", {
-    hasUrl: !!audioUrl,
-    hasBase64: !!audioBase64,
-    base64Len: audioBase64?.length ?? 0,
-  });
   if (audioUrl) {
-    return playAudioFromUrl(audioUrl).catch((err) => {
-      console.warn("[audio] URL playback failed → TTS:", err);
-      return speakText(content);
-    });
+    return playAudioFromUrl(audioUrl).catch(() => speakText(content));
   }
   if (audioBase64) {
-    return playAudioFromBase64(audioBase64).catch((err) => {
-      console.warn("[audio] base64 playback failed → TTS:", err);
-      return speakText(content);
-    });
+    return playAudioFromBase64(audioBase64).catch(() => speakText(content));
   }
-  console.log("[audio] no audio source, using TTS");
   return speakText(content);
 }
 
@@ -57,13 +45,12 @@ export function stopAssistantAudio(): void {
 
 /**
  * Phát file audio từ URL và đợi đến khi phát xong.
- * Reject khi player báo lỗi hoặc playbackState='failed', timeout 15s làm safety net.
+ * Reject khi playbackState='failed', timeout 15s làm safety net.
  *
  * LƯU Ý: AudioStatus của expo-audio không có field `error` — lỗi native được
  * phản ánh qua `playbackState === 'failed'` thay vì `status.error`.
  */
 async function playAudioFromUrl(url: string): Promise<void> {
-  console.log("[audio] createAudioPlayer:", url.slice(0, 100));
   const player = createAudioPlayer(url);
   _currentPlayer = player;
   return new Promise<void>((resolve, reject) => {
@@ -75,30 +62,19 @@ async function playAudioFromUrl(url: string): Promise<void> {
     };
 
     const timeoutId = setTimeout(() => {
-      console.warn("[audio] timeout 15s — resolving without didJustFinish");
       cleanup();
-      resolve();
+      resolve(); // Safety net: không block luồng nếu không có sự kiện nào
     }, 15_000);
 
     const subscription = player.addListener(
       "playbackStatusUpdate",
       (status) => {
-        console.log("[audio] status update:", JSON.stringify({
-          isLoaded: status.isLoaded,
-          playing: status.playing,
-          didJustFinish: status.didJustFinish,
-          isBuffering: status.isBuffering,
-          playbackState: status.playbackState,
-          timeControlStatus: status.timeControlStatus,
-          duration: status.duration,
-        }));
         if (status.didJustFinish) {
           cleanup();
           resolve();
         } else if (status.playbackState === "failed") {
-          // expo-audio báo lỗi qua playbackState, không phải status.error
           cleanup();
-          reject(new Error(`Player failed: playbackState=failed`));
+          reject(new Error("playbackState=failed"));
         }
       },
     );
@@ -109,21 +85,14 @@ async function playAudioFromUrl(url: string): Promise<void> {
 /**
  * Ghi base64 audio ra file tạm rồi phát bằng playAudioFromUrl.
  * Xóa file tạm sau khi phát xong (kể cả khi lỗi) để tránh rò rỉ bộ nhớ.
+ *
+ * expo-file-system v19: dùng class File/Paths thay vì writeAsStringAsync/cacheDirectory.
  */
 async function playAudioFromBase64(base64: string): Promise<void> {
-  // expo-file-system v19: dùng class File thay vì writeAsStringAsync/cacheDirectory
   const file = new File(Paths.cache, `ai_audio_${Date.now()}.mp3`);
-  console.log("[audio] writing base64 to file:", file.uri, "| length:", base64.length);
-  try {
-    file.write(base64, { encoding: "base64" });
-    console.log("[audio] file written OK, starting player");
-  } catch (writeErr) {
-    console.error("[audio] file.write failed:", writeErr);
-    throw writeErr;
-  }
+  file.write(base64, { encoding: "base64" });
   try {
     await playAudioFromUrl(file.uri);
-    console.log("[audio] base64 playback done");
   } finally {
     try { file.delete(); } catch { /* ignore */ }
   }

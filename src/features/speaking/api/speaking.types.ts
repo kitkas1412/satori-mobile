@@ -142,6 +142,7 @@ export interface Messages {
   /** Nội dung chính của tin nhắn */
   content: string;
   japaneseContent: string | null;
+  japaneseWithFurigana: string | null;
   translation: string | null;
   romaji: string | null;
   /** URL file audio do AI tạo ra (nếu có) */
