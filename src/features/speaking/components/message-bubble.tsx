@@ -4,6 +4,7 @@ import { Text, TouchableOpacity, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
+import { MarkdownText } from "@/components/ui";
 import type { FeedbackResultResponse, Messages } from "@/features/speaking/api";
 
 export function MessageBubble({ message }: { message: Messages }) {
@@ -28,12 +29,9 @@ export function MessageBubble({ message }: { message: Messages }) {
               borderColor: theme.border.subtle,
             }}
           >
-            <Text
-              className="font-body text-base"
-              style={{ color: theme.text.primary }}
-            >
-              {message.content}
-            </Text>
+            <MarkdownText fontSize={16}>
+              {message.japaneseWithFurigana ?? message.content}
+            </MarkdownText>
             {showTranslation && message.translation ? (
               <Text
                 className="font-body text-sm"

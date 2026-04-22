@@ -73,6 +73,7 @@ export function useConversationSession() {
         setTurnState("AI_TURN");
         // Tắt overlay trước khi phát audio để người dùng thấy tin nhắn xuất hiện
         setIsInitializing(false);
+        console.log("[startSession] initial messages:", session.messages.map((m) => ({ role: m.role, audioUrl: m.audioUrl })));
         for (const msg of session.messages) {
           if (cancelledRef.current) break;
           await delay(600); // Độ trễ tự nhiên giữa các tin nhắn
@@ -80,7 +81,7 @@ export function useConversationSession() {
           addMessages([msg]);
           if (msg.role === "ASSISTANT") {
             // Đợi audio phát xong trước khi hiển thị tin nhắn tiếp theo
-            await playAssistantMessage(msg.content, msg.audioUrl).catch(
+            await playAssistantMessage(msg.content, msg.audioUrl, msg.audioBase64).catch(
               () => {}, // Bỏ qua lỗi audio, không block luồng hội thoại
             );
           }
@@ -185,6 +186,8 @@ export function useConversationSession() {
           audioUri ?? undefined,
         );
 
+        console.log("[sendMessage] messages:", result.messages.map((m) => ({ role: m.role, audioUrl: m.audioUrl })));
+
         // Tách tin nhắn người dùng (có dữ liệu thật) và tin nhắn AI
         const userMessages = result.messages.filter(
           (m) => m.role !== "ASSISTANT",
@@ -204,7 +207,7 @@ export function useConversationSession() {
           await delay(600); // Độ trễ tự nhiên trước mỗi tin nhắn
           if (cancelledRef.current) break;
           addMessages([msg]);
-          await playAssistantMessage(msg.content, msg.audioUrl).catch(() => {});
+          await playAssistantMessage(msg.content, msg.audioUrl, msg.audioBase64).catch(() => {});
         }
         if (!cancelledRef.current) {
           if (result.allMissionsCompleted) {

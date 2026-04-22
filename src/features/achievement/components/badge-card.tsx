@@ -1,7 +1,5 @@
-import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Image } from "expo-image";
-import { Text, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity } from "react-native";
 import type { EarnedBadge } from "../api";
 
 interface BadgeCardProps {
@@ -10,9 +8,6 @@ interface BadgeCardProps {
 }
 
 export function BadgeCard({ badge, onPress }: BadgeCardProps) {
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
-
   return (
     <TouchableOpacity
       activeOpacity={0.7}
@@ -23,39 +18,14 @@ export function BadgeCard({ badge, onPress }: BadgeCardProps) {
         borderRadius: 14,
         paddingVertical: 12,
         paddingHorizontal: 12,
-        gap: 8,
+        alignItems: "center",
       }}
     >
-      {/* Icon */}
-      <View style={{ alignItems: "center" }}>
-        <Image
-          source={{ uri: badge.iconUrl }}
-          style={{ width: 48, height: 48 }}
-          contentFit="contain"
-        />
-      </View>
-
-      {/* Title + description */}
-      <View style={{ alignItems: "center", gap: 2 }}>
-        <Text
-          className="font-heading"
-          style={{
-            fontSize: 11,
-            color: theme.text.primary,
-            textAlign: "center",
-          }}
-          numberOfLines={2}
-        >
-          {badge.badgeName}
-        </Text>
-        <Text
-          style={{ fontSize: 9, color: theme.text.tertiary, textAlign: "center" }}
-          numberOfLines={2}
-        >
-          {badge.description}
-        </Text>
-      </View>
-
+      <Image
+        source={{ uri: badge.iconUrl }}
+        style={{ width: 48, height: 48 }}
+        contentFit="contain"
+      />
     </TouchableOpacity>
   );
 }
