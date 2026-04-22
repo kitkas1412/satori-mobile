@@ -4,6 +4,7 @@
 
 import { createAudioPlayer } from "expo-audio";
 import type { AudioPlayer } from "expo-audio";
+import { File, Paths } from "expo-file-system";
 import * as Speech from "expo-speech";
 
 /** Instance player hiện tại đang phát — dùng để dừng từ bên ngoài khi cần */
@@ -19,13 +20,14 @@ let _currentPlayer: AudioPlayer | null = null;
 export async function playAssistantMessage(
   content: string,
   audioUrl?: string | null,
+  audioBase64?: string | null,
 ): Promise<void> {
   if (audioUrl) {
-    // Ưu tiên phát audio từ URL vì chất lượng tốt hơn TTS
-    // Nếu URL lỗi, fallback sang TTS để không bỏ qua lượt nói của AI
     return playAudioFromUrl(audioUrl).catch(() => speakText(content));
   }
-  // Fallback: đọc văn bản bằng TTS tiếng Nhật
+  if (audioBase64) {
+    return playAudioFromBase64(audioBase64).catch(() => speakText(content));
+  }
   return speakText(content);
 }
 
@@ -43,7 +45,10 @@ export function stopAssistantAudio(): void {
 
 /**
  * Phát file audio từ URL và đợi đến khi phát xong.
- * Reject ngay khi player báo lỗi (fail fast), timeout 5s làm safety net.
+ * Reject khi playbackState='failed', timeout 15s làm safety net.
+ *
+ * LƯU Ý: AudioStatus của expo-audio không có field `error` — lỗi native được
+ * phản ánh qua `playbackState === 'failed'` thay vì `status.error`.
  */
 async function playAudioFromUrl(url: string): Promise<void> {
   const player = createAudioPlayer(url);
@@ -59,7 +64,7 @@ async function playAudioFromUrl(url: string): Promise<void> {
     const timeoutId = setTimeout(() => {
       cleanup();
       resolve(); // Safety net: không block luồng nếu không có sự kiện nào
-    }, 5_000);
+    }, 15_000);
 
     const subscription = player.addListener(
       "playbackStatusUpdate",
@@ -67,14 +72,30 @@ async function playAudioFromUrl(url: string): Promise<void> {
         if (status.didJustFinish) {
           cleanup();
           resolve();
-        } else if (status.error) {
+        } else if (status.playbackState === "failed") {
           cleanup();
-          reject(new Error(status.error));
+          reject(new Error("playbackState=failed"));
         }
       },
     );
     player.play();
   });
+}
+
+/**
+ * Ghi base64 audio ra file tạm rồi phát bằng playAudioFromUrl.
+ * Xóa file tạm sau khi phát xong (kể cả khi lỗi) để tránh rò rỉ bộ nhớ.
+ *
+ * expo-file-system v19: dùng class File/Paths thay vì writeAsStringAsync/cacheDirectory.
+ */
+async function playAudioFromBase64(base64: string): Promise<void> {
+  const file = new File(Paths.cache, `ai_audio_${Date.now()}.mp3`);
+  file.write(base64, { encoding: "base64" });
+  try {
+    await playAudioFromUrl(file.uri);
+  } finally {
+    try { file.delete(); } catch { /* ignore */ }
+  }
 }
 
 /**

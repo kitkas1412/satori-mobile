@@ -81,7 +81,7 @@ export function useConversationSession() {
           addMessages([msg]);
           if (msg.role === "ASSISTANT") {
             // Đợi audio phát xong trước khi hiển thị tin nhắn tiếp theo
-            await playAssistantMessage(msg.content, msg.audioUrl).catch(
+            await playAssistantMessage(msg.content, msg.audioUrl, msg.audioBase64).catch(
               () => {}, // Bỏ qua lỗi audio, không block luồng hội thoại
             );
           }
@@ -207,7 +207,7 @@ export function useConversationSession() {
           await delay(600); // Độ trễ tự nhiên trước mỗi tin nhắn
           if (cancelledRef.current) break;
           addMessages([msg]);
-          await playAssistantMessage(msg.content, msg.audioUrl).catch(() => {});
+          await playAssistantMessage(msg.content, msg.audioUrl, msg.audioBase64).catch(() => {});
         }
         if (!cancelledRef.current) {
           if (result.allMissionsCompleted) {
