@@ -29,6 +29,7 @@ const MAX_SELECTION = 20;
 
 type MasteryFilter =
   | "ALL"
+  | "CHUA_LUYEN"
   | "CHUA_THANH_THAO"
   | "QUEN_THUOC"
   | "NAM_VUNG"
@@ -36,6 +37,7 @@ type MasteryFilter =
 
 const MASTERY_FILTERS: { value: MasteryFilter; label: string }[] = [
   { value: "ALL", label: "Tất cả" },
+  { value: "CHUA_LUYEN", label: "Chưa luyện" },
   { value: "CHUA_THANH_THAO", label: "Chưa thành thạo" },
   { value: "QUEN_THUOC", label: "Quen thuộc" },
   { value: "NAM_VUNG", label: "Nắm vững" },
@@ -43,7 +45,7 @@ const MASTERY_FILTERS: { value: MasteryFilter; label: string }[] = [
 ];
 
 function getMasteryLabel(mastery: MasteryInfo | null): string {
-  if (mastery === null) return "Chưa thành thạo";
+  if (mastery === null) return "Chưa luyện";
   return mastery.label;
 }
 
@@ -72,8 +74,10 @@ function matchesMasteryFilter(
   filter: MasteryFilter,
 ): boolean {
   if (filter === "ALL") return true;
-  if (filter === "CHUA_THANH_THAO") return mastery === null;
-  const label = getMasteryLabel(mastery).toLowerCase();
+  if (filter === "CHUA_LUYEN") return mastery === null;
+  if (mastery === null) return false;
+  const label = mastery.label.toLowerCase();
+  if (filter === "CHUA_THANH_THAO") return label.includes("chưa");
   if (filter === "QUEN_THUOC") return label.includes("quen");
   if (filter === "NAM_VUNG")
     return label.includes("nắm") || label.includes("nam");
