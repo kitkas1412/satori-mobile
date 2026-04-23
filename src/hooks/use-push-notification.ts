@@ -13,18 +13,30 @@ async function ensureAndroidChannel() {
 }
 
 export async function getPushToken(): Promise<string | null> {
-  await ensureAndroidChannel();
+  try {
+    await ensureAndroidChannel();
+    console.log("[PushToken] channel ok");
 
-  const { status: existingStatus } = await Notifications.getPermissionsAsync();
-  let finalStatus = existingStatus;
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
+    console.log("[PushToken] permission:", existingStatus);
 
-  if (existingStatus === "undetermined") {
-    const { status } = await Notifications.requestPermissionsAsync();
-    finalStatus = status;
+    if (existingStatus === "undetermined") {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+
+    if (finalStatus !== "granted") {
+      console.log("[PushToken] permission denied, abort");
+      return null;
+    }
+
+    console.log("[PushToken] calling getDevicePushTokenAsync...");
+    const tokenData = await Notifications.getDevicePushTokenAsync();
+    console.log("[PushToken] token:", tokenData.data);
+    return tokenData.data;
+  } catch (e) {
+    console.error("[PushToken] ERROR:", e);
+    return null;
   }
-
-  if (finalStatus !== "granted") return null;
-
-  const tokenData = await Notifications.getDevicePushTokenAsync();
-  return tokenData.data;
 }
