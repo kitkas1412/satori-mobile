@@ -11,24 +11,68 @@ export type MetricKey =
   | "averageScore"
   | "expEarned";
 
+export const Y_AXIS_W = 24;
+const BODY_PAD_LEFT = 8;
+const PAD_RIGHT = 8;
+const PAD_TOP = 12;
+const PAD_BOTTOM = 24;
+const CHART_H = 150;
+const GRID_COUNT = 4;
+export const CHART_SVG_H = CHART_H + PAD_TOP + PAD_BOTTOM;
+
+function extractWeekLabel(label: string): string {
+  const match = label.match(/^(W\d+)/);
+  return match ? match[1] : label;
+}
+
+function computeGrid(values: number[]) {
+  const maxVal = Math.max(...values, 0);
+  const range = maxVal === 0 ? 1 : maxVal;
+  const gridValues = Array.from({ length: GRID_COUNT + 1 }, (_, i) =>
+    Math.round((maxVal / GRID_COUNT) * i),
+  );
+  return { range, gridValues };
+}
+
+function toY(v: number, range: number): number {
+  return PAD_TOP + CHART_H - (v / range) * CHART_H;
+}
+
+interface YAxisProps {
+  dataPoints: WeeklyDataPoint[];
+  metric: MetricKey;
+}
+
+export function WeeklyProgressYAxis({ dataPoints, metric }: YAxisProps) {
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
+  const values = dataPoints.map((d) => d[metric] as number);
+  const { range, gridValues } = computeGrid(values);
+
+  return (
+    <Svg width={Y_AXIS_W} height={CHART_SVG_H}>
+      {gridValues.map((val, i) => (
+        <SvgText
+          key={i}
+          x={Y_AXIS_W - 4}
+          y={toY(val, range) + 4}
+          textAnchor="end"
+          fontSize={9}
+          fill={theme.text.secondary}
+        >
+          {val}
+        </SvgText>
+      ))}
+    </Svg>
+  );
+}
+
 interface WeeklyProgressChartProps {
   dataPoints: WeeklyDataPoint[];
   metric: MetricKey;
   width: number;
   selectedIndex?: number | null;
   onDotPress?: (index: number) => void;
-}
-
-const PAD_LEFT = 32;
-const PAD_RIGHT = 8;
-const PAD_TOP = 12;
-const PAD_BOTTOM = 24;
-const CHART_H = 150;
-const GRID_COUNT = 4;
-
-function extractWeekLabel(label: string): string {
-  const match = label.match(/^(W\d+)/);
-  return match ? match[1] : label;
 }
 
 export function WeeklyProgressChart({
@@ -41,58 +85,37 @@ export function WeeklyProgressChart({
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
-  const svgH = CHART_H + PAD_TOP + PAD_BOTTOM;
-  const chartW = width - PAD_LEFT - PAD_RIGHT;
   const n = dataPoints.length;
-
   const values = dataPoints.map((d) => d[metric] as number);
-  const maxVal = Math.max(...values, 0);
-  const range = maxVal === 0 ? 1 : maxVal;
+  const { range, gridValues } = computeGrid(values);
 
-  const gridValues = Array.from({ length: GRID_COUNT + 1 }, (_, i) =>
-    Math.round((maxVal / GRID_COUNT) * i),
-  );
-
+  const chartW = width - BODY_PAD_LEFT - PAD_RIGHT;
   const toX = (i: number) =>
-    PAD_LEFT + (n > 1 ? (i / (n - 1)) * chartW : chartW / 2);
-
-  const toY = (v: number) => PAD_TOP + CHART_H - (v / range) * CHART_H;
+    BODY_PAD_LEFT + (n > 1 ? (i / (n - 1)) * chartW : chartW / 2);
 
   const polylinePoints = dataPoints
-    .map((d, i) => `${toX(i)},${toY(d[metric] as number)}`)
+    .map((d, i) => `${toX(i)},${toY(d[metric] as number, range)}`)
     .join(" ");
 
   return (
-    <View style={{ width, height: svgH }}>
-      <Svg width={width} height={svgH}>
-        {/* Horizontal grid lines + Y-axis labels */}
+    <View style={{ width, height: CHART_SVG_H }}>
+      <Svg width={width} height={CHART_SVG_H}>
         {gridValues.map((val, i) => {
-          const y = toY(val);
+          const y = toY(val, range);
           return (
-            <React.Fragment key={i}>
-              <Line
-                x1={PAD_LEFT}
-                y1={y}
-                x2={width - PAD_RIGHT}
-                y2={y}
-                stroke={theme.border.subtle}
-                strokeWidth={1}
-                strokeDasharray={i === 0 ? undefined : "3,3"}
-              />
-              <SvgText
-                x={PAD_LEFT - 8}
-                y={y + 4}
-                textAnchor="end"
-                fontSize={9}
-                fill={theme.text.secondary}
-              >
-                {val}
-              </SvgText>
-            </React.Fragment>
+            <Line
+              key={i}
+              x1={0}
+              y1={y}
+              x2={width}
+              y2={y}
+              stroke={theme.border.subtle}
+              strokeWidth={1}
+              strokeDasharray={i === 0 ? undefined : "3,3"}
+            />
           );
         })}
 
-        {/* Data line */}
         <Polyline
           points={polylinePoints}
           fill="none"
@@ -102,14 +125,12 @@ export function WeeklyProgressChart({
           strokeLinecap="round"
         />
 
-        {/* Dots + tap targets + X-axis week labels */}
         {dataPoints.map((d, i) => {
           const x = toX(i);
-          const y = toY(d[metric] as number);
+          const y = toY(d[metric] as number, range);
           const isSelected = selectedIndex === i;
           return (
             <React.Fragment key={i}>
-              {/* Visible dot */}
               <Circle
                 cx={x}
                 cy={y}
@@ -120,7 +141,6 @@ export function WeeklyProgressChart({
                 stroke={theme.brand.primary}
                 strokeWidth={2}
               />
-              {/* Invisible tap target (larger hit area) */}
               <Circle
                 cx={x}
                 cy={y}
@@ -130,7 +150,7 @@ export function WeeklyProgressChart({
               />
               <SvgText
                 x={x}
-                y={svgH - 2}
+                y={CHART_SVG_H - 2}
                 textAnchor="middle"
                 fontSize={9}
                 fill={isSelected ? theme.brand.primary : theme.text.secondary}

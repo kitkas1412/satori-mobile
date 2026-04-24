@@ -11,7 +11,11 @@ import {
 } from "react-native";
 import { useWeeklyProgress } from "../hooks";
 import type { MetricKey } from "./weekly-progress-chart";
-import { WeeklyProgressChart } from "./weekly-progress-chart";
+import {
+  WeeklyProgressChart,
+  WeeklyProgressYAxis,
+  Y_AXIS_W,
+} from "./weekly-progress-chart";
 
 const METRICS: { key: MetricKey; label: string; unit: string }[] = [
   { key: "sessionsCompleted", label: "Buổi học", unit: "buổi" },
@@ -45,10 +49,10 @@ export function WeeklyProgressCard() {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const { width: screenWidth } = useWindowDimensions();
 
-  const minChartWidth = screenWidth - 64;
-  // 56px per point ensures dots are spaced comfortably; scroll when wider than card
-  const chartWidth = Math.max(
-    minChartWidth,
+  // 32 card padding + Y_AXIS_W = 64; 56px per point ensures dots are spaced comfortably
+  const minBodyWidth = screenWidth - 32 - Y_AXIS_W;
+  const bodyWidth = Math.max(
+    minBodyWidth,
     (data?.dataPoints.length ?? 0) * 56,
   );
 
@@ -148,19 +152,26 @@ export function WeeklyProgressCard() {
 
       {data && (
         <>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            bounces={false}
-          >
-            <WeeklyProgressChart
+          <View style={{ flexDirection: "row" }}>
+            <WeeklyProgressYAxis
               dataPoints={data.dataPoints}
               metric={selectedMetric}
-              width={chartWidth}
-              selectedIndex={selectedIndex}
-              onDotPress={handleDotPress}
             />
-          </ScrollView>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              bounces={false}
+              style={{ flex: 1 }}
+            >
+              <WeeklyProgressChart
+                dataPoints={data.dataPoints}
+                metric={selectedMetric}
+                width={bodyWidth}
+                selectedIndex={selectedIndex}
+                onDotPress={handleDotPress}
+              />
+            </ScrollView>
+          </View>
 
           {/* Info panel — shown when a dot is selected */}
           <View
