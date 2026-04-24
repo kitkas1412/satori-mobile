@@ -5,6 +5,7 @@ import {
   StatsSection,
 } from "@/features/achievement/components";
 import {
+  InsightsCard,
   SkillRadarCard,
   WeeklyProgressCard,
 } from "@/features/learning-analytics/components";
@@ -221,6 +222,9 @@ export default function ProfileTab() {
           </View>
           <View className="px-4">
             <WeeklyProgressCard />
+          </View>
+          <View className="px-4">
+            <InsightsCard />
           </View>
           <AchievementSection />
         </ScrollView>

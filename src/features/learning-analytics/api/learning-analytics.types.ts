@@ -45,3 +45,23 @@ export interface SkillRadarData {
 
 // Full HTTP response — what the server actually returns
 export type SkillRadarResponse = ApiResponse<SkillRadarData>;
+
+export interface InsightPoint {
+  category: string | null;
+  skill: string | null;
+  description: string | null;
+  confidence: number;
+  source: string | null;
+  jlptLevel: string | null;
+  relatedEntityIds: string[] | null;
+  lastUpdated: string | null;
+}
+
+export interface InsightsData {
+  weakPoints: InsightPoint[];
+  strongPoints: InsightPoint[];
+  recommendations: string[];
+  lastUpdated: string;
+}
+
+export type InsightsResponse = ApiResponse<InsightsData>;
