@@ -82,7 +82,7 @@ export interface LessonResponse {
 // ---------------------------------------------------------------------------
 
 export interface MasteryInfo {
-  level: string;
+  level: number;
   label: string;
   attemptCount: number;
   emaScore: number;
