@@ -4,7 +4,11 @@ import {
   AchievementSection,
   StatsSection,
 } from "@/features/achievement/components";
-import { SkillRadarCard } from "@/features/learning-analytics/components";
+import {
+  InsightsCard,
+  SkillRadarCard,
+  WeeklyProgressCard,
+} from "@/features/learning-analytics/components";
 import { useAchievementProgress } from "@/features/achievement/hooks";
 import {
   useProfile,
@@ -215,6 +219,12 @@ export default function ProfileTab() {
           <StatsSection />
           <View className="px-4">
             <SkillRadarCard />
+          </View>
+          <View className="px-4">
+            <WeeklyProgressCard />
+          </View>
+          <View className="px-4">
+            <InsightsCard />
           </View>
           <AchievementSection />
         </ScrollView>
