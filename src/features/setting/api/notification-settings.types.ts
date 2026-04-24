@@ -7,8 +7,7 @@ export interface NotificationSettings {
   dailyReminderTime: string;
   assignmentNotifications: boolean;
   achievementNotifications: boolean;
-  socialNotifications: boolean;
-  marketingNotifications: boolean;
+  classNotifications: boolean;
   quietHoursEnabled: boolean;
   quietHoursStart: string;
   quietHoursEnd: string;
