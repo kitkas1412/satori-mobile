@@ -13,9 +13,19 @@ export interface FeedbackPanelProps {
 }
 
 export function FeedbackPanel({ answerResult, theme, options }: FeedbackPanelProps) {
-  const correctAnswerText =
-    options?.find((o) => String(o.id) === answerResult.correctAnswer)?.text ??
-    answerResult.correctAnswer;
+  const correctAnswerText = (() => {
+    if (!options) return answerResult.correctAnswer;
+    const single = options.find((o) => String(o.id) === answerResult.correctAnswer);
+    if (single) return single.text;
+    const parts = answerResult.correctAnswer.split(",").map((p) => p.trim());
+    if (parts.length > 1) {
+      const words = parts
+        .map((id) => options.find((o) => String(o.id) === id)?.text)
+        .filter(Boolean);
+      if (words.length > 0) return words.join("");
+    }
+    return answerResult.correctAnswer;
+  })();
   return (
     <View
       style={{
