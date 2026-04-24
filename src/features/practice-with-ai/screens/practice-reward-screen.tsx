@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { Award, Check, Flame, Star } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Image, Text, View } from "react-native";
@@ -262,6 +263,7 @@ export function PracticeRewardScreen() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const { practiceSessionId, sessionType, lessonId } = useLocalSearchParams<{
     practiceSessionId?: string;
@@ -287,6 +289,7 @@ export function PracticeRewardScreen() {
 
   function handleGoSessionConfig() {
     if (lessonId && sessionType) {
+      void queryClient.invalidateQueries({ queryKey: ["lessonItems", lessonId] });
       router.replace({ pathname: "/session-config", params: { lessonId, sessionType } });
     } else {
       router.replace({ pathname: "/(tabs)/practice", params: { tab: "ai" } });

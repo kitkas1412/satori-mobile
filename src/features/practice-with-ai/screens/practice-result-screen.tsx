@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Check, RefreshCw, X } from "lucide-react-native";
@@ -21,6 +22,7 @@ export function PracticeResultScreen() {
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const { practiceSessionId, itemTypes, items: itemsParam, sessionType, lessonId } = useLocalSearchParams<{
     practiceSessionId?: string;
@@ -46,6 +48,7 @@ export function PracticeResultScreen() {
 
   function handleGoSessionConfig() {
     if (lessonId && sessionType) {
+      void queryClient.invalidateQueries({ queryKey: ["lessonItems", lessonId] });
       router.replace({ pathname: "/session-config", params: { lessonId, sessionType } });
     } else {
       handleGoPracticeHome();
