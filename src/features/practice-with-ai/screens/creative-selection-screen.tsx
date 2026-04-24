@@ -21,12 +21,15 @@ import type {
 } from "../api/practice-with-ai.types";
 import { useLessonItems } from "../hooks";
 
+const MAX_SELECTION = 20;
+
 // ---------------------------------------------------------------------------
 // Mastery helpers
 // ---------------------------------------------------------------------------
 
 type MasteryFilter =
   | "ALL"
+  | "CHUA_LUYEN"
   | "CHUA_THANH_THAO"
   | "QUEN_THUOC"
   | "NAM_VUNG"
@@ -34,6 +37,7 @@ type MasteryFilter =
 
 const MASTERY_FILTERS: { value: MasteryFilter; label: string }[] = [
   { value: "ALL", label: "Tất cả" },
+  { value: "CHUA_LUYEN", label: "Chưa luyện" },
   { value: "CHUA_THANH_THAO", label: "Chưa thành thạo" },
   { value: "QUEN_THUOC", label: "Quen thuộc" },
   { value: "NAM_VUNG", label: "Nắm vững" },
@@ -41,7 +45,7 @@ const MASTERY_FILTERS: { value: MasteryFilter; label: string }[] = [
 ];
 
 function getMasteryLabel(mastery: MasteryInfo | null): string {
-  if (mastery === null) return "Chưa thành thạo";
+  if (mastery === null) return "Chưa luyện";
   return mastery.label;
 }
 
@@ -70,8 +74,10 @@ function matchesMasteryFilter(
   filter: MasteryFilter,
 ): boolean {
   if (filter === "ALL") return true;
-  if (filter === "CHUA_THANH_THAO") return mastery === null;
-  const label = getMasteryLabel(mastery).toLowerCase();
+  if (filter === "CHUA_LUYEN") return mastery === null;
+  if (mastery === null) return false;
+  const label = mastery.label.toLowerCase();
+  if (filter === "CHUA_THANH_THAO") return label.includes("chưa");
   if (filter === "QUEN_THUOC") return label.includes("quen");
   if (filter === "NAM_VUNG")
     return label.includes("nắm") || label.includes("nam");
@@ -475,6 +481,11 @@ export function CreativeSelectionScreen() {
       if (next.has(id)) {
         next.delete(id);
       } else {
+        const total =
+          sessionType === "MIXED_LESSON"
+            ? prev.size + selectedGrammarIds.size
+            : prev.size;
+        if (total >= MAX_SELECTION) return prev;
         next.add(id);
       }
       return next;
@@ -487,6 +498,11 @@ export function CreativeSelectionScreen() {
       if (next.has(id)) {
         next.delete(id);
       } else {
+        const total =
+          sessionType === "MIXED_LESSON"
+            ? selectedVocabIds.size + prev.size
+            : prev.size;
+        if (total >= MAX_SELECTION) return prev;
         next.add(id);
       }
       return next;
@@ -513,6 +529,16 @@ export function CreativeSelectionScreen() {
       : sessionType === "GRAMMAR_DRILL"
         ? "Lựa chọn ngữ pháp"
         : "Lựa chọn nội dung";
+
+  // Selection counter
+  const selectedCount =
+    sessionType === "VOCAB_DRILL"
+      ? selectedVocabIds.size
+      : sessionType === "GRAMMAR_DRILL"
+        ? selectedGrammarIds.size
+        : selectedVocabIds.size + selectedGrammarIds.size;
+
+  const remainingSlots = MAX_SELECTION - selectedCount;
 
   // Determine if CTA should be enabled
   const hasSelection =
@@ -649,6 +675,32 @@ export function CreativeSelectionScreen() {
             paddingTop: 12,
           }}
         >
+          <Text
+            className="font-body"
+            style={{
+              fontSize: 12,
+              color: theme.text.secondary,
+              textAlign: "center",
+              marginBottom: 2,
+            }}
+          >
+            Tối đa {MAX_SELECTION} mục
+          </Text>
+          <Text
+            className="font-body"
+            style={{
+              fontSize: 13,
+              color:
+                remainingSlots === 0
+                  ? theme.border.error
+                  : theme.text.secondary,
+              textAlign: "center",
+              marginBottom: 8,
+            }}
+          >
+            {selectedCount}/{MAX_SELECTION} đã chọn
+            {remainingSlots === 0 ? " · Đã đạt giới hạn" : ""}
+          </Text>
           <PrimaryButton
             text="Tiếp tục"
             onPress={handleContinue}

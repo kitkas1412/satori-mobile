@@ -37,9 +37,57 @@ export interface Badge {
 
 export interface BadgesPage {
   content: Badge[];
-  last: boolean;
-  totalElements: number;
-  totalPages: number;
-  number: number;
-  size: number;
+  page: {
+    size: number;
+    number: number;
+    totalElements: number;
+    totalPages: number;
+  };
+}
+
+export interface BadgeDetail {
+  badgeId: string;
+  name: string;
+  description: string;
+  badgeType: "LEARNING_STREAK" | "AI_SPEAKING_COUNT" | "AI_PRACTICE_COUNT" | "LEARNING_LEVEL";
+  requirementValue: number;
+  expReward: number;
+  iconUrl: string;
+  status: "ACTIVE";
+  createdAt: string;
+  unlockedConditions: {
+    description: string;
+    requirementValue: number;
+    requirementUnit: string;
+  };
+  learnerProgress: {
+    earned: boolean;
+    earnedAt: string | null;
+    currentValue: number;
+    remainingValue: number;
+    progressPercent: number;
+    isFeatured: boolean;
+    nextMilestone: {
+      badgeId: string;
+      name: string;
+      requirementValue: number;
+      expReward: number;
+    } | null;
+  };
+  statistics: {
+    totalEarners: number;
+    totalLearners: number;
+    percentageEarned: number;
+  };
+}
+
+export interface EarnedBadge {
+  badgeId: string;
+  badgeName: string;
+  description: string;
+  badgeType: "LEARNING_STREAK" | "AI_SPEAKING_COUNT" | "AI_PRACTICE_COUNT" | "LEARNING_LEVEL";
+  iconUrl: string;
+  expReward: number;
+  earnedAt: string;
+  isFeatured: boolean;
 }

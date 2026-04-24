@@ -101,26 +101,24 @@ const PRACTICE_MODES: {
 }[] = [
   {
     value: "QUICK",
-    label: "Tốc chiến",
-    description:
-      "Chiến nhanh như sấm, học gì nhớ đó! Hoàn thành trong chớp mắt",
+    label: "Khởi động",
+    description: "5 câu thôi, không đau não đâu. Ôn xong còn kịp lướt TikTok!",
     icon: (color) => <Zap size={24} color={color} strokeWidth={2} />,
     iconBgKey: "warning",
     iconColorKey: "warning",
   },
   {
     value: "STANDARD",
-    label: "Ổn định",
-    description:
-      "Không quá dễ, không quá khó – vừa đủ để não bạn hoạt động tốt",
+    label: "Luyện tập",
+    description: "10 câu – không quá chill, không quá mệt. Vừa đủ để não không phàn nàn.",
     icon: (color) => <BookOpen size={24} color={color} strokeWidth={2} />,
     iconBgKey: "info",
     iconColorKey: "info",
   },
   {
     value: "FULL",
-    label: "Bứt phá",
-    description: "Dành cho anh hùng thực thụ! Thử thách khó nhằn đang chờ bạn",
+    label: "Thử thách",
+    description: "20 câu – dành cho ai tự nhận là simp của tiếng Nhật.",
     icon: (color) => <Flame size={24} color={color} strokeWidth={2} />,
     iconBgKey: "error",
     iconColorKey: "error",
@@ -184,7 +182,12 @@ export function SessionConfigScreen() {
           className="flex-row items-center gap-2 px-4"
           style={{ height: 48, opacity: 0.9 }}
         >
-          <Pressable onPress={() => router.back()} hitSlop={30}>
+          <Pressable
+            onPress={() =>
+              router.replace({ pathname: "/(tabs)/practice", params: { tab: "ai" } })
+            }
+            hitSlop={30}
+          >
             <X size={24} color={theme.icon.primary} strokeWidth={2} />
           </Pressable>
           <Text

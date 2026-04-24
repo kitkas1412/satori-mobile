@@ -33,7 +33,17 @@ import { getPushToken } from "@/hooks/use-push-notification";
 import { useAuthStore } from "@/stores/auth-store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
+import * as Notifications from "expo-notifications";
 import { AppState, Platform } from "react-native";
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "../../global.css";
 
 const FCM_TOKEN_STORAGE_KEY = "fcm_token";
@@ -322,6 +332,10 @@ function RootLayoutNav() {
         name="achievements"
         options={{ headerShown: false, gestureEnabled: true }}
       />
+      <Stack.Screen
+        name="badge-detail"
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
     </Stack>
   );
 }
@@ -352,13 +366,15 @@ export default function RootLayout() {
   }
 
   return (
-    <QueryProvider>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <RootLayoutNav />
-        <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
-      </ThemeProvider>
-      <LoadingOverlayRenderer />
-      <ErrorOverlay />
-    </QueryProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <QueryProvider>
+        <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+          <RootLayoutNav />
+          <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+        </ThemeProvider>
+        <LoadingOverlayRenderer />
+        <ErrorOverlay />
+      </QueryProvider>
+    </GestureHandlerRootView>
   );
 }
