@@ -1,7 +1,7 @@
 import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -17,8 +17,7 @@ import type {
   AssignmentStatusFilter,
   Content,
 } from "@/features/assignment/api";
-import { AssignmentCard } from "@/features/assignment/components/assignment-card";
-import { AssignmentFilterBar } from "@/features/assignment/components/assignment-filter-bar";
+import { AssignmentCard, AssignmentFilterBar } from "@/features/assignment/components";
 import {
   useAssignmentNavigation,
   useAssignments,
@@ -67,16 +66,14 @@ export default function AssignmentTab() {
 
   const [isFocusRefetching, setIsFocusRefetching] = useState(false);
 
-  useFocusEffect(
-    useCallback(() => {
-      const refetch = async () => {
-        setIsFocusRefetching(true);
-        await refetchAssignments();
-        setIsFocusRefetching(false);
-      };
-      refetch();
-    }, [refetchAssignments]),
-  );
+  useFocusEffect(() => {
+    const refetch = async () => {
+      setIsFocusRefetching(true);
+      await refetchAssignments();
+      setIsFocusRefetching(false);
+    };
+    refetch();
+  });
 
   const [refreshing, setRefreshing] = useState(false);
 
