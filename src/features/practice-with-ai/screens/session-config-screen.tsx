@@ -184,7 +184,7 @@ export function SessionConfigScreen() {
         >
           <Pressable
             onPress={() =>
-              router.replace({ pathname: "/(tabs)/practice", params: { tab: "ai" } })
+              router.replace("/(tabs)/practice")
             }
             hitSlop={30}
           >

@@ -33,7 +33,22 @@ import { getPushToken } from "@/hooks/use-push-notification";
 import { useAuthStore } from "@/stores/auth-store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
+import * as Notifications from "expo-notifications";
 import { AppState, Platform } from "react-native";
+
+Notifications.setNotificationHandler({
+  handleNotification: async (notification) => {
+    console.log(
+      "[Notification] received:",
+      JSON.stringify(notification.request.content),
+    );
+    return {
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+    };
+  },
+});
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "../../global.css";
 
@@ -96,17 +111,27 @@ function RootLayoutNav() {
   const sendToken = async () => {
     try {
       const token = await getPushToken();
-      if (!token) return;
+      if (!token) {
+        console.warn("[FCM] sendToken: no token, skipping");
+        return;
+      }
+      console.log("[FCM] sendToken: registering token", token);
       registerDeviceToken(
         {
           fcmToken: token,
           deviceType: Platform.OS === "ios" ? "IOS" : "ANDROID",
           appVersion: Constants.expoConfig?.version,
         },
-        { onSuccess: () => AsyncStorage.setItem(FCM_TOKEN_STORAGE_KEY, token) },
+        {
+          onSuccess: () => {
+            console.log("[FCM] sendToken: registered OK");
+            AsyncStorage.setItem(FCM_TOKEN_STORAGE_KEY, token);
+          },
+          onError: (err) => console.error("[FCM] sendToken: FAILED", err),
+        },
       );
-    } catch {
-      // best-effort
+    } catch (err) {
+      console.error("[FCM] sendToken: unexpected error", err);
     }
   };
 
@@ -114,19 +139,33 @@ function RootLayoutNav() {
   const registerIfTokenChanged = async () => {
     try {
       const token = await getPushToken();
-      if (!token) return;
+      if (!token) {
+        console.warn("[FCM] registerIfTokenChanged: no token, skipping");
+        return;
+      }
       const storedToken = await AsyncStorage.getItem(FCM_TOKEN_STORAGE_KEY);
-      if (token === storedToken) return;
+      if (token === storedToken) {
+        console.log("[FCM] registerIfTokenChanged: token unchanged, skip");
+        return;
+      }
+      console.log("[FCM] registerIfTokenChanged: token changed, re-registering");
       registerDeviceToken(
         {
           fcmToken: token,
           deviceType: Platform.OS === "ios" ? "IOS" : "ANDROID",
           appVersion: Constants.expoConfig?.version,
         },
-        { onSuccess: () => AsyncStorage.setItem(FCM_TOKEN_STORAGE_KEY, token) },
+        {
+          onSuccess: () => {
+            console.log("[FCM] registerIfTokenChanged: re-registered OK");
+            AsyncStorage.setItem(FCM_TOKEN_STORAGE_KEY, token);
+          },
+          onError: (err) =>
+            console.error("[FCM] registerIfTokenChanged: FAILED", err),
+        },
       );
-    } catch {
-      // best-effort
+    } catch (err) {
+      console.error("[FCM] registerIfTokenChanged: unexpected error", err);
     }
   };
 
