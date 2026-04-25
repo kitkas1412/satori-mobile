@@ -27,7 +27,7 @@ export function useQuizResult({ onNavigate }: UseQuizResultParams) {
 
   function handleContinue() {
     clearQuizResult();
-    onNavigate("/(tabs)/practice");
+    onNavigate("/(tabs)/assignment");
   }
 
   return { quizResult, wrongCount, performanceLabel, handleContinue, isReview };
