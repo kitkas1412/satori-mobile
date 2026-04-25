@@ -2,15 +2,16 @@
 // Trả về null nếu chưa có kết quả trong store (màn hình sẽ không render gì).
 
 import { useAssignmentStore } from "@/stores";
+import { selectQuizResult, selectClearQuizResult, selectIsReview } from "@/stores/assignment-store";
 
 interface UseQuizResultParams {
   onNavigate: (path: string) => void;
 }
 
 export function useQuizResult({ onNavigate }: UseQuizResultParams) {
-  const quizResult = useAssignmentStore((s) => s.quizResult);
-  const clearQuizResult = useAssignmentStore((s) => s.clearQuizResult);
-  const isReview = useAssignmentStore((s) => s.isReview);
+  const quizResult = useAssignmentStore(selectQuizResult);
+  const clearQuizResult = useAssignmentStore(selectClearQuizResult);
+  const isReview = useAssignmentStore(selectIsReview);
 
   if (!quizResult) return null;
 
@@ -25,26 +26,9 @@ export function useQuizResult({ onNavigate }: UseQuizResultParams) {
         ? "Tốt!"
         : "Cố lên!";
 
-  // Khi xem lại bài đã chấm → clear store và về tab Practice (không hiện reward).
-  // Khi vừa submit xong → kiểm tra reward trước khi về.
   function handleContinue() {
-    if (isReview) {
-      clearQuizResult();
-      onNavigate("/(tabs)/practice");
-      return;
-    }
-
-    const hasReward =
-      (quizResult.newBadgesEarned?.length ?? 0) > 0 ||
-      quizResult.levelUp !== null ||
-      quizResult.streakNotification?.is_first_activity_today === true;
-
-    if (hasReward) {
-      onNavigate("/assignment-reward");
-    } else {
-      clearQuizResult();
-      onNavigate("/(tabs)/practice");
-    }
+    clearQuizResult();
+    onNavigate("/(tabs)/assignment");
   }
 
   return { quizResult, wrongCount, performanceLabel, handleContinue, isReview };

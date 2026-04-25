@@ -96,7 +96,15 @@ export function AchievementsScreen() {
               <FlatList
                 data={earned}
                 keyExtractor={(item) => item.badgeId}
-                renderItem={({ item }) => <EarnedBadgeCard badge={item} />}
+                renderItem={({ item }) => (
+                  <EarnedBadgeCard
+                    iconUrl={item.iconUrl}
+                    name={item.name}
+                    onPress={() =>
+                      router.push({ pathname: "/badge-detail", params: { badgeId: item.badgeId } })
+                    }
+                  />
+                )}
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 ItemSeparatorComponent={() => <View style={{ width: 8 }} />}
@@ -117,7 +125,14 @@ export function AchievementsScreen() {
               </Text>
               <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
                 {unearned.map((item) => (
-                  <UnearnedBadgeCard key={item.badgeId} badge={item} />
+                  <UnearnedBadgeCard
+                    key={item.badgeId}
+                    iconUrl={item.iconUrl}
+                    name={item.name}
+                    onPress={() =>
+                      router.push({ pathname: "/badge-detail", params: { badgeId: item.badgeId } })
+                    }
+                  />
                 ))}
               </View>
               {isFetchingNextPage && (

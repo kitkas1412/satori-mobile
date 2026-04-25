@@ -32,6 +32,7 @@ export function WritingResultScreen() {
   const {
     writingResult,
     isGraded,
+    isPastDeadline,
     imageUrls,
     score,
     isCancelling,
@@ -302,8 +303,8 @@ export function WritingResultScreen() {
           )}
         </View>
 
-        {/* Banner cảnh báo hủy nộp bài — chỉ hiển thị khi chưa chấm */}
-        {!isGraded && (
+        {/* Banner cảnh báo hủy nộp bài — chỉ hiển thị khi chưa chấm và chưa qua deadline */}
+        {!isGraded && !isPastDeadline && (
           <StatusBanner
             type="warning"
             title="Lưu ý"
@@ -332,7 +333,7 @@ export function WritingResultScreen() {
             style={{ flex: 1 }}
           />
 
-          {!isGraded && (
+          {!isGraded && !isPastDeadline && (
             <PrimaryButton
               text="Hủy nộp bài"
               onPress={handleCancelSubmission}

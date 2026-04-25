@@ -82,7 +82,7 @@ export interface LessonResponse {
 // ---------------------------------------------------------------------------
 
 export interface MasteryInfo {
-  level: string;
+  level: number;
   label: string;
   attemptCount: number;
   emaScore: number;
@@ -167,7 +167,6 @@ export interface Options {
   id: number;
   text: string;
   side?: "LEFT" | "RIGHT";
-  isCorrect?: boolean;
 }
 
 /** Dữ liệu session trả về khi khởi tạo thành công */

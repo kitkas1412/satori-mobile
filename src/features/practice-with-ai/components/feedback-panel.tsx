@@ -2,16 +2,30 @@ import { CheckCircle, XCircle } from "lucide-react-native";
 import { Text, View } from "react-native";
 
 import { Colors } from "@/constants/theme";
-import type { AnswerResponse } from "../api/practice-with-ai.types";
+import type { AnswerResponse, Options } from "../api/practice-with-ai.types";
 
 type Theme = typeof Colors.light;
 
 export interface FeedbackPanelProps {
   answerResult: AnswerResponse;
   theme: Theme;
+  options?: Options[];
 }
 
-export function FeedbackPanel({ answerResult, theme }: FeedbackPanelProps) {
+export function FeedbackPanel({ answerResult, theme, options }: FeedbackPanelProps) {
+  const correctAnswerText = (() => {
+    if (!options) return answerResult.correctAnswer;
+    const single = options.find((o) => String(o.id) === answerResult.correctAnswer);
+    if (single) return single.text;
+    const parts = answerResult.correctAnswer.split(",").map((p) => p.trim());
+    if (parts.length > 1) {
+      const words = parts
+        .map((id) => options.find((o) => String(o.id) === id)?.text)
+        .filter(Boolean);
+      if (words.length > 0) return words.join("");
+    }
+    return answerResult.correctAnswer;
+  })();
   return (
     <View
       style={{
@@ -68,7 +82,7 @@ export function FeedbackPanel({ answerResult, theme }: FeedbackPanelProps) {
                 className="font-heading"
                 style={{ fontSize: 13, color: theme.success.default }}
               >
-                {answerResult.correctAnswer}
+                {correctAnswerText}
               </Text>
             </View>
           )}

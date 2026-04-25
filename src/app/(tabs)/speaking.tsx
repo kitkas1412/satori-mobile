@@ -2,7 +2,12 @@
 // Hiển thị banner free-talk và danh sách các section (chủ đề) để người dùng chọn luyện tập.
 // Tự động highlight section đầu tiên còn topic chưa được luyện.
 
-import { useRef, useCallback, useState } from "react";
+import { BellButton, LoadingOverlay, ScreenHeader } from "@/components/ui";
+import { useUnreadNotificationsCount } from "@/features/notification/hooks";
+import { Colors } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -11,30 +16,27 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter, useFocusEffect } from "expo-router";
-import { useColorScheme } from "@/hooks/use-color-scheme";
-import { Colors } from "@/constants/theme";
-import { BellButton, LoadingOverlay, ScreenHeader } from "@/components/ui";
 
+import { ChatbotFab } from "@/features/chatbot/components";
+import { useProfile } from "@/features/profile-management/hooks";
+import type { Topic } from "@/features/speaking/api";
 import {
   ConversationBanner,
   TopicSection,
 } from "@/features/speaking/components";
-import { ChatbotFab } from "@/features/chatbot/components";
-import { useAppStore } from "@/stores";
 import {
-  useTopics,
-  useFirstUnpracticedSection,
   useConversationNavigation,
+  useFirstUnpracticedSection,
+  useTopics,
 } from "@/features/speaking/hooks";
-import type { Topic } from "@/features/speaking/api";
-import { useProfile } from "@/features/profile-management/hooks";
+import { useAppStore } from "@/stores";
 
 export default function SpeakingScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const language = useAppStore((state) => state.language);
   const { data: profile, refetch: refetchProfile } = useProfile();
+  const { unreadCount, hasMore } = useUnreadNotificationsCount();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const {
@@ -96,13 +98,11 @@ export default function SpeakingScreen() {
   );
 
   const blockedMessage = (() => {
-    if (!profile?.enrolledClasses?.length)
+    if (profile?.status !== "ACTIVE")
       return "Bạn chưa có lớp. Vui lòng thử lại sau";
     const classStatus = profile?.enrolledClasses[0]?.status;
     if (classStatus === "not_started")
       return "Lớp của bạn chưa bắt đầu. Vui lòng thử lại sau";
-    if (classStatus === "closed")
-      return "Lớp của bạn đã kết thúc. Vui lòng thử lại sau";
     return null;
   })();
 
@@ -117,7 +117,11 @@ export default function SpeakingScreen() {
           title="Luyện nói"
           paddingTop={insets.top + 16}
           rightAction={
-            <BellButton onPress={() => router.push("/notifications")} />
+            <BellButton
+              badgeCount={unreadCount}
+              showPlus={hasMore}
+              onPress={() => router.push("/notifications")}
+            />
           }
         />
 

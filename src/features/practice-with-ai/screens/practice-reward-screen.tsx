@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { Award, Check, Flame, Star } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Image, Text, View } from "react-native";
@@ -8,6 +9,7 @@ import { Colors } from "@/constants/theme";
 import { PrimaryButton, ProgressBar, RewardIconCircle } from "@/components/ui";
 import { usePracticeSessionSummary } from "../hooks";
 import type { BadgeEarned, LevelUp, StreakNotification } from "../api";
+import { useStreakHistory } from "@/features/streak/hooks";
 
 type RewardItem =
   | { type: "streak"; data: StreakNotification }
@@ -29,24 +31,15 @@ function buildQueue(
   return queue;
 }
 
-function getWeekStreakDays(streakLastDate: string, currentStreak: number): boolean[] {
-  const lastDate = new Date(streakLastDate + "T00:00:00");
-  const streakStartDate = new Date(lastDate);
-  streakStartDate.setDate(lastDate.getDate() - currentStreak + 1);
-
-  const dayOfWeek = lastDate.getDay();
-  const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-  const weekMonday = new Date(lastDate);
-  weekMonday.setDate(lastDate.getDate() - daysToMonday);
-
-  return Array.from({ length: 7 }, (_, i) => {
-    const day = new Date(weekMonday);
-    day.setDate(weekMonday.getDate() + i);
-    return day >= streakStartDate && day <= lastDate;
-  });
-}
-
-const WEEK_DAY_LABELS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
+const dayOfWeekLabel: Record<string, string> = {
+  MON: "T2",
+  TUE: "T3",
+  WED: "T4",
+  THU: "T5",
+  FRI: "T6",
+  SAT: "T7",
+  SUN: "CN",
+};
 
 function StreakView({
   data,
@@ -55,7 +48,16 @@ function StreakView({
   data: StreakNotification;
   theme: typeof Colors.light;
 }) {
-  const weekDays = getWeekStreakDays(data.streak_last_date, data.current_streak);
+  const { data: history } = useStreakHistory(7);
+  const weekDays = history?.daily_records
+    ? [...history.daily_records].reverse().map((record) => ({
+        label: dayOfWeekLabel[record.day_of_week] ?? record.day_of_week,
+        active: record.had_activity || record.is_today,
+      }))
+    : Array.from({ length: 7 }, (_, i) => ({
+        label: Object.values(dayOfWeekLabel)[i] ?? "",
+        active: false,
+      }));
 
   return (
     <View className="flex-1 items-center justify-center px-8 gap-6">
@@ -80,19 +82,19 @@ function StreakView({
       </View>
 
       <View className="flex-row justify-between w-full">
-        {WEEK_DAY_LABELS.map((label, i) => (
-          <View key={label} className="items-center gap-1">
+        {weekDays.map((day, i) => (
+          <View key={i} className="items-center gap-1">
             <View
               className="items-center justify-center rounded-full"
               style={{
                 width: 36,
                 height: 36,
-                backgroundColor: weekDays[i]
+                backgroundColor: day.active
                   ? theme.warning.default
                   : theme.border.subtle,
               }}
             >
-              {weekDays[i] && (
+              {day.active && (
                 <Check size={20} color="white" strokeWidth={2.5} />
               )}
             </View>
@@ -100,7 +102,7 @@ function StreakView({
               className="font-body text-xs"
               style={{ color: theme.text.secondary }}
             >
-              {label}
+              {day.label}
             </Text>
           </View>
         ))}
@@ -261,9 +263,12 @@ export function PracticeRewardScreen() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const router = useRouter();
+  const queryClient = useQueryClient();
 
-  const { practiceSessionId } = useLocalSearchParams<{
+  const { practiceSessionId, sessionType, lessonId } = useLocalSearchParams<{
     practiceSessionId?: string;
+    sessionType?: string;
+    lessonId?: string;
   }>();
 
   const { data: summary } = usePracticeSessionSummary(practiceSessionId);
@@ -282,17 +287,26 @@ export function PracticeRewardScreen() {
     setInitialized(true);
   }, [summary]);
 
+  function handleGoSessionConfig() {
+    if (lessonId && sessionType) {
+      void queryClient.invalidateQueries({ queryKey: ["lessonItems", lessonId] });
+      router.replace({ pathname: "/session-config", params: { lessonId, sessionType } });
+    } else {
+      router.replace("/(tabs)/practice");
+    }
+  }
+
   // Redirect nếu không có reward sau khi data đã load
   useEffect(() => {
     if (initialized && queue.length === 0) {
-      router.replace({ pathname: "/(tabs)/practice", params: { tab: "ai" } });
+      handleGoSessionConfig();
     }
   }, [initialized, queue.length]);
 
   function handleNext() {
     const next = queue.slice(1);
     if (next.length === 0) {
-      router.replace({ pathname: "/(tabs)/practice", params: { tab: "ai" } });
+      handleGoSessionConfig();
     } else {
       setQueue(next);
     }

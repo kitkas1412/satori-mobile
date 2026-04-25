@@ -51,11 +51,8 @@ export function NotificationSettingsScreen() {
   const [achievementNotifications, setAchievementNotifications] = useState(
     prefs?.achievementNotifications ?? true,
   );
-  const [socialNotifications, setSocialNotifications] = useState(
-    prefs?.socialNotifications ?? true,
-  );
-  const [marketingNotifications, setMarketingNotifications] = useState(
-    prefs?.marketingNotifications ?? false,
+  const [classNotifications, setClassNotifications] = useState(
+    prefs?.classNotifications ?? true,
   );
   const [quietHoursEnabled, setQuietHoursEnabled] = useState(
     prefs?.quietHoursEnabled ?? false,
@@ -87,8 +84,7 @@ export function NotificationSettingsScreen() {
     dailyReminderTime,
     assignmentNotifications,
     achievementNotifications,
-    socialNotifications,
-    marketingNotifications,
+    classNotifications,
     quietHoursEnabled,
     quietHoursStart,
     quietHoursEnd,
@@ -110,8 +106,7 @@ export function NotificationSettingsScreen() {
       dailyReminderTime,
       assignmentNotifications,
       achievementNotifications,
-      socialNotifications,
-      marketingNotifications,
+      classNotifications,
       quietHoursEnabled,
       quietHoursStart,
       quietHoursEnd,
@@ -123,8 +118,7 @@ export function NotificationSettingsScreen() {
     dailyReminderTime,
     assignmentNotifications,
     achievementNotifications,
-    socialNotifications,
-    marketingNotifications,
+    classNotifications,
     quietHoursEnabled,
     quietHoursStart,
     quietHoursEnd,
@@ -145,8 +139,7 @@ export function NotificationSettingsScreen() {
           : p.dailyReminderTime,
         assignmentNotifications: s.assignmentNotifications,
         achievementNotifications: s.achievementNotifications,
-        socialNotifications: s.socialNotifications,
-        marketingNotifications: s.marketingNotifications,
+        classNotifications: s.classNotifications,
         quietHoursEnabled: s.quietHoursEnabled,
         quietHoursStart: TIME_RE.test(s.quietHoursStart)
           ? toPayload(s.quietHoursStart)
@@ -303,14 +296,9 @@ export function NotificationSettingsScreen() {
                 onChange: markDirty(setAchievementNotifications),
               },
               {
-                label: "Xã hội",
-                value: socialNotifications,
-                onChange: markDirty(setSocialNotifications),
-              },
-              {
-                label: "Khuyến mãi",
-                value: marketingNotifications,
-                onChange: markDirty(setMarketingNotifications),
+                label: "Lớp học",
+                value: classNotifications,
+                onChange: markDirty(setClassNotifications),
               },
             ].map((item) => (
               <View

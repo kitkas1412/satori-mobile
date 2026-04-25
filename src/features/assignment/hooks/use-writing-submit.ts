@@ -6,21 +6,24 @@ import type { ImagePickerAsset } from "expo-image-picker";
 
 import { submitWritingApi } from "../api";
 import { useAssignmentStore } from "@/stores";
+import { selectSetWritingResult } from "@/stores/assignment-store";
 import { assignmentQueryKeys } from "./use-assignments";
 
 interface UseWritingSubmitParams {
   assignmentId: string;
   images: ImagePickerAsset[];
   onNavigate: () => void;
+  dueDate?: string;
 }
 
 export function useWritingSubmit({
   assignmentId,
   images,
   onNavigate,
+  dueDate,
 }: UseWritingSubmitParams) {
   const queryClient = useQueryClient();
-  const setWritingResult = useAssignmentStore((s) => s.setWritingResult);
+  const setWritingResult = useAssignmentStore(selectSetWritingResult);
 
   const mutation = useMutation({
     mutationFn: () =>
@@ -38,7 +41,7 @@ export function useWritingSubmit({
         queryKey: assignmentQueryKeys.all,
       });
       // Lưu kết quả vào store để màn hình kết quả đọc mà không cần gọi API lại
-      setWritingResult(data);
+      setWritingResult(data, false, dueDate);
       onNavigate();
     },
   });

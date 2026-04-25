@@ -61,8 +61,12 @@ export interface Content {
 // POST /learner/assignments/:id/start
 // ---------------------------------------------------------------------------
 
-// Thông tin chi tiết bài tập sau khi bắt đầu làm — bao gồm câu hỏi hoặc nội dung bài viết
-export interface AssignmentDetailResponse {
+// Thông tin chi tiết bài tập sau khi bắt đầu làm — bao gồm câu hỏi hoặc nội dung bài viết.
+// Dùng discriminated union để TypeScript biết chính xác field nào có giá trị theo từng loại bài:
+// - QuizAssignmentDetail: questions luôn có giá trị, writingContent luôn null
+// - WritingAssignmentDetail: writingContent luôn có giá trị, questions luôn null
+
+interface AssignmentDetailBase {
   id: string;
   title: string;
   description: string | null;
@@ -72,11 +76,21 @@ export interface AssignmentDetailResponse {
   dueDate: string;
   audioUrl: string | null;
   actualQuestionCount: number;
-  // Danh sách câu hỏi — chỉ có giá trị với bài QUIZ
-  questions: Question[] | null;
-  // Nội dung bài viết — chỉ có giá trị với bài WRITING
-  writingContent: WritingContent | null;
 }
+
+export interface QuizAssignmentDetail extends AssignmentDetailBase {
+  assignmentType: "QUIZ";
+  questions: Question[];
+  writingContent: null;
+}
+
+export interface WritingAssignmentDetail extends AssignmentDetailBase {
+  assignmentType: "WRITING" | "TRANSLATION";
+  questions: null;
+  writingContent: WritingContent;
+}
+
+export type AssignmentDetailResponse = QuizAssignmentDetail | WritingAssignmentDetail;
 
 // Một câu hỏi trong bài trắc nghiệm
 export interface Question {
@@ -104,48 +118,6 @@ export interface WritingContent {
   prompt: string; // Yêu cầu/đề bài
   sourceText: string | null; // Văn bản tham khảo (nếu có)
   createdAt: string;
-}
-
-// ---------------------------------------------------------------------------
-// Shared reward types — dùng trong response của submit-quiz và submit-writing
-// ---------------------------------------------------------------------------
-
-export type BadgeType =
-  | "LEARNING_STREAK"
-  | "CONVERSATION_MASTER"
-  | "PRONUNCIATION_EXPERT"
-  | "VOCABULARY_BUILDER"
-  | "GRAMMAR_GURU"
-  | string;
-
-export interface BadgeEarned {
-  badgeId: string;
-  badgeName: string;
-  description: string;
-  badgeType: BadgeType;
-  iconUrl: string;
-  expReward: number;
-  earnedAt: string;
-  isFeatured: boolean;
-}
-
-export interface LevelUp {
-  previousLevel: number;
-  newLevel: number;
-  expEarned: number;
-  oldTotalExp: number;
-  totalExp: number;
-  expToNextLevel: number;
-  progressPercentage: number;
-  isLevelUp: boolean;
-}
-
-export interface StreakNotification {
-  is_first_activity_today: boolean;
-  current_streak: number;
-  longest_streak: number;
-  /** Định dạng YYYY-MM-DD */
-  streak_last_date: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -191,9 +163,6 @@ export interface SubmitQuizResponse {
   imageUrls: string[] | null;
   quizDetails: QuizDetail[]; // Chi tiết đáp án từng câu
   createdAt: string;
-  newBadgesEarned: BadgeEarned[];
-  levelUp: LevelUp | null;
-  streakNotification: StreakNotification | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -222,9 +191,6 @@ export interface SubmitWritingResponse {
   imageUrls: string[] | null; // Danh sách URL ảnh bài làm đã nộp
   quizDetails: QuizDetail[] | null;
   createdAt: string;
-  newBadgesEarned: BadgeEarned[];
-  levelUp: LevelUp | null;
-  streakNotification: StreakNotification | null;
 }
 
 // ---------------------------------------------------------------------------
