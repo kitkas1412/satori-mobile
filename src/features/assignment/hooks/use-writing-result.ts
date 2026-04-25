@@ -27,7 +27,7 @@ export function useWritingResult({ onNavigate }: UseWritingResultParams) {
 
   function handleContinue() {
     clearWritingResult();
-    onNavigate("/(tabs)/practice");
+    onNavigate("/(tabs)/assignment");
   }
 
   // Hiển thị xác nhận trước khi hủy nộp bài.
