@@ -1,4 +1,4 @@
-import { IconButton, ScreenHeader } from "@/components/ui";
+import { IconButton, ProgressBar, ScreenHeader } from "@/components/ui";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Image } from "expo-image";
@@ -7,16 +7,7 @@ import { X } from "lucide-react-native";
 import { ActivityIndicator, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useBadgeDetail } from "../hooks";
-
-function formatDate(dateStr: string): string {
-  const date = new Date(dateStr);
-  const formatted = date.toLocaleDateString("vi-VN", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-  return formatted.replace(/^(\d+)/, "Ngày $1");
-}
+import { formatDate } from "../utils";
 
 export function BadgeDetailScreen() {
   const router = useRouter();
@@ -106,24 +97,7 @@ export function BadgeDetailScreen() {
                   {data.learnerProgress.currentValue}/{data.requirementValue}
                 </Text>
               </View>
-              <View
-                style={{
-                  width: "100%",
-                  height: 8,
-                  borderRadius: 100,
-                  backgroundColor: theme.border.subtle,
-                  overflow: "hidden",
-                }}
-              >
-                <View
-                  style={{
-                    height: 8,
-                    borderRadius: 100,
-                    backgroundColor: theme.brand.primary,
-                    width: `${data.learnerProgress.progressPercent}%`,
-                  }}
-                />
-              </View>
+              <ProgressBar progress={data.learnerProgress.progressPercent / 100} />
             </View>
           )}
 
