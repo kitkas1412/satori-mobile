@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Check, RefreshCw, X } from "lucide-react-native";
@@ -21,11 +22,14 @@ export function PracticeResultScreen() {
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
-  const { practiceSessionId, itemTypes, items: itemsParam } = useLocalSearchParams<{
+  const { practiceSessionId, itemTypes, items: itemsParam, sessionType, lessonId } = useLocalSearchParams<{
     practiceSessionId?: string;
     itemTypes?: string;
     items?: string;
+    sessionType?: string;
+    lessonId?: string;
   }>();
 
   const sessionItems: Items[] = itemsParam ? (JSON.parse(itemsParam) as Items[]) : [];
@@ -42,6 +46,15 @@ export function PracticeResultScreen() {
     router.replace({ pathname: "/(tabs)/practice", params: { tab: "ai" } });
   }
 
+  function handleGoSessionConfig() {
+    if (lessonId && sessionType) {
+      void queryClient.invalidateQueries({ queryKey: ["lessonItems", lessonId] });
+      router.replace({ pathname: "/session-config", params: { lessonId, sessionType } });
+    } else {
+      handleGoPracticeHome();
+    }
+  }
+
   function handleContinue() {
     if (!summary || !practiceSessionId) {
       handleGoPracticeHome();
@@ -54,10 +67,10 @@ export function PracticeResultScreen() {
     if (hasReward) {
       router.replace({
         pathname: "/practice-reward",
-        params: { practiceSessionId },
+        params: { practiceSessionId, sessionType, lessonId },
       });
     } else {
-      handleGoPracticeHome();
+      handleGoSessionConfig();
     }
   }
 

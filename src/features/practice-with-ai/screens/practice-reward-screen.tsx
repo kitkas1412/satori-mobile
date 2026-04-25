@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { Award, Check, Flame, Star } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Image, Text, View } from "react-native";
@@ -51,7 +52,7 @@ function StreakView({
   const weekDays = history?.daily_records
     ? [...history.daily_records].reverse().map((record) => ({
         label: dayOfWeekLabel[record.day_of_week] ?? record.day_of_week,
-        active: record.had_activity,
+        active: record.had_activity || record.is_today,
       }))
     : Array.from({ length: 7 }, (_, i) => ({
         label: Object.values(dayOfWeekLabel)[i] ?? "",
@@ -262,9 +263,12 @@ export function PracticeRewardScreen() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const router = useRouter();
+  const queryClient = useQueryClient();
 
-  const { practiceSessionId } = useLocalSearchParams<{
+  const { practiceSessionId, sessionType, lessonId } = useLocalSearchParams<{
     practiceSessionId?: string;
+    sessionType?: string;
+    lessonId?: string;
   }>();
 
   const { data: summary } = usePracticeSessionSummary(practiceSessionId);
@@ -283,17 +287,26 @@ export function PracticeRewardScreen() {
     setInitialized(true);
   }, [summary]);
 
+  function handleGoSessionConfig() {
+    if (lessonId && sessionType) {
+      void queryClient.invalidateQueries({ queryKey: ["lessonItems", lessonId] });
+      router.replace({ pathname: "/session-config", params: { lessonId, sessionType } });
+    } else {
+      router.replace({ pathname: "/(tabs)/practice", params: { tab: "ai" } });
+    }
+  }
+
   // Redirect nếu không có reward sau khi data đã load
   useEffect(() => {
     if (initialized && queue.length === 0) {
-      router.replace({ pathname: "/(tabs)/practice", params: { tab: "ai" } });
+      handleGoSessionConfig();
     }
   }, [initialized, queue.length]);
 
   function handleNext() {
     const next = queue.slice(1);
     if (next.length === 0) {
-      router.replace({ pathname: "/(tabs)/practice", params: { tab: "ai" } });
+      handleGoSessionConfig();
     } else {
       setQueue(next);
     }

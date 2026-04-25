@@ -29,6 +29,7 @@ const MAX_SELECTION = 20;
 
 type MasteryFilter =
   | "ALL"
+  | "CHUA_LUYEN"
   | "CHUA_THANH_THAO"
   | "QUEN_THUOC"
   | "NAM_VUNG"
@@ -36,6 +37,7 @@ type MasteryFilter =
 
 const MASTERY_FILTERS: { value: MasteryFilter; label: string }[] = [
   { value: "ALL", label: "Tất cả" },
+  { value: "CHUA_LUYEN", label: "Chưa luyện" },
   { value: "CHUA_THANH_THAO", label: "Chưa thành thạo" },
   { value: "QUEN_THUOC", label: "Quen thuộc" },
   { value: "NAM_VUNG", label: "Nắm vững" },
@@ -43,27 +45,15 @@ const MASTERY_FILTERS: { value: MasteryFilter; label: string }[] = [
 ];
 
 function getMasteryLabel(mastery: MasteryInfo | null): string {
-  if (mastery === null) return "Chưa thành thạo";
+  if (mastery === null) return "Chưa luyện";
   return mastery.label;
 }
 
 function getMasteryColor(mastery: MasteryInfo | null): string {
-  if (mastery === null) return Primitive.neutral[600]; // #8090ae
-  const lower = mastery.label.toLowerCase();
-  if (lower.includes("quen") || mastery.level === "FAMILIAR")
-    return Primitive.amber[300]; // #f59e0b
-  if (
-    lower.includes("nắm") ||
-    lower.includes("nam") ||
-    mastery.level === "PROFICIENT"
-  )
-    return Primitive.blue[600]; // #5477e8
-  if (
-    lower.includes("thành") ||
-    lower.includes("thanh") ||
-    mastery.level === "MASTERED"
-  )
-    return Primitive.green[500]; // #16a34a
+  if (mastery === null) return Primitive.neutral[600];
+  if (mastery.level === 1) return Primitive.amber[300];
+  if (mastery.level === 2) return Primitive.blue[600];
+  if (mastery.level === 3) return Primitive.green[500];
   return Primitive.neutral[600];
 }
 
@@ -72,14 +62,13 @@ function matchesMasteryFilter(
   filter: MasteryFilter,
 ): boolean {
   if (filter === "ALL") return true;
-  if (filter === "CHUA_THANH_THAO") return mastery === null;
-  const label = getMasteryLabel(mastery).toLowerCase();
-  if (filter === "QUEN_THUOC") return label.includes("quen");
-  if (filter === "NAM_VUNG")
-    return label.includes("nắm") || label.includes("nam");
-  if (filter === "THANH_THAO")
-    return label.includes("thành") || label.includes("thanh");
-  return true;
+  if (filter === "CHUA_LUYEN") return mastery === null;
+  if (mastery === null) return false;
+  if (filter === "CHUA_THANH_THAO") return mastery.level === 0;
+  if (filter === "QUEN_THUOC") return mastery.level === 1;
+  if (filter === "NAM_VUNG") return mastery.level === 2;
+  if (filter === "THANH_THAO") return mastery.level === 3;
+  return false;
 }
 
 // ---------------------------------------------------------------------------

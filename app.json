@@ -18,6 +18,7 @@
       "bundleIdentifier": "com.kitkas1412.satorimobile"
     },
     "android": {
+      "googleServicesFile": "./android/app/google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/satori-icon.png",
