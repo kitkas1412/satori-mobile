@@ -2,15 +2,16 @@
 // Trả về null nếu chưa có kết quả trong store (màn hình sẽ không render gì).
 
 import { useAssignmentStore } from "@/stores";
+import { selectQuizResult, selectClearQuizResult, selectIsReview } from "@/stores/assignment-store";
 
 interface UseQuizResultParams {
   onNavigate: (path: string) => void;
 }
 
 export function useQuizResult({ onNavigate }: UseQuizResultParams) {
-  const quizResult = useAssignmentStore((s) => s.quizResult);
-  const clearQuizResult = useAssignmentStore((s) => s.clearQuizResult);
-  const isReview = useAssignmentStore((s) => s.isReview);
+  const quizResult = useAssignmentStore(selectQuizResult);
+  const clearQuizResult = useAssignmentStore(selectClearQuizResult);
+  const isReview = useAssignmentStore(selectIsReview);
 
   if (!quizResult) return null;
 
