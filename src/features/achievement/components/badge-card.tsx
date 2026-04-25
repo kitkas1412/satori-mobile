@@ -1,13 +1,12 @@
 import { Image } from "expo-image";
 import { TouchableOpacity } from "react-native";
-import type { EarnedBadge } from "../api";
 
 interface BadgeCardProps {
-  badge: EarnedBadge;
+  iconUrl: string;
   onPress?: () => void;
 }
 
-export function BadgeCard({ badge, onPress }: BadgeCardProps) {
+export function BadgeCard({ iconUrl, onPress }: BadgeCardProps) {
   return (
     <TouchableOpacity
       activeOpacity={0.7}
@@ -22,7 +21,7 @@ export function BadgeCard({ badge, onPress }: BadgeCardProps) {
       }}
     >
       <Image
-        source={{ uri: badge.iconUrl }}
+        source={{ uri: iconUrl }}
         style={{ width: 48, height: 48 }}
         contentFit="contain"
       />
