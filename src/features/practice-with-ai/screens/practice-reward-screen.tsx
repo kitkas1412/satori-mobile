@@ -292,7 +292,7 @@ export function PracticeRewardScreen() {
       void queryClient.invalidateQueries({ queryKey: ["lessonItems", lessonId] });
       router.replace({ pathname: "/session-config", params: { lessonId, sessionType } });
     } else {
-      router.replace({ pathname: "/(tabs)/practice", params: { tab: "ai" } });
+      router.replace("/(tabs)/practice");
     }
   }
 
