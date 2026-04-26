@@ -6,7 +6,6 @@ import {
 } from "@/features/achievement/components";
 import {
   InsightsCard,
-  SkillRadarCard,
   WeeklyProgressCard,
 } from "@/features/learning-analytics/components";
 import {
@@ -223,9 +222,6 @@ export default function ProfileTab() {
           )}
 
           {achievementProgress && <StatsSection progress={achievementProgress} />}
-          <View className="px-4">
-            <SkillRadarCard />
-          </View>
           <View className="px-4">
             <WeeklyProgressCard />
           </View>
