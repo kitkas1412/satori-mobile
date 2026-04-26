@@ -22,7 +22,9 @@ interface AssignmentActions {
   clearWritingResult: () => void;
 }
 
-export const useAssignmentStore = create<AssignmentState & AssignmentActions>()((set) => ({
+type AssignmentStore = AssignmentState & AssignmentActions;
+
+export const useAssignmentStore = create<AssignmentStore>()((set) => ({
   quizResult: null,
   assignmentId: null,
   writingResult: null,
@@ -34,3 +36,13 @@ export const useAssignmentStore = create<AssignmentState & AssignmentActions>()(
   setWritingResult: (result, isReview = false, dueDate) => set({ writingResult: result, isReview, writingDueDate: dueDate ?? null }),
   clearWritingResult: () => set({ writingResult: null, writingDueDate: null, isReview: false }),
 }));
+
+export const selectQuizResult = (s: AssignmentStore) => s.quizResult;
+export const selectAssignmentId = (s: AssignmentStore) => s.assignmentId;
+export const selectWritingResult = (s: AssignmentStore) => s.writingResult;
+export const selectWritingDueDate = (s: AssignmentStore) => s.writingDueDate;
+export const selectIsReview = (s: AssignmentStore) => s.isReview;
+export const selectSetQuizResult = (s: AssignmentStore) => s.setQuizResult;
+export const selectClearQuizResult = (s: AssignmentStore) => s.clearQuizResult;
+export const selectSetWritingResult = (s: AssignmentStore) => s.setWritingResult;
+export const selectClearWritingResult = (s: AssignmentStore) => s.clearWritingResult;

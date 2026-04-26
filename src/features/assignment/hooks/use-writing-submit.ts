@@ -6,6 +6,7 @@ import type { ImagePickerAsset } from "expo-image-picker";
 
 import { submitWritingApi } from "../api";
 import { useAssignmentStore } from "@/stores";
+import { selectSetWritingResult } from "@/stores/assignment-store";
 import { assignmentQueryKeys } from "./use-assignments";
 
 interface UseWritingSubmitParams {
@@ -22,7 +23,7 @@ export function useWritingSubmit({
   dueDate,
 }: UseWritingSubmitParams) {
   const queryClient = useQueryClient();
-  const setWritingResult = useAssignmentStore((s) => s.setWritingResult);
+  const setWritingResult = useAssignmentStore(selectSetWritingResult);
 
   const mutation = useMutation({
     mutationFn: () =>
