@@ -1,6 +1,6 @@
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   ScrollView,
@@ -68,6 +68,13 @@ export function WeeklyProgressCard() {
     useState<MetricKey>("totalStudyMinutes");
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const { width: screenWidth } = useWindowDimensions();
+  const chartScrollRef = useRef<ScrollView>(null);
+
+  useEffect(() => {
+    if (data) {
+      chartScrollRef.current?.scrollToEnd({ animated: false });
+    }
+  }, [data]);
 
   // 32 card padding + Y_AXIS_W = 64; 56px per point ensures dots are spaced comfortably
   const minBodyWidth = screenWidth - 32 - Y_AXIS_W;
@@ -182,6 +189,7 @@ export function WeeklyProgressCard() {
               metric={selectedMetric}
             />
             <ScrollView
+              ref={chartScrollRef}
               horizontal
               showsHorizontalScrollIndicator={false}
               bounces={false}
