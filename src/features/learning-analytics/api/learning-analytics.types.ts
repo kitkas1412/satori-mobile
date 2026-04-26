@@ -11,12 +11,27 @@ export interface WeeklyDataPoint {
   totalStudyMinutes: number;
   averageScore: number;
   expEarned: number;
+  pronunciationUtterances: number | null;
+  pronunciationOverall: number | null;
+  pronunciationAccuracy: number | null;
+  pronunciationFluency: number | null;
+  speakingSessions: number | null;
+  languageOverall: number | null;
+  speakingTaskCompletion: number | null;
 }
 
 export interface WeeklyTrends {
   scoreDirection: TrendDirection;
   studyTimeDirection: TrendDirection;
   consistencyRate: number;
+  pronunciationDirection: TrendDirection;
+  languageDirection: TrendDirection;
+  sessionsDelta: number;
+  scoreDelta: number;
+  studyMinutesDelta: number;
+  speakingSessionsDelta: number;
+  pronunciationDelta: number;
+  languageDelta: number;
 }
 
 export interface WeeklyProgressData {

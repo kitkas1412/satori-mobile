@@ -9,6 +9,7 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
+import type { TrendDirection } from "../api";
 import { useWeeklyProgress } from "../hooks";
 import type { MetricKey } from "./weekly-progress-chart";
 import {
@@ -18,9 +19,12 @@ import {
 } from "./weekly-progress-chart";
 
 const METRICS: { key: MetricKey; label: string; unit: string }[] = [
-  { key: "sessionsCompleted", label: "Buổi học", unit: "buổi" },
   { key: "totalStudyMinutes", label: "Phút học", unit: "phút" },
+  { key: "sessionsCompleted", label: "Luyện tập", unit: "buổi" },
+  { key: "speakingSessions", label: "Luyện nói", unit: "buổi" },
   { key: "averageScore", label: "Điểm TB", unit: "điểm" },
+  { key: "pronunciationOverall", label: "Phát âm", unit: "%" },
+  { key: "languageOverall", label: "Diễn đạt", unit: "%" },
   { key: "expEarned", label: "EXP", unit: "EXP" },
 ];
 
@@ -40,12 +44,28 @@ function extractWeekLabel(label: string): string {
   return match ? match[1] : label;
 }
 
+function TrendChip({
+  label,
+  direction,
+  theme,
+}: {
+  label: string;
+  direction: TrendDirection;
+  theme: typeof Colors["light"];
+}) {
+  return (
+    <Text className="font-body" style={{ fontSize: 11, color: theme.text.secondary }}>
+      {label}: {TREND_LABELS[direction] ?? direction}
+    </Text>
+  );
+}
+
 export function WeeklyProgressCard() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const { data, isLoading, isError } = useWeeklyProgress();
   const [selectedMetric, setSelectedMetric] =
-    useState<MetricKey>("sessionsCompleted");
+    useState<MetricKey>("totalStudyMinutes");
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const { width: screenWidth } = useWindowDimensions();
 
@@ -93,8 +113,12 @@ export function WeeklyProgressCard() {
       </Text>
 
       {/* Metric selector pills */}
-      <View
-        style={{ flexDirection: "row", gap: 8, flexWrap: "wrap", marginBottom: 12 }}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        bounces={false}
+        contentContainerStyle={{ flexDirection: "row", gap: 8, paddingRight: 4 }}
+        style={{ marginBottom: 12 }}
       >
         {METRICS.map(({ key, label }) => {
           const isSelected = selectedMetric === key;
@@ -126,7 +150,7 @@ export function WeeklyProgressCard() {
             </TouchableOpacity>
           );
         })}
-      </View>
+      </ScrollView>
 
       {isLoading && (
         <ActivityIndicator
@@ -203,10 +227,14 @@ export function WeeklyProgressCard() {
                 {formatDate(selectedPoint.endDate)}
                 {"  ·  "}
                 <Text style={{ fontWeight: "700" }}>
-                  {selectedMetric === "averageScore"
-                    ? selectedPoint[selectedMetric].toFixed(1)
-                    : selectedPoint[selectedMetric]}{" "}
-                  {activeMetric.unit}
+                  {selectedPoint[selectedMetric] == null
+                    ? "—"
+                    : selectedMetric === "averageScore" ||
+                        selectedMetric === "pronunciationOverall" ||
+                        selectedMetric === "languageOverall"
+                      ? (selectedPoint[selectedMetric] as number).toFixed(1)
+                      : selectedPoint[selectedMetric]}{" "}
+                  {selectedPoint[selectedMetric] != null ? activeMetric.unit : ""}
                 </Text>
               </Text>
             ) : (
@@ -222,27 +250,25 @@ export function WeeklyProgressCard() {
           {/* Trend footer */}
           <View
             style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
               paddingTop: 8,
               borderTopWidth: 1,
               borderTopColor: theme.border.subtle,
+              gap: 4,
             }}
           >
-            <Text
-              className="font-body"
-              style={{ fontSize: 11, color: theme.text.secondary }}
-            >
-              Điểm:{" "}
-              {TREND_LABELS[data.trends.scoreDirection] ??
-                data.trends.scoreDirection}
-            </Text>
-            <Text
-              className="font-body"
-              style={{ fontSize: 11, color: theme.text.secondary }}
-            >
-              Tỉ lệ đều đặn: {Math.round(data.trends.consistencyRate * 100)}%
-            </Text>
+            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+              <Text className="font-body" style={{ fontSize: 11, color: theme.text.secondary }}>
+                Điểm:{" "}
+                {TREND_LABELS[data.trends.scoreDirection] ?? data.trends.scoreDirection}
+              </Text>
+              <Text className="font-body" style={{ fontSize: 11, color: theme.text.secondary }}>
+                Tỉ lệ đều đặn: {Math.round(data.trends.consistencyRate * 100)}%
+              </Text>
+            </View>
+            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+              <TrendChip label="Phát âm" direction={data.trends.pronunciationDirection} theme={theme} />
+              <TrendChip label="Ngôn ngữ" direction={data.trends.languageDirection} theme={theme} />
+            </View>
           </View>
         </>
       )}
