@@ -1,5 +1,4 @@
 import {
-  BaseInput,
   IconButton,
   ScreenAsyncView,
   ScreenHeader,
@@ -10,11 +9,12 @@ import {
 } from "@/features/setting/hooks";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { useNavigation, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { ChevronLeft } from "lucide-react-native";
+import { ChevronLeft, X } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
-import { ScrollView, Switch, Text, View } from "react-native";
+import { Modal, Pressable, ScrollView, Switch, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const TIME_RE = /^\d{2}:\d{2}$/;
@@ -25,6 +25,19 @@ function toDisplay(time: string): string {
 
 function toPayload(time: string): string {
   return `${time}:00`;
+}
+
+function timeStringToDate(hhmm: string): Date {
+  const [h, m] = hhmm.split(":").map(Number);
+  const d = new Date();
+  d.setHours(h, m, 0, 0);
+  return d;
+}
+
+function dateToTimeString(date: Date): string {
+  const h = String(date.getHours()).padStart(2, "0");
+  const m = String(date.getMinutes()).padStart(2, "0");
+  return `${h}:${m}`;
 }
 
 export function NotificationSettingsScreen() {
@@ -64,6 +77,15 @@ export function NotificationSettingsScreen() {
     prefs?.quietHoursEnd ? toDisplay(prefs.quietHoursEnd) : "07:00",
   );
 
+  const [timePickerVisible, setTimePickerVisible] = useState(false);
+  const [tempTime, setTempTime] = useState(() => timeStringToDate(dailyReminderTime));
+
+  const [quietStartPickerVisible, setQuietStartPickerVisible] = useState(false);
+  const [tempQuietStart, setTempQuietStart] = useState(() => timeStringToDate(quietHoursStart));
+
+  const [quietEndPickerVisible, setQuietEndPickerVisible] = useState(false);
+  const [tempQuietEnd, setTempQuietEnd] = useState(() => timeStringToDate(quietHoursEnd));
+
   // Track whether the user has made any changes
   const isDirtyRef = useRef(false);
 
@@ -73,6 +95,21 @@ export function NotificationSettingsScreen() {
       setter(value);
     };
   }
+
+  // Sync server data → local state when prefs arrives/refreshes (only if user hasn't changed anything)
+  useEffect(() => {
+    if (!prefs || isDirtyRef.current) return;
+    setPushEnabled(prefs.pushEnabled);
+    setEmailEnabled(prefs.emailEnabled);
+    setDailyReminderEnabled(prefs.dailyReminderEnabled);
+    setDailyReminderTime(prefs.dailyReminderTime ? toDisplay(prefs.dailyReminderTime) : "08:00");
+    setAssignmentNotifications(prefs.assignmentNotifications);
+    setAchievementNotifications(prefs.achievementNotifications);
+    setClassNotifications(prefs.classNotifications);
+    setQuietHoursEnabled(prefs.quietHoursEnabled);
+    setQuietHoursStart(prefs.quietHoursStart ? toDisplay(prefs.quietHoursStart) : "22:00");
+    setQuietHoursEnd(prefs.quietHoursEnd ? toDisplay(prefs.quietHoursEnd) : "07:00");
+  }, [prefs]);
 
   // Keep refs fresh for use inside the beforeRemove listener
   const mutateRef = useRef(updatePrefs);
@@ -260,18 +297,113 @@ export function NotificationSettingsScreen() {
             </View>
 
             {dailyReminderEnabled && (
-              <BaseInput
-                label="Giờ nhắc nhở"
-                value={dailyReminderTime}
-                onChangeText={markDirty(setDailyReminderTime)}
-                placeholder="HH:mm"
-                keyboardType="numbers-and-punctuation"
-                error={
-                  dailyReminderTime.length > 0 && !TIME_RE.test(dailyReminderTime)
-                    ? "Định dạng giờ không hợp lệ (HH:mm)"
-                    : undefined
-                }
-              />
+              <>
+                <View className="rounded-2xl px-4 py-4" style={cardStyle}>
+                  <View className="flex-row items-center justify-between">
+                    <View style={{ gap: 2 }}>
+                      <Text
+                        className="text-sm font-heading"
+                        style={{ color: theme.text.secondary }}
+                      >
+                        Giờ nhắc nhở
+                      </Text>
+                      <Text
+                        className="text-base font-body"
+                        style={{ color: theme.text.primary }}
+                      >
+                        {dailyReminderTime}
+                      </Text>
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setTempTime(timeStringToDate(dailyReminderTime));
+                        setTimePickerVisible(true);
+                      }}
+                      activeOpacity={0.6}
+                      hitSlop={{ top: 10, bottom: 10, left: 20, right: 20 }}
+                    >
+                      <Text
+                        className="text-base font-heading"
+                        style={{ color: theme.brand.primary }}
+                      >
+                        Thay đổi
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                <Modal
+                  visible={timePickerVisible}
+                  transparent
+                  animationType="slide"
+                  onRequestClose={() => setTimePickerVisible(false)}
+                >
+                  <Pressable
+                    style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.4)" }}
+                    onPress={() => setTimePickerVisible(false)}
+                  />
+                  <View
+                    style={{
+                      backgroundColor: theme.background.surface,
+                      borderTopLeftRadius: 20,
+                      borderTopRightRadius: 20,
+                      paddingBottom: insets.bottom + 16,
+                    }}
+                  >
+                    <View
+                      className="flex-row items-center justify-between px-4"
+                      style={{ paddingTop: 16, paddingBottom: 8 }}
+                    >
+                      <TouchableOpacity
+                        onPress={() => setTimePickerVisible(false)}
+                        hitSlop={12}
+                        activeOpacity={0.6}
+                      >
+                        <View
+                          style={{
+                            backgroundColor: theme.background.page,
+                            borderRadius: 99,
+                            padding: 6,
+                          }}
+                        >
+                          <X size={18} color={theme.icon.primary} />
+                        </View>
+                      </TouchableOpacity>
+                      <Text
+                        className="text-base font-heading"
+                        style={{ color: theme.text.primary }}
+                      >
+                        Chọn thời gian
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() => {
+                          markDirty(setDailyReminderTime)(dateToTimeString(tempTime));
+                          setTimePickerVisible(false);
+                        }}
+                        hitSlop={12}
+                        activeOpacity={0.6}
+                      >
+                        <Text
+                          className="text-base font-heading"
+                          style={{ color: theme.brand.primary }}
+                        >
+                          Xong
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                    <View style={{ alignItems: "center", width: "100%" }}>
+                      <DateTimePicker
+                        value={tempTime}
+                        mode="time"
+                        display="spinner"
+                        is24Hour
+                        onChange={(_, date) => { if (date) setTempTime(date); }}
+                        style={{ height: 216 }}
+                      />
+                    </View>
+                  </View>
+                </Modal>
+              </>
             )}
           </View>
 
@@ -350,30 +482,219 @@ export function NotificationSettingsScreen() {
 
             {quietHoursEnabled && (
               <>
-                <BaseInput
-                  label="Bắt đầu"
-                  value={quietHoursStart}
-                  onChangeText={markDirty(setQuietHoursStart)}
-                  placeholder="HH:mm"
-                  keyboardType="numbers-and-punctuation"
-                  error={
-                    quietHoursStart.length > 0 && !TIME_RE.test(quietHoursStart)
-                      ? "Định dạng giờ không hợp lệ (HH:mm)"
-                      : undefined
-                  }
-                />
-                <BaseInput
-                  label="Kết thúc"
-                  value={quietHoursEnd}
-                  onChangeText={markDirty(setQuietHoursEnd)}
-                  placeholder="HH:mm"
-                  keyboardType="numbers-and-punctuation"
-                  error={
-                    quietHoursEnd.length > 0 && !TIME_RE.test(quietHoursEnd)
-                      ? "Định dạng giờ không hợp lệ (HH:mm)"
-                      : undefined
-                  }
-                />
+                {/* Bắt đầu */}
+                <View className="rounded-2xl px-4 py-4" style={cardStyle}>
+                  <View className="flex-row items-center justify-between">
+                    <View style={{ gap: 2 }}>
+                      <Text
+                        className="text-sm font-heading"
+                        style={{ color: theme.text.secondary }}
+                      >
+                        Bắt đầu
+                      </Text>
+                      <Text
+                        className="text-base font-body"
+                        style={{ color: theme.text.primary }}
+                      >
+                        {quietHoursStart}
+                      </Text>
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setTempQuietStart(timeStringToDate(quietHoursStart));
+                        setQuietStartPickerVisible(true);
+                      }}
+                      activeOpacity={0.6}
+                      hitSlop={{ top: 10, bottom: 10, left: 20, right: 20 }}
+                    >
+                      <Text
+                        className="text-base font-heading"
+                        style={{ color: theme.brand.primary }}
+                      >
+                        Thay đổi
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                <Modal
+                  visible={quietStartPickerVisible}
+                  transparent
+                  animationType="slide"
+                  onRequestClose={() => setQuietStartPickerVisible(false)}
+                >
+                  <Pressable
+                    style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.4)" }}
+                    onPress={() => setQuietStartPickerVisible(false)}
+                  />
+                  <View
+                    style={{
+                      backgroundColor: theme.background.surface,
+                      borderTopLeftRadius: 20,
+                      borderTopRightRadius: 20,
+                      paddingBottom: insets.bottom + 16,
+                    }}
+                  >
+                    <View
+                      className="flex-row items-center justify-between px-4"
+                      style={{ paddingTop: 16, paddingBottom: 8 }}
+                    >
+                      <TouchableOpacity
+                        onPress={() => setQuietStartPickerVisible(false)}
+                        hitSlop={12}
+                        activeOpacity={0.6}
+                      >
+                        <View
+                          style={{
+                            backgroundColor: theme.background.page,
+                            borderRadius: 99,
+                            padding: 6,
+                          }}
+                        >
+                          <X size={18} color={theme.icon.primary} />
+                        </View>
+                      </TouchableOpacity>
+                      <Text
+                        className="text-base font-heading"
+                        style={{ color: theme.text.primary }}
+                      >
+                        Chọn thời gian
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() => {
+                          markDirty(setQuietHoursStart)(dateToTimeString(tempQuietStart));
+                          setQuietStartPickerVisible(false);
+                        }}
+                        hitSlop={12}
+                        activeOpacity={0.6}
+                      >
+                        <Text
+                          className="text-base font-heading"
+                          style={{ color: theme.brand.primary }}
+                        >
+                          Xong
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                    <View style={{ alignItems: "center", width: "100%" }}>
+                      <DateTimePicker
+                        value={tempQuietStart}
+                        mode="time"
+                        display="spinner"
+                        is24Hour
+                        onChange={(_, date) => { if (date) setTempQuietStart(date); }}
+                        style={{ height: 216 }}
+                      />
+                    </View>
+                  </View>
+                </Modal>
+
+                {/* Kết thúc */}
+                <View className="rounded-2xl px-4 py-4" style={cardStyle}>
+                  <View className="flex-row items-center justify-between">
+                    <View style={{ gap: 2 }}>
+                      <Text
+                        className="text-sm font-heading"
+                        style={{ color: theme.text.secondary }}
+                      >
+                        Kết thúc
+                      </Text>
+                      <Text
+                        className="text-base font-body"
+                        style={{ color: theme.text.primary }}
+                      >
+                        {quietHoursEnd}
+                      </Text>
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setTempQuietEnd(timeStringToDate(quietHoursEnd));
+                        setQuietEndPickerVisible(true);
+                      }}
+                      activeOpacity={0.6}
+                      hitSlop={{ top: 10, bottom: 10, left: 20, right: 20 }}
+                    >
+                      <Text
+                        className="text-base font-heading"
+                        style={{ color: theme.brand.primary }}
+                      >
+                        Thay đổi
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                <Modal
+                  visible={quietEndPickerVisible}
+                  transparent
+                  animationType="slide"
+                  onRequestClose={() => setQuietEndPickerVisible(false)}
+                >
+                  <Pressable
+                    style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.4)" }}
+                    onPress={() => setQuietEndPickerVisible(false)}
+                  />
+                  <View
+                    style={{
+                      backgroundColor: theme.background.surface,
+                      borderTopLeftRadius: 20,
+                      borderTopRightRadius: 20,
+                      paddingBottom: insets.bottom + 16,
+                    }}
+                  >
+                    <View
+                      className="flex-row items-center justify-between px-4"
+                      style={{ paddingTop: 16, paddingBottom: 8 }}
+                    >
+                      <TouchableOpacity
+                        onPress={() => setQuietEndPickerVisible(false)}
+                        hitSlop={12}
+                        activeOpacity={0.6}
+                      >
+                        <View
+                          style={{
+                            backgroundColor: theme.background.page,
+                            borderRadius: 99,
+                            padding: 6,
+                          }}
+                        >
+                          <X size={18} color={theme.icon.primary} />
+                        </View>
+                      </TouchableOpacity>
+                      <Text
+                        className="text-base font-heading"
+                        style={{ color: theme.text.primary }}
+                      >
+                        Chọn thời gian
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() => {
+                          markDirty(setQuietHoursEnd)(dateToTimeString(tempQuietEnd));
+                          setQuietEndPickerVisible(false);
+                        }}
+                        hitSlop={12}
+                        activeOpacity={0.6}
+                      >
+                        <Text
+                          className="text-base font-heading"
+                          style={{ color: theme.brand.primary }}
+                        >
+                          Xong
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                    <View style={{ alignItems: "center", width: "100%" }}>
+                      <DateTimePicker
+                        value={tempQuietEnd}
+                        mode="time"
+                        display="spinner"
+                        is24Hour
+                        onChange={(_, date) => { if (date) setTempQuietEnd(date); }}
+                        style={{ height: 216 }}
+                      />
+                    </View>
+                  </View>
+                </Modal>
               </>
             )}
           </View>
