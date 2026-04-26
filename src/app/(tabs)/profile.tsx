@@ -6,10 +6,13 @@ import {
 } from "@/features/achievement/components";
 import {
   InsightsCard,
-  SkillRadarCard,
+  MasteryCard,
   WeeklyProgressCard,
 } from "@/features/learning-analytics/components";
-import { useAchievementProgress } from "@/features/achievement/hooks";
+import {
+  useAchievementProgress,
+  useEarnedBadges,
+} from "@/features/achievement/hooks";
 import {
   useProfile,
   useUploadAvatar,
@@ -17,6 +20,7 @@ import {
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
 import { useFocusEffect, useRouter } from "expo-router";
+import { useIsFocused } from "@react-navigation/native";
 import { useCallback } from "react";
 import { StatusBar } from "expo-status-bar";
 import { Camera, Pencil, Settings } from "lucide-react-native";
@@ -36,12 +40,14 @@ export default function ProfileTab() {
   useFocusEffect(
     useCallback(() => {
       refetch();
-    }, [refetch])
+    }, [refetch]),
   );
   const router = useRouter();
+  const isFocused = useIsFocused();
   const { mutate: logoutUser, isPending } = useLogout();
   const { handleAvatarPress, isPending: isUploadingAvatar } = useUploadAvatar();
   const { data: achievementProgress } = useAchievementProgress();
+  const { data: earnedBadges } = useEarnedBadges();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
@@ -216,21 +222,37 @@ export default function ProfileTab() {
             </View>
           )}
 
-          <StatsSection />
-          <View className="px-4">
-            <SkillRadarCard />
-          </View>
+          {achievementProgress && (
+            <StatsSection progress={achievementProgress} />
+          )}
           <View className="px-4">
             <WeeklyProgressCard />
           </View>
           <View className="px-4">
+            <MasteryCard />
+          </View>
+          <View className="px-4">
             <InsightsCard />
           </View>
-          <AchievementSection />
+          {earnedBadges && (
+            <AchievementSection
+              badges={earnedBadges}
+              onPressViewAll={() => router.push("/achievements")}
+              onPressBadge={(id) =>
+                router.push({
+                  pathname: "/badge-detail",
+                  params: { badgeId: id },
+                })
+              }
+            />
+          )}
         </ScrollView>
       </View>
-      <LoadingOverlay visible={isFetching} title="Đang tải..." />
-      <LoadingOverlay visible={isPending} title="Đang đăng xuất..." />
+      <LoadingOverlay visible={isFocused && isFetching} title="Đang tải..." />
+      <LoadingOverlay
+        visible={isFocused && isPending}
+        title="Đang đăng xuất..."
+      />
     </>
   );
 }
