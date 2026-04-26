@@ -60,3 +60,41 @@ export interface InsightsData {
 }
 
 export type InsightsResponse = ApiResponse<InsightsData>;
+
+export interface MasteryTier {
+  level: number;
+  label: string;
+  count: number;
+}
+
+export interface MasteryCategory {
+  mastered: number;
+  learning: number;
+  notStarted: number;
+  total: number;
+  percent: number;
+  tiers: MasteryTier[];
+}
+
+export interface MasteryScope {
+  type: string;
+  id: string;
+}
+
+export interface MasteryNeedsReview {
+  entityId: string;
+  entityType: string;
+  masteryLevel: number;
+  emaScore: number;
+  lastPracticedAt: string;
+}
+
+export interface MasteryData {
+  scope: MasteryScope;
+  vocabulary: MasteryCategory;
+  grammar: MasteryCategory;
+  needsReview: MasteryNeedsReview[];
+  lastUpdated: string;
+}
+
+export type MasteryResponse = ApiResponse<MasteryData>;
