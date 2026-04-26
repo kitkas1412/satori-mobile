@@ -1,5 +1,4 @@
-import { IconButton, ScreenAsyncView, ScreenHeader } from "@/components/ui";
-import { ProfileRow } from "@/features/profile-management/components";
+import { IconButton, ProfileRow, ScreenAsyncView, ScreenHeader } from "@/components/ui";
 import { useLearningPreferences } from "@/features/setting/hooks";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
