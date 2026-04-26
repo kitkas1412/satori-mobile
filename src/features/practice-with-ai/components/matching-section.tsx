@@ -21,8 +21,8 @@ export function MatchingSection({
   theme,
   onConfirmedPairsChange,
 }: MatchingSectionProps) {
-  const leftOptions = currentItem.options.filter((o) => o.side === "LEFT");
-  const rightOptions = currentItem.options.filter((o) => o.side === "RIGHT");
+  const leftOptions = [...currentItem.options].sort((a, b) => a.id - b.id).filter((o) => o.side === "LEFT");
+  const rightOptions = [...currentItem.options].sort((a, b) => a.id - b.id).filter((o) => o.side === "RIGHT");
 
   const [selectedLeftId, setSelectedLeftId] = useState<number | null>(null);
   const [selectedRightId, setSelectedRightId] = useState<number | null>(null);

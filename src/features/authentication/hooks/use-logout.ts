@@ -1,11 +1,10 @@
 import { logoutApi } from "@/features/authentication/api";
 import { useAuthStore } from "@/stores";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 
 export function useLogout() {
   const logout = useAuthStore((state) => state.logout);
   const token = useAuthStore((state) => state.token);
-  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async () => {
@@ -29,13 +28,11 @@ export function useLogout() {
       }
     },
     onSuccess: () => {
-      // Xóa toàn bộ cache của React Query
-      queryClient.clear();
-
       // Xóa auth store (kích hoạt dọn dẹp SecureStore qua persist middleware)
       logout();
 
-      // Điều hướng được xử lý tự động bởi auth guard trong _layout.tsx
+      // Điều hướng và dọn React Query cache được xử lý tự động bởi
+      // auth guard trong _layout.tsx khi isAuthenticated chuyển false
     },
     onError: (error: any) => {
       // BR-68: Vẫn đăng xuất local dù API thất bại (offline hoặc timeout)
@@ -44,10 +41,7 @@ export function useLogout() {
         error?.message,
       );
 
-      queryClient.clear();
       logout();
-
-      // Auth guard trong _layout.tsx sẽ xử lý điều hướng về màn hình đăng nhập
     },
   });
 }

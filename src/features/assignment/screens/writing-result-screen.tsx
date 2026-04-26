@@ -5,13 +5,16 @@
 
 import { CheckCircle2, ChevronLeft, Clock, X } from "lucide-react-native";
 import { useState } from "react";
-import { Image, Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
+import { Image } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
+import { useRouter } from "expo-router";
 
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import {
+  IconButton,
   ImageViewerModal,
   LoadingOverlay,
   PrimaryButton,
@@ -21,6 +24,7 @@ import { useWritingResult } from "../hooks";
 import { StatusBanner } from "../components";
 
 export function WritingResultScreen() {
+  const router = useRouter();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
@@ -28,12 +32,17 @@ export function WritingResultScreen() {
   const {
     writingResult,
     isGraded,
+    isPastDeadline,
     imageUrls,
     score,
     isCancelling,
-    handleGoHome,
+    handleContinue,
     handleCancelSubmission,
-  } = useWritingResult();
+    isReview,
+  } = useWritingResult({
+    onNavigate: (pathname, params) =>
+      router.replace(params ? { pathname: pathname as any, params } : (pathname as any)),
+  });
 
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
@@ -50,9 +59,10 @@ export function WritingResultScreen() {
         title={isGraded ? "Bài tập đã nộp" : "Chi tiết bài nộp"}
         showDivider
         leftAction={
-          <Pressable onPress={handleGoHome} hitSlop={8}>
-            <ChevronLeft size={24} color={theme.text.primary} strokeWidth={2} />
-          </Pressable>
+          <IconButton
+            icon={<ChevronLeft size={24} color={theme.text.primary} strokeWidth={2} />}
+            onPress={handleContinue}
+          />
         }
         rightAction={<View style={{ width: 24 }} />}
       />
@@ -233,7 +243,7 @@ export function WritingResultScreen() {
                           borderWidth: 1,
                           borderColor: theme.border.subtle,
                         }}
-                        resizeMode="cover"
+                        contentFit="cover"
                       />
                     </Pressable>
                     {/* Số thứ tự ảnh */}
@@ -293,8 +303,8 @@ export function WritingResultScreen() {
           )}
         </View>
 
-        {/* Banner cảnh báo hủy nộp bài — chỉ hiển thị khi chưa chấm */}
-        {!isGraded && (
+        {/* Banner cảnh báo hủy nộp bài — chỉ hiển thị khi chưa chấm và chưa qua deadline */}
+        {!isGraded && !isPastDeadline && (
           <StatusBanner
             type="warning"
             title="Lưu ý"
@@ -318,12 +328,12 @@ export function WritingResultScreen() {
       >
         <View className="flex-row gap-3">
           <PrimaryButton
-            text="Quay về"
-            onPress={handleGoHome}
+            text={isReview ? "Quay về" : "Tiếp tục"}
+            onPress={handleContinue}
             style={{ flex: 1 }}
           />
 
-          {!isGraded && (
+          {!isGraded && !isPastDeadline && (
             <PrimaryButton
               text="Hủy nộp bài"
               onPress={handleCancelSubmission}

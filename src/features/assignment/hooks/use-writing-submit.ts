@@ -1,25 +1,29 @@
 // Hook nộp bài viết: gọi API upload ảnh, invalidate cache danh sách bài tập,
-// lưu kết quả vào store và điều hướng đến màn hình kết quả bài viết.
+// lưu kết quả vào store và gọi callback điều hướng đến màn hình kết quả bài viết.
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "expo-router";
 import type { ImagePickerAsset } from "expo-image-picker";
 
 import { submitWritingApi } from "../api";
 import { useAssignmentStore } from "@/stores";
+import { selectSetWritingResult } from "@/stores/assignment-store";
+import { assignmentQueryKeys } from "./use-assignments";
 
 interface UseWritingSubmitParams {
   assignmentId: string;
   images: ImagePickerAsset[];
+  onNavigate: () => void;
+  dueDate?: string;
 }
 
 export function useWritingSubmit({
   assignmentId,
   images,
+  onNavigate,
+  dueDate,
 }: UseWritingSubmitParams) {
-  const router = useRouter();
   const queryClient = useQueryClient();
-  const setWritingResult = useAssignmentStore((s) => s.setWritingResult);
+  const setWritingResult = useAssignmentStore(selectSetWritingResult);
 
   const mutation = useMutation({
     mutationFn: () =>
@@ -34,11 +38,11 @@ export function useWritingSubmit({
     onSuccess: (data) => {
       // Làm mới danh sách bài tập để phản ánh trạng thái "Đã nộp"
       queryClient.invalidateQueries({
-        queryKey: ["assignments"],
+        queryKey: assignmentQueryKeys.all,
       });
       // Lưu kết quả vào store để màn hình kết quả đọc mà không cần gọi API lại
-      setWritingResult(data);
-      router.replace("/assignment-writing-result");
+      setWritingResult(data, false, dueDate);
+      onNavigate();
     },
   });
 

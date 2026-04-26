@@ -1,22 +1,46 @@
 // Màn hình kết quả sau khi hoàn thành session hội thoại.
-// Hiển thị theo thứ tự: điểm tổng → điểm chi tiết (3 chỉ số) → nhiệm vụ → đánh giá ngôn ngữ.
+// Hiển thị 5 tabs: Báo cáo tổng thể, Chính xác, Phát âm, Nhiệm vụ, Phức tạp.
 // Có 2 mode:
 //   - Post-session: không có conversationId param → đọc từ Zustand store, CTA "Tiếp tục" → /conversation-reward
 //   - Review: có conversationId param → fetch từ API, CTA "Làm lại" → /conversation-detail
 
-import { ActivityIndicator, TouchableOpacity, ScrollView, Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { PrimaryButton, ScreenHeader } from "@/components/ui";
 import { Colors } from "@/constants/theme";
-import { PrimaryButton, ScreenHeader, ScoreCircle } from "@/components/ui";
-import { useConversationStore } from "@/stores";
 import {
-  LanguageEvaluationCard,
-  MissionDetailsCard,
+  FeedbackAccuracyTab,
+  FeedbackComplexityTab,
+  FeedbackMissionTab,
+  FeedbackOverviewTab,
+  FeedbackPronunciationTab,
 } from "@/features/speaking/components";
 import { useLatestFeedback } from "@/features/speaking/hooks";
-import { ChevronLeft } from "lucide-react-native";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useConversationStore } from "@/stores";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { X } from "lucide-react-native";
+import { useState } from "react";
+import {
+  ActivityIndicator,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+// ─── Tab config ────────────────────────────────────────────────────────────────
+
+const TABS = [
+  { key: "overview", label: "Báo cáo tổng thể" },
+  { key: "accuracy", label: "Chính xác" },
+  { key: "pronunciation", label: "Phát âm" },
+  { key: "mission", label: "Nhiệm vụ" },
+  { key: "complexity", label: "Phức tạp" },
+] as const;
+
+type TabKey = (typeof TABS)[number]["key"];
+
+// ─── Main screen ───────────────────────────────────────────────────────────────
 
 export function ConversationFeedbackScreen() {
   const insets = useSafeAreaInsets();
@@ -24,15 +48,21 @@ export function ConversationFeedbackScreen() {
   const theme = Colors[colorScheme ?? "light"];
   const router = useRouter();
 
-  const { conversationId } = useLocalSearchParams<{ conversationId?: string }>();
+  const { conversationId } = useLocalSearchParams<{
+    conversationId?: string;
+  }>();
   const isReviewMode = !!conversationId;
 
   const storeFeedback = useConversationStore((s) => s.feedback);
-  const { data: apiFeedback, isLoading, isError } = useLatestFeedback(
-    isReviewMode ? conversationId : undefined,
-  );
+  const {
+    data: apiFeedback,
+    isLoading,
+    isError,
+  } = useLatestFeedback(isReviewMode ? conversationId : undefined);
 
   const feedback = isReviewMode ? apiFeedback : storeFeedback;
+
+  const [activeTab, setActiveTab] = useState<TabKey>("overview");
 
   function handleCTA() {
     if (isReviewMode) {
@@ -49,7 +79,10 @@ export function ConversationFeedbackScreen() {
     return (
       <View
         className="flex-1 items-center justify-center"
-        style={{ backgroundColor: theme.background.page, paddingTop: insets.top }}
+        style={{
+          backgroundColor: theme.background.page,
+          paddingTop: insets.top,
+        }}
       >
         <ActivityIndicator size="large" color={theme.brand.primary} />
       </View>
@@ -60,7 +93,10 @@ export function ConversationFeedbackScreen() {
     return (
       <View
         className="flex-1 items-center justify-center"
-        style={{ backgroundColor: theme.background.page, paddingTop: insets.top }}
+        style={{
+          backgroundColor: theme.background.page,
+          paddingTop: insets.top,
+        }}
       >
         <Text
           className="font-body text-base"
@@ -72,7 +108,6 @@ export function ConversationFeedbackScreen() {
     );
   }
 
-  // Guard: nếu người dùng truy cập trực tiếp màn hình này mà không có dữ liệu feedback
   if (!feedback) {
     return (
       <View
@@ -93,13 +128,44 @@ export function ConversationFeedbackScreen() {
   }
 
   const {
-    overallScore,
-    missionScore,
-    pronunciationScore,
-    languageScore,
-    missionDetails,
-    languageEvaluation,
+    accuracy,
+    pronunciation,
+    taskCompletion,
+    complexity,
+    qualitativeSummary,
   } = feedback;
+
+  function renderTabContent() {
+    switch (activeTab) {
+      case "overview":
+        return <FeedbackOverviewTab qualitativeSummary={qualitativeSummary} />;
+      case "accuracy":
+        return <FeedbackAccuracyTab accuracy={accuracy} />;
+      case "pronunciation":
+        return (
+          <FeedbackPronunciationTab
+            pronunciation={pronunciation}
+            pronunciationFeedback={qualitativeSummary.pronunciationFeedback}
+          />
+        );
+      case "mission":
+        return (
+          <FeedbackMissionTab
+            taskCompletion={taskCompletion}
+            taskCompletionFeedback={qualitativeSummary.taskCompletionFeedback}
+          />
+        );
+      case "complexity":
+        return (
+          <FeedbackComplexityTab
+            complexity={complexity}
+            complexityFeedback={qualitativeSummary.complexityFeedback}
+          />
+        );
+    }
+  }
+
+  // ─── Render ───────────────────────────────────────────────────────────────────
 
   return (
     <View
@@ -111,86 +177,75 @@ export function ConversationFeedbackScreen() {
     >
       {/* Header */}
       <ScreenHeader
-        title="Kết quả buổi học"
+        title="Kết quả đánh giá"
         titleSize="2xl"
         leftAction={
-          <TouchableOpacity
-            onPress={() => router.back()}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          >
-            <ChevronLeft size={24} color={theme.icon.primary} strokeWidth={2} />
-          </TouchableOpacity>
+          isReviewMode ? (
+            <TouchableOpacity
+              onPress={() => router.back()}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <X size={22} color={theme.icon.primary} strokeWidth={2} />
+            </TouchableOpacity>
+          ) : undefined
         }
       />
 
       {/* Divider */}
       <View className="h-px" style={{ backgroundColor: theme.border.subtle }} />
 
+      {/* Tab Bar */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={{ flexGrow: 0 }}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingVertical: 8,
+          gap: 4,
+          alignItems: "center",
+        }}
+      >
+        {TABS.map((tab) => {
+          const isActive = activeTab === tab.key;
+          return (
+            <TouchableOpacity
+              key={tab.key}
+              onPress={() => setActiveTab(tab.key)}
+              className="rounded-2xl px-3 py-2"
+              style={{
+                backgroundColor: isActive
+                  ? theme.brand.primary
+                  : theme.background.surface,
+                borderWidth: 0.5,
+                borderColor: isActive
+                  ? theme.brand.primary
+                  : theme.border.subtle,
+              }}
+            >
+              <Text
+                className="font-body text-xs"
+                style={{
+                  color: isActive ? theme.text.onBrand : theme.text.primary,
+                }}
+              >
+                {tab.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
+
+      {/* Tab Content */}
       <ScrollView
         className="flex-1"
         contentContainerStyle={{
           paddingHorizontal: 16,
           paddingBottom: 24,
-          gap: 16,
         }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Overall Score */}
-        <View
-          className="rounded-2xl border mt-4 p-6 items-center"
-          style={{
-            backgroundColor: theme.background.surface,
-            borderColor: theme.border.subtle,
-          }}
-        >
-          <Text
-            className="font-body text-sm"
-            style={{ color: theme.text.secondary }}
-          >
-            Điểm tổng
-          </Text>
-          <Text
-            className="font-heading"
-            style={{ fontSize: 48, color: theme.info.default }}
-          >
-            {overallScore != null ? Math.round(overallScore) : "--"}
-          </Text>
-          <Text
-            className="font-body text-xs"
-            style={{ color: theme.text.secondary }}
-          >
-            / 100
-          </Text>
-        </View>
-
-        {/* Score Breakdown */}
-        <View
-          className="rounded-2xl p-4 border"
-          style={{
-            backgroundColor: theme.background.surface,
-            borderColor: theme.border.subtle,
-          }}
-        >
-          <Text
-            className="font-heading text-base mb-4"
-            style={{ color: theme.text.primary }}
-          >
-            Chi tiết điểm
-          </Text>
-          <View className="flex-row">
-            <ScoreCircle score={missionScore} label="Nhiệm vụ" />
-            <ScoreCircle score={pronunciationScore} label="Phát âm" />
-            <ScoreCircle score={languageScore} label="Ngôn ngữ" />
-          </View>
-        </View>
-
-        {/* Mission Details */}
-        <MissionDetailsCard missionDetails={missionDetails} />
-
-        {/* Language Evaluation */}
-        {languageEvaluation && (
-          <LanguageEvaluationCard languageEvaluation={languageEvaluation} />
-        )}
+        {renderTabContent()}
       </ScrollView>
 
       {/* CTA */}
