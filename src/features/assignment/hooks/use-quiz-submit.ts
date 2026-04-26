@@ -4,6 +4,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useAssignmentStore } from "@/stores";
+import { selectSetQuizResult } from "@/stores/assignment-store";
 import { assignmentQueryKeys } from "./use-assignments";
 import type { Question } from "../api";
 import { submitQuizApi } from "../api";
@@ -26,7 +27,7 @@ export function useQuizSubmit({
     mutationFn: (body: { answers: string }) =>
       submitQuizApi(assignmentId, body),
   });
-  const setQuizResult = useAssignmentStore((s) => s.setQuizResult);
+  const setQuizResult = useAssignmentStore(selectSetQuizResult);
 
   function handleSubmit() {
     // Build payload: với mỗi câu hỏi, lấy đáp án đã chọn (hoặc chuỗi rỗng nếu bỏ qua).

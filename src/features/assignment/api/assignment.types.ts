@@ -61,8 +61,12 @@ export interface Content {
 // POST /learner/assignments/:id/start
 // ---------------------------------------------------------------------------
 
-// Thông tin chi tiết bài tập sau khi bắt đầu làm — bao gồm câu hỏi hoặc nội dung bài viết
-export interface AssignmentDetailResponse {
+// Thông tin chi tiết bài tập sau khi bắt đầu làm — bao gồm câu hỏi hoặc nội dung bài viết.
+// Dùng discriminated union để TypeScript biết chính xác field nào có giá trị theo từng loại bài:
+// - QuizAssignmentDetail: questions luôn có giá trị, writingContent luôn null
+// - WritingAssignmentDetail: writingContent luôn có giá trị, questions luôn null
+
+interface AssignmentDetailBase {
   id: string;
   title: string;
   description: string | null;
@@ -72,11 +76,21 @@ export interface AssignmentDetailResponse {
   dueDate: string;
   audioUrl: string | null;
   actualQuestionCount: number;
-  // Danh sách câu hỏi — chỉ có giá trị với bài QUIZ
-  questions: Question[] | null;
-  // Nội dung bài viết — chỉ có giá trị với bài WRITING
-  writingContent: WritingContent | null;
 }
+
+export interface QuizAssignmentDetail extends AssignmentDetailBase {
+  assignmentType: "QUIZ";
+  questions: Question[];
+  writingContent: null;
+}
+
+export interface WritingAssignmentDetail extends AssignmentDetailBase {
+  assignmentType: "WRITING" | "TRANSLATION";
+  questions: null;
+  writingContent: WritingContent;
+}
+
+export type AssignmentDetailResponse = QuizAssignmentDetail | WritingAssignmentDetail;
 
 // Một câu hỏi trong bài trắc nghiệm
 export interface Question {

@@ -44,19 +44,23 @@ export interface SkillPoint {
   lastUpdated: string | null;
 }
 
+export interface SkillScore {
+  skill: string;
+  score: number;
+  previousScore: number;
+  trend: "STABLE" | "UP" | "DOWN";
+  dataPoints: number;
+  lastUpdated: string;
+}
+
 export interface LearningPreferences {
   targetJlptLevel: string;
   dailyStudyGoalMinutes: number;
-  preferredStudyTime: string | null;
   preferredTopics: string[];
-  learningPace: string | null;
   preferredFormality: string | null;
-  conversationStyle: string | null;
-  streakReminderEnabled: boolean;
-  reminderTime: string | null;
   weakPoints: SkillPoint[];
   strongPoints: SkillPoint[];
-  skillScores: unknown[];
+  skillScores: SkillScore[];
 }
 
 export interface EnrolledClass {
