@@ -98,7 +98,8 @@ export function AchievementsScreen() {
                 keyExtractor={(item) => item.badgeId}
                 renderItem={({ item }) => (
                   <EarnedBadgeCard
-                    badge={item}
+                    iconUrl={item.iconUrl}
+                    name={item.name}
                     onPress={() =>
                       router.push({ pathname: "/badge-detail", params: { badgeId: item.badgeId } })
                     }
@@ -126,7 +127,8 @@ export function AchievementsScreen() {
                 {unearned.map((item) => (
                   <UnearnedBadgeCard
                     key={item.badgeId}
-                    badge={item}
+                    iconUrl={item.iconUrl}
+                    name={item.name}
                     onPress={() =>
                       router.push({ pathname: "/badge-detail", params: { badgeId: item.badgeId } })
                     }

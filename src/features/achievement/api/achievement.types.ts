@@ -1,7 +1,13 @@
+export type BadgeType =
+  | "LEARNING_STREAK"
+  | "AI_SPEAKING_COUNT"
+  | "AI_PRACTICE_COUNT"
+  | "LEARNING_LEVEL";
+
 export interface BadgeProgress {
   badgeId: string;
   badgeName: string;
-  badgeType: "LEARNING_STREAK" | "AI_SPEAKING_COUNT" | "AI_PRACTICE_COUNT" | "LEARNING_LEVEL";
+  badgeType: BadgeType;
   requirementValue: number;
   currentValue: number;
   earned: boolean;
@@ -24,7 +30,7 @@ export interface Badge {
   badgeId: string;
   name: string;
   description: string;
-  badgeType: "LEARNING_STREAK" | "AI_SPEAKING_COUNT" | "AI_PRACTICE_COUNT" | "LEARNING_LEVEL";
+  badgeType: BadgeType;
   requirementValue: number;
   expReward: number;
   iconUrl: string;
@@ -49,7 +55,7 @@ export interface BadgeDetail {
   badgeId: string;
   name: string;
   description: string;
-  badgeType: "LEARNING_STREAK" | "AI_SPEAKING_COUNT" | "AI_PRACTICE_COUNT" | "LEARNING_LEVEL";
+  badgeType: BadgeType;
   requirementValue: number;
   expReward: number;
   iconUrl: string;
@@ -85,7 +91,7 @@ export interface EarnedBadge {
   badgeId: string;
   badgeName: string;
   description: string;
-  badgeType: "LEARNING_STREAK" | "AI_SPEAKING_COUNT" | "AI_PRACTICE_COUNT" | "LEARNING_LEVEL";
+  badgeType: BadgeType;
   iconUrl: string;
   expReward: number;
   earnedAt: string;
