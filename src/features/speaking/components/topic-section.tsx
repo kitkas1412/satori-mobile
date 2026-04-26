@@ -71,7 +71,7 @@ export function TopicSection({
       practiceStatus: topic.practiceStatus,
     })) ?? [];
 
-  const practicedCount = conversations.filter((c) => c.practiced).length;
+  const practicedCount = conversations.filter((c) => c.practiceStatus === "COMPLETED").length;
 
   /** true nếu section còn ít nhất một topic chưa được luyện tập */
   const hasUnpracticed =
