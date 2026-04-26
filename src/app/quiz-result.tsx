@@ -1,4 +1,4 @@
-import { QuizResultScreen } from "@/features/assignment/screens/quiz-result-screen";
+import { QuizResultScreen } from "@/features/assignment/screens";
 
 export default function QuizResult() {
   return <QuizResultScreen />;

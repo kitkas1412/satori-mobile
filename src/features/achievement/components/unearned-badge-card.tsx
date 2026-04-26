@@ -3,9 +3,14 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Lock } from "lucide-react-native";
 import { Image } from "expo-image";
 import { Text, TouchableOpacity, View } from "react-native";
-import type { Badge } from "../api";
 
-export function UnearnedBadgeCard({ badge, onPress }: { badge: Badge; onPress?: () => void }) {
+interface UnearnedBadgeCardProps {
+  iconUrl: string;
+  name: string;
+  onPress?: () => void;
+}
+
+export function UnearnedBadgeCard({ iconUrl, name, onPress }: UnearnedBadgeCardProps) {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
@@ -36,52 +41,19 @@ export function UnearnedBadgeCard({ badge, onPress }: { badge: Badge; onPress?: 
 
       {/* Icon */}
       <Image
-        source={{ uri: badge.iconUrl }}
+        source={{ uri: iconUrl }}
         style={{ width: 48, height: 48 }}
         contentFit="contain"
       />
 
-      {/* Name + description */}
-      <View style={{ alignItems: "center", gap: 2, width: "100%" }}>
-        <Text
-          className="font-heading"
-          style={{ fontSize: 11, color: theme.text.tertiary, textAlign: "center" }}
-          numberOfLines={2}
-        >
-          {badge.name}
-        </Text>
-        <Text
-          style={{ fontSize: 9, color: theme.text.tertiary, textAlign: "center" }}
-          numberOfLines={2}
-        >
-          {badge.description}
-        </Text>
-      </View>
-
-      {/* Progress bar */}
-      <View style={{ width: "100%", gap: 2 }}>
-        <View
-          style={{
-            width: "100%",
-            height: 4,
-            borderRadius: 100,
-            backgroundColor: theme.border.subtle,
-            overflow: "hidden",
-          }}
-        >
-          <View
-            style={{
-              height: 4,
-              borderRadius: 100,
-              backgroundColor: theme.brand.primary,
-              width: `${badge.progressPercent}%`,
-            }}
-          />
-        </View>
-        <Text style={{ fontSize: 9, color: theme.text.tertiary, textAlign: "center" }}>
-          {badge.currentValue}/{badge.requirementValue}
-        </Text>
-      </View>
+      {/* Name */}
+      <Text
+        className="font-heading"
+        style={{ fontSize: 11, color: theme.text.tertiary, textAlign: "center", width: "100%" }}
+        numberOfLines={2}
+      >
+        {name}
+      </Text>
     </TouchableOpacity>
   );
 }

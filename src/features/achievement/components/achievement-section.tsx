@@ -1,26 +1,22 @@
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { useRouter } from "expo-router";
 import { ChevronRight } from "lucide-react-native";
 import { Text, TouchableOpacity, View } from "react-native";
-import { useEarnedBadges } from "../hooks";
+import type { EarnedBadge } from "../api";
+import { chunkArray } from "../utils";
 import { BadgeCard } from "./badge-card";
 
-function chunkArray<T>(arr: T[], size: number): T[][] {
-  return Array.from({ length: Math.ceil(arr.length / size) }, (_, i) =>
-    arr.slice(i * size, i * size + size)
-  );
+interface AchievementSectionProps {
+  badges: EarnedBadge[];
+  onPressViewAll: () => void;
+  onPressBadge: (badgeId: string) => void;
 }
 
-export function AchievementSection() {
-  const { data } = useEarnedBadges();
-  const router = useRouter();
+export function AchievementSection({ badges, onPressViewAll, onPressBadge }: AchievementSectionProps) {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
-  if (!data) return null;
-
-  const preview = data.slice(0, 6);
+  const preview = badges.slice(0, 6);
   const rows = chunkArray(preview, 3);
 
   return (
@@ -37,7 +33,7 @@ export function AchievementSection() {
           activeOpacity={0.6}
           hitSlop={12}
           style={{ flexDirection: "row", alignItems: "center" }}
-          onPress={() => router.push("/achievements")}
+          onPress={onPressViewAll}
         >
           <Text
             className="font-heading"
@@ -56,10 +52,8 @@ export function AchievementSection() {
             {row.map((badge) => (
               <BadgeCard
                 key={badge.badgeId}
-                badge={badge}
-                onPress={() =>
-                  router.push({ pathname: "/badge-detail", params: { badgeId: badge.badgeId } })
-                }
+                iconUrl={badge.iconUrl}
+                onPress={() => onPressBadge(badge.badgeId)}
               />
             ))}
           </View>

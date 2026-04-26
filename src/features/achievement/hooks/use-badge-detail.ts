@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { getBadgeDetailApi } from "../api";
-import { achievementQueryKeys } from "./use-achievement-progress";
+import { achievementQueryKeys } from "../utils";
 
 export function useBadgeDetail(badgeId: string) {
   return useQuery({
