@@ -4,7 +4,7 @@ import {
   useSpeechRecognitionEvent,
 } from "expo-speech-recognition";
 import { useRef, useState } from "react";
-import { Alert, Platform } from "react-native";
+import { Alert } from "react-native";
 
 type RecordingResult = { transcript: string; audioUri: string | null };
 
@@ -20,7 +20,7 @@ export function useRecorder() {
   const resolveRef = useRef<((v: RecordingResult) => void) | null>(null);
   const safetyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  function tryResolve() {
+  async function tryResolve() {
     // resolve only when both "end" and "audioend" have fired
     if (!endFiredRef.current) return;
     if (!audioEndFiredRef.current) return;
@@ -31,20 +31,32 @@ export function useRecorder() {
       safetyTimerRef.current = null;
     }
 
-    resolveRef.current({
+    // Switch audio session sang playback TRƯỚC khi resolve — tránh race với
+    // playAssistantMessage chạy ngay sau, khi session còn ở `.playAndRecord`
+    // sẽ routing audio qua earpiece với volume thấp.
+    await setAudioModeAsync({
+      allowsRecording: false,
+      playsInSilentMode: true,
+    }).catch(() => {});
+
+    const resolver = resolveRef.current;
+    resolveRef.current = null;
+    isCleaningUpRef.current = false;
+    resolver?.({
       transcript: transcriptRef.current,
       audioUri: audioUriRef.current,
     });
-    resolveRef.current = null;
-    setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true });
-    isCleaningUpRef.current = false;
   }
 
   useSpeechRecognitionEvent("result", (event) => {
-    const top = event.results?.[0];
-    if (top) {
-      transcriptRef.current = top.transcript;
-    }
+    const alts = event.results;
+    if (!alts || alts.length === 0) return;
+    const best = alts.reduce((acc, cur) => {
+      const a = acc.confidence ?? 0;
+      const c = cur.confidence ?? 0;
+      return c > a ? cur : acc;
+    }, alts[0]);
+    if (best.transcript) transcriptRef.current = best.transcript;
   });
 
   useSpeechRecognitionEvent("audioend", (event) => {
@@ -62,22 +74,16 @@ export function useRecorder() {
   useSpeechRecognitionEvent("error", (event) => {
     if (event.error === "aborted") return;
 
-    if (event.error === "language-not-supported") {
-      if (Platform.OS === "android") {
-        ExpoSpeechRecognitionModule.androidTriggerOfflineModelDownload({
-          locale: "ja-JP",
-        }).catch(() => {
-          Alert.alert(
-            "Thiết bị chưa hỗ trợ",
-            "Vào Cài đặt → Quản lý chung → Nhận dạng giọng nói ngoại tuyến và tải tiếng Nhật.",
-          );
-        });
-      } else {
-        Alert.alert(
-          "Thiết bị không hỗ trợ",
-          "Thiết bị này không hỗ trợ nhận dạng tiếng Nhật.",
-        );
-      }
+    if (event.error === "network") {
+      Alert.alert(
+        "Mất kết nối",
+        "Không thể nhận dạng giọng nói khi mất mạng. Vui lòng kiểm tra kết nối và thử lại.",
+      );
+    } else if (event.error === "language-not-supported") {
+      Alert.alert(
+        "Thiết bị không hỗ trợ",
+        "Thiết bị này không hỗ trợ nhận dạng tiếng Nhật.",
+      );
     }
 
     console.warn("Speech recognition error:", event.error, event.message);
@@ -109,14 +115,16 @@ export function useRecorder() {
       interimResults: true,
       continuous: true,
       addsPunctuation: true,
-      requiresOnDeviceRecognition: true,
+      requiresOnDeviceRecognition: false,
+      maxAlternatives: 3,
+      iosTaskHint: "dictation",
       recordingOptions: {
         persist: true,
       },
       iosCategory: {
         category: "playAndRecord",
         categoryOptions: ["defaultToSpeaker", "allowBluetooth"],
-        mode: "voiceChat",
+        mode: "measurement",
       },
     });
   }
@@ -128,20 +136,20 @@ export function useRecorder() {
       ExpoSpeechRecognitionModule.stop();
 
       // safety net: if iOS never fires "end", resolve after 8s to avoid leak
-      safetyTimerRef.current = setTimeout(() => {
-        if (resolveRef.current) {
-          resolveRef.current({
-            transcript: transcriptRef.current,
-            audioUri: audioUriRef.current,
-          });
-          resolveRef.current = null;
-          setAudioModeAsync({
-            allowsRecording: false,
-            playsInSilentMode: true,
-          });
-          isCleaningUpRef.current = false;
-          audioEndFiredRef.current = false;
-        }
+      safetyTimerRef.current = setTimeout(async () => {
+        if (!resolveRef.current) return;
+        await setAudioModeAsync({
+          allowsRecording: false,
+          playsInSilentMode: true,
+        }).catch(() => {});
+        const resolver = resolveRef.current;
+        resolveRef.current = null;
+        isCleaningUpRef.current = false;
+        audioEndFiredRef.current = false;
+        resolver?.({
+          transcript: transcriptRef.current,
+          audioUri: audioUriRef.current,
+        });
       }, 8000);
     });
   }

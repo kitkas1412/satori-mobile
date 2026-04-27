@@ -1,5 +1,4 @@
-import { IconButton, ScreenAsyncView, ScreenHeader } from "@/components/ui";
-import { ProfileRow } from "@/features/profile-management/components";
+import { IconButton, ProfileRow, ScreenAsyncView, ScreenHeader } from "@/components/ui";
 import { useLearningPreferences } from "@/features/setting/hooks";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -9,29 +8,10 @@ import { ChevronLeft } from "lucide-react-native";
 import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const STUDY_TIME_LABELS: Record<string, string> = {
-  morning: "Buổi sáng",
-  afternoon: "Buổi chiều",
-  evening: "Buổi tối",
-  night: "Ban đêm",
-};
-
-const PACE_LABELS: Record<string, string> = {
-  slow: "Chậm",
-  normal: "Bình thường",
-  fast: "Nhanh",
-};
-
 const FORMALITY_LABELS: Record<string, string> = {
   polite: "Lịch sự",
   casual: "Thân mật",
   formal: "Trang trọng",
-};
-
-const CONVERSATION_STYLE_LABELS: Record<string, string> = {
-  practical: "Thực hành",
-  academic: "Học thuật",
-  casual: "Thông thường",
 };
 
 
@@ -90,31 +70,6 @@ export function GeneralSettingsScreen() {
               onChangePress={() => router.push("/edit-daily-goal")}
             />
 
-            <View style={{ height: 8 }} />
-
-            <ProfileRow
-              label="Thời gian học ưa thích"
-              value={
-                prefs?.preferredStudyTime
-                  ? (STUDY_TIME_LABELS[prefs.preferredStudyTime] ??
-                    prefs.preferredStudyTime)
-                  : "—"
-              }
-              onChangePress={() => router.push("/edit-study-time")}
-            />
-
-            <View style={{ height: 8 }} />
-
-            <ProfileRow
-              label="Tốc độ học"
-              value={
-                prefs?.learningPace
-                  ? (PACE_LABELS[prefs.learningPace] ?? prefs.learningPace)
-                  : "—"
-              }
-              onChangePress={() => router.push("/edit-learning-pace")}
-            />
-
           </View>
 
           {/* Card 2 — Ngôn ngữ & Hội thoại */}
@@ -135,19 +90,6 @@ export function GeneralSettingsScreen() {
                   : "—"
               }
               onChangePress={() => router.push("/edit-formality")}
-            />
-
-            <View style={{ height: 8 }} />
-
-            <ProfileRow
-              label="Phong cách hội thoại"
-              value={
-                prefs?.conversationStyle
-                  ? (CONVERSATION_STYLE_LABELS[prefs.conversationStyle] ??
-                    prefs.conversationStyle)
-                  : "—"
-              }
-              onChangePress={() => router.push("/edit-conversation-style")}
             />
           </View>
 
