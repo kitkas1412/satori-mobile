@@ -3,7 +3,7 @@ import type {
   NotificationSettings,
   UpdateNotificationSettingsRequest,
 } from "@/features/setting/api";
-import { notificationSettingsQueryKey } from "./use-notification-settings";
+import { notificationSettingsQueryKeys } from "./use-notification-settings";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export function useUpdateNotificationSettings() {
@@ -12,7 +12,7 @@ export function useUpdateNotificationSettings() {
   return useMutation({
     mutationFn: async (data: Partial<UpdateNotificationSettingsRequest>) => {
       const cached = queryClient.getQueryData<NotificationSettings>(
-        notificationSettingsQueryKey,
+        notificationSettingsQueryKeys.all,
       );
       return updateNotificationSettings({
         ...cached,
@@ -20,7 +20,7 @@ export function useUpdateNotificationSettings() {
       } as UpdateNotificationSettingsRequest);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: notificationSettingsQueryKey });
+      queryClient.invalidateQueries({ queryKey: notificationSettingsQueryKeys.all });
     },
   });
 }

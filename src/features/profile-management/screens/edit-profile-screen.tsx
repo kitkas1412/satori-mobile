@@ -1,5 +1,4 @@
-import { IconButton, ScreenHeader } from "@/components/ui";
-import { ProfileRow } from "@/features/profile-management/components";
+import { IconButton, ProfileRow, ScreenHeader } from "@/components/ui";
 import { useProfile } from "@/features/profile-management/hooks";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
