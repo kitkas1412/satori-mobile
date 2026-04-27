@@ -2,7 +2,7 @@
 // Ưu tiên phát file audio từ URL (chất lượng cao hơn), nếu không có thì
 // dùng Text-to-Speech (TTS) tiếng Nhật làm phương án dự phòng.
 
-import { createAudioPlayer } from "expo-audio";
+import { createAudioPlayer, setAudioModeAsync } from "expo-audio";
 import type { AudioPlayer } from "expo-audio";
 import { File, Paths } from "expo-file-system";
 import * as Speech from "expo-speech";
@@ -22,6 +22,14 @@ export async function playAssistantMessage(
   audioUrl?: string | null,
   audioBase64?: string | null,
 ): Promise<void> {
+  // Defensive: đảm bảo audio session ở chế độ playback (loa ngoài, full DSP).
+  // Nếu còn dính `.playAndRecord` từ session ghi âm trước, audio sẽ phát qua
+  // earpiece với volume rất nhỏ.
+  await setAudioModeAsync({
+    allowsRecording: false,
+    playsInSilentMode: true,
+  }).catch(() => {});
+
   if (audioUrl) {
     return playAudioFromUrl(audioUrl).catch(() => speakText(content));
   }
