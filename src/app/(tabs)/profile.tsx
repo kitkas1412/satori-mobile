@@ -6,6 +6,7 @@ import {
 } from "@/features/achievement/components";
 import {
   InsightsCard,
+  MasteryCard,
   WeeklyProgressCard,
 } from "@/features/learning-analytics/components";
 import {
@@ -39,7 +40,7 @@ export default function ProfileTab() {
   useFocusEffect(
     useCallback(() => {
       refetch();
-    }, [refetch])
+    }, [refetch]),
   );
   const router = useRouter();
   const isFocused = useIsFocused();
@@ -221,9 +222,14 @@ export default function ProfileTab() {
             </View>
           )}
 
-          {achievementProgress && <StatsSection progress={achievementProgress} />}
+          {achievementProgress && (
+            <StatsSection progress={achievementProgress} />
+          )}
           <View className="px-4">
             <WeeklyProgressCard />
+          </View>
+          <View className="px-4">
+            <MasteryCard />
           </View>
           <View className="px-4">
             <InsightsCard />
@@ -232,13 +238,21 @@ export default function ProfileTab() {
             <AchievementSection
               badges={earnedBadges}
               onPressViewAll={() => router.push("/achievements")}
-              onPressBadge={(id) => router.push({ pathname: "/badge-detail", params: { badgeId: id } })}
+              onPressBadge={(id) =>
+                router.push({
+                  pathname: "/badge-detail",
+                  params: { badgeId: id },
+                })
+              }
             />
           )}
         </ScrollView>
       </View>
       <LoadingOverlay visible={isFocused && isFetching} title="Đang tải..." />
-      <LoadingOverlay visible={isFocused && isPending} title="Đang đăng xuất..." />
+      <LoadingOverlay
+        visible={isFocused && isPending}
+        title="Đang đăng xuất..."
+      />
     </>
   );
 }
