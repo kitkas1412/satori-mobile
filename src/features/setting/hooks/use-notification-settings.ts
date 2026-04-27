@@ -1,11 +1,14 @@
 import { getNotificationSettings } from "@/features/setting/api";
 import { useQuery } from "@tanstack/react-query";
 
-export const notificationSettingsQueryKey = ["setting", "notificationSettings"] as const;
+export const notificationSettingsQueryKeys = {
+  all: ["setting", "notificationSettings"] as const,
+  filtered: () => [...notificationSettingsQueryKeys.all] as const,
+};
 
 export function useNotificationSettings() {
   return useQuery({
-    queryKey: notificationSettingsQueryKey,
+    queryKey: notificationSettingsQueryKeys.all,
     queryFn: getNotificationSettings,
   });
 }

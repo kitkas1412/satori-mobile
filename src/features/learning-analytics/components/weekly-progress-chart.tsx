@@ -9,7 +9,10 @@ export type MetricKey =
   | "sessionsCompleted"
   | "totalStudyMinutes"
   | "averageScore"
-  | "expEarned";
+  | "expEarned"
+  | "pronunciationOverall"
+  | "languageOverall"
+  | "speakingSessions";
 
 export const Y_AXIS_W = 24;
 const BODY_PAD_LEFT = 8;
@@ -46,7 +49,7 @@ interface YAxisProps {
 export function WeeklyProgressYAxis({ dataPoints, metric }: YAxisProps) {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
-  const values = dataPoints.map((d) => d[metric] as number);
+  const values = dataPoints.map((d) => (d[metric] ?? 0) as number);
   const { range, gridValues } = computeGrid(values);
 
   return (
@@ -86,7 +89,7 @@ export function WeeklyProgressChart({
   const theme = Colors[colorScheme ?? "light"];
 
   const n = dataPoints.length;
-  const values = dataPoints.map((d) => d[metric] as number);
+  const values = dataPoints.map((d) => (d[metric] ?? 0) as number);
   const { range, gridValues } = computeGrid(values);
 
   const chartW = width - BODY_PAD_LEFT - PAD_RIGHT;
@@ -94,7 +97,7 @@ export function WeeklyProgressChart({
     BODY_PAD_LEFT + (n > 1 ? (i / (n - 1)) * chartW : chartW / 2);
 
   const polylinePoints = dataPoints
-    .map((d, i) => `${toX(i)},${toY(d[metric] as number, range)}`)
+    .map((d, i) => `${toX(i)},${toY((d[metric] ?? 0) as number, range)}`)
     .join(" ");
 
   return (
@@ -127,7 +130,7 @@ export function WeeklyProgressChart({
 
         {dataPoints.map((d, i) => {
           const x = toX(i);
-          const y = toY(d[metric] as number, range);
+          const y = toY((d[metric] ?? 0) as number, range);
           const isSelected = selectedIndex === i;
           return (
             <React.Fragment key={i}>
