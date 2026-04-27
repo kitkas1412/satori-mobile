@@ -4,7 +4,7 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { ArrowLeft } from "lucide-react-native";
+import { ChevronLeft } from "lucide-react-native";
 import { useState } from "react";
 import { KeyboardAvoidingView, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -47,7 +47,7 @@ export function EditDisplayNameScreen() {
               hitSlop={12}
               style={{ alignSelf: "flex-start" }}
             >
-              <ArrowLeft size={24} color={theme.icon.primary} />
+              <ChevronLeft size={24} color={theme.icon.primary} />
             </TouchableOpacity>
 
             <View style={{ marginTop: 24, gap: 4 }}>

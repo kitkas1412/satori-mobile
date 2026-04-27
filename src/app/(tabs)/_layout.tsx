@@ -1,5 +1,11 @@
 import { Tabs } from "expo-router";
-import { Dumbbell, House, Mic, UserRound } from "lucide-react-native";
+import {
+  ClipboardList,
+  Dumbbell,
+  House,
+  Mic,
+  UserRound,
+} from "lucide-react-native";
 import React from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -43,12 +49,17 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="assignment"
+        options={{
+          title: "Bài tập",
+          tabBarIcon: ({ color }) => <ClipboardList size={24} color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="practice"
         options={{
           title: "Luyện tập",
-          tabBarIcon: ({ color, focused }) => (
-            <Dumbbell size={24} color={color} />
-          ),
+          tabBarIcon: ({ color }) => <Dumbbell size={24} color={color} />,
         }}
       />
       <Tabs.Screen

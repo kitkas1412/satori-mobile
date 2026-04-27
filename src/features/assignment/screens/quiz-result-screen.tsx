@@ -2,27 +2,29 @@
 // Hiển thị điểm số, nhãn đánh giá, thống kê đúng/sai và chi tiết đáp án từng câu.
 
 import { Check, X } from "lucide-react-native";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
+import { useRouter } from "expo-router";
 
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { PrimaryButton, ScoreRing, ScreenHeader } from "@/components/ui";
+import { IconButton, PrimaryButton, ScoreRing, ScreenHeader } from "@/components/ui";
 import { useQuizResult } from "../hooks";
 import { QuizAnswerItem } from "../components";
 
 export function QuizResultScreen() {
+  const router = useRouter();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
 
-  const result = useQuizResult();
+  const result = useQuizResult({ onNavigate: (path) => router.replace(path as any) });
 
   // Không render nếu chưa có kết quả trong store (tránh màn hình trắng)
   if (!result) return null;
 
-  const { quizResult, wrongCount, performanceLabel, handleContinue } = result;
+  const { quizResult, wrongCount, performanceLabel, handleContinue, isReview } = result;
 
   return (
     <View
@@ -36,14 +38,10 @@ export function QuizResultScreen() {
         title="Kết quả"
         showDivider
         leftAction={
-          <Pressable
+          <IconButton
+            icon={<X size={22} color={theme.icon.primary} strokeWidth={2} />}
             onPress={handleContinue}
-            hitSlop={8}
-            className="items-center justify-center"
-            style={{ width: 24, height: 24 }}
-          >
-            <X size={22} color={theme.icon.primary} strokeWidth={2} />
-          </Pressable>
+          />
         }
         rightAction={<View style={{ width: 24 }} />}
       />
@@ -175,7 +173,7 @@ export function QuizResultScreen() {
           backgroundColor: theme.background.page,
         }}
       >
-        <PrimaryButton text="Quay về" onPress={handleContinue} />
+        <PrimaryButton text={isReview ? "Quay về" : "Tiếp tục"} onPress={handleContinue} />
       </View>
     </View>
   );

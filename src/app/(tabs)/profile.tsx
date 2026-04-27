@@ -4,14 +4,24 @@ import {
   AchievementSection,
   StatsSection,
 } from "@/features/achievement/components";
-import { useAchievementProgress } from "@/features/achievement/hooks";
+import {
+  InsightsCard,
+  MasteryCard,
+  WeeklyProgressCard,
+} from "@/features/learning-analytics/components";
+import {
+  useAchievementProgress,
+  useEarnedBadges,
+} from "@/features/achievement/hooks";
 import {
   useProfile,
   useUploadAvatar,
 } from "@/features/profile-management/hooks";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useIsFocused } from "@react-navigation/native";
+import { useCallback } from "react";
 import { StatusBar } from "expo-status-bar";
 import { Camera, Pencil, Settings } from "lucide-react-native";
 import {
@@ -25,11 +35,19 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function ProfileTab() {
-  const { data: profile, isLoading } = useProfile();
+  const { data: profile, isFetching, refetch } = useProfile();
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch]),
+  );
   const router = useRouter();
+  const isFocused = useIsFocused();
   const { mutate: logoutUser, isPending } = useLogout();
   const { handleAvatarPress, isPending: isUploadingAvatar } = useUploadAvatar();
   const { data: achievementProgress } = useAchievementProgress();
+  const { data: earnedBadges } = useEarnedBadges();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
@@ -69,7 +87,7 @@ export default function ProfileTab() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ gap: 16, paddingBottom: 32 }}
         >
-          {!isLoading && profile && (
+          {!isFetching && profile && (
             <View className="px-4">
               <View
                 className="rounded-2xl overflow-hidden"
@@ -204,11 +222,37 @@ export default function ProfileTab() {
             </View>
           )}
 
-          <StatsSection />
-          <AchievementSection />
+          {achievementProgress && (
+            <StatsSection progress={achievementProgress} />
+          )}
+          <View className="px-4">
+            <WeeklyProgressCard />
+          </View>
+          <View className="px-4">
+            <MasteryCard />
+          </View>
+          <View className="px-4">
+            <InsightsCard />
+          </View>
+          {earnedBadges && (
+            <AchievementSection
+              badges={earnedBadges}
+              onPressViewAll={() => router.push("/achievements")}
+              onPressBadge={(id) =>
+                router.push({
+                  pathname: "/badge-detail",
+                  params: { badgeId: id },
+                })
+              }
+            />
+          )}
         </ScrollView>
       </View>
-      <LoadingOverlay visible={isPending} title="Đang đăng xuất..." />
+      <LoadingOverlay visible={isFocused && isFetching} title="Đang tải..." />
+      <LoadingOverlay
+        visible={isFocused && isPending}
+        title="Đang đăng xuất..."
+      />
     </>
   );
 }

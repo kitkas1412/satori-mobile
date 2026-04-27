@@ -33,18 +33,34 @@ export interface User {
   status: string;
 }
 
+export interface SkillPoint {
+  category: string | null;
+  skill: string | null;
+  description: string | null;
+  confidence: number;
+  source: string | null;
+  jlptLevel: string | null;
+  relatedEntityIds: string[] | null;
+  lastUpdated: string | null;
+}
+
+export interface SkillScore {
+  skill: string;
+  score: number;
+  previousScore: number;
+  trend: "STABLE" | "UP" | "DOWN";
+  dataPoints: number;
+  lastUpdated: string;
+}
+
 export interface LearningPreferences {
   targetJlptLevel: string;
   dailyStudyGoalMinutes: number;
-  preferredStudyTime: string | null;
   preferredTopics: string[];
-  learningPace: string | null;
   preferredFormality: string | null;
-  conversationStyle: string | null;
-  streakReminderEnabled: boolean;
-  reminderTime: string | null;
-  weakPoints: { item: string; type: string }[];
-  strongPoints: { item: string; type: string }[];
+  weakPoints: SkillPoint[];
+  strongPoints: SkillPoint[];
+  skillScores: SkillScore[];
 }
 
 export interface EnrolledClass {

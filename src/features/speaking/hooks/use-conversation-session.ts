@@ -12,6 +12,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Alert, AppState, type AppStateStatus } from "react-native";
+import { extractApiError } from "@/lib/extract-api-error";
+import { useErrorOverlayStore } from "@/stores/error-overlay-store";
 import {
   abandonSessionApi,
   completeSessionApi,
@@ -71,6 +73,7 @@ export function useConversationSession() {
         setTurnState("AI_TURN");
         // Tắt overlay trước khi phát audio để người dùng thấy tin nhắn xuất hiện
         setIsInitializing(false);
+        console.log("[startSession] initial messages:", session.messages.map((m) => ({ role: m.role, audioUrl: m.audioUrl })));
         for (const msg of session.messages) {
           if (cancelledRef.current) break;
           await delay(600); // Độ trễ tự nhiên giữa các tin nhắn
@@ -78,15 +81,17 @@ export function useConversationSession() {
           addMessages([msg]);
           if (msg.role === "ASSISTANT") {
             // Đợi audio phát xong trước khi hiển thị tin nhắn tiếp theo
-            await playAssistantMessage(msg.content, msg.audioUrl).catch(
+            await playAssistantMessage(msg.content, msg.audioUrl, msg.audioBase64).catch(
               () => {}, // Bỏ qua lỗi audio, không block luồng hội thoại
             );
           }
         }
         if (!cancelledRef.current) setTurnState("USER_TURN");
-      } catch {
-        Alert.alert("Lỗi", "Không thể bắt đầu buổi học. Vui lòng thử lại.");
-        router.back();
+      } catch (error) {
+        useErrorOverlayStore.getState().show(
+          extractApiError(error, "Không thể bắt đầu buổi học. Vui lòng thử lại."),
+          () => router.back(),
+        );
       } finally {
         setIsInitializing(false);
       }
@@ -106,6 +111,28 @@ export function useConversationSession() {
       _startSession(() => startFreeTalkSessionApi({ jlptLevel, language })),
     [_startSession],
   );
+
+  /**
+   * Kết thúc session và lấy kết quả đánh giá từ AI.
+   * Sau khi gọi, feedback sẽ được lưu vào store và màn hình sẽ hiển thị nút "Tiếp tục".
+   */
+  const completeSession = useCallback(async () => {
+    if (!sessionId) return;
+    setIsCompleting(true);
+    try {
+      const feedback = await completeSessionApi(sessionId);
+      setFeedback(feedback);
+      queryClient.invalidateQueries({ queryKey: ["speaking", "conversations"] });
+      queryClient.invalidateQueries({ queryKey: speakingQueryKeys.topics });
+    } catch (error) {
+      useErrorOverlayStore.getState().show(
+        extractApiError(error, "Không thể hoàn thành buổi học. Vui lòng thử lại."),
+      );
+    } finally {
+      await AsyncStorage.removeItem(ACTIVE_SESSION_STORAGE_KEY);
+      setIsCompleting(false);
+    }
+  }, [sessionId, setFeedback, queryClient]);
 
   /**
    * Gửi tin nhắn của người dùng và xử lý phản hồi từ AI.
@@ -159,6 +186,8 @@ export function useConversationSession() {
           audioUri ?? undefined,
         );
 
+        console.log("[sendMessage] messages:", result.messages.map((m) => ({ role: m.role, audioUrl: m.audioUrl })));
+
         // Tách tin nhắn người dùng (có dữ liệu thật) và tin nhắn AI
         const userMessages = result.messages.filter(
           (m) => m.role !== "ASSISTANT",
@@ -178,36 +207,25 @@ export function useConversationSession() {
           await delay(600); // Độ trễ tự nhiên trước mỗi tin nhắn
           if (cancelledRef.current) break;
           addMessages([msg]);
-          await playAssistantMessage(msg.content, msg.audioUrl).catch(() => {});
+          await playAssistantMessage(msg.content, msg.audioUrl, msg.audioBase64).catch(() => {});
         }
-        if (!cancelledRef.current) setTurnState("USER_TURN");
-      } catch {
-        Alert.alert("Lỗi", "Không thể gửi tin nhắn. Vui lòng thử lại.");
+        if (!cancelledRef.current) {
+          if (result.allMissionsCompleted) {
+            await completeSession();
+          } else {
+            setTurnState("USER_TURN");
+          }
+        }
+      } catch (error) {
+        useErrorOverlayStore.getState().show(
+          extractApiError(error, "Không thể gửi tin nhắn. Vui lòng thử lại."),
+          () => {}, // Ở lại session, không navigate
+        );
         setTurnState("USER_TURN");
       }
     },
-    [sessionId, addMessages, setMissions],
+    [sessionId, addMessages, setMissions, completeSession],
   );
-
-  /**
-   * Kết thúc session và lấy kết quả đánh giá từ AI.
-   * Sau khi gọi, feedback sẽ được lưu vào store và màn hình sẽ hiển thị nút "Tiếp tục".
-   */
-  const completeSession = useCallback(async () => {
-    if (!sessionId) return;
-    setIsCompleting(true);
-    try {
-      const feedback = await completeSessionApi(sessionId);
-      setFeedback(feedback);
-      queryClient.invalidateQueries({ queryKey: ["speaking", "conversations"] });
-      queryClient.invalidateQueries({ queryKey: speakingQueryKeys.topics });
-    } catch {
-      Alert.alert("Lỗi", "Không thể hoàn thành buổi học. Vui lòng thử lại.");
-    } finally {
-      await AsyncStorage.removeItem(ACTIVE_SESSION_STORAGE_KEY);
-      setIsCompleting(false);
-    }
-  }, [sessionId, setFeedback]);
 
   /**
    * Bỏ dở session (người dùng thoát giữa chừng).
@@ -253,7 +271,10 @@ export function useConversationSession() {
             await AsyncStorage.removeItem(ACTIVE_SESSION_STORAGE_KEY);
             clearSession();
             router.replace("/(tabs)/speaking");
-            Alert.alert("Buổi học đã kết thúc", "Buổi học đã kết thúc do không hoạt động.");
+            useErrorOverlayStore.getState().show(
+              "Buổi học đã kết thúc do không hoạt động.",
+              () => {}, // Đã navigate, chỉ dismiss overlay
+            );
           }
         }
       }

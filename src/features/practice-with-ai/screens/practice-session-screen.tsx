@@ -2,16 +2,15 @@
 // Luồng: khởi tạo session → người dùng chọn đáp án → xác nhận → câu tiếp theo
 //        → hoàn thành → chuyển sang màn hình kết quả
 
-import { useEffect, useState } from "react";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { useEffect, useState } from "react";
+import { Alert, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { LoadingOverlay, PrimaryButton, ProgressBar } from "@/components/ui";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { usePracticeSession, useSubmitAnswer } from "../hooks";
 import type {
   AnswerResponse,
   Items,
@@ -28,12 +27,12 @@ import {
   TranslationSection,
   TrueFalseSection,
 } from "../components";
+import { usePracticeSession, useSubmitAnswer } from "../hooks";
 
 const SESSION_TYPE_LABEL: Record<SessionType, string> = {
   VOCAB_DRILL: "Từ vựng",
   GRAMMAR_DRILL: "Ngữ pháp",
   MIXED_LESSON: "Hỗn hợp",
-  KANJI_READING: "Kanji",
 };
 
 export function PracticeSessionScreen() {
@@ -42,15 +41,21 @@ export function PracticeSessionScreen() {
   const theme = Colors[colorScheme ?? "light"];
   const router = useRouter();
 
-  const { lessonId, sessionType, preset, itemTypes, selectedVocabIds, selectedGrammarIds } =
-    useLocalSearchParams<{
-      lessonId: string;
-      sessionType: string;
-      preset?: string;
-      itemTypes: string;
-      selectedVocabIds?: string;
-      selectedGrammarIds?: string;
-    }>();
+  const {
+    lessonId,
+    sessionType,
+    preset,
+    itemTypes,
+    selectedVocabIds,
+    selectedGrammarIds,
+  } = useLocalSearchParams<{
+    lessonId: string;
+    sessionType: string;
+    preset?: string;
+    itemTypes: string;
+    selectedVocabIds?: string;
+    selectedGrammarIds?: string;
+  }>();
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOptionId, setSelectedOptionId] = useState<number | null>(null);
@@ -86,8 +91,12 @@ export function PracticeSessionScreen() {
         sessionType: sessionType as SessionType,
         ...(preset ? { preset: preset as "QUICK" | "STANDARD" | "FULL" } : {}),
         itemTypes: JSON.parse(itemTypes),
-        selectedVocabIds: selectedVocabIds ? JSON.parse(selectedVocabIds) : null,
-        selectedGrammarIds: selectedGrammarIds ? JSON.parse(selectedGrammarIds) : null,
+        selectedVocabIds: selectedVocabIds
+          ? JSON.parse(selectedVocabIds)
+          : null,
+        selectedGrammarIds: selectedGrammarIds
+          ? JSON.parse(selectedGrammarIds)
+          : null,
       });
     }
   }, []);
@@ -98,7 +107,9 @@ export function PracticeSessionScreen() {
     );
   }
 
-  function handleMatchingPairsChange(pairs: { leftId: number; rightId: number }[]) {
+  function handleMatchingPairsChange(
+    pairs: { leftId: number; rightId: number }[],
+  ) {
     setConfirmedMatchingPairs(pairs);
   }
 
@@ -138,7 +149,7 @@ export function PracticeSessionScreen() {
             if (result.sessionCompleted || currentIndex + 1 >= totalItems) {
               router.replace({
                 pathname: "/practice-result",
-                params: { practiceSessionId: sessionData.session.sessionId },
+                params: { practiceSessionId: sessionData.session.sessionId, itemTypes, items: JSON.stringify(sessionData.items), sessionType, lessonId },
               });
             } else {
               setCurrentIndex((i) => i + 1);
@@ -159,7 +170,7 @@ export function PracticeSessionScreen() {
       if (answerResult.sessionCompleted || currentIndex + 1 >= totalItems) {
         router.replace({
           pathname: "/practice-result",
-          params: { practiceSessionId: sessionData.session.sessionId },
+          params: { practiceSessionId: sessionData.session.sessionId, itemTypes, items: JSON.stringify(sessionData.items), sessionType, lessonId },
         });
       } else {
         setCurrentIndex((i) => i + 1);
@@ -173,9 +184,7 @@ export function PracticeSessionScreen() {
 
     if (currentItem.itemType === "SENTENCE_ORDER") {
       if (selectedWordIds.length === 0) return;
-      const userAnswer = selectedWordIds
-        .map((id) => currentItem.options.find((o) => o.id === id)?.text ?? "")
-        .join(" ");
+      const userAnswer = selectedWordIds.join(",");
       submitAnswer(
         {
           sessionId: sessionData.session.sessionId,
@@ -193,16 +202,12 @@ export function PracticeSessionScreen() {
     }
 
     if (selectedOptionId === null) return;
-    const selectedOption = currentItem.options.find(
-      (o) => o.id === selectedOptionId,
-    );
-    if (!selectedOption) return;
 
     submitAnswer(
       {
         sessionId: sessionData.session.sessionId,
         itemId: currentItem.id,
-        userAnswer: selectedOption.text,
+        userAnswer: String(selectedOptionId),
       },
       {
         onSuccess: (result) => {
@@ -390,7 +395,7 @@ export function PracticeSessionScreen() {
           }}
         >
           {answerResult !== null && (
-            <FeedbackPanel answerResult={answerResult} theme={theme} />
+            <FeedbackPanel answerResult={answerResult} theme={theme} options={currentItem?.options} />
           )}
           <PrimaryButton
             text={

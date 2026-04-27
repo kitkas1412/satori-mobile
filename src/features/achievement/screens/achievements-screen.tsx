@@ -2,7 +2,7 @@ import { IconButton, ScreenHeader } from "@/components/ui";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useRouter } from "expo-router";
-import { ArrowLeft } from "lucide-react-native";
+import { ChevronLeft } from "lucide-react-native";
 import {
   ActivityIndicator,
   FlatList,
@@ -49,7 +49,7 @@ export function AchievementsScreen() {
         paddingTop={insets.top + 16}
         leftAction={
           <IconButton
-            icon={<ArrowLeft size={24} color={theme.icon.primary} />}
+            icon={<ChevronLeft size={24} color={theme.icon.primary} />}
             onPress={() => router.back()}
           />
         }
@@ -96,7 +96,15 @@ export function AchievementsScreen() {
               <FlatList
                 data={earned}
                 keyExtractor={(item) => item.badgeId}
-                renderItem={({ item }) => <EarnedBadgeCard badge={item} />}
+                renderItem={({ item }) => (
+                  <EarnedBadgeCard
+                    iconUrl={item.iconUrl}
+                    name={item.name}
+                    onPress={() =>
+                      router.push({ pathname: "/badge-detail", params: { badgeId: item.badgeId } })
+                    }
+                  />
+                )}
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 ItemSeparatorComponent={() => <View style={{ width: 8 }} />}
@@ -117,7 +125,14 @@ export function AchievementsScreen() {
               </Text>
               <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
                 {unearned.map((item) => (
-                  <UnearnedBadgeCard key={item.badgeId} badge={item} />
+                  <UnearnedBadgeCard
+                    key={item.badgeId}
+                    iconUrl={item.iconUrl}
+                    name={item.name}
+                    onPress={() =>
+                      router.push({ pathname: "/badge-detail", params: { badgeId: item.badgeId } })
+                    }
+                  />
                 ))}
               </View>
               {isFetchingNextPage && (

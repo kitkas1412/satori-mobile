@@ -1,14 +1,17 @@
 // Hook đọc kết quả bài trắc nghiệm từ store, tính nhãn đánh giá và xử lý điều hướng về trang chủ.
 // Trả về null nếu chưa có kết quả trong store (màn hình sẽ không render gì).
 
-import { useRouter } from "expo-router";
-
 import { useAssignmentStore } from "@/stores";
+import { selectQuizResult, selectClearQuizResult, selectIsReview } from "@/stores/assignment-store";
 
-export function useQuizResult() {
-  const router = useRouter();
-  const quizResult = useAssignmentStore((s) => s.quizResult);
-  const clearQuizResult = useAssignmentStore((s) => s.clearQuizResult);
+interface UseQuizResultParams {
+  onNavigate: (path: string) => void;
+}
+
+export function useQuizResult({ onNavigate }: UseQuizResultParams) {
+  const quizResult = useAssignmentStore(selectQuizResult);
+  const clearQuizResult = useAssignmentStore(selectClearQuizResult);
+  const isReview = useAssignmentStore(selectIsReview);
 
   if (!quizResult) return null;
 
@@ -23,11 +26,10 @@ export function useQuizResult() {
         ? "Tốt!"
         : "Cố lên!";
 
-  // Xóa kết quả khỏi store và quay về tab Practice
   function handleContinue() {
     clearQuizResult();
-    router.replace("/(tabs)/practice");
+    onNavigate("/(tabs)/assignment");
   }
 
-  return { quizResult, wrongCount, performanceLabel, handleContinue };
+  return { quizResult, wrongCount, performanceLabel, handleContinue, isReview };
 }

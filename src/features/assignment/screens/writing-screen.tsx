@@ -10,7 +10,8 @@ import {
   X,
 } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { Image, Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
+import { Image } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -18,6 +19,7 @@ import { StatusBar } from "expo-status-bar";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import {
+  IconButton,
   ImageViewerModal,
   LoadingOverlay,
   MarkdownText,
@@ -60,6 +62,8 @@ export function WritingScreen({ id }: WritingScreenProps) {
   const { handleSubmit, isPending: isSubmitting } = useWritingSubmit({
     assignmentId: id,
     images,
+    onNavigate: () => router.replace("/assignment-writing-result"),
+    dueDate: data?.dueDate,
   });
   const { handleExit } = useExitAssignment(() => router.back());
 
@@ -88,9 +92,10 @@ export function WritingScreen({ id }: WritingScreenProps) {
         title="Nộp bài tập"
         showDivider
         leftAction={
-          <Pressable onPress={handleExit} hitSlop={8}>
-            <X size={24} color={theme.icon.primary} strokeWidth={2} />
-          </Pressable>
+          <IconButton
+            icon={<X size={24} color={theme.icon.primary} strokeWidth={2} />}
+            onPress={handleExit}
+          />
         }
         rightAction={<View style={{ width: 24 }} />}
       />
@@ -277,6 +282,7 @@ export function WritingScreen({ id }: WritingScreenProps) {
                           <Image
                             source={{ uri: img.uri }}
                             style={{ width: 100, height: 100, borderRadius: 8 }}
+                            contentFit="cover"
                           />
                         </Pressable>
                         {/* Nút X để xóa ảnh khỏi danh sách */}

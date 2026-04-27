@@ -10,5 +10,7 @@ import { useMutation } from "@tanstack/react-query";
 export function useChangePassword() {
   return useMutation({
     mutationFn: (params: ChangePasswordRequest) => changePasswordApi(params),
+    // Tự xử lý lỗi trong useChangePasswordForm — tránh global overlay router.back() không mong muốn
+    meta: { suppressGlobalError: true },
   });
 }

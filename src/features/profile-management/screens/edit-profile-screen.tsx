@@ -1,11 +1,10 @@
-import { IconButton, ScreenHeader } from "@/components/ui";
-import { ProfileRow } from "@/features/profile-management/components";
+import { IconButton, ProfileRow, ScreenHeader } from "@/components/ui";
 import { useProfile } from "@/features/profile-management/hooks";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { ArrowLeft } from "lucide-react-native";
+import { ChevronLeft } from "lucide-react-native";
 import { ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -38,7 +37,7 @@ export function EditProfileScreen() {
         paddingTop={insets.top + 16}
         leftAction={
           <IconButton
-            icon={<ArrowLeft size={20} color={theme.icon.primary} />}
+            icon={<ChevronLeft size={20} color={theme.icon.primary} />}
             onPress={() => router.back()}
           />
         }
