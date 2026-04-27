@@ -26,7 +26,9 @@ import {
 import { mapAssignmentToCardProps } from "@/features/assignment/utils";
 import { ChatbotFab } from "@/features/chatbot/components";
 import { useUnreadNotificationsCount } from "@/features/notification/hooks";
+import { useLessons } from "@/features/practice-with-ai/hooks";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useProfile } from "@/features/profile-management/hooks";
 
 export default function AssignmentTab() {
   const router = useRouter();
@@ -40,12 +42,16 @@ export default function AssignmentTab() {
   const [activeClassId, setActiveClassId] = useState<string | undefined>(
     undefined,
   );
+  const [activeLessonId, setActiveLessonId] = useState<string | undefined>(undefined);
   const { handleAssignmentPress, isLoadingSubmission } =
     useAssignmentNavigation((pathname, params) =>
       router.push({ pathname: pathname as any, params }),
     );
   const { unreadCount, hasMore } = useUnreadNotificationsCount();
   const { data: classes } = useClasses();
+  const { data: profile } = useProfile();
+  const courseId = profile?.enrolledClasses[0]?.courseId;
+  const { data: lessons } = useLessons(courseId);
 
   useEffect(() => {
     if (classes?.[0]?.id && activeClassId === undefined) {
@@ -62,7 +68,7 @@ export default function AssignmentTab() {
     hasNextPage,
     isFetchingNextPage,
     refetch: refetchAssignments,
-  } = useAssignments(activeStatus, activeClassId);
+  } = useAssignments(activeStatus, activeClassId, activeLessonId);
 
   const [isFocusRefetching, setIsFocusRefetching] = useState(false);
 
@@ -98,6 +104,12 @@ export default function AssignmentTab() {
         flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
       }}
       classes={classes ?? []}
+      lessonId={activeLessonId}
+      onLessonChange={(id) => {
+        setActiveLessonId(id);
+        flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
+      }}
+      lessons={lessons ?? []}
     />
   );
 
