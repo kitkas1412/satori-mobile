@@ -22,7 +22,7 @@ export function ErrorOverlay() {
   }
 
   return (
-    <Modal visible={visible} transparent={false} statusBarTranslucent animationType="fade">
+    <Modal visible={visible} transparent={false} statusBarTranslucent>
       <View
         className="flex-1 items-center justify-center px-8 gap-6"
         style={{ backgroundColor: theme.background.page }}

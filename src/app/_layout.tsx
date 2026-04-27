@@ -23,8 +23,9 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useColorScheme as useNativeWindColorScheme } from "nativewind";
 
 import { QueryProvider } from "@/components/providers/query-provider";
-import { ErrorOverlay } from "@/components/ui";
+import { ErrorOverlay, LoadingOverlayRenderer } from "@/components/ui";
 import { useTokenValidation } from "@/features/authentication/hooks";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRegisterDeviceToken } from "@/features/notification/hooks";
 import { abandonSessionApi } from "@/features/speaking/api";
 import { ACTIVE_SESSION_STORAGE_KEY } from "@/features/speaking/hooks";
@@ -32,7 +33,23 @@ import { getPushToken } from "@/hooks/use-push-notification";
 import { useAuthStore } from "@/stores/auth-store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
+import * as Notifications from "expo-notifications";
 import { AppState, Platform } from "react-native";
+
+Notifications.setNotificationHandler({
+  handleNotification: async (notification) => {
+    console.log(
+      "[Notification] received:",
+      JSON.stringify(notification.request.content),
+    );
+    return {
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+    };
+  },
+});
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "../../global.css";
 
 const FCM_TOKEN_STORAGE_KEY = "fcm_token";
@@ -63,6 +80,7 @@ function RootLayoutNav() {
   const { isAuthenticated, isHydrated } = useAuthStore();
   const { isValidating } = useTokenValidation();
   const { mutate: registerDeviceToken } = useRegisterDeviceToken();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     // Chờ store load từ SecureStore trước khi kiểm tra
@@ -79,21 +97,41 @@ function RootLayoutNav() {
     }
   }, [isAuthenticated, isHydrated, isValidating, segments]);
 
+  // Dọn toàn bộ React Query cache khi đăng xuất.
+  // Đặt ở đây thay vì trong useLogout.onSuccess để đảm bảo cache chỉ bị clear
+  // sau khi isAuthenticated = false — thời điểm tabs đang unmount và không còn
+  // active observer nào, tránh kích hoạt refetch không cần thiết trên Android.
+  useEffect(() => {
+    if (!isAuthenticated && isHydrated) {
+      queryClient.clear();
+    }
+  }, [isAuthenticated, isHydrated, queryClient]);
+
   // Gửi FCM token lên backend và cập nhật AsyncStorage sau khi thành công.
   const sendToken = async () => {
     try {
       const token = await getPushToken();
-      if (!token) return;
+      if (!token) {
+        console.warn("[FCM] sendToken: no token, skipping");
+        return;
+      }
+      console.log("[FCM] sendToken: registering token", token);
       registerDeviceToken(
         {
           fcmToken: token,
           deviceType: Platform.OS === "ios" ? "IOS" : "ANDROID",
           appVersion: Constants.expoConfig?.version,
         },
-        { onSuccess: () => AsyncStorage.setItem(FCM_TOKEN_STORAGE_KEY, token) },
+        {
+          onSuccess: () => {
+            console.log("[FCM] sendToken: registered OK");
+            AsyncStorage.setItem(FCM_TOKEN_STORAGE_KEY, token);
+          },
+          onError: (err) => console.error("[FCM] sendToken: FAILED", err),
+        },
       );
-    } catch {
-      // best-effort
+    } catch (err) {
+      console.error("[FCM] sendToken: unexpected error", err);
     }
   };
 
@@ -101,19 +139,33 @@ function RootLayoutNav() {
   const registerIfTokenChanged = async () => {
     try {
       const token = await getPushToken();
-      if (!token) return;
+      if (!token) {
+        console.warn("[FCM] registerIfTokenChanged: no token, skipping");
+        return;
+      }
       const storedToken = await AsyncStorage.getItem(FCM_TOKEN_STORAGE_KEY);
-      if (token === storedToken) return;
+      if (token === storedToken) {
+        console.log("[FCM] registerIfTokenChanged: token unchanged, skip");
+        return;
+      }
+      console.log("[FCM] registerIfTokenChanged: token changed, re-registering");
       registerDeviceToken(
         {
           fcmToken: token,
           deviceType: Platform.OS === "ios" ? "IOS" : "ANDROID",
           appVersion: Constants.expoConfig?.version,
         },
-        { onSuccess: () => AsyncStorage.setItem(FCM_TOKEN_STORAGE_KEY, token) },
+        {
+          onSuccess: () => {
+            console.log("[FCM] registerIfTokenChanged: re-registered OK");
+            AsyncStorage.setItem(FCM_TOKEN_STORAGE_KEY, token);
+          },
+          onError: (err) =>
+            console.error("[FCM] registerIfTokenChanged: FAILED", err),
+        },
       );
-    } catch {
-      // best-effort
+    } catch (err) {
+      console.error("[FCM] registerIfTokenChanged: unexpected error", err);
     }
   };
 
@@ -214,9 +266,10 @@ function RootLayoutNav() {
         options={{ headerShown: false, gestureEnabled: false }}
       />
       <Stack.Screen
-        name="assignment-result"
+        name="quiz-result"
         options={{ headerShown: false, gestureEnabled: false }}
       />
+
       <Stack.Screen
         name="assignment-writing"
         options={{ headerShown: false, gestureEnabled: false }}
@@ -231,6 +284,10 @@ function RootLayoutNav() {
       />
       <Stack.Screen
         name="practice-result"
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="practice-reward"
         options={{ headerShown: false, gestureEnabled: false }}
       />
       <Stack.Screen
@@ -250,27 +307,11 @@ function RootLayoutNav() {
         options={{ headerShown: false, gestureEnabled: true }}
       />
       <Stack.Screen
-        name="edit-study-time"
-        options={{ headerShown: false, gestureEnabled: true }}
-      />
-      <Stack.Screen
-        name="edit-learning-pace"
-        options={{ headerShown: false, gestureEnabled: true }}
-      />
-      <Stack.Screen
         name="edit-formality"
         options={{ headerShown: false, gestureEnabled: true }}
       />
       <Stack.Screen
-        name="edit-conversation-style"
-        options={{ headerShown: false, gestureEnabled: true }}
-      />
-      <Stack.Screen
         name="edit-topics"
-        options={{ headerShown: false, gestureEnabled: true }}
-      />
-      <Stack.Screen
-        name="edit-reminder"
         options={{ headerShown: false, gestureEnabled: true }}
       />
       <Stack.Screen
@@ -305,6 +346,10 @@ function RootLayoutNav() {
         name="achievements"
         options={{ headerShown: false, gestureEnabled: true }}
       />
+      <Stack.Screen
+        name="badge-detail"
+        options={{ headerShown: false, gestureEnabled: true }}
+      />
     </Stack>
   );
 }
@@ -335,12 +380,15 @@ export default function RootLayout() {
   }
 
   return (
-    <QueryProvider>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <RootLayoutNav />
-        <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
-      </ThemeProvider>
-      <ErrorOverlay />
-    </QueryProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <QueryProvider>
+        <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+          <RootLayoutNav />
+          <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+        </ThemeProvider>
+        <LoadingOverlayRenderer />
+        <ErrorOverlay />
+      </QueryProvider>
+    </GestureHandlerRootView>
   );
 }

@@ -1,4 +1,5 @@
 import { BellButton, LoadingOverlay, ScreenHeader } from "@/components/ui";
+import { useUnreadNotificationsCount } from "@/features/notification/hooks";
 import { Colors } from "@/constants/theme";
 import { AssignmentCard } from "@/features/assignment/components/assignment-card";
 import { ChatbotFab } from "@/features/chatbot/components";
@@ -22,7 +23,6 @@ import { ChevronRight } from "lucide-react-native";
 import { useCallback } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useAuthStore } from "@/stores";
 
 function UpcomingAssignments() {
   const colorScheme = useColorScheme();
@@ -32,7 +32,7 @@ function UpcomingAssignments() {
   const { handleAssignmentPress, isLoadingSubmission } =
     useAssignmentNavigation();
 
-  if (!assignments || assignments.length === 0) return null;
+  const isEmpty = !assignments || assignments.length === 0;
 
   return (
     <View className="mx-4 mb-6">
@@ -53,7 +53,12 @@ function UpcomingAssignments() {
         </View>
         <Pressable
           className="flex-row items-center gap-0.5"
-          onPress={() => router.push("/(tabs)/practice")}
+          onPress={() =>
+            router.push({
+              pathname: "/(tabs)/practice",
+              params: { tab: "teacher" },
+            })
+          }
         >
           <Text
             className="text-sm font-heading"
@@ -65,15 +70,24 @@ function UpcomingAssignments() {
         </Pressable>
       </View>
 
-      <View className="gap-2">
-        {assignments.map((item) => (
-          <AssignmentCard
-            key={item.id}
-            {...mapAssignmentToCardProps(item)}
-            onPress={() => handleAssignmentPress(item)}
-          />
-        ))}
-      </View>
+      {isEmpty ? (
+        <Text
+          className="text-sm font-body text-center py-4"
+          style={{ color: theme.text.secondary }}
+        >
+          Không có bài tập sắp đến hạn
+        </Text>
+      ) : (
+        <View className="gap-2">
+          {assignments.map((item) => (
+            <AssignmentCard
+              key={item.id}
+              {...mapAssignmentToCardProps(item)}
+              onPress={() => handleAssignmentPress(item)}
+            />
+          ))}
+        </View>
+      )}
 
       <LoadingOverlay visible={isLoadingSubmission} title="Đang tải..." />
     </View>
@@ -89,10 +103,10 @@ export default function HomeScreen() {
   const { isFetching: isCurrentFetching } = useStreakCurrent();
   const { isFetching: isHistoryFetching } = useStreakHistory(7);
   const isLoading = isCurrentFetching || isHistoryFetching;
-  const user = useAuthStore((state) => state.user);
   const { data: profile } = useProfile();
+  const { unreadCount, hasMore } = useUnreadNotificationsCount();
   const isBlocked = (() => {
-    if (user?.status === "INACTIVE") return true;
+    if (!profile?.enrolledClasses?.length) return true;
     const classStatus = profile?.enrolledClasses[0]?.status;
     if (classStatus === "not_started" || classStatus === "closed") return true;
     return false;
@@ -111,7 +125,11 @@ export default function HomeScreen() {
       <ScreenHeader
         title="Chào bạn 👋"
         rightAction={
-          <BellButton onPress={() => router.push("/notifications")} />
+          <BellButton
+            badgeCount={unreadCount}
+            showPlus={hasMore}
+            onPress={() => router.push("/notifications")}
+          />
         }
         paddingTop={insets.top + 16}
       />

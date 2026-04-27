@@ -7,20 +7,35 @@ import { Pressable, Text, View } from "react-native";
 
 import { Colors } from "@/constants/theme";
 import { MarkdownText } from "@/components/ui";
-import type { PracticeSessionSummaryItem } from "../api/practice-with-ai.types";
+import type { ItemType, Options, PracticeSessionSummaryItem } from "../api/practice-with-ai.types";
 
 interface PracticeAnswerItemProps {
   item: PracticeSessionSummaryItem;
   index: number;
   theme: (typeof Colors)["light"];
+  options?: Options[];
+  itemType?: ItemType;
+}
+
+function resolveAnswerText(answer: string, options?: Options[], itemType?: ItemType): string {
+  if (!options || options.length === 0) return answer;
+  if (itemType === "SENTENCE_ORDER") {
+    const resolved = answer.split(",").map((id) => options.find((o) => String(o.id) === id.trim())?.text ?? id).join(" ");
+    return resolved || answer;
+  }
+  return options.find((o) => String(o.id) === answer)?.text ?? answer;
 }
 
 export function PracticeAnswerItem({
   item,
   index,
   theme,
+  options,
+  itemType,
 }: PracticeAnswerItemProps) {
   const [expanded, setExpanded] = useState(false);
+  const userAnswerText = resolveAnswerText(item.userAnswer, options, itemType);
+  const correctAnswerText = resolveAnswerText(item.correctAnswer, options, itemType);
 
   return (
     <Pressable
@@ -91,7 +106,7 @@ export function PracticeAnswerItem({
                   Bạn trả lời:
                 </Text>
                 <MarkdownText fontSize={12} color={theme.error.default}>
-                  {item.userAnswer || "-"}
+                  {userAnswerText || "-"}
                 </MarkdownText>
               </View>
               <View className="flex-row flex-wrap items-center gap-1">
@@ -102,7 +117,7 @@ export function PracticeAnswerItem({
                   Đáp án đúng:
                 </Text>
                 <MarkdownText fontSize={12} color={theme.success.text}>
-                  {item.correctAnswer || "-"}
+                  {correctAnswerText || "-"}
                 </MarkdownText>
               </View>
             </View>
@@ -118,7 +133,7 @@ export function PracticeAnswerItem({
                   Đáp án đúng:
                 </Text>
                 <MarkdownText fontSize={12} color={theme.success.text}>
-                  {item.correctAnswer || "-"}
+                  {correctAnswerText || "-"}
                 </MarkdownText>
               </View>
             </View>

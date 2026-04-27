@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Check, RefreshCw, X } from "lucide-react-native";
@@ -14,16 +15,24 @@ import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { usePracticeSessionSummary } from "../hooks";
 import { PracticeAnswerItem } from "../components";
+import type { Items } from "../api/practice-with-ai.types";
 
 export function PracticeResultScreen() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
-  const { practiceSessionId } = useLocalSearchParams<{
+  const { practiceSessionId, itemTypes, items: itemsParam, sessionType, lessonId } = useLocalSearchParams<{
     practiceSessionId?: string;
+    itemTypes?: string;
+    items?: string;
+    sessionType?: string;
+    lessonId?: string;
   }>();
+
+  const sessionItems: Items[] = itemsParam ? (JSON.parse(itemsParam) as Items[]) : [];
 
   const {
     data: summary,
@@ -34,7 +43,35 @@ export function PracticeResultScreen() {
   } = usePracticeSessionSummary(practiceSessionId);
 
   function handleGoPracticeHome() {
-    router.replace({ pathname: "/(tabs)/practice", params: { tab: "ai" } });
+    router.replace("/(tabs)/practice");
+  }
+
+  function handleGoSessionConfig() {
+    if (lessonId && sessionType) {
+      void queryClient.invalidateQueries({ queryKey: ["lessonItems", lessonId] });
+      router.replace({ pathname: "/session-config", params: { lessonId, sessionType } });
+    } else {
+      handleGoPracticeHome();
+    }
+  }
+
+  function handleContinue() {
+    if (!summary || !practiceSessionId) {
+      handleGoPracticeHome();
+      return;
+    }
+    const hasReward =
+      (summary.newBadgesEarned?.length ?? 0) > 0 ||
+      summary.levelUp !== null ||
+      summary.streakNotification?.is_first_activity_today === true;
+    if (hasReward) {
+      router.replace({
+        pathname: "/practice-reward",
+        params: { practiceSessionId, sessionType, lessonId },
+      });
+    } else {
+      handleGoSessionConfig();
+    }
   }
 
   if (!practiceSessionId) {
@@ -103,6 +140,10 @@ export function PracticeResultScreen() {
   }
 
   const wrongCount = Math.max(0, summary.totalItems - summary.correctItems);
+
+  const isMatchingSession =
+    itemTypes !== undefined &&
+    (JSON.parse(itemTypes) as string[]).includes("MATCHING");
 
   return (
     <View
@@ -225,23 +266,30 @@ export function PracticeResultScreen() {
           </View>
         </View>
 
-        <View className="gap-3">
-          <Text
-            className="font-heading text-base"
-            style={{ color: theme.text.primary }}
-          >
-            Chi tiết câu trả lời
-          </Text>
+        {!isMatchingSession && (
+          <View className="gap-3">
+            <Text
+              className="font-heading text-base"
+              style={{ color: theme.text.primary }}
+            >
+              Chi tiết câu trả lời
+            </Text>
 
-          {summary.items.map((item, index) => (
-            <PracticeAnswerItem
-              key={`${item.itemIndex}-${index}`}
-              item={item}
-              index={index}
-              theme={theme}
-            />
-          ))}
-        </View>
+            {summary.items.map((item, index) => {
+              const sessionItem = sessionItems.find((si) => si.itemIndex === item.itemIndex);
+              return (
+              <PracticeAnswerItem
+                key={`${item.itemIndex}-${index}`}
+                item={item}
+                index={index}
+                theme={theme}
+                options={sessionItem?.options}
+                itemType={sessionItem?.itemType}
+              />
+              );
+            })}
+          </View>
+        )}
       </ScrollView>
 
       <View
@@ -257,8 +305,8 @@ export function PracticeResultScreen() {
         }}
       >
         <PrimaryButton
-          text="Về trang luyện tập"
-          onPress={handleGoPracticeHome}
+          text="Tiếp tục"
+          onPress={handleContinue}
         />
       </View>
     </View>

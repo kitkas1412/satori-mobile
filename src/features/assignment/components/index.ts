@@ -5,3 +5,4 @@ export type { AssignmentCardProps, AssignmentStatus } from "./assignment-card";
 export { QuestionView } from "./question-view";
 export { QuizAnswerItem } from "./quiz-answer-item";
 export { StatusBanner } from "./status-banner";
+export { AudioPlayerBar } from "./audio-player-bar";
