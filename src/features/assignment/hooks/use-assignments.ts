@@ -10,17 +10,18 @@ import type { LearnerSubmissionStatus } from "../api/assignment.types";
 // .all là base key để invalidate toàn bộ; .filtered dùng cho query cụ thể.
 export const assignmentQueryKeys = {
   all: ["assignments"] as const,
-  filtered: (status?: LearnerSubmissionStatus, classId?: string) =>
-    ["assignments", status ?? "all", classId ?? "all"] as const,
+  filtered: (status?: LearnerSubmissionStatus, classId?: string, lessonId?: string) =>
+    ["assignments", status ?? "all", classId ?? "all", lessonId ?? "all"] as const,
 };
 
 export function useAssignments(
   status?: LearnerSubmissionStatus,
   classId?: string,
+  lessonId?: string,
 ) {
   return useInfiniteQuery({
-    queryKey: assignmentQueryKeys.filtered(status, classId),
-    queryFn: ({ pageParam }) => getAssignmentsApi(pageParam, status, classId),
+    queryKey: assignmentQueryKeys.filtered(status, classId, lessonId),
+    queryFn: ({ pageParam }) => getAssignmentsApi(pageParam, status, classId, lessonId),
     initialPageParam: 0,
     getNextPageParam: (lastPage) =>
       lastPage.pageNumber < lastPage.totalPages

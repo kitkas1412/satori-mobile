@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { getBadgesApi } from "../api";
-import { achievementQueryKeys } from "./use-achievement-progress";
+import { achievementQueryKeys } from "../utils";
 
 export function useBadges() {
   return useInfiniteQuery({

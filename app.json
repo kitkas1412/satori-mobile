@@ -84,7 +84,8 @@
           "cameraPermission": "Satori Nihongo cần quyền truy cập camera để bạn có thể chụp ảnh bài làm."
         }
       ],
-      "./plugins/withoutIosPushNotifications.js"
+      "./plugins/withoutIosPushNotifications.js",
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true,

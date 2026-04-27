@@ -9,11 +9,13 @@ export async function getAssignmentsApi(
   pageParam: number = 1,
   status?: LearnerSubmissionStatus,
   classId?: string,
+  lessonId?: string,
   size: number = 10,
 ): Promise<AssignmentsResponse> {
   const params: Record<string, unknown> = { page: pageParam, size };
   if (status) params.status = status;
   if (classId) params.classId = classId;
+  if (lessonId) params.lessonId = lessonId;
   const response = await api.get<ApiResponse<AssignmentsResponse>>(
     "/learner/assignments",
     { params },
