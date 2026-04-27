@@ -1,0 +1,99 @@
+export type BadgeType =
+  | "LEARNING_STREAK"
+  | "AI_SPEAKING_COUNT"
+  | "AI_PRACTICE_COUNT"
+  | "LEARNING_LEVEL";
+
+export interface BadgeProgress {
+  badgeId: string;
+  badgeName: string;
+  badgeType: BadgeType;
+  requirementValue: number;
+  currentValue: number;
+  earned: boolean;
+  iconUrl: string;
+  progress: number;
+}
+
+export interface AchievementProgress {
+  userId: string;
+  streakCurrent: number;
+  streakLongest: number;
+  practiceCount: number;
+  speakingCount: number;
+  currentLevel: number;
+  totalExp: number;
+  badgeProgress: BadgeProgress[];
+}
+
+export interface Badge {
+  badgeId: string;
+  name: string;
+  description: string;
+  badgeType: BadgeType;
+  requirementValue: number;
+  expReward: number;
+  iconUrl: string;
+  earned: boolean;
+  earnedAt: string | null;
+  currentValue: number;
+  progressPercent: number;
+  isFeatured: boolean;
+}
+
+export interface BadgesPage {
+  content: Badge[];
+  page: {
+    size: number;
+    number: number;
+    totalElements: number;
+    totalPages: number;
+  };
+}
+
+export interface BadgeDetail {
+  badgeId: string;
+  name: string;
+  description: string;
+  badgeType: BadgeType;
+  requirementValue: number;
+  expReward: number;
+  iconUrl: string;
+  status: "ACTIVE";
+  createdAt: string;
+  unlockedConditions: {
+    description: string;
+    requirementValue: number;
+    requirementUnit: string;
+  };
+  learnerProgress: {
+    earned: boolean;
+    earnedAt: string | null;
+    currentValue: number;
+    remainingValue: number;
+    progressPercent: number;
+    isFeatured: boolean;
+    nextMilestone: {
+      badgeId: string;
+      name: string;
+      requirementValue: number;
+      expReward: number;
+    } | null;
+  };
+  statistics: {
+    totalEarners: number;
+    totalLearners: number;
+    percentageEarned: number;
+  };
+}
+
+export interface EarnedBadge {
+  badgeId: string;
+  badgeName: string;
+  description: string;
+  badgeType: BadgeType;
+  iconUrl: string;
+  expReward: number;
+  earnedAt: string;
+  isFeatured: boolean;
+}

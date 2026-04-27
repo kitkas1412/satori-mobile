@@ -8,7 +8,7 @@ import { useRouter } from "expo-router";
 import React from "react";
 import { KeyboardAvoidingView, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ArrowLeft } from "lucide-react-native";
+import { ChevronLeft } from "lucide-react-native";
 import { PasswordInput, PasswordValidation } from "../components";
 
 export function ChangePasswordScreen() {
@@ -47,7 +47,7 @@ export function ChangePasswordScreen() {
       >
         <View className="flex-col px-4 pb-4" style={{ paddingTop: insets.top }}>
           <IconButton
-            icon={<ArrowLeft size={24} color={theme.icon.primary} />}
+            icon={<ChevronLeft size={24} color={theme.icon.primary} />}
             onPress={() => router.back()}
           />
 

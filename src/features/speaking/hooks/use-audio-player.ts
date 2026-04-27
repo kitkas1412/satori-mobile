@@ -2,8 +2,9 @@
 // Ưu tiên phát file audio từ URL (chất lượng cao hơn), nếu không có thì
 // dùng Text-to-Speech (TTS) tiếng Nhật làm phương án dự phòng.
 
-import { createAudioPlayer } from "expo-audio";
+import { createAudioPlayer, setAudioModeAsync } from "expo-audio";
 import type { AudioPlayer } from "expo-audio";
+import { File, Paths } from "expo-file-system";
 import * as Speech from "expo-speech";
 
 /** Instance player hiện tại đang phát — dùng để dừng từ bên ngoài khi cần */
@@ -19,12 +20,22 @@ let _currentPlayer: AudioPlayer | null = null;
 export async function playAssistantMessage(
   content: string,
   audioUrl?: string | null,
+  audioBase64?: string | null,
 ): Promise<void> {
+  // Defensive: đảm bảo audio session ở chế độ playback (loa ngoài, full DSP).
+  // Nếu còn dính `.playAndRecord` từ session ghi âm trước, audio sẽ phát qua
+  // earpiece với volume rất nhỏ.
+  await setAudioModeAsync({
+    allowsRecording: false,
+    playsInSilentMode: true,
+  }).catch(() => {});
+
   if (audioUrl) {
-    // Ưu tiên phát audio từ URL vì chất lượng tốt hơn TTS
-    return playAudioFromUrl(audioUrl);
+    return playAudioFromUrl(audioUrl).catch(() => speakText(content));
   }
-  // Fallback: đọc văn bản bằng TTS tiếng Nhật
+  if (audioBase64) {
+    return playAudioFromBase64(audioBase64).catch(() => speakText(content));
+  }
   return speakText(content);
 }
 
@@ -42,22 +53,36 @@ export function stopAssistantAudio(): void {
 
 /**
  * Phát file audio từ URL và đợi đến khi phát xong.
- * Lắng nghe sự kiện "playbackStatusUpdate" để biết khi nào audio kết thúc,
- * sau đó dọn dẹp listener và player để tránh rò rỉ bộ nhớ.
+ * Reject khi playbackState='failed', timeout 15s làm safety net.
+ *
+ * LƯU Ý: AudioStatus của expo-audio không có field `error` — lỗi native được
+ * phản ánh qua `playbackState === 'failed'` thay vì `status.error`.
  */
 async function playAudioFromUrl(url: string): Promise<void> {
   const player = createAudioPlayer(url);
   _currentPlayer = player;
-  return new Promise<void>((resolve) => {
+  return new Promise<void>((resolve, reject) => {
+    const cleanup = () => {
+      clearTimeout(timeoutId);
+      subscription.remove();
+      player.remove();
+      if (_currentPlayer === player) _currentPlayer = null;
+    };
+
+    const timeoutId = setTimeout(() => {
+      cleanup();
+      resolve(); // Safety net: không block luồng nếu không có sự kiện nào
+    }, 15_000);
+
     const subscription = player.addListener(
       "playbackStatusUpdate",
       (status) => {
         if (status.didJustFinish) {
-          // Dọn dẹp sau khi phát xong
-          subscription.remove();
-          player.remove();
-          if (_currentPlayer === player) _currentPlayer = null;
+          cleanup();
           resolve();
+        } else if (status.playbackState === "failed") {
+          cleanup();
+          reject(new Error("playbackState=failed"));
         }
       },
     );
@@ -66,17 +91,42 @@ async function playAudioFromUrl(url: string): Promise<void> {
 }
 
 /**
+ * Ghi base64 audio ra file tạm rồi phát bằng playAudioFromUrl.
+ * Xóa file tạm sau khi phát xong (kể cả khi lỗi) để tránh rò rỉ bộ nhớ.
+ *
+ * expo-file-system v19: dùng class File/Paths thay vì writeAsStringAsync/cacheDirectory.
+ */
+async function playAudioFromBase64(base64: string): Promise<void> {
+  const file = new File(Paths.cache, `ai_audio_${Date.now()}.mp3`);
+  file.write(base64, { encoding: "base64" });
+  try {
+    await playAudioFromUrl(file.uri);
+  } finally {
+    try { file.delete(); } catch { /* ignore */ }
+  }
+}
+
+/**
  * Đọc văn bản bằng TTS tiếng Nhật và đợi đến khi đọc xong.
- * Resolve trong cả 3 trường hợp: đọc xong, bị dừng, hoặc lỗi —
- * để đảm bảo luồng hội thoại không bị treo.
+ * Chia thành từng câu theo ký tự kết thúc câu (。！？) và chèn ngắt 250ms
+ * giữa các câu để âm thanh tự nhiên hơn, dễ theo hơn.
  */
 async function speakText(text: string): Promise<void> {
-  return new Promise<void>((resolve) => {
-    Speech.speak(text, {
-      language: "ja-JP",
-      onDone: resolve,
-      onStopped: resolve,
-      onError: () => resolve(), // Không throw lỗi, chỉ bỏ qua và tiếp tục
+  const sentences = text.split(/(?<=[。！？\n])/).map((s) => s.trim()).filter(Boolean);
+  const chunks = sentences.length > 0 ? sentences : [text];
+
+  for (let i = 0; i < chunks.length; i++) {
+    await new Promise<void>((resolve) => {
+      Speech.speak(chunks[i], {
+        language: "ja-JP",
+        rate: 0.9,
+        onDone: resolve,
+        onStopped: resolve,
+        onError: () => resolve(),
+      });
     });
-  });
+    if (i < chunks.length - 1) {
+      await new Promise<void>((resolve) => setTimeout(resolve, 250));
+    }
+  }
 }

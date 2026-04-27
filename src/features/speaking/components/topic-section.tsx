@@ -9,7 +9,7 @@ import { ConversationCard } from "./conversation-card";
 import { useConversations } from "@/features/speaking/hooks";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
-import type { Topic } from "@/features/speaking/api";
+import type { Topic, PracticeStatus } from "@/features/speaking/api";
 
 /** Chuyển điểm độ khó thành nhãn hiển thị: 1 = Dễ, 2 = Trung Bình, khác = Khó */
 function difficultyLabel(score: number): string {
@@ -27,7 +27,7 @@ interface TopicSectionProps {
   /** Callback báo lên parent khi section này có topic chưa luyện tập */
   onHasUnpracticed: (sectionId: string, orderIndex: number) => void;
   /** Callback điều hướng sang màn hình chi tiết conversation */
-  onConversationPress: (conversationId: string) => void;
+  onConversationPress: (conversationId: string, practiceStatus: PracticeStatus) => void;
   /** True nếu đây là section chứa conversation card đầu tiên chưa practiced */
   isTargetSection?: boolean;
   /** Callback trả về (cardY, cardHeight) tương đối với root View của section khi target card layout xong */
@@ -53,6 +53,9 @@ export function TopicSection({
   const cardPositions = useRef<Record<string, { y: number; height: number }>>(
     {},
   );
+  // Y offset của cards container relative to section root View.
+  // Cần cộng vào cardY để tính đúng vị trí tuyệt đối trong FlatList content.
+  const cardsContainerOffsetRef = useRef<number>(0);
 
   const accentColor =
     section.orderIndex % 2 === 0 ? theme.purple.default : theme.brand.primary;
@@ -67,6 +70,8 @@ export function TopicSection({
       practiced: topic.practiced,
       practiceStatus: topic.practiceStatus,
     })) ?? [];
+
+  const practicedCount = conversations.filter((c) => c.practiceStatus === "COMPLETED").length;
 
   /** true nếu section còn ít nhất một topic chưa được luyện tập */
   const hasUnpracticed =
@@ -107,7 +112,7 @@ export function TopicSection({
     if (!target) return;
     const pos = cardPositions.current[target.id];
     if (pos) {
-      onScrollToCard?.(pos.y, pos.height);
+      onScrollToCard?.(cardsContainerOffsetRef.current + pos.y, pos.height);
     }
   }, [isTargetSection]);
 
@@ -135,7 +140,7 @@ export function TopicSection({
               className="text-xs font-body"
               style={{ color: theme.text.secondary }}
             >
-              0/{section.conversationCount} HỘI THOẠI
+              {practicedCount}/{conversations.length} HỘI THOẠI
             </Text>
           </View>
           {isExpanded ? (
@@ -162,7 +167,11 @@ export function TopicSection({
 
       {/* Lesson Cards */}
       {isExpanded && (
-        <View>
+        <View
+          onLayout={(e) => {
+            cardsContainerOffsetRef.current = e.nativeEvent.layout.y;
+          }}
+        >
           {conversations.map((conversation, index) => {
             const isFirstUnpracticed = index === firstUnpracticedIndex;
             return (
@@ -172,7 +181,7 @@ export function TopicSection({
                   const { y, height } = e.nativeEvent.layout;
                   cardPositions.current[conversation.id] = { y, height };
                   if (isFirstUnpracticed && isTargetSection) {
-                    onScrollToCard?.(y, height);
+                    onScrollToCard?.(cardsContainerOffsetRef.current + y, height);
                   }
                 }}
               >
@@ -194,7 +203,7 @@ export function TopicSection({
                   practiceStatus={conversation.practiceStatus}
                   showBorder={showFirstUnpracticedBorder && isFirstUnpracticed}
                   accentColor={accentColor}
-                  onPress={() => onConversationPress(conversation.id)}
+                  onPress={() => onConversationPress(conversation.id, conversation.practiceStatus)}
                 />
               </View>
             );

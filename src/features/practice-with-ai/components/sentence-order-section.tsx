@@ -63,9 +63,9 @@ export function SentenceOrderSection({
     .map((id) => currentItem.options.find((o) => o.id === id))
     .filter(Boolean) as Items["options"];
 
-  const poolWords = currentItem.options.filter(
-    (o) => !selectedWordIds.includes(o.id),
-  );
+  const poolWords = [...currentItem.options]
+    .sort((a, b) => a.id - b.id)
+    .filter((o) => !selectedWordIds.includes(o.id));
 
   return (
     <View style={{ gap: 50 }}>

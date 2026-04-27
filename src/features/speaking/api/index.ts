@@ -7,6 +7,7 @@ export type {
   TopicListResponse,
   MissionDetails,
   MissionStatus,
+  PracticeStatus,
   Topic,
   Messages,
   RoleplaySessionResponse,
@@ -14,7 +15,12 @@ export type {
   Missions,
   SessionStatus,
   TurnState,
-  PronunciationSummary,
+  AccuracyResult,
+  PronunciationResult,
+  TaskCompletionResult,
+  ComplexityResult,
+  QualitativeSummary,
+  RecurringPattern,
   BadgeEarned,
   BadgeType,
   LevelUp,
@@ -28,3 +34,4 @@ export { startFreeTalkSessionApi } from "./start-free-talk-session";
 export { sendMessageApi } from "./send-message";
 export { completeSessionApi } from "./complete-session";
 export { abandonSessionApi } from "./abandon-session";
+export { getLatestFeedbackApi } from "./get-latest-feedback";

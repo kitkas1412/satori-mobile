@@ -8,7 +8,7 @@ export function useUpcomingAssignments() {
   return useQuery({
     queryKey: ["assignments", "upcoming"] as const,
     queryFn: async (): Promise<Content[]> => {
-      const data = await getAssignmentsApi(1, undefined, undefined, 3);
+      const data = await getAssignmentsApi(1, undefined, undefined, undefined, 3);
       const pending = data.content.filter((a) =>
         PENDING_STATUSES.has(a.learnerSubmissionStatus),
       );
