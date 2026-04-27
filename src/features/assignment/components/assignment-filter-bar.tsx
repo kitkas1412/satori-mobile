@@ -13,6 +13,7 @@ import Animated, {
 
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import type { LessonResponse } from "@/features/practice-with-ai/api/practice-with-ai.types";
 import type { AssignmentStatusFilter, LearnerClass } from "../api/assignment.types";
 
 const TIMING = { duration: 250, easing: Easing.out(Easing.cubic) };
@@ -34,6 +35,9 @@ interface AssignmentFilterBarProps {
   classId: string | undefined;
   onClassChange: (classId: string | undefined) => void;
   classes: LearnerClass[];
+  lessonId: string | undefined;
+  onLessonChange: (lessonId: string | undefined) => void;
+  lessons: LessonResponse[];
 }
 
 export function AssignmentFilterBar({
@@ -42,18 +46,24 @@ export function AssignmentFilterBar({
   classId,
   onClassChange,
   classes,
+  lessonId,
+  onLessonChange,
+  lessons,
 }: AssignmentFilterBarProps) {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const scrollRef = useRef<ScrollView>(null);
-  const [expanded, setExpanded] = useState<"status" | "class" | null>(null);
+  const [expanded, setExpanded] = useState<"status" | "class" | "lesson" | null>(null);
 
   const statusMaxWidth = useSharedValue(0);
   const statusOpacity = useSharedValue(0);
   const classMaxWidth = useSharedValue(0);
   const classOpacity = useSharedValue(0);
+  const lessonMaxWidth = useSharedValue(0);
+  const lessonOpacity = useSharedValue(0);
   const statusChevronDeg = useSharedValue(0);
   const classChevronDeg = useSharedValue(0);
+  const lessonChevronDeg = useSharedValue(0);
 
   const statusOptionsStyle = useAnimatedStyle(() => ({
     maxWidth: statusMaxWidth.value,
@@ -73,16 +83,28 @@ export function AssignmentFilterBar({
     transform: [{ rotate: `${classChevronDeg.value}deg` }],
   }));
 
+  const lessonOptionsStyle = useAnimatedStyle(() => ({
+    maxWidth: lessonMaxWidth.value,
+    opacity: lessonOpacity.value,
+  }));
+
+  const lessonChevronStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${lessonChevronDeg.value}deg` }],
+  }));
+
   function closeAll() {
     statusMaxWidth.value = withTiming(0, TIMING);
     statusOpacity.value = withTiming(0, TIMING);
     classMaxWidth.value = withTiming(0, TIMING);
     classOpacity.value = withTiming(0, TIMING);
+    lessonMaxWidth.value = withTiming(0, TIMING);
+    lessonOpacity.value = withTiming(0, TIMING);
     statusChevronDeg.value = withTiming(0, TIMING);
     classChevronDeg.value = withTiming(0, TIMING);
+    lessonChevronDeg.value = withTiming(0, TIMING);
   }
 
-  function toggleFilter(filter: "status" | "class") {
+  function toggleFilter(filter: "status" | "class" | "lesson") {
     const isOpening = expanded !== filter;
     closeAll();
 
@@ -92,10 +114,14 @@ export function AssignmentFilterBar({
         statusMaxWidth.value = withTiming(MAX_OPTIONS_WIDTH, TIMING);
         statusOpacity.value = withTiming(1, TIMING);
         statusChevronDeg.value = withTiming(180, TIMING);
-      } else {
+      } else if (filter === "class") {
         classMaxWidth.value = withTiming(MAX_OPTIONS_WIDTH, TIMING);
         classOpacity.value = withTiming(1, TIMING);
         classChevronDeg.value = withTiming(180, TIMING);
+      } else {
+        lessonMaxWidth.value = withTiming(MAX_OPTIONS_WIDTH, TIMING);
+        lessonOpacity.value = withTiming(1, TIMING);
+        lessonChevronDeg.value = withTiming(180, TIMING);
       }
       scrollRef.current?.scrollTo({ x: 0, animated: true });
     } else {
@@ -121,13 +147,25 @@ export function AssignmentFilterBar({
     scrollRef.current?.scrollTo({ x: 0, animated: true });
   }
 
+  function selectLesson(id: string | undefined) {
+    onLessonChange(id);
+    setExpanded(null);
+    lessonMaxWidth.value = withTiming(0, TIMING);
+    lessonOpacity.value = withTiming(0, TIMING);
+    lessonChevronDeg.value = withTiming(0, TIMING);
+    scrollRef.current?.scrollTo({ x: 0, animated: true });
+  }
+
   const statusPillActive = expanded === "status" || status !== undefined;
   const classPillActive = expanded === "class";
+  const lessonPillActive = expanded === "lesson" || lessonId !== undefined;
 
   const statusLabel =
     STATUS_OPTIONS.find((o) => o.value === status)?.label ?? "Tất cả";
   const classLabel =
     classes.find((c) => c.id === classId)?.name ?? "Lớp";
+  const lessonLabel =
+    lessons.find((l) => l.id === lessonId)?.title ?? "Bài học";
 
   return (
     <ScrollView
@@ -216,6 +254,114 @@ export function AssignmentFilterBar({
                 }}
               >
                 {option.label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </Animated.View>
+
+      {/* Lesson pill button */}
+      <Pressable
+        onPress={() => toggleFilter("lesson")}
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 4,
+          paddingHorizontal: 12,
+          paddingVertical: 8,
+          borderRadius: 20,
+          backgroundColor: lessonPillActive
+            ? theme.brand.primary
+            : theme.background.surface,
+          borderWidth: 1,
+          borderColor: lessonPillActive
+            ? theme.brand.primary
+            : theme.border.subtle,
+        }}
+      >
+        <Text
+          className="font-heading text-sm"
+          numberOfLines={1}
+          style={{
+            color: lessonPillActive ? theme.text.onBrand : theme.text.secondary,
+            maxWidth: 120,
+          }}
+        >
+          {lessonLabel}
+        </Text>
+        <Animated.View style={lessonChevronStyle}>
+          <ChevronRight
+            size={14}
+            color={lessonPillActive ? theme.icon.onBrand : theme.icon.primary}
+            strokeWidth={2.5}
+          />
+        </Animated.View>
+      </Pressable>
+
+      {/* Lesson options — slide ra bên phải của pill */}
+      <Animated.View
+        style={[
+          {
+            overflow: "hidden",
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 8,
+          },
+          lessonOptionsStyle,
+        ]}
+      >
+        <Pressable
+          onPress={() => selectLesson(undefined)}
+          style={{
+            paddingHorizontal: 12,
+            paddingVertical: 8,
+            borderRadius: 20,
+            backgroundColor: lessonId === undefined
+              ? theme.brand.primary
+              : theme.background.surface,
+            borderWidth: 1,
+            borderColor: lessonId === undefined
+              ? theme.brand.primary
+              : theme.border.subtle,
+          }}
+        >
+          <Text
+            className="font-heading text-sm"
+            style={{
+              color: lessonId === undefined ? theme.text.onBrand : theme.text.secondary,
+            }}
+          >
+            Tất cả
+          </Text>
+        </Pressable>
+        {lessons.map((lesson) => {
+          const isSelected = lesson.id === lessonId;
+          return (
+            <Pressable
+              key={lesson.id}
+              onPress={() => selectLesson(lesson.id)}
+              style={{
+                paddingHorizontal: 12,
+                paddingVertical: 8,
+                borderRadius: 20,
+                backgroundColor: isSelected
+                  ? theme.brand.primary
+                  : theme.background.surface,
+                borderWidth: 1,
+                borderColor: isSelected
+                  ? theme.brand.primary
+                  : theme.border.subtle,
+              }}
+            >
+              <Text
+                className="font-heading text-sm"
+                numberOfLines={1}
+                style={{
+                  color: isSelected ? theme.text.onBrand : theme.text.secondary,
+                  maxWidth: 160,
+                }}
+              >
+                {lesson.title}
               </Text>
             </Pressable>
           );
