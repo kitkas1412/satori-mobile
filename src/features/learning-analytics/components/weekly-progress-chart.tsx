@@ -148,7 +148,8 @@ export function WeeklyProgressChart({
                 cx={x}
                 cy={y}
                 r={16}
-                fill="transparent"
+                fill={theme.background.surface}
+                fillOpacity={0.01}
                 onPress={() => onDotPress?.(i)}
               />
               <SvgText
