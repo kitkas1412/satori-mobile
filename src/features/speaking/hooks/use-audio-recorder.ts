@@ -124,7 +124,7 @@ export function useRecorder() {
       iosCategory: {
         category: "playAndRecord",
         categoryOptions: ["defaultToSpeaker", "allowBluetooth"],
-        mode: "measurement",
+        mode: "default",
       },
     });
   }
