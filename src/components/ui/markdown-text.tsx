@@ -47,6 +47,32 @@ function extractNodeText(node: ASTNode): string {
   return "";
 }
 
+const CJK_RE = /[　-〿぀-ゟ゠-ヿ一-鿿ｦ-ﾟ]/;
+
+function tokenizeText(text: string): string[] {
+  const tokens: string[] = [];
+  let buffer = "";
+  const flush = () => {
+    if (buffer) {
+      tokens.push(buffer);
+      buffer = "";
+    }
+  };
+  for (const ch of text) {
+    if (CJK_RE.test(ch)) {
+      flush();
+      tokens.push(ch);
+    } else {
+      buffer += ch;
+      if (ch === " " || ch === "\t" || ch === "\n") {
+        flush();
+      }
+    }
+  }
+  flush();
+  return tokens;
+}
+
 function renderSegments(
   text: string,
   baseStyle: object,
@@ -56,23 +82,37 @@ function renderSegments(
   fontSize: number,
   lineHeight: number,
 ): React.ReactNode[] {
-  return parseInline(text).map((seg, i) => {
+  const nodes: React.ReactNode[] = [];
+  let key = 0;
+  for (const seg of parseInline(text)) {
     if (seg.type === "text") {
-      return (
-        <Text key={i} style={baseStyle}>
-          {seg.content}
-        </Text>
-      );
+      for (const token of tokenizeText(seg.content)) {
+        nodes.push(
+          <Text key={key++} style={baseStyle}>
+            {token}
+          </Text>,
+        );
+      }
+      continue;
     }
     if (seg.type === "underline") {
-      return (
-        <Text key={i} style={[baseStyle, { textDecorationLine: "underline" }]}>
-          {seg.content}
-        </Text>
-      );
+      for (const token of tokenizeText(seg.content)) {
+        nodes.push(
+          <Text
+            key={key++}
+            style={[baseStyle, { textDecorationLine: "underline" }]}
+          >
+            {token}
+          </Text>,
+        );
+      }
+      continue;
     }
-    return (
-      <View key={i} style={{ alignItems: "center", paddingTop: furiganaSize + 2 }}>
+    nodes.push(
+      <View
+        key={key++}
+        style={{ alignItems: "center", paddingTop: furiganaSize + 2 }}
+      >
         <Text
           style={{
             fontSize: furiganaSize,
@@ -89,9 +129,10 @@ function renderSegments(
           {seg.reading}
         </Text>
         <Text style={baseStyle}>{seg.base}</Text>
-      </View>
+      </View>,
     );
-  });
+  }
+  return nodes;
 }
 
 interface MarkdownTextProps {
