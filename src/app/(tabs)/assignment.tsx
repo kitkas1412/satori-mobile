@@ -47,7 +47,7 @@ export default function AssignmentTab() {
     useAssignmentNavigation((pathname, params) =>
       router.push({ pathname: pathname as any, params }),
     );
-  const { unreadCount, hasMore } = useUnreadNotificationsCount();
+  const { hasUnread } = useUnreadNotificationsCount();
   const { data: classes } = useClasses();
   const { data: profile } = useProfile();
   const courseId = profile?.enrolledClasses[0]?.courseId;
@@ -149,8 +149,7 @@ export default function AssignmentTab() {
         title="Bài tập"
         rightAction={
           <BellButton
-            badgeCount={unreadCount}
-            showPlus={hasMore}
+            hasUnread={hasUnread}
             onPress={() => router.push("/notifications")}
           />
         }
