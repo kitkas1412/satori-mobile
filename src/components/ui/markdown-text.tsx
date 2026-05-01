@@ -2,7 +2,7 @@ import Markdown, {
   type ASTNode,
   type RenderRules,
 } from "react-native-markdown-display";
-import { View, Text } from "react-native";
+import { View, Text, Platform } from "react-native";
 import type { ViewStyle } from "react-native";
 
 import { Colors } from "@/constants/theme";
@@ -124,6 +124,66 @@ export function MarkdownText({
   };
 
   const rules: RenderRules = {
+    list_item: (node, children, parent, _styles) => {
+      const hasFurigana = HAS_INLINE_RE.test(extractNodeText(node));
+      const iconPadding = hasFurigana ? furiganaSize + 2 : 0;
+      const iconStyle = {
+        ...baseStyle,
+        paddingTop: iconPadding,
+        alignSelf: "flex-start" as const,
+        marginLeft: 4,
+        marginRight: 6,
+      };
+
+      const isBullet = (parent as ASTNode[]).some(
+        (p) => p.type === "bullet_list",
+      );
+      const isOrdered = (parent as ASTNode[]).some(
+        (p) => p.type === "ordered_list",
+      );
+
+      if (isBullet) {
+        return (
+          <View
+            key={node.key}
+            style={{ flexDirection: "row", justifyContent: "flex-start" }}
+          >
+            <Text accessible={false} style={iconStyle}>
+              {Platform.select({ android: "•", default: "•" })}
+            </Text>
+            <View style={{ flex: 1 }}>{children}</View>
+          </View>
+        );
+      }
+
+      if (isOrdered) {
+        const orderedListIndex = (parent as ASTNode[]).findIndex(
+          (p) => p.type === "ordered_list",
+        );
+        const orderedList = (parent as ASTNode[])[orderedListIndex] as any;
+        const start = orderedList.attributes?.start ?? 0;
+        const listItemNumber = start + node.index + 1;
+
+        return (
+          <View
+            key={node.key}
+            style={{ flexDirection: "row", justifyContent: "flex-start" }}
+          >
+            <Text style={iconStyle}>
+              {listItemNumber}
+              {node.markup}
+            </Text>
+            <View style={{ flex: 1 }}>{children}</View>
+          </View>
+        );
+      }
+
+      return (
+        <View key={node.key} style={{ flexDirection: "row" }}>
+          {children}
+        </View>
+      );
+    },
     textgroup: (node, children, _parent, styles) => {
       const rawText = extractNodeText(node);
       if (HAS_INLINE_RE.test(rawText)) {
@@ -194,14 +254,6 @@ export function MarkdownText({
         },
         list_item: {
           marginVertical: 1,
-        },
-        bullet_list_icon: {
-          marginLeft: 4,
-          marginRight: 6,
-        },
-        ordered_list_icon: {
-          marginLeft: 4,
-          marginRight: 6,
         },
       }}
       mergeStyle
