@@ -86,7 +86,6 @@ export function useRecorder() {
       );
     }
 
-    console.warn("Speech recognition error:", event.error, event.message);
     setIsListening(false);
     endFiredRef.current = true;
   });
@@ -124,7 +123,7 @@ export function useRecorder() {
       iosCategory: {
         category: "playAndRecord",
         categoryOptions: ["defaultToSpeaker", "allowBluetooth"],
-        mode: "measurement",
+        mode: "default",
       },
     });
   }

@@ -95,7 +95,6 @@ axiosInstance.interceptors.request.use(
     return config;
   },
   (error: AxiosError) => {
-    console.error("Lỗi request:", error);
     return Promise.reject(error);
   },
 );
@@ -126,7 +125,6 @@ axiosInstance.interceptors.response.use(
       if (status === 401) {
         // Nếu chính request refresh bị 401 → refresh token hết hạn, logout ngay
         if (originalRequest.url?.includes("/auth/refresh")) {
-          console.error("Refresh token hết hạn, đang đăng xuất");
           useAuthStore.getState().logout();
           queryClient.clear();
           return Promise.reject(error);
@@ -145,7 +143,6 @@ axiosInstance.interceptors.response.use(
         // Không có refreshToken → logout ngay
         const refreshToken = useAuthStore.getState().refreshToken;
         if (!refreshToken) {
-          console.error("Không có refresh token, đang đăng xuất");
           useAuthStore.getState().logout();
           queryClient.clear();
           return Promise.reject(error);
@@ -173,35 +170,12 @@ axiosInstance.interceptors.response.use(
           processQueue(refreshError, null);
           useAuthStore.getState().logout();
           queryClient.clear();
-          console.error("Làm mới token thất bại, đang đăng xuất");
           return Promise.reject(refreshError);
         } finally {
           isRefreshing = false;
         }
       }
 
-      switch (status) {
-        case 403:
-          console.error("Không có quyền truy cập");
-          break;
-        case 404:
-          console.error("API endpoint không tồn tại");
-          break;
-        case 500:
-          console.error("Lỗi máy chủ nội bộ");
-          break;
-        default:
-          console.error("Lỗi API:", status, error.response.data);
-      }
-    } else if (error.code === "ECONNABORTED") {
-      // Request timeout - server không phản hồi trong thời gian cho phép
-      console.error("Yêu cầu quá thời gian chờ. Vui lòng thử lại.");
-    } else if (error.request) {
-      // Request đã được gửi nhưng không nhận được response
-      console.error("Không thể kết nối đến server. Vui lòng kiểm tra mạng.");
-    } else {
-      // Lỗi khác
-      console.error("Lỗi:", error.message);
     }
 
     return Promise.reject(error);

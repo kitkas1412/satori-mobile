@@ -36,11 +36,6 @@ export function useLogout() {
     },
     onError: (error: any) => {
       // BR-68: Vẫn đăng xuất local dù API thất bại (offline hoặc timeout)
-      console.error(
-        "API đăng xuất thất bại, tiến hành dọn dẹp local:",
-        error?.message,
-      );
-
       logout();
     },
   });
