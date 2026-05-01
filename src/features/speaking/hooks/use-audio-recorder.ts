@@ -86,7 +86,6 @@ export function useRecorder() {
       );
     }
 
-    console.warn("Speech recognition error:", event.error, event.message);
     setIsListening(false);
     endFiredRef.current = true;
   });
