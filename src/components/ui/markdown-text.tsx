@@ -125,12 +125,13 @@ export function MarkdownText({
 
   const rules: RenderRules = {
     list_item: (node, children, parent, _styles) => {
-      const hasFurigana = HAS_INLINE_RE.test(extractNodeText(node));
+      const hasFurigana = ((node as any).children ?? [])
+        .filter((child: ASTNode) => child.type !== "bullet_list" && child.type !== "ordered_list")
+        .some((child: ASTNode) => HAS_INLINE_RE.test(extractNodeText(child)));
       const iconPadding = hasFurigana ? furiganaSize + 2 : 0;
       const iconStyle = {
         ...baseStyle,
         paddingTop: iconPadding,
-        alignSelf: "flex-start" as const,
         marginLeft: 4,
         marginRight: 6,
       };
@@ -146,7 +147,7 @@ export function MarkdownText({
         return (
           <View
             key={node.key}
-            style={{ flexDirection: "row", justifyContent: "flex-start" }}
+            style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "flex-start" }}
           >
             <Text accessible={false} style={iconStyle}>
               {Platform.select({ android: "•", default: "•" })}
@@ -167,7 +168,7 @@ export function MarkdownText({
         return (
           <View
             key={node.key}
-            style={{ flexDirection: "row", justifyContent: "flex-start" }}
+            style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "flex-start" }}
           >
             <Text style={iconStyle}>
               {listItemNumber}
@@ -209,7 +210,7 @@ export function MarkdownText({
         );
       }
       return (
-        <Text key={node.key} style={styles.textgroup}>
+        <Text key={node.key} style={[baseStyle, styles.textgroup]}>
           {children}
         </Text>
       );
