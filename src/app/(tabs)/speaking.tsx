@@ -36,7 +36,7 @@ export default function SpeakingScreen() {
   const router = useRouter();
   const language = useAppStore((state) => state.language);
   const { data: profile, refetch: refetchProfile } = useProfile();
-  const { unreadCount, hasMore } = useUnreadNotificationsCount();
+  const { hasUnread } = useUnreadNotificationsCount();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const {
@@ -133,8 +133,7 @@ export default function SpeakingScreen() {
           paddingTop={insets.top + 16}
           rightAction={
             <BellButton
-              badgeCount={unreadCount}
-              showPlus={hasMore}
+              hasUnread={hasUnread}
               onPress={() => router.push("/notifications")}
             />
           }
