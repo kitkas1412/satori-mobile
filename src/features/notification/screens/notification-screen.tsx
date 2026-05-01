@@ -117,7 +117,7 @@ export function NotificationScreen() {
             ) : null
           }
           onEndReached={() => {
-            if (hasNextPage) fetchNextPage();
+            if (hasNextPage && !isFetchingNextPage) fetchNextPage();
           }}
           onEndReachedThreshold={0.3}
           refreshControl={
