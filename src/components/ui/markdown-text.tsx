@@ -1,4 +1,4 @@
-import Markdown from "react-native-markdown-display";
+import Markdown, { type ASTNode, type RenderRules } from "react-native-markdown-display";
 import { View, Text } from "react-native";
 import type { ViewStyle } from "react-native";
 
@@ -38,6 +38,60 @@ function parseInline(text: string): Segment[] {
   return segments;
 }
 
+function extractNodeText(node: ASTNode): string {
+  if (node.content) return node.content;
+  if (node.children?.length) return node.children.map(extractNodeText).join("");
+  return "";
+}
+
+function renderSegments(
+  text: string,
+  baseStyle: object,
+  furiganaSize: number,
+  color: string,
+  fontFamily: string,
+  fontSize: number
+): React.ReactNode[] {
+  return parseInline(text).map((seg, i) => {
+    if (seg.type === "text") {
+      return (
+        <Text key={i} style={baseStyle}>
+          {seg.content}
+        </Text>
+      );
+    }
+    if (seg.type === "underline") {
+      return (
+        <Text key={i} style={[baseStyle, { textDecorationLine: "underline" }]}>
+          {seg.content}
+        </Text>
+      );
+    }
+    return (
+      <View
+        key={i}
+        style={{ alignItems: "center", paddingTop: furiganaSize + 2 }}
+      >
+        <Text
+          style={{
+            fontSize: furiganaSize,
+            fontFamily,
+            color,
+            position: "absolute",
+            bottom: Math.round(fontSize * 1.25),
+            left: -30,
+            right: -30,
+            textAlign: "center",
+          }}
+        >
+          {seg.reading}
+        </Text>
+        <Text style={baseStyle}>{seg.base}</Text>
+      </View>
+    );
+  });
+}
+
 interface MarkdownTextProps {
   children: string;
   fontSize?: number;
@@ -58,74 +112,44 @@ export function MarkdownText({
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const resolvedLineHeight = lineHeight ?? fontSize * 1.5;
+  const resolvedColor = color ?? theme.text.primary;
+  const furiganaSize = Math.max(8, Math.round(fontSize * 0.5));
+  const baseStyle = {
+    fontSize,
+    fontFamily,
+    color: resolvedColor,
+    lineHeight: resolvedLineHeight,
+  };
 
-  if (HAS_INLINE_RE.test(children)) {
-    const furiganaSize = Math.max(8, Math.round(fontSize * 0.5));
-    const baseStyle = {
-      fontSize,
-      fontFamily,
-      color: color ?? theme.text.primary,
-      lineHeight: resolvedLineHeight,
-    };
-    return (
-      <View
-        style={[
-          { flexDirection: "row", flexWrap: "wrap", alignItems: "flex-end" },
-          containerStyle,
-        ]}
-      >
-        {parseInline(children).map((seg, i) => {
-          if (seg.type === "text") {
-            return (
-              <Text key={i} style={baseStyle}>
-                {seg.content}
-              </Text>
-            );
-          }
-          if (seg.type === "underline") {
-            return (
-              <Text
-                key={i}
-                style={[baseStyle, { textDecorationLine: "underline" }]}
-              >
-                {seg.content}
-              </Text>
-            );
-          }
-          return (
-            <View
-              key={i}
-              style={{ alignItems: "center", paddingTop: furiganaSize + 2 }}
-            >
-              <Text
-                style={{
-                  fontSize: furiganaSize,
-                  fontFamily,
-                  color: color ?? theme.text.primary,
-                  position: "absolute",
-                  bottom: Math.round(fontSize * 1.25),
-                  left: -30,
-                  right: -30,
-                  textAlign: "center",
-                }}
-              >
-                {seg.reading}
-              </Text>
-              <Text style={baseStyle}>{seg.base}</Text>
-            </View>
-          );
-        })}
-      </View>
-    );
-  }
+  const rules: RenderRules = {
+    textgroup: (node, children, _parent, styles) => {
+      const rawText = extractNodeText(node);
+      if (HAS_INLINE_RE.test(rawText)) {
+        return (
+          <View
+            key={node.key}
+            style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "flex-end" }}
+          >
+            {renderSegments(rawText, baseStyle, furiganaSize, resolvedColor, fontFamily, fontSize)}
+          </View>
+        );
+      }
+      return (
+        <Text key={node.key} style={styles.textgroup}>
+          {children}
+        </Text>
+      );
+    },
+  };
 
   return (
     <Markdown
+      rules={rules}
       style={{
         body: {
           fontSize,
           fontFamily,
-          color: color ?? theme.text.primary,
+          color: resolvedColor,
           lineHeight: resolvedLineHeight,
           margin: 0,
           padding: 0,
