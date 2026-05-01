@@ -1,4 +1,7 @@
-import Markdown, { type ASTNode, type RenderRules } from "react-native-markdown-display";
+import Markdown, {
+  type ASTNode,
+  type RenderRules,
+} from "react-native-markdown-display";
 import { View, Text } from "react-native";
 import type { ViewStyle } from "react-native";
 
@@ -50,7 +53,8 @@ function renderSegments(
   furiganaSize: number,
   color: string,
   fontFamily: string,
-  fontSize: number
+  fontSize: number,
+  lineHeight: number,
 ): React.ReactNode[] {
   return parseInline(text).map((seg, i) => {
     if (seg.type === "text") {
@@ -68,17 +72,15 @@ function renderSegments(
       );
     }
     return (
-      <View
-        key={i}
-        style={{ alignItems: "center", paddingTop: furiganaSize + 2 }}
-      >
+      <View key={i} style={{ alignItems: "center", paddingTop: furiganaSize + 2 }}>
         <Text
           style={{
             fontSize: furiganaSize,
+            lineHeight: furiganaSize + 2,
             fontFamily,
             color,
             position: "absolute",
-            bottom: Math.round(fontSize * 1.25),
+            top: 0,
             left: -30,
             right: -30,
             textAlign: "center",
@@ -111,7 +113,7 @@ export function MarkdownText({
 }: MarkdownTextProps) {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
-  const resolvedLineHeight = lineHeight ?? fontSize * 1.5;
+  const resolvedLineHeight = lineHeight ?? fontSize * 1.8;
   const resolvedColor = color ?? theme.text.primary;
   const furiganaSize = Math.max(8, Math.round(fontSize * 0.5));
   const baseStyle = {
@@ -128,9 +130,21 @@ export function MarkdownText({
         return (
           <View
             key={node.key}
-            style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "flex-end" }}
+            style={{
+              flexDirection: "row",
+              flexWrap: "wrap",
+              alignItems: "flex-end",
+            }}
           >
-            {renderSegments(rawText, baseStyle, furiganaSize, resolvedColor, fontFamily, fontSize)}
+            {renderSegments(
+              rawText,
+              baseStyle,
+              furiganaSize,
+              resolvedColor,
+              fontFamily,
+              fontSize,
+              resolvedLineHeight,
+            )}
           </View>
         );
       }
