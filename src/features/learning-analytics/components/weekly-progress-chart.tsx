@@ -1,7 +1,7 @@
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import React from "react";
-import { View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import Svg, { Circle, Line, Polyline, Text as SvgText } from "react-native-svg";
 import type { WeeklyDataPoint } from "../api";
 
@@ -22,6 +22,7 @@ const PAD_BOTTOM = 24;
 const CHART_H = 150;
 const GRID_COUNT = 4;
 export const CHART_SVG_H = CHART_H + PAD_TOP + PAD_BOTTOM;
+const HIT_SIZE = 44;
 
 function extractWeekLabel(label: string): string {
   const match = label.match(/^(W\d+)/);
@@ -101,7 +102,7 @@ export function WeeklyProgressChart({
     .join(" ");
 
   return (
-    <View style={{ width, height: CHART_SVG_H }}>
+    <View style={{ width, height: CHART_SVG_H, position: "relative" }}>
       <Svg width={width} height={CHART_SVG_H}>
         {gridValues.map((val, i) => {
           const y = toY(val, range);
@@ -144,13 +145,6 @@ export function WeeklyProgressChart({
                 stroke={theme.brand.primary}
                 strokeWidth={2}
               />
-              <Circle
-                cx={x}
-                cy={y}
-                r={16}
-                fill="transparent"
-                onPress={() => onDotPress?.(i)}
-              />
               <SvgText
                 x={x}
                 y={CHART_SVG_H - 2}
@@ -165,6 +159,25 @@ export function WeeklyProgressChart({
           );
         })}
       </Svg>
+
+      {dataPoints.map((d, i) => {
+        const x = toX(i);
+        const y = toY((d[metric] ?? 0) as number, range);
+        return (
+          <TouchableOpacity
+            key={`hit-${i}`}
+            activeOpacity={0.6}
+            onPress={() => onDotPress?.(i)}
+            style={{
+              position: "absolute",
+              left: x - HIT_SIZE / 2,
+              top: y - HIT_SIZE / 2,
+              width: HIT_SIZE,
+              height: HIT_SIZE,
+            }}
+          />
+        );
+      })}
     </View>
   );
 }

@@ -20,12 +20,14 @@ function difficultyLabel(score: number): string {
 
 interface TopicSectionProps {
   section: Topic;
-  /** Section đầu tiên trong danh sách sẽ được mở rộng mặc định */
-  defaultExpanded: boolean;
   /** Hiển thị viền highlight khi đây là section cần học tiếp theo */
   showFirstUnpracticedBorder: boolean;
-  /** Callback báo lên parent khi section này có topic chưa luyện tập */
-  onHasUnpracticed: (sectionId: string, orderIndex: number) => void;
+  /** Callback báo lên parent sau khi section đã loaded conversations (dù còn unpracticed hay không) */
+  onSectionResolved: (
+    sectionId: string,
+    orderIndex: number,
+    hasUnpracticed: boolean,
+  ) => void;
   /** Callback điều hướng sang màn hình chi tiết conversation */
   onConversationPress: (conversationId: string, practiceStatus: PracticeStatus) => void;
   /** True nếu đây là section chứa conversation card đầu tiên chưa practiced */
@@ -38,9 +40,8 @@ interface TopicSectionProps {
 
 export function TopicSection({
   section,
-  defaultExpanded,
   showFirstUnpracticedBorder,
-  onHasUnpracticed,
+  onSectionResolved,
   onConversationPress,
   isTargetSection,
   onScrollToCard,
@@ -48,7 +49,7 @@ export function TopicSection({
 }: TopicSectionProps) {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
-  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+  const [isExpanded, setIsExpanded] = useState(false);
   const { data: topics } = useConversations(section.id);
   const cardPositions = useRef<Record<string, { y: number; height: number }>>(
     {},
@@ -81,17 +82,17 @@ export function TopicSection({
     ? conversations.findIndex((c) => c.practiceStatus !== "COMPLETED")
     : -1;
 
-  // Báo lên parent mỗi khi trạng thái "có chưa luyện" thay đổi.
+  // Báo lên parent sau khi conversations đã loaded (dù còn unpracticed hay đã COMPLETED hết).
   // focusTrigger trong deps để force re-report mỗi lần màn hình được focus.
   useEffect(() => {
-    if (hasUnpracticed) {
-      onHasUnpracticed(section.id, section.orderIndex);
-    }
+    if (topics === undefined) return;
+    onSectionResolved(section.id, section.orderIndex, hasUnpracticed);
   }, [
+    topics,
     hasUnpracticed,
     section.id,
     section.orderIndex,
-    onHasUnpracticed,
+    onSectionResolved,
     focusTrigger,
   ]);
 
@@ -103,6 +104,15 @@ export function TopicSection({
       setIsExpanded(true);
     }
   }, [isTargetSection, hasUnpracticed]);
+
+  // Tự động đóng section khi đã hoàn thành toàn bộ và không phải target.
+  // Bỏ isExpanded khỏi deps để user vẫn có thể tự mở lại để xem mà không bị đóng liên tục.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!hasUnpracticed && !isTargetSection && isExpanded) {
+      setIsExpanded(false);
+    }
+  }, [hasUnpracticed, isTargetSection]);
 
   // Scroll đến card đầu tiên chưa practiced khi section này trở thành target.
   // Dùng stored positions thay vì onLayout để hoạt động cả khi cards đã mounted rồi.

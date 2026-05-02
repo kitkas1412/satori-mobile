@@ -111,11 +111,7 @@ function RootLayoutNav() {
   const sendToken = async () => {
     try {
       const token = await getPushToken();
-      if (!token) {
-        console.warn("[FCM] sendToken: no token, skipping");
-        return;
-      }
-      console.log("[FCM] sendToken: registering token", token);
+      if (!token) return;
       registerDeviceToken(
         {
           fcmToken: token,
@@ -124,14 +120,12 @@ function RootLayoutNav() {
         },
         {
           onSuccess: () => {
-            console.log("[FCM] sendToken: registered OK");
             AsyncStorage.setItem(FCM_TOKEN_STORAGE_KEY, token);
           },
-          onError: (err) => console.error("[FCM] sendToken: FAILED", err),
         },
       );
-    } catch (err) {
-      console.error("[FCM] sendToken: unexpected error", err);
+    } catch {
+      // best-effort
     }
   };
 
@@ -139,16 +133,9 @@ function RootLayoutNav() {
   const registerIfTokenChanged = async () => {
     try {
       const token = await getPushToken();
-      if (!token) {
-        console.warn("[FCM] registerIfTokenChanged: no token, skipping");
-        return;
-      }
+      if (!token) return;
       const storedToken = await AsyncStorage.getItem(FCM_TOKEN_STORAGE_KEY);
-      if (token === storedToken) {
-        console.log("[FCM] registerIfTokenChanged: token unchanged, skip");
-        return;
-      }
-      console.log("[FCM] registerIfTokenChanged: token changed, re-registering");
+      if (token === storedToken) return;
       registerDeviceToken(
         {
           fcmToken: token,
@@ -157,15 +144,12 @@ function RootLayoutNav() {
         },
         {
           onSuccess: () => {
-            console.log("[FCM] registerIfTokenChanged: re-registered OK");
             AsyncStorage.setItem(FCM_TOKEN_STORAGE_KEY, token);
           },
-          onError: (err) =>
-            console.error("[FCM] registerIfTokenChanged: FAILED", err),
         },
       );
-    } catch (err) {
-      console.error("[FCM] registerIfTokenChanged: unexpected error", err);
+    } catch {
+      // best-effort
     }
   };
 

@@ -57,7 +57,6 @@ export function useLoginForm() {
         password: password.trim(),
       });
     } catch (error: any) {
-      console.error("Lỗi đăng nhập:", error);
       // Ưu tiên lấy message từ response API, fallback về message lỗi JS
       const errorMessage =
         error?.response?.data?.message ||

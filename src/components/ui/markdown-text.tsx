@@ -1,5 +1,8 @@
-import Markdown from "react-native-markdown-display";
-import { View, Text } from "react-native";
+import Markdown, {
+  type ASTNode,
+  type RenderRules,
+} from "react-native-markdown-display";
+import { View, Text, Platform } from "react-native";
 import type { ViewStyle } from "react-native";
 
 import { Colors } from "@/constants/theme";
@@ -38,6 +41,100 @@ function parseInline(text: string): Segment[] {
   return segments;
 }
 
+function extractNodeText(node: ASTNode): string {
+  if (node.content) return node.content;
+  if (node.children?.length) return node.children.map(extractNodeText).join("");
+  return "";
+}
+
+const CJK_RE = /[　-〿぀-ゟ゠-ヿ一-鿿ｦ-ﾟ]/;
+
+function tokenizeText(text: string): string[] {
+  const tokens: string[] = [];
+  let buffer = "";
+  const flush = () => {
+    if (buffer) {
+      tokens.push(buffer);
+      buffer = "";
+    }
+  };
+  for (const ch of text) {
+    if (CJK_RE.test(ch)) {
+      flush();
+      tokens.push(ch);
+    } else {
+      buffer += ch;
+      if (ch === " " || ch === "\t" || ch === "\n") {
+        flush();
+      }
+    }
+  }
+  flush();
+  return tokens;
+}
+
+function renderSegments(
+  text: string,
+  baseStyle: object,
+  furiganaSize: number,
+  color: string,
+  fontFamily: string,
+  fontSize: number,
+  lineHeight: number,
+): React.ReactNode[] {
+  const nodes: React.ReactNode[] = [];
+  let key = 0;
+  for (const seg of parseInline(text)) {
+    if (seg.type === "text") {
+      for (const token of tokenizeText(seg.content)) {
+        nodes.push(
+          <Text key={key++} style={baseStyle}>
+            {token}
+          </Text>,
+        );
+      }
+      continue;
+    }
+    if (seg.type === "underline") {
+      for (const token of tokenizeText(seg.content)) {
+        nodes.push(
+          <Text
+            key={key++}
+            style={[baseStyle, { textDecorationLine: "underline" }]}
+          >
+            {token}
+          </Text>,
+        );
+      }
+      continue;
+    }
+    nodes.push(
+      <View
+        key={key++}
+        style={{ alignItems: "center", paddingTop: furiganaSize + 2 }}
+      >
+        <Text
+          style={{
+            fontSize: furiganaSize,
+            lineHeight: furiganaSize + 2,
+            fontFamily,
+            color,
+            position: "absolute",
+            top: 0,
+            left: -30,
+            right: -30,
+            textAlign: "center",
+          }}
+        >
+          {seg.reading}
+        </Text>
+        <Text style={baseStyle}>{seg.base}</Text>
+      </View>,
+    );
+  }
+  return nodes;
+}
+
 interface MarkdownTextProps {
   children: string;
   fontSize?: number;
@@ -57,75 +154,118 @@ export function MarkdownText({
 }: MarkdownTextProps) {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
-  const resolvedLineHeight = lineHeight ?? fontSize * 1.5;
+  const resolvedLineHeight = lineHeight ?? fontSize * 1.8;
+  const resolvedColor = color ?? theme.text.primary;
+  const furiganaSize = Math.max(8, Math.round(fontSize * 0.5));
+  const baseStyle = {
+    fontSize,
+    fontFamily,
+    color: resolvedColor,
+    lineHeight: resolvedLineHeight,
+  };
 
-  if (HAS_INLINE_RE.test(children)) {
-    const furiganaSize = Math.max(8, Math.round(fontSize * 0.5));
-    const baseStyle = {
-      fontSize,
-      fontFamily,
-      color: color ?? theme.text.primary,
-      lineHeight: resolvedLineHeight,
-    };
-    return (
-      <View
-        style={[
-          { flexDirection: "row", flexWrap: "wrap", alignItems: "flex-end" },
-          containerStyle,
-        ]}
-      >
-        {parseInline(children).map((seg, i) => {
-          if (seg.type === "text") {
-            return (
-              <Text key={i} style={baseStyle}>
-                {seg.content}
-              </Text>
-            );
-          }
-          if (seg.type === "underline") {
-            return (
-              <Text
-                key={i}
-                style={[baseStyle, { textDecorationLine: "underline" }]}
-              >
-                {seg.content}
-              </Text>
-            );
-          }
-          return (
-            <View
-              key={i}
-              style={{ alignItems: "center", paddingTop: furiganaSize + 2 }}
-            >
-              <Text
-                style={{
-                  fontSize: furiganaSize,
-                  fontFamily,
-                  color: color ?? theme.text.primary,
-                  position: "absolute",
-                  bottom: Math.round(fontSize * 1.25),
-                  left: -30,
-                  right: -30,
-                  textAlign: "center",
-                }}
-              >
-                {seg.reading}
-              </Text>
-              <Text style={baseStyle}>{seg.base}</Text>
-            </View>
-          );
-        })}
-      </View>
-    );
-  }
+  const rules: RenderRules = {
+    list_item: (node, children, parent, _styles) => {
+      const hasFurigana = ((node as any).children ?? [])
+        .filter((child: ASTNode) => child.type !== "bullet_list" && child.type !== "ordered_list")
+        .some((child: ASTNode) => HAS_INLINE_RE.test(extractNodeText(child)));
+      const iconPadding = hasFurigana ? furiganaSize + 2 : 0;
+      const iconStyle = {
+        ...baseStyle,
+        paddingTop: iconPadding,
+        marginLeft: 4,
+        marginRight: 6,
+      };
+
+      const isBullet = (parent as ASTNode[]).some(
+        (p) => p.type === "bullet_list",
+      );
+      const isOrdered = (parent as ASTNode[]).some(
+        (p) => p.type === "ordered_list",
+      );
+
+      if (isBullet) {
+        return (
+          <View
+            key={node.key}
+            style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "flex-start" }}
+          >
+            <Text accessible={false} style={iconStyle}>
+              {Platform.select({ android: "•", default: "•" })}
+            </Text>
+            <View style={{ flex: 1 }}>{children}</View>
+          </View>
+        );
+      }
+
+      if (isOrdered) {
+        const orderedListIndex = (parent as ASTNode[]).findIndex(
+          (p) => p.type === "ordered_list",
+        );
+        const orderedList = (parent as ASTNode[])[orderedListIndex] as any;
+        const start = orderedList.attributes?.start ?? 0;
+        const listItemNumber = start + node.index + 1;
+
+        return (
+          <View
+            key={node.key}
+            style={{ flexDirection: "row", justifyContent: "flex-start", alignItems: "flex-start" }}
+          >
+            <Text style={iconStyle}>
+              {listItemNumber}
+              {node.markup}
+            </Text>
+            <View style={{ flex: 1 }}>{children}</View>
+          </View>
+        );
+      }
+
+      return (
+        <View key={node.key} style={{ flexDirection: "row" }}>
+          {children}
+        </View>
+      );
+    },
+    textgroup: (node, children, _parent, styles) => {
+      const rawText = extractNodeText(node);
+      if (HAS_INLINE_RE.test(rawText)) {
+        return (
+          <View
+            key={node.key}
+            style={{
+              flexDirection: "row",
+              flexWrap: "wrap",
+              alignItems: "flex-end",
+            }}
+          >
+            {renderSegments(
+              rawText,
+              baseStyle,
+              furiganaSize,
+              resolvedColor,
+              fontFamily,
+              fontSize,
+              resolvedLineHeight,
+            )}
+          </View>
+        );
+      }
+      return (
+        <Text key={node.key} style={[baseStyle, styles.textgroup]}>
+          {children}
+        </Text>
+      );
+    },
+  };
 
   return (
     <Markdown
+      rules={rules}
       style={{
         body: {
           fontSize,
           fontFamily,
-          color: color ?? theme.text.primary,
+          color: resolvedColor,
           lineHeight: resolvedLineHeight,
           margin: 0,
           padding: 0,
@@ -156,14 +296,6 @@ export function MarkdownText({
         },
         list_item: {
           marginVertical: 1,
-        },
-        bullet_list_icon: {
-          marginLeft: 4,
-          marginRight: 6,
-        },
-        ordered_list_icon: {
-          marginLeft: 4,
-          marginRight: 6,
         },
       }}
       mergeStyle
