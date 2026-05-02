@@ -27,6 +27,7 @@ export interface LearnerClass {
   id: string;
   name: string;
   status: "ACTIVE" | "CLOSED";
+  courseId: string;
 }
 
 // ---------------------------------------------------------------------------
