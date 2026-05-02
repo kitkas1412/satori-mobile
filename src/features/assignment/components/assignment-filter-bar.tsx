@@ -3,7 +3,7 @@
 
 import { ChevronRight } from "lucide-react-native";
 import { useRef, useState } from "react";
-import { Pressable, ScrollView, Text } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -17,8 +17,6 @@ import type { LessonResponse } from "@/features/practice-with-ai/api/practice-wi
 import type { AssignmentStatusFilter, LearnerClass } from "../api/assignment.types";
 
 const TIMING = { duration: 250, easing: Easing.out(Easing.cubic) };
-// Giá trị maxWidth đủ lớn để chứa tất cả option chips khi expand
-const MAX_OPTIONS_WIDTH = 800;
 
 const STATUS_OPTIONS: { label: string; value: AssignmentStatusFilter }[] = [
   { label: "Tất cả", value: undefined },
@@ -54,6 +52,9 @@ export function AssignmentFilterBar({
   const theme = Colors[colorScheme ?? "light"];
   const scrollRef = useRef<ScrollView>(null);
   const [expanded, setExpanded] = useState<"status" | "class" | "lesson" | null>(null);
+  const [statusContentWidth, setStatusContentWidth] = useState(0);
+  const [classContentWidth, setClassContentWidth] = useState(0);
+  const [lessonContentWidth, setLessonContentWidth] = useState(0);
 
   const statusMaxWidth = useSharedValue(0);
   const statusOpacity = useSharedValue(0);
@@ -111,15 +112,15 @@ export function AssignmentFilterBar({
     if (isOpening) {
       setExpanded(filter);
       if (filter === "status") {
-        statusMaxWidth.value = withTiming(MAX_OPTIONS_WIDTH, TIMING);
+        statusMaxWidth.value = withTiming(statusContentWidth, TIMING);
         statusOpacity.value = withTiming(1, TIMING);
         statusChevronDeg.value = withTiming(180, TIMING);
       } else if (filter === "class") {
-        classMaxWidth.value = withTiming(MAX_OPTIONS_WIDTH, TIMING);
+        classMaxWidth.value = withTiming(classContentWidth, TIMING);
         classOpacity.value = withTiming(1, TIMING);
         classChevronDeg.value = withTiming(180, TIMING);
       } else {
-        lessonMaxWidth.value = withTiming(MAX_OPTIONS_WIDTH, TIMING);
+        lessonMaxWidth.value = withTiming(lessonContentWidth, TIMING);
         lessonOpacity.value = withTiming(1, TIMING);
         lessonChevronDeg.value = withTiming(180, TIMING);
       }
@@ -166,6 +167,145 @@ export function AssignmentFilterBar({
     classes.find((c) => c.id === classId)?.name ?? "Lớp";
   const lessonLabel =
     lessons.find((l) => l.id === lessonId)?.title ?? "Bài học";
+
+  const statusOptionsContent = STATUS_OPTIONS.map((option) => {
+    const isSelected = option.value === status;
+    return (
+      <Pressable
+        key={option.label}
+        onPress={() => selectStatus(option.value)}
+        style={{
+          paddingHorizontal: 12,
+          paddingVertical: 8,
+          borderRadius: 20,
+          backgroundColor: isSelected
+            ? theme.brand.primary
+            : theme.background.surface,
+          borderWidth: 1,
+          borderColor: isSelected
+            ? theme.brand.primary
+            : theme.border.subtle,
+        }}
+      >
+        <Text
+          className="font-heading text-sm"
+          style={{
+            color: isSelected ? theme.text.onBrand : theme.text.secondary,
+          }}
+        >
+          {option.label}
+        </Text>
+      </Pressable>
+    );
+  });
+
+  const lessonOptionsContent = (
+    <>
+      <Pressable
+        key="__all__"
+        onPress={() => selectLesson(undefined)}
+        style={{
+          paddingHorizontal: 12,
+          paddingVertical: 8,
+          borderRadius: 20,
+          backgroundColor: lessonId === undefined
+            ? theme.brand.primary
+            : theme.background.surface,
+          borderWidth: 1,
+          borderColor: lessonId === undefined
+            ? theme.brand.primary
+            : theme.border.subtle,
+        }}
+      >
+        <Text
+          className="font-heading text-sm"
+          style={{
+            color: lessonId === undefined ? theme.text.onBrand : theme.text.secondary,
+          }}
+        >
+          Tất cả
+        </Text>
+      </Pressable>
+      {lessons.map((lesson) => {
+        const isSelected = lesson.id === lessonId;
+        return (
+          <Pressable
+            key={lesson.id}
+            onPress={() => selectLesson(lesson.id)}
+            style={{
+              paddingHorizontal: 12,
+              paddingVertical: 8,
+              borderRadius: 20,
+              backgroundColor: isSelected
+                ? theme.brand.primary
+                : theme.background.surface,
+              borderWidth: 1,
+              borderColor: isSelected
+                ? theme.brand.primary
+                : theme.border.subtle,
+            }}
+          >
+            <Text
+              className="font-heading text-sm"
+              numberOfLines={1}
+              style={{
+                color: isSelected ? theme.text.onBrand : theme.text.secondary,
+                maxWidth: 160,
+              }}
+            >
+              {lesson.title}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </>
+  );
+
+  const classOptionsContent = classes.map((cls) => {
+    const isSelected = cls.id === classId;
+    return (
+      <Pressable
+        key={cls.id}
+        onPress={() => selectClass(cls.id)}
+        style={{
+          paddingHorizontal: 12,
+          paddingVertical: 8,
+          borderRadius: 20,
+          backgroundColor: isSelected
+            ? theme.brand.primary
+            : theme.background.surface,
+          borderWidth: 1,
+          borderColor: isSelected
+            ? theme.brand.primary
+            : theme.border.subtle,
+        }}
+      >
+        <Text
+          className="font-heading text-sm"
+          style={{
+            color: isSelected ? theme.text.onBrand : theme.text.secondary,
+          }}
+        >
+          {cls.name}
+        </Text>
+      </Pressable>
+    );
+  });
+
+  // Style chung cho cả measurer (hidden, đo width thật) và visible Animated.View.
+  const measurerStyle = {
+    position: "absolute" as const,
+    opacity: 0,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 8,
+  };
+  const visibleRowStyle = {
+    overflow: "hidden" as const,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 8,
+  };
 
   return (
     <ScrollView
@@ -216,48 +356,16 @@ export function AssignmentFilterBar({
         </Animated.View>
       </Pressable>
 
-      {/* Status options — slide ra bên phải của pill */}
-      <Animated.View
-        style={[
-          {
-            overflow: "hidden",
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 8,
-          },
-          statusOptionsStyle,
-        ]}
+      {/* Status options — measurer + visible animated row */}
+      <View
+        pointerEvents="none"
+        style={measurerStyle}
+        onLayout={(e) => setStatusContentWidth(e.nativeEvent.layout.width)}
       >
-        {STATUS_OPTIONS.map((option) => {
-          const isSelected = option.value === status;
-          return (
-            <Pressable
-              key={option.label}
-              onPress={() => selectStatus(option.value)}
-              style={{
-                paddingHorizontal: 12,
-                paddingVertical: 8,
-                borderRadius: 20,
-                backgroundColor: isSelected
-                  ? theme.brand.primary
-                  : theme.background.surface,
-                borderWidth: 1,
-                borderColor: isSelected
-                  ? theme.brand.primary
-                  : theme.border.subtle,
-              }}
-            >
-              <Text
-                className="font-heading text-sm"
-                style={{
-                  color: isSelected ? theme.text.onBrand : theme.text.secondary,
-                }}
-              >
-                {option.label}
-              </Text>
-            </Pressable>
-          );
-        })}
+        {statusOptionsContent}
+      </View>
+      <Animated.View style={[visibleRowStyle, statusOptionsStyle]}>
+        {statusOptionsContent}
       </Animated.View>
 
       {/* Lesson pill button */}
@@ -298,74 +406,16 @@ export function AssignmentFilterBar({
         </Animated.View>
       </Pressable>
 
-      {/* Lesson options — slide ra bên phải của pill */}
-      <Animated.View
-        style={[
-          {
-            overflow: "hidden",
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 8,
-          },
-          lessonOptionsStyle,
-        ]}
+      {/* Lesson options — measurer + visible animated row */}
+      <View
+        pointerEvents="none"
+        style={measurerStyle}
+        onLayout={(e) => setLessonContentWidth(e.nativeEvent.layout.width)}
       >
-        <Pressable
-          onPress={() => selectLesson(undefined)}
-          style={{
-            paddingHorizontal: 12,
-            paddingVertical: 8,
-            borderRadius: 20,
-            backgroundColor: lessonId === undefined
-              ? theme.brand.primary
-              : theme.background.surface,
-            borderWidth: 1,
-            borderColor: lessonId === undefined
-              ? theme.brand.primary
-              : theme.border.subtle,
-          }}
-        >
-          <Text
-            className="font-heading text-sm"
-            style={{
-              color: lessonId === undefined ? theme.text.onBrand : theme.text.secondary,
-            }}
-          >
-            Tất cả
-          </Text>
-        </Pressable>
-        {lessons.map((lesson) => {
-          const isSelected = lesson.id === lessonId;
-          return (
-            <Pressable
-              key={lesson.id}
-              onPress={() => selectLesson(lesson.id)}
-              style={{
-                paddingHorizontal: 12,
-                paddingVertical: 8,
-                borderRadius: 20,
-                backgroundColor: isSelected
-                  ? theme.brand.primary
-                  : theme.background.surface,
-                borderWidth: 1,
-                borderColor: isSelected
-                  ? theme.brand.primary
-                  : theme.border.subtle,
-              }}
-            >
-              <Text
-                className="font-heading text-sm"
-                numberOfLines={1}
-                style={{
-                  color: isSelected ? theme.text.onBrand : theme.text.secondary,
-                  maxWidth: 160,
-                }}
-              >
-                {lesson.title}
-              </Text>
-            </Pressable>
-          );
-        })}
+        {lessonOptionsContent}
+      </View>
+      <Animated.View style={[visibleRowStyle, lessonOptionsStyle]}>
+        {lessonOptionsContent}
       </Animated.View>
 
       {/* Class pill button */}
@@ -404,48 +454,16 @@ export function AssignmentFilterBar({
         </Animated.View>
       </Pressable>
 
-      {/* Class options — slide ra bên phải của pill */}
-      <Animated.View
-        style={[
-          {
-            overflow: "hidden",
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 8,
-          },
-          classOptionsStyle,
-        ]}
+      {/* Class options — measurer + visible animated row */}
+      <View
+        pointerEvents="none"
+        style={measurerStyle}
+        onLayout={(e) => setClassContentWidth(e.nativeEvent.layout.width)}
       >
-        {classes.map((cls) => {
-          const isSelected = cls.id === classId;
-          return (
-            <Pressable
-              key={cls.id}
-              onPress={() => selectClass(cls.id)}
-              style={{
-                paddingHorizontal: 12,
-                paddingVertical: 8,
-                borderRadius: 20,
-                backgroundColor: isSelected
-                  ? theme.brand.primary
-                  : theme.background.surface,
-                borderWidth: 1,
-                borderColor: isSelected
-                  ? theme.brand.primary
-                  : theme.border.subtle,
-              }}
-            >
-              <Text
-                className="font-heading text-sm"
-                style={{
-                  color: isSelected ? theme.text.onBrand : theme.text.secondary,
-                }}
-              >
-                {cls.name}
-              </Text>
-            </Pressable>
-          );
-        })}
+        {classOptionsContent}
+      </View>
+      <Animated.View style={[visibleRowStyle, classOptionsStyle]}>
+        {classOptionsContent}
       </Animated.View>
     </ScrollView>
   );
