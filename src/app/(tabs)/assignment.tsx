@@ -28,7 +28,6 @@ import { ChatbotFab } from "@/features/chatbot/components";
 import { useUnreadNotificationsCount } from "@/features/notification/hooks";
 import { useLessons } from "@/features/practice-with-ai/hooks";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { useProfile } from "@/features/profile-management/hooks";
 
 export default function AssignmentTab() {
   const router = useRouter();
@@ -47,10 +46,9 @@ export default function AssignmentTab() {
     useAssignmentNavigation((pathname, params) =>
       router.push({ pathname: pathname as any, params }),
     );
-  const { unreadCount, hasMore } = useUnreadNotificationsCount();
+  const { hasUnread } = useUnreadNotificationsCount();
   const { data: classes } = useClasses();
-  const { data: profile } = useProfile();
-  const courseId = profile?.enrolledClasses[0]?.courseId;
+  const courseId = classes?.find((c) => c.id === activeClassId)?.courseId;
   const { data: lessons } = useLessons(courseId);
 
   useEffect(() => {
@@ -101,6 +99,7 @@ export default function AssignmentTab() {
       classId={activeClassId}
       onClassChange={(id) => {
         setActiveClassId(id);
+        setActiveLessonId(undefined);
         flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
       }}
       classes={classes ?? []}
@@ -149,8 +148,7 @@ export default function AssignmentTab() {
         title="Bài tập"
         rightAction={
           <BellButton
-            badgeCount={unreadCount}
-            showPlus={hasMore}
+            hasUnread={hasUnread}
             onPress={() => router.push("/notifications")}
           />
         }

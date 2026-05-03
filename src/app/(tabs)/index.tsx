@@ -104,7 +104,7 @@ export default function HomeScreen() {
   const { isFetching: isHistoryFetching } = useStreakHistory(7);
   const isLoading = isCurrentFetching || isHistoryFetching;
   const { data: profile } = useProfile();
-  const { unreadCount, hasMore } = useUnreadNotificationsCount();
+  const { hasUnread } = useUnreadNotificationsCount();
   const isBlocked = (() => {
     if (!profile?.enrolledClasses?.length) return true;
     const classStatus = profile?.enrolledClasses[0]?.status;
@@ -126,8 +126,7 @@ export default function HomeScreen() {
         title="Chào bạn 👋"
         rightAction={
           <BellButton
-            badgeCount={unreadCount}
-            showPlus={hasMore}
+            hasUnread={hasUnread}
             onPress={() => router.push("/notifications")}
           />
         }

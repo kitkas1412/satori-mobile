@@ -9,7 +9,6 @@ const secureStorage: StateStorage = {
       const value = await SecureStore.getItemAsync(name);
       return value;
     } catch (error) {
-      console.error("Lỗi khi lấy dữ liệu từ SecureStore:", error);
       return null;
     }
   },
@@ -17,14 +16,14 @@ const secureStorage: StateStorage = {
     try {
       await SecureStore.setItemAsync(name, value);
     } catch (error) {
-      console.error("Lỗi khi lưu dữ liệu vào SecureStore:", error);
+      // silent
     }
   },
   removeItem: async (name: string) => {
     try {
       await SecureStore.deleteItemAsync(name);
     } catch (error) {
-      console.error("Lỗi khi xóa dữ liệu khỏi SecureStore:", error);
+      // silent
     }
   },
 };
