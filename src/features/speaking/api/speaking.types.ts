@@ -199,6 +199,20 @@ export interface SendMessageResponse {
 }
 
 // POST: /learner/roleplay/sessions/{{session_id}}/complete
+/** Một lỗi tiêu biểu được AI sửa trong session */
+export interface TopCorrection {
+  original: string;
+  corrected: string;
+  explanation: string;
+  errorType: string;
+  /** Mức độ nghiêm trọng, ví dụ: "MINOR" | "MAJOR" | "CRITICAL" */
+  severity: string;
+  /** Tác động đến khả năng người nghe hiểu được */
+  comprehensibilityImpact: string;
+  /** Lý do AI gán mức severity này */
+  severityReasoning: string;
+}
+
 /** Kết quả độ chính xác ngôn ngữ sau session */
 export interface AccuracyResult {
   score: number;
@@ -208,6 +222,43 @@ export interface AccuracyResult {
   errorRate: number | null;
   errorBreakdown: Record<string, number>;
   feedback: string;
+  /** Danh sách lỗi tiêu biểu cần lưu ý */
+  topCorrections?: TopCorrection[];
+  /** Tổng số mệnh đề người dùng tạo ra */
+  totalClauses?: number;
+  /** Số mệnh đề không có lỗi */
+  cleanClauses?: number;
+  /** Số mệnh đề có lỗi */
+  dirtyClauses?: number;
+  /** Phân bố theo mức độ nghiêm trọng, ví dụ: { MINOR: 2, MAJOR: 1 } */
+  severityCounts?: Record<string, number>;
+  /** Có lỗi giao tiếp nghiêm trọng (phá vỡ truyền đạt) hay không */
+  hasCriticalCommunicationBreakdown?: boolean;
+}
+
+/** Một từ phát âm yếu được phát hiện qua nhiều lần xuất hiện */
+export interface WeakWord {
+  word: string;
+  averageAccuracy: number;
+  occurrences: number;
+  dominantErrorType: string;
+  errorTypeLabel: string;
+  /** Mức độ ảnh hưởng tới điểm tổng (0-1 hoặc 0-100 tuỳ backend) */
+  impact: number;
+}
+
+/** Một phoneme (âm vị) cần luyện tập thêm */
+export interface WeakPhoneme {
+  /** Ký hiệu IPA */
+  ipa: string;
+  label: string;
+  averageScore: number;
+  occurrences: number;
+  /** Mức ưu tiên / tầng nhóm phoneme */
+  tier: string;
+  /** Gợi ý bài luyện tập */
+  drill: string;
+  impact: number;
 }
 
 /** Kết quả phát âm tổng hợp sau session */
@@ -218,6 +269,14 @@ export interface PronunciationResult {
   averageCompleteness: number;
   totalAssessed: number;
   feedback: string;
+  /** Danh sách từ phát âm yếu */
+  weakWords?: WeakWord[];
+  /** Danh sách phoneme cần cải thiện */
+  weakPhonemes?: WeakPhoneme[];
+  /** Phiên không có lỗi phát âm đáng kể */
+  cleanSession?: boolean;
+  /** Phiên không có dữ liệu audio để chấm */
+  noAudio?: boolean;
 }
 
 /** Kết quả hoàn thành nhiệm vụ sau session */
@@ -229,6 +288,35 @@ export interface TaskCompletionResult {
   feedback: string;
 }
 
+/** Chi tiết độ phức tạp từ vựng */
+export interface LexicalComplexity {
+  score: number;
+  /** Độ dài trung bình kỳ vọng của từ */
+  expectedL_avg: number;
+  uniqueWords: number;
+  /** Số từ thuộc vốn từ đã biết của người dùng */
+  knownWords: number;
+  /** Số từ chưa biết */
+  unknownWords: number;
+  jlptDistribution: Record<string, number>;
+  /** Độ dài trung bình thực tế của từ */
+  l_avg: number;
+}
+
+/** Chi tiết độ phức tạp cú pháp */
+export interface SyntacticComplexity {
+  score: number;
+  /** Tổng số AS-units (đơn vị phân tích cú pháp) */
+  totalAS_Units: number;
+  totalClauses: number;
+  /** Phân loại mệnh đề, ví dụ: { MAIN: 3, SUB: 1 } */
+  clauseTypeBreakdown: Record<string, number>;
+  /** Số từ trung bình mỗi AS-unit */
+  w_per_U: number;
+  /** Số mệnh đề trung bình mỗi AS-unit */
+  c_per_U: number;
+}
+
 /** Kết quả độ phức tạp ngôn ngữ sau session */
 export interface ComplexityResult {
   score: number;
@@ -236,6 +324,14 @@ export interface ComplexityResult {
   /** Phân bố theo cấp độ JLPT, ví dụ: { "N5": 3, "N4": 1 } */
   jlptDistribution: Record<string, number>;
   feedback: string;
+  /** Phân tích từ vựng chi tiết */
+  lexical?: LexicalComplexity;
+  /** Phân tích cú pháp chi tiết */
+  syntactic?: SyntacticComplexity;
+  /** Kết quả chỉ đo được một phần */
+  partialMeasurement?: boolean;
+  /** Dữ liệu chưa đủ để đánh giá */
+  insufficient?: boolean;
 }
 
 /** Đánh giá định tính tổng hợp sau session, bao gồm nhận xét chi tiết và bước tiếp theo */
