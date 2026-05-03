@@ -7,7 +7,11 @@ import { Pressable, Text, View } from "react-native";
 
 import { Colors } from "@/constants/theme";
 import { MarkdownText } from "@/components/ui";
-import type { ItemType, Options, PracticeSessionSummaryItem } from "../api/practice-with-ai.types";
+import type {
+  ItemType,
+  Options,
+  PracticeSessionSummaryItem,
+} from "../api/practice-with-ai.types";
 
 interface PracticeAnswerItemProps {
   item: PracticeSessionSummaryItem;
@@ -17,10 +21,17 @@ interface PracticeAnswerItemProps {
   itemType?: ItemType;
 }
 
-function resolveAnswerText(answer: string, options?: Options[], itemType?: ItemType): string {
+function resolveAnswerText(
+  answer: string,
+  options?: Options[],
+  itemType?: ItemType,
+): string {
   if (!options || options.length === 0) return answer;
   if (itemType === "SENTENCE_ORDER") {
-    const resolved = answer.split(",").map((id) => options.find((o) => String(o.id) === id.trim())?.text ?? id).join(" ");
+    const resolved = answer
+      .split(",")
+      .map((id) => options.find((o) => String(o.id) === id.trim())?.text ?? id)
+      .join(" ");
     return resolved || answer;
   }
   return options.find((o) => String(o.id) === answer)?.text ?? answer;
@@ -35,7 +46,11 @@ export function PracticeAnswerItem({
 }: PracticeAnswerItemProps) {
   const [expanded, setExpanded] = useState(false);
   const userAnswerText = resolveAnswerText(item.userAnswer, options, itemType);
-  const correctAnswerText = resolveAnswerText(item.correctAnswer, options, itemType);
+  const correctAnswerText = resolveAnswerText(
+    item.correctAnswer,
+    options,
+    itemType,
+  );
 
   return (
     <Pressable
@@ -70,9 +85,20 @@ export function PracticeAnswerItem({
             <X size={14} color={theme.icon.onBrand} strokeWidth={2.5} />
           )}
         </View>
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, flexDirection: "row" }}>
+          <Text
+            className="font-body"
+            style={{
+              fontSize: 14,
+              color: theme.text.primary,
+              marginRight: 4,
+              paddingTop: 3,
+            }}
+          >
+            {index + 1}.
+          </Text>
           <MarkdownText fontSize={14} color={theme.text.primary}>
-            {`${index + 1}. ${item.question}`}
+            {item.question}
           </MarkdownText>
         </View>
         {/* Chevron chỉ hướng mở/đóng */}
