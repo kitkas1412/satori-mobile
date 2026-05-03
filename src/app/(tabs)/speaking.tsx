@@ -36,7 +36,7 @@ export default function SpeakingScreen() {
   const router = useRouter();
   const language = useAppStore((state) => state.language);
   const { data: profile, refetch: refetchProfile } = useProfile();
-  const { unreadCount, hasMore } = useUnreadNotificationsCount();
+  const { hasUnread } = useUnreadNotificationsCount();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const {
@@ -49,9 +49,11 @@ export default function SpeakingScreen() {
     isFetchingNextPage,
   } = useTopics();
   const sections = data?.pages.flatMap((p) => p.content) ?? [];
+  const firstPageSectionIds =
+    data?.pages[0]?.content.map((s) => s.id) ?? [];
 
-  const { firstUnpracticedSectionId, handleHasUnpracticed, reset } =
-    useFirstUnpracticedSection();
+  const { firstUnpracticedSectionId, isResolved, handleSectionResolved, reset } =
+    useFirstUnpracticedSection(firstPageSectionIds);
   const { handleConversationPress } = useConversationNavigation();
 
   const scrollViewRef = useRef<FlatList<Topic>>(null);
@@ -61,9 +63,14 @@ export default function SpeakingScreen() {
   const [focusTrigger, setFocusTrigger] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
   const [isFocusRefetching, setIsFocusRefetching] = useState(false);
+  const [hasScrolled, setHasScrolled] = useState(false);
 
   const onRefresh = async () => {
     setRefreshing(true);
+    hasScrolledRef.current = false;
+    setHasScrolled(false);
+    reset();
+    setFocusTrigger((prev) => prev + 1);
     await Promise.all([refetch(), refetchProfile()]);
     setRefreshing(false);
   };
@@ -71,6 +78,7 @@ export default function SpeakingScreen() {
   useFocusEffect(
     useCallback(() => {
       hasScrolledRef.current = false;
+      setHasScrolled(false);
       reset();
       setFocusTrigger((prev) => prev + 1);
       const doRefetch = async () => {
@@ -93,6 +101,7 @@ export default function SpeakingScreen() {
         animated: true,
       });
       hasScrolledRef.current = true;
+      setHasScrolled(true);
     },
     [],
   );
@@ -106,6 +115,12 @@ export default function SpeakingScreen() {
     return null;
   })();
 
+  // Phủ overlay cho đến khi: tất cả section trang đầu đã resolved
+  // và (không có target để scroll HOẶC đã scroll xong lần đầu).
+  const isPreparingScroll =
+    !blockedMessage &&
+    (!isResolved || (firstUnpracticedSectionId !== null && !hasScrolled));
+
   return (
     <>
       <View
@@ -118,8 +133,7 @@ export default function SpeakingScreen() {
           paddingTop={insets.top + 16}
           rightAction={
             <BellButton
-              badgeCount={unreadCount}
-              showPlus={hasMore}
+              hasUnread={hasUnread}
               onPress={() => router.push("/notifications")}
             />
           }
@@ -179,7 +193,7 @@ export default function SpeakingScreen() {
                 )}
               </>
             }
-            renderItem={({ item: section, index }) => (
+            renderItem={({ item: section }) => (
               <View
                 onLayout={(e) => {
                   sectionYMap.current[section.id] = e.nativeEvent.layout.y;
@@ -187,15 +201,12 @@ export default function SpeakingScreen() {
               >
                 <TopicSection
                   section={section}
-                  // Section đầu tiên trong danh sách luôn được mở rộng mặc định
-                  defaultExpanded={index === 0}
-                  // Hiển thị viền highlight nếu chưa xác định được section nào,
-                  // hoặc nếu đây chính là section cần học tiếp theo
+                  // Chỉ section thắng cuộc mới vẽ viền highlight; overlay phủ tới khi resolved
+                  // nên không lo nháy "không viền" trong lúc chờ.
                   showFirstUnpracticedBorder={
-                    firstUnpracticedSectionId === null ||
                     firstUnpracticedSectionId === section.id
                   }
-                  onHasUnpracticed={handleHasUnpracticed}
+                  onSectionResolved={handleSectionResolved}
                   onConversationPress={handleConversationPress}
                   isTargetSection={firstUnpracticedSectionId === section.id}
                   onScrollToCard={(cardY, cardHeight) =>
@@ -233,6 +244,7 @@ export default function SpeakingScreen() {
       </View>
       <LoadingOverlay visible={isLoading} title="Đang tải..." />
       <LoadingOverlay visible={isFocusRefetching} title="Đang tải..." />
+      <LoadingOverlay visible={isPreparingScroll} title="Đang tải..." />
       {!blockedMessage && <ChatbotFab />}
     </>
   );
