@@ -113,7 +113,11 @@ export function WeeklyProgressChart({
               y1={y}
               x2={width}
               y2={y}
-              stroke={theme.border.subtle}
+              stroke={
+                colorScheme === "dark"
+                  ? theme.background.page
+                  : theme.border.subtle
+              }
               strokeWidth={1}
               strokeDasharray={i === 0 ? undefined : "3,3"}
             />
