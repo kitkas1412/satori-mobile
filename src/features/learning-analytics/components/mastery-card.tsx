@@ -1,8 +1,7 @@
-import { ProgressBar } from "@/components/ui";
 import { Colors } from "@/constants/theme";
 import { useProfile } from "@/features/profile-management/hooks";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import type { MasteryCategory } from "../api";
 import { useMastery } from "../hooks";
 
@@ -41,7 +40,40 @@ function MasteryCategoryRow({ label, data, theme }: MasteryCategoryRowProps) {
         </View>
       </View>
 
-      <ProgressBar progress={data.percent / 100} height={6} />
+      <View
+        style={{
+          height: 10,
+          borderRadius: 9999,
+          overflow: "hidden",
+          backgroundColor: theme.border.subtle,
+          flexDirection: "row",
+          borderWidth: StyleSheet.hairlineWidth,
+          borderColor: theme.border.subtle,
+        }}
+      >
+        {data.total > 0 && (
+          <>
+            <View
+              style={{
+                width: `${(data.mastered / data.total) * 100}%`,
+                backgroundColor: theme.icon.success,
+              }}
+            />
+            <View
+              style={{
+                width: `${(data.learning / data.total) * 100}%`,
+                backgroundColor: theme.icon.info,
+              }}
+            />
+            <View
+              style={{
+                width: `${(data.notStarted / data.total) * 100}%`,
+                backgroundColor: theme.background.page,
+              }}
+            />
+          </>
+        )}
+      </View>
 
       <View style={{ flexDirection: "row", gap: 12 }}>
         <CountChip
@@ -59,7 +91,8 @@ function MasteryCategoryRow({ label, data, theme }: MasteryCategoryRowProps) {
         <CountChip
           label="Chưa học"
           count={data.notStarted}
-          color={theme.text.secondary}
+          color={theme.background.page}
+          borderColor={theme.border.subtle}
           theme={theme}
         />
       </View>
@@ -71,10 +104,11 @@ interface CountChipProps {
   label: string;
   count: number;
   color: string;
+  borderColor?: string;
   theme: (typeof Colors)["light"];
 }
 
-function CountChip({ label, count, color, theme }: CountChipProps) {
+function CountChip({ label, count, color, borderColor, theme }: CountChipProps) {
   return (
     <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
       <View
@@ -83,6 +117,8 @@ function CountChip({ label, count, color, theme }: CountChipProps) {
           height: 8,
           borderRadius: 4,
           backgroundColor: color,
+          borderWidth: borderColor ? 1 : 0,
+          borderColor,
         }}
       />
       <Text
