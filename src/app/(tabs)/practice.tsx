@@ -31,7 +31,7 @@ export default function PracticeTab() {
   const theme = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
   const { data: profile, refetch: refetchProfile } = useProfile();
-  const { unreadCount, hasMore } = useUnreadNotificationsCount();
+  const { hasUnread } = useUnreadNotificationsCount();
   const courseId = profile?.enrolledClasses[0]?.courseId;
 
   const {
@@ -106,8 +106,7 @@ export default function PracticeTab() {
         title="Luyện tập với AI"
         rightAction={
           <BellButton
-            badgeCount={unreadCount}
-            showPlus={hasMore}
+            hasUnread={hasUnread}
             onPress={() => router.push("/notifications")}
           />
         }

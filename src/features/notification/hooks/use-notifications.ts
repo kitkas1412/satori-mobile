@@ -10,8 +10,10 @@ export function useNotifications() {
     queryKey: notificationQueryKeys.list(),
     queryFn: ({ pageParam }) => getNotificationsApi(pageParam, 20),
     initialPageParam: 0,
-    getNextPageParam: (lastPage) =>
-      lastPage.last ? undefined : lastPage.number + 1,
+    getNextPageParam: (lastPage) => {
+      const { number, totalPages } = lastPage.page;
+      return number + 1 < totalPages ? number + 1 : undefined;
+    },
     staleTime: 0,
   });
 }

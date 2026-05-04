@@ -18,9 +18,9 @@ export function FeedbackMissionTab({
     return (
       <View className="gap-4">
         <EmptyMissionsCard />
-        {taskCompletionFeedback ? (
+        {/* {taskCompletionFeedback ? (
           <FeedbackCard title="Phản hồi nhiệm vụ" text={taskCompletionFeedback} />
-        ) : null}
+        ) : null} */}
       </View>
     );
   }
@@ -30,7 +30,7 @@ export function FeedbackMissionTab({
   return (
     <View className="gap-4">
       <FeedbackScoreCard title="Nhiệm vụ" score={taskCompletion.score} />
-      <FeedbackCard title="Phản hồi nhiệm vụ" text={taskCompletion.feedback} />
+      {/* <FeedbackCard title="Phản hồi nhiệm vụ" text={taskCompletion.feedback} /> */}
       {hasMissions ? (
         <MissionDetailsCard missionDetails={taskCompletion.details} />
       ) : (

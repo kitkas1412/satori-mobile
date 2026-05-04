@@ -35,14 +35,10 @@ export interface Content {
 
 export interface NotificationsResponse {
   content: Content[];
-  number: number;
-  size: number;
-  last: boolean;
-  first: boolean;
-  totalElements: number;
-  totalPages: number;
-  numberOfElements: number;
-  empty: boolean;
-  sort: object[];
-  pageable: object;
+  page: {
+    size: number;
+    number: number;
+    totalElements: number;
+    totalPages: number;
+  };
 }
