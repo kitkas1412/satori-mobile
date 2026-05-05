@@ -1,6 +1,7 @@
 import { Text, View } from "react-native";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors } from "@/constants/theme";
+import { MarkdownText } from "@/components/ui/markdown-text";
 
 interface FeedbackCardProps {
   title: string;
@@ -22,12 +23,9 @@ export function FeedbackCard({ title, text }: FeedbackCardProps) {
       <Text className="font-heading text-sm" style={{ color: theme.text.primary }}>
         {title}
       </Text>
-      <Text
-        className="font-body text-xs leading-5"
-        style={{ color: theme.text.secondary }}
-      >
+      <MarkdownText fontSize={12} lineHeight={20} color={theme.text.secondary}>
         {text}
-      </Text>
+      </MarkdownText>
     </View>
   );
 }
