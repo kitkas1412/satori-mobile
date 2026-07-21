@@ -1,50 +1,98 @@
-# Welcome to your Expo app 👋
+# Satori Nihongo (Satori Mobile)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Satori Mobile is the React Native (Expo) client for **Satori Nihongo**, a Japanese learning support application. It follows a client-server architecture with file-based routing via Expo Router.
 
-## Get started
+## Key Features
 
-1. Install dependencies
+- **AI Self-Study & Practice** — self-paced practice sessions and results (`src/features/practice-with-ai`, `src/features/assignment`)
+- **AI Conversation Practice** — chatbot-driven conversation practice with feedback and rewards (`src/features/speaking`, `src/features/chatbot`)
+- **AI Pronunciation Trainer** — speech recording and recognition for pronunciation feedback (`src/features/speaking` hooks, built on `expo-audio` / `expo-speech-recognition`)
 
-   ```bash
-   npm install
-   ```
+## Tech Stack
 
-2. Start the app
+- **Framework**: Expo `~54`, React Native `0.81`, React `19`, TypeScript
+- **Routing**: Expo Router (file-based, typed routes) under `src/app`
+- **Client state**: Zustand
+- **Server state**: TanStack Query
+- **HTTP**: Axios (single instance with auth-refresh interceptors)
+- **Styling**: NativeWind (Tailwind CSS for React Native)
+- **Animation**: React Native Reanimated + `@legendapp/motion`
+- **Voice/AI**: `expo-audio`, `expo-speech`, `expo-speech-recognition`
 
-   ```bash
-   npx expo start
-   ```
+## Project Structure
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+src/
+  app/            # Expo Router routes (file-based, thin route "shells")
+    (auth)/        # Unauthenticated stack: welcome, login, password reset
+    (tabs)/        # Main authenticated bottom-tab navigator
+  features/       # Feature modules (api/components/hooks/screens/utils per feature)
+  stores/         # Zustand stores (auth, app, conversation, assignment, error overlay)
+  lib/            # Axios instance, TanStack Query client
+  components/ui/  # Shared UI primitives
+  hooks/          # Cross-cutting hooks
+docs/guidelines/  # Engineering guidelines (architecture, routing, state, API, etc.)
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Getting Started
 
-## Learn more
+### Prerequisites
 
-To learn more about developing your project with Expo, look at the following resources:
+- Node.js and npm
+- Expo CLI (invoked via `npx`, no global install required)
+- For native builds: Xcode (iOS) and/or Android Studio (Android)
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+### Installation
 
-## Join the community
+```bash
+npm install
+```
 
-Join our community of developers creating universal apps.
+### Environment Variables
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Copy `.env.example` to `.env` and set your API URL:
+
+```bash
+cp .env.example .env
+```
+
+```
+EXPO_PUBLIC_API_URL=https://api.example.vn
+```
+
+### Running the App
+
+```bash
+npm start        # Start the Expo dev server
+npm run android  # Run on Android
+npm run ios      # Run on iOS
+npm run web      # Run in the browser
+```
+
+## Available Scripts
+
+| Script | Description |
+|---|---|
+| `npm start` | Start the Expo dev server |
+| `npm run android` | Build and run on an Android device/emulator |
+| `npm run ios` | Build and run on an iOS device/simulator |
+| `npm run web` | Run the app in a browser |
+| `npm run lint` | Lint the project (`expo lint`) |
+
+## Documentation
+
+Detailed engineering guidelines live in [`docs/guidelines/`](docs/guidelines/) and are the source of truth for architecture and coding conventions:
+
+- [`system_design-doc.md`](docs/guidelines/system_design-doc.md) — Tech stack overview and index of the topics below
+- [`architecture-doc.md`](docs/guidelines/architecture-doc.md) — Architecture pattern, directory structure, and data flow
+- [`routing-doc.md`](docs/guidelines/routing-doc.md) — Route tree, tab bar config, auth guard, route file conventions
+- [`state-management-doc.md`](docs/guidelines/state-management-doc.md) — Zustand stores and TanStack Query setup
+- [`api-doc.md`](docs/guidelines/api-doc.md) — Axios instance, interceptors, and authentication flow
+- [`ui-styling-doc.md`](docs/guidelines/ui-styling-doc.md) — Styling system, color tokens, typography, dark mode
+- [`performance-doc.md`](docs/guidelines/performance-doc.md) — React Compiler, New Architecture, Reanimated v4
+- [`conventions-doc.md`](docs/guidelines/conventions-doc.md) — File naming conventions and anti-patterns
+- [`patterns-doc.md`](docs/guidelines/patterns-doc.md) — Reusable code patterns (API functions, mutation hooks, etc.)
+
+## Testing
+
+No automated test suite is set up in this project yet.
